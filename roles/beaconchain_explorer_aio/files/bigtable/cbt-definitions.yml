@@ -1,0 +1,9 @@
+protocol_buffer_definitions:
+  - /eth1.proto
+protocol_buffer_paths:
+  - /
+
+columns:
+  data:
+    encoding: ProtocolBuffer
+    type: Eth1Block

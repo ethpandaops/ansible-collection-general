@@ -1,0 +1,7 @@
+galaxy_info:
+  author: beaconchain_explorer_aio
+  description: Deploy a beaconchain explorer and all required database dependencies on a single machine.
+  license: MIT
+  min_ansible_version: 2.1
+  galaxy_tags: []
+dependencies: []
