@@ -1,7 +1,7 @@
 beaconchain_explorer_aio
 =========
 
-Setup a beaconchain explorer[https://github.com/gobitfly/eth2-beaconchain-explorer/] and all required database dependencies all in one server.
+Setup a [beaconchain explorer](https://github.com/gobitfly/eth2-beaconchain-explorer/) and all required database dependencies all in one server.
 
 Requirements
 ------------
@@ -16,13 +16,34 @@ A description of the settable variables for this role should go here, including 
 Dependencies
 ------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+You'll need docker and docker-compose to run this role. One way of installing docker could be via ansible galaxy with the following dependencies set within `requirements.yaml`:
+
+```yaml
+roles:
+- src: geerlingguy.docker
+  version: 6.0.3
+- src: geerlingguy.pip
+  version: 2.2.0
+```
 
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+Your playbook could look like this:
 
-    - hosts: servers
-      roles:
-         - { role: beaconchain_explorer_aio }
+```yaml
+- hosts: beaconchain_explorer
+  become: true
+  roles:
+  # Docker. Required dependency
+  - role: geerlingguy.docker
+    tags: [docker]
+  - role: geerlingguy.pip
+    pip_install_packages:
+    - name: docker
+    - name: docker-compose
+    tags: [docker]
+  # Beaconchain explorer
+  - role: beaconchain_explorer_aio
+    tags: [beaconchain_explorer_aio]
+```
