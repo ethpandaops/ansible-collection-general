@@ -2,8 +2,8 @@
 
 #set -e
 
-BIGTABLE_EMULATOR_HOST="bigtable:9000"
-INSTANCE="bigtable:9000"
+BIGTABLE_EMULATOR_HOST="beaconchain_bigtable:9000"
+INSTANCE="beaconchain_bigtable:9000"
 PROJECT="explorer"
 
 cbt -project $PROJECT -instance $INSTANCE createtable beaconchain

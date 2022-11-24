@@ -34,6 +34,7 @@ create index idx_validators_pubkeyhex_pattern_pos on validators (pubkeyhex varch
 create index idx_validators_status on validators (status);
 create index idx_validators_balanceactivation on validators (balanceactivation);
 create index idx_validators_activationepoch on validators (activationepoch);
+CREATE INDEX validators_is_offline_vali_idx ON validators (validatorindex, lastattestationslot, pubkey);
 
 drop table if exists validator_pool;
 create table validator_pool
@@ -551,7 +552,8 @@ create table users_subscriptions
     last_sent_epoch   int,
     created_ts        timestamp without time zone not null,
     created_epoch     int                         not null,
-    unsubscribe_hash  bytea                        ,
+    unsubscribe_hash  bytea,
+    internal_state    varchar,
     primary key (user_id, event_name, event_filter)
 );
 create index idx_users_subscriptions_unsubscribe_hash on users_subscriptions (unsubscribe_hash);
@@ -648,6 +650,8 @@ create table api_statistics
     count  int                         not null default 0,
     primary key (ts, apikey, call)
 );
+
+
 
 drop table if exists stake_pools_stats;
 create table stake_pools_stats
@@ -840,28 +844,39 @@ create table rocketpool_reward_tree
 drop table if exists eth_store_stats;
 create table eth_store_stats
 (
-    day			int	not null,
-    effective_balances_sum	bigint	not null,
-    start_balances_sum		bigint	not null,
-    end_balances_sum		bigint	not null,
-    deposits_sum		bigint	not null,
+    day			                int not null,
+    validator			        int not null,
+    effective_balances_sum_wei numeric not null,
+    start_balances_sum_wei numeric not null,
+    end_balances_sum_wei numeric not null,
+    deposits_sum_wei numeric not null,
+    tx_fees_sum_wei numeric not null,
+    consensus_rewards_sum_wei numeric not null,
+    total_rewards_wei numeric not null,
+    apr float   not null,
 
-    primary key(day)
-
+    primary key(day, validator)
 );
+create index idx_eth_store_validator on eth_store_stats (validator, day desc);
 
 drop table if exists historical_pool_performance;
 create table historical_pool_performance
 (
-    pool 			varchar(40) 	not null,
-    day 			int 		not null,
-    effective_balances_sum	bigint		not null,
-    start_balances_sum		bigint		not null,
-    end_balances_sum		bigint		not null,
-    deposits_sum		bigint		not null,
+    day                int not null,
+    pool        varchar(40) not null,
+    validators int not null,
+    effective_balances_sum_wei numeric not null,
+    start_balances_sum_wei numeric not null,
+    end_balances_sum_wei numeric not null,
+    deposits_sum_wei numeric not null,
+    tx_fees_sum_wei numeric not null,
+    consensus_rewards_sum_wei numeric not null,
+    total_rewards_wei numeric not null,
+    apr float   not null,
 
-    primary key(pool, day)
+    primary key(day, pool)
 );
+create index idx_historical_pool_performance_pool on historical_pool_performance (pool, day desc);
 
 --- need to drop all three tabls in the correct order to correctly resolve foreign key constrains
 DROP TABLE IF EXISTS relays;
@@ -879,10 +894,18 @@ CREATE TABLE blocks_tags (
 	blockroot bytea NOT NULL,
 	tag_id varchar NOT NULL,
 	PRIMARY KEY (slot, blockroot, tag_id),
-	FOREIGN KEY (slot,blockroot) REFERENCES blocks(slot,blockroot),
+	FOREIGN KEY (slot, blockroot) REFERENCES blocks(slot, blockroot),
 	FOREIGN KEY (tag_id) REFERENCES tags(id)
 );
 CREATE INDEX idx_blocks_tags_slot ON blocks_tags (slot);
+CREATE INDEX idx_blocks_tags_tag_id ON blocks_tags (tag_id);
+
+CREATE TABLE relays (
+	tag_id varchar NOT NULL,
+	endpoint varchar NOT NULL,
+	PRIMARY KEY (tag_id, endpoint),
+	FOREIGN KEY (tag_id) REFERENCES tags(id)
+);
 
 DROP TABLE IF EXISTS relays;
 
@@ -926,3 +949,21 @@ CREATE TABLE validator_queue_deposits (
 );
 CREATE INDEX idx_validator_queue_deposits_block_slot ON validator_queue_deposits USING btree (block_slot);
 CREATE UNIQUE INDEX idx_validator_queue_deposits_validatorindex ON validator_queue_deposits USING btree (validatorindex);
+
+create table service_status (name text not null, executable_name text not null, version text not null, pid int not null, status text not null, metadata jsonb, last_update timestamp not null, primary key (name, executable_name, version, pid));
+
+DROP TABLE IF EXISTS chart_series;
+CREATE TABLE chart_series (
+    "time" timestamp without time zone NOT NULL,
+    indicator character varying(50) NOT NULL,
+    value numeric NOT NULL,
+    primary key ("time", indicator)
+);
+
+drop table if exists chart_series_status;
+create table chart_series_status
+(
+    day    int     not null,
+    status boolean not null,
+    primary key (day)
+);

@@ -3,23 +3,23 @@ chain:
   name: sepolia
 readerDatabase:
   name: db
-  host: postgres
+  host: beaconchain_postgres
   port: "5432"
   user: postgres
   password: "pass"
 writerDatabase:
   name: db
-  host: postgres
+  host: beaconchain_postgres
   port: "5432"
   user: postgres
   password: "pass"
 bigtable:
   project: explorer
-  instance: bigtable:9000
+  instance: beaconchain_bigtable:9000
 lastAttestationCachePath: "/data/lastAttestationCache"
 eth1ErigonEndpoint: "{{ beaconchain_explorer_aio_url_erigon }}"
 eth1GethEndpoint: "{{ beaconchain_explorer_aio_url_geth }}"
-redisCacheEndpoint: 'redis:6379'
+redisCacheEndpoint: 'beaconchain_redis:6379'
 tieredCacheProvider: 'redis'
 #tieredCacheProvider: 'bigtable'
 frontend:
@@ -31,13 +31,13 @@ frontend:
     port: '8080' # Port to listen on
   readerDatabase:
     name: db
-    host: postgres
+    host: beaconchain_postgres
     port: "5432"
     user: postgres
     password: "pass"
   writerDatabase:
     name: db
-    host: postgres
+    host: beaconchain_postgres
     port: "5432"
     user: postgres
     password: "pass"

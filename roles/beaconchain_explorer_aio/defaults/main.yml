@@ -3,7 +3,7 @@
 beaconchain_explorer_aio_user: beaconchainexplorer
 
 beaconchain_explorer_aio_url_erigon: http://your-erigon-node:8545
-beaconchain_explorer_aio_url_erigon_ws: ws://your-erigon-node:8545
+beaconchain_explorer_aio_url_erigon_ws: ws://your-erigon-node:8546
 beaconchain_explorer_aio_url_geth: http://your-geth-node:8545
 
 beaconchain_explorer_aio_sql_init_file: files/postgres/tables.sql
@@ -12,7 +12,7 @@ beaconchain_explorer_aio_config_file: templates/config.yml.j2
 
 beaconchain_explorer_aio_installation_dir: /opt/beaconchain-explorer-aio
 
-beaconchain_explorer_aio_docker_image_default: gobitfly/eth2-beaconchain-explorer:v1.0.3
+beaconchain_explorer_aio_docker_image_default: gobitfly/eth2-beaconchain-explorer:v1.1.0
 beaconchain_explorer_aio_docker_image_exporter: "{{ beaconchain_explorer_aio_docker_image_default }}"
 beaconchain_explorer_aio_docker_image_eth1indexer: "{{ beaconchain_explorer_aio_docker_image_default }}"
 beaconchain_explorer_aio_docker_image_statistics: "{{ beaconchain_explorer_aio_docker_image_default }}"
@@ -28,15 +28,19 @@ beaconchain_explorer_aio_data_dir_postgres: /data/beaconchain-explorer-aio/postg
 beaconchain_explorer_aio_data_dir_bigtable: /data/beaconchain-explorer-aio/bigtable
 beaconchain_explorer_aio_data_dir_redis: /data/beaconchain-explorer-aio/redis
 
+# Set this to true if you want to stop everything and wipe the databases
+beaconchain_explorer_cleanup_all: false
+
 beaconchain_explorer_aio_cmd_exporter:
   - /app/explorer
   - -config=/config.yml
 
 beaconchain_explorer_aio_cmd_eth1indexer:
   - /app/eth1indexer
+  - -config=/config.yml
   - -bigtable.project=explorer
-  - -bigtable.instance=bigtable:9000
-  - -network=sepolia
+  - -bigtable.instance=beaconchain_bigtable:9000
+  #- -network=sepolia
   - "-erigon={{ beaconchain_explorer_aio_url_erigon_ws }}"
   - -data.concurrency=2
   - -data.offset=100
@@ -64,10 +68,12 @@ beaconchain_explorer_aio_cmd_frontend:
 # This can be used to create additional config files for the beaconchain explorer.
 # It's useful when using private testnets and you need to mount a custom phase0/altair
 # as the chain config. All files will be available within the explorer containers on the
-# /configs directory.
+# /custom_configs directory.
 beaconchain_explorer_aio_extra_config_files: {}
 #
 #  phase0.yml: |
+#    # NOTE: This file will appear in the container at the following path: /custom_configs/phase0.yml
+#
 #    # Extends the mainnet preset
 #    PRESET_BASE: "gnosis"
 #    # needs to exist because of Prysm. Otherwise it conflicts with mainnet genesis
