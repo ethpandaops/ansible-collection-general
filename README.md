@@ -1,2 +1,3 @@
-# ethereum-ansible
-Ansible collection for Ethereum specific components
+# Ansible Collection - ethpandaops.ethereum
+
+Documentation for the collection.
