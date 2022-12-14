@@ -46,17 +46,19 @@
       dest: "{{ beaconchain_explorer_aio_installation_dir }}/bigtable/init-bigtable.sh"
       mode: "0700"
 
-- name: Copy config templates
+- name: Copy docker-compose template
   ansible.builtin.template:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
+    src: "{{ beaconchain_explorer_aio_docker_compose_file }}"
+    dest: "{{ beaconchain_explorer_aio_installation_dir }}/docker-compose.yml"
     owner: "{{ beaconchain_explorer_aio_user }}"
     group: "{{ beaconchain_explorer_aio_user }}"
-  loop:
-    - src: "{{ beaconchain_explorer_aio_docker_compose_file }}"
-      dest: "{{ beaconchain_explorer_aio_installation_dir }}/docker-compose.yml"
-    - src: "{{ beaconchain_explorer_aio_config_file }}"
-      dest: "{{ beaconchain_explorer_aio_installation_dir }}/explorer/config.yml"
+
+- name: Create explorer config file
+  ansible.builtin.copy:
+    content: "{{ beaconchain_explorer_config }}"
+    dest: "{{ beaconchain_explorer_aio_installation_dir }}/explorer/config.yml"
+    owner: "{{ beaconchain_explorer_aio_user }}"
+    group: "{{ beaconchain_explorer_aio_user }}"
 
 - name: Create custom config files
   ansible.builtin.copy:
