@@ -3,7 +3,7 @@
 beaconchain_explorer_aio_user: beaconchainexplorer
 
 beaconchain_explorer_aio_url_erigon: http://your-erigon-node:8545
-beaconchain_explorer_aio_url_erigon_ws: ws://your-erigon-node:8546
+beaconchain_explorer_aio_url_erigon_ws: ws://your-erigon-node:8545
 beaconchain_explorer_aio_url_geth: http://your-geth-node:8545
 
 beaconchain_explorer_aio_sql_init_file: files/postgres/tables.sql
@@ -12,7 +12,7 @@ beaconchain_explorer_aio_config_file: templates/config.yml.j2
 
 beaconchain_explorer_aio_installation_dir: /opt/beaconchain-explorer-aio
 
-beaconchain_explorer_aio_docker_image_default: gobitfly/eth2-beaconchain-explorer:v1.1.0
+beaconchain_explorer_aio_docker_image_default: gobitfly/eth2-beaconchain-explorer:v1.4.1
 beaconchain_explorer_aio_docker_image_exporter: "{{ beaconchain_explorer_aio_docker_image_default }}"
 beaconchain_explorer_aio_docker_image_eth1indexer: "{{ beaconchain_explorer_aio_docker_image_default }}"
 beaconchain_explorer_aio_docker_image_statistics: "{{ beaconchain_explorer_aio_docker_image_default }}"
@@ -40,14 +40,13 @@ beaconchain_explorer_aio_cmd_eth1indexer:
   - -config=/config.yml
   - -bigtable.project=explorer
   - -bigtable.instance=beaconchain_bigtable:9000
-  #- -network=sepolia
   - "-erigon={{ beaconchain_explorer_aio_url_erigon_ws }}"
   - -data.concurrency=2
-  - -data.offset=100
+  - -data.offset=0
   - -data.start=0
   - -data.end=0
   - -blocks.concurrency=2
-  - -blocks.offset=100
+  - -blocks.offset=0
   - -blocks.start=0
   - -blocks.end=0
   - -balances.enabled
