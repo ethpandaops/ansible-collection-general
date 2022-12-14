@@ -32,3 +32,6 @@ cbt -project $PROJECT -instance $INSTANCE createfamily metadata erc721
 
 cbt -project $PROJECT -instance $INSTANCE createfamily metadata_updates blocks
 cbt -project $PROJECT -instance $INSTANCE createfamily metadata_updates f
+
+cbt -project $PROJECT -instance $INSTANCE createfamily data c
+cbt -project $PROJECT -instance $INSTANCE createfamily data f
