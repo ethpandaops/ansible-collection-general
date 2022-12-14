@@ -55,7 +55,7 @@
 
 - name: Create explorer config file
   ansible.builtin.copy:
-    content: "{{ beaconchain_explorer_config }}"
+    content: "{{ beaconchain_explorer_aio_config }}"
     dest: "{{ beaconchain_explorer_aio_installation_dir }}/explorer/config.yml"
     owner: "{{ beaconchain_explorer_aio_user }}"
     group: "{{ beaconchain_explorer_aio_user }}"

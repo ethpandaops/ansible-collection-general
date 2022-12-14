@@ -29,7 +29,7 @@ beaconchain_explorer_aio_data_dir_bigtable: /data/beaconchain-explorer-aio/bigta
 beaconchain_explorer_aio_data_dir_redis: /data/beaconchain-explorer-aio/redis
 
 # Set this to true if you want to stop everything and wipe the databases
-beaconchain_explorer_cleanup_all: false
+beaconchain_explorer_aio_cleanup_all: false
 
 beaconchain_explorer_aio_cmd_exporter:
   - /app/explorer
@@ -64,7 +64,7 @@ beaconchain_explorer_aio_cmd_frontend:
   - /app/explorer
   - -config=/config.yml
 
-beaconchain_explorer_config: |
+beaconchain_explorer_aio_config: |
   # All config options can be found in here: https://github.com/gobitfly/eth2-beaconchain-explorer/blob/master/types/config.go
   chain:
     name: sepolia
