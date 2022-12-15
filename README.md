@@ -12,6 +12,12 @@ A collection of reusable ansible components used by the EthPandaOps team.
 - [teku](roles/teku)
 - [nimbus](roles/nimbus)
 
+### General purpose tooling
+- [node_exporter]
+- [prometheus]
+- [docker_cleanup]
+- [docker_network]
+
 ## Usage
 
 Currently we're not publishing the collection to Ansible Galaxy. We'll do that once it grows bigger.
