@@ -1,6 +1,6 @@
-# ethpandaops.general.teku
+# ethpandaops.general.geth
 
-Setup [Teku](https://github.com/ConsenSys/teku), a ethereum consensus layer client.
+Setup [Geth](https://github.com/ethereum/go-ethereum), a ethereum execution layer client.
 
 ## Requirements
 

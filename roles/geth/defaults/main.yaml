@@ -1,0 +1,29 @@
+geth_user: geth
+geth_datadir: /data/geth
+geth_auth_jwt_path: /data/execution-auth.secret
+
+geth_container_name: geth
+geth_container_image: ethereum/client-go:v1.10.26
+geth_container_env: {}
+geth_container_ports:
+  - "127.0.0.1:8545:8545"
+  - "127.0.0.1:8551:8551"
+  - "30303:30303"
+geth_container_volumes:
+  - "{{ geth_datadir }}:/data"
+  - "{{ geth_auth_jwt_path }}:/execution-auth.jwt:ro"
+geth_container_stop_timeout: "300"
+geth_container_networks: []
+geth_container_command:
+  - --datadir=/data
+  - --http
+  - --http.addr=0.0.0.0
+  - --http.api=eth,net,web3
+  - --http.vhosts=*
+  - --authrpc.addr=0.0.0.0
+  - --authrpc.vhosts=*
+  - --authrpc.jwtsecret=/execution-auth.jwt
+  - --nat=extip:{{ ansible_host }}
+  - --metrics
+  - --metrics.port=6060
+  - --metrics.addr=0.0.0.0

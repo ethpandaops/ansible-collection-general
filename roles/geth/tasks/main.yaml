@@ -1,0 +1,26 @@
+- name: Add geth user
+  ansible.builtin.user:
+    name: "{{ geth_user }}"
+  register: geth_user_meta
+
+- name: Create data dir
+  ansible.builtin.file:
+    path: "{{ geth_datadir }}"
+    state: directory
+    recurse: true
+    owner: "{{ geth_user }}"
+    group: "{{ geth_user }}"
+
+- name: Run geth container
+  community.docker.docker_container:
+    name: "{{ geth_container_name }}"
+    image: "{{ geth_container_image }}"
+    state: started
+    restart_policy: always
+    stop_timeout: "{{ geth_container_stop_timeout }}"
+    ports: "{{ geth_container_ports }}"
+    volumes: "{{ geth_container_volumes }}"
+    env: "{{ geth_container_env }}"
+    networks: "{{ geth_container_networks }}"
+    command: "{{ geth_container_command }} "
+    user: "{{ geth_user_meta.uid }}"
