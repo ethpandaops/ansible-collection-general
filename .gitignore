@@ -1,1 +1,5 @@
+# Test outputs from ansible-test
 tests/output/
+
+# Build artifacts from ansible-galaxy
+ethpandaops-ethereum-*.tar.gz
