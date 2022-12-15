@@ -1,20 +1,16 @@
-beaconchain_explorer_aio
-=========
+# ethpandaops.general.beaconchain_explorer_aio
 
 Setup a [beaconchain explorer](https://github.com/gobitfly/eth2-beaconchain-explorer/) and all required database dependencies all in one server.
 
-Requirements
-------------
+## Requirements
 
 You'll need docker and docker-compose on the target system. Make sure to install these upfront.
 
-Role Variables
---------------
+## Role Variables
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+Default variables are defined in [defaults/main.yaml](defaults/main.yaml)
 
-Dependencies
-------------
+## Dependencies
 
 You'll need docker and docker-compose to run this role. One way of installing docker could be via ansible galaxy with the following dependencies set within `requirements.yaml`:
 
@@ -26,8 +22,7 @@ roles:
   version: 2.2.0
 ```
 
-Example Playbook
-----------------
+## Example Playbook
 
 Your playbook could look like this:
 
