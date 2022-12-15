@@ -1,5 +1,7 @@
 # Ansible Collection - ethpandaops.general
 
+[![Ansible CI](https://github.com/ethpandaops/ansible-collection-general/actions/workflows/ansible_lint.yml/badge.svg)](https://github.com/ethpandaops/ansible-collection-general/actions/workflows/ansible_lint.yml)
+
 A collection of reusable ansible components used by the EthPandaOps team.
 
 ## Roles
