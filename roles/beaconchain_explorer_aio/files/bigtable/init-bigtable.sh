@@ -1,8 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-#set -e
-
-BIGTABLE_EMULATOR_HOST="beaconchain_bigtable:9000"
+export BIGTABLE_EMULATOR_HOST="beaconchain_bigtable:9000"
 INSTANCE="beaconchain_bigtable:9000"
 PROJECT="explorer"
 
