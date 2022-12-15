@@ -1,6 +1,6 @@
-# Ansible Collection - ethpandaops.ethereum
+# Ansible Collection - ethpandaops.general
 
-A collection of useful ethereum related ansible resources
+A collection of reusable ansible components used by the EthPandaOps team.
 
 ## Roles
 
@@ -13,15 +13,15 @@ Currently we're not publishing the collection to Ansible Galaxy. We'll do that o
 To install the collection directly from our git repository you can do the following:
 
 ```sh
-ansible-galaxy collection install git+https://github.com/ethpandaops/ethereum-ansible.git,master
+ansible-galaxy collection install git+https://github.com/ethpandaops/ansible-collection-general.git,master
 ```
 
 Or using a `requirements.yml` file that looks like:
 
 ```yaml
 collections:
-  - name: ethpandaops.ethereum
-    source: https://github.com/ethpandaops/ethereum-ansible.git,master
+  - name: ethpandaops.general
+    source: https://github.com/ethpandaops/ansible-collection-general.git,master
     type: git
 ```
 
@@ -38,7 +38,7 @@ ansible-galaxy install -r requirements.yml
 Clone the repository. Make sure that you follow that directory structure, otherwise `ansible test` won't work:
 
 ```sh
-git clone git@github.com:ethpandaops/ethereum-ansible.git ansible_collections/ethpandaops/ethereum
+git clone git@github.com:ethpandaops/ansible-collection-general.git ansible_collections/ethpandaops/general
 ```
 
 If you want to test and develop on this ansible collection you'll need some tools. We're using [`asdf`](https://asdf-vm.com/) to commit to certain [versions](.tool-versions) of those tools.
