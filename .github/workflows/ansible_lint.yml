@@ -7,7 +7,7 @@ on:
 
 defaults:
   run:
-    working-directory: ansible_collections/ethpandaops/ethereum
+    working-directory: ansible_collections/ethpandaops/general
 
 jobs:
 
@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          path: ansible_collections/ethpandaops/ethereum
+          path: ansible_collections/ethpandaops/general
 
       - name: Set up python
         uses: actions/setup-python@v4
