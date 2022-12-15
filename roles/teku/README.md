@@ -4,7 +4,7 @@ Setup [Teku](https://github.com/ConsenSys/teku), a ethereum consensus layer clie
 
 ## Requirements
 
-You'll need docker on the target system. Make sure to install these upfront.
+You'll need docker on the target system. Make sure to install it upfront.
 
 ## Role Variables
 
