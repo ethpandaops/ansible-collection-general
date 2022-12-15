@@ -1,0 +1,35 @@
+nimbus_user: nimbus
+nimbus_datadir: /data/nimbus
+nimbus_auth_jwt_path: /data/execution-auth.secret
+nimbus_execution_engine_endpoint: http://geth:8551
+
+nimbus_container_name: nimbus
+nimbus_container_image: statusim/nimbus-eth2:amd64-v22.11.1
+nimbus_container_env: {}
+nimbus_container_ports:
+  - "127.0.0.1:5051:5051"
+  - "9000:9000"
+  - "9000:9000/udp"
+nimbus_container_volumes:
+  - "{{ nimbus_datadir }}:/data"
+  - "{{ nimbus_auth_jwt_path }}:/execution-auth.jwt:ro"
+nimbus_container_stop_timeout: "300"
+nimbus_container_networks: []
+nimbus_container_command:
+  - --non-interactive=true
+  - --data-dir=/data
+  - --log-level=INFO
+  - --listen-address=0.0.0.0
+  - --udp-port=9000
+  - --tcp-port=9000
+  - --nat="extip:{{ ansible_host }}"
+  - --enr-auto-update=false
+  - --rest
+  - --rest-port=5051
+  - --rest-address=0.0.0.0
+  - --rest-allow-origin="*"
+  - --web3-url={{ nimbus_execution_engine_endpoint }}
+  - --jwt-secret=/execution-auth.jwt
+  - --metrics
+  - --metrics-port=8008
+  - --metrics-address=0.0.0.0

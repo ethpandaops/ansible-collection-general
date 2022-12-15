@@ -4,7 +4,13 @@ A collection of reusable ansible components used by the EthPandaOps team.
 
 ## Roles
 
+### Ethereum tooling
 - [beaconchain_explorer_aio](roles/beaconchain_explorer_aio/)
+
+### Ethereum clients
+- [geth](roles/geth)
+- [teku](roles/teku)
+- [nimbus](roles/nimbus)
 
 ## Usage
 

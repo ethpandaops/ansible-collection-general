@@ -1,0 +1,39 @@
+teku_user: teku
+teku_datadir: /data/teku
+teku_auth_jwt_path: /data/execution-auth.secret
+teku_execution_engine_endpoint: http://geth:8551
+
+teku_container_name: teku
+teku_container_image: consensys/teku:22.12.0
+teku_container_env: {}
+teku_container_ports:
+  - "127.0.0.1:5051:5051"
+  - "9000:9000"
+  - "9000:9000/udp"
+teku_container_volumes:
+  - "{{ teku_datadir }}:/data"
+  - "{{ teku_auth_jwt_path }}:/execution-auth.jwt:ro"
+teku_container_stop_timeout: "300"
+teku_container_networks: []
+teku_container_command:
+  - --data-path=/data
+  - --data-storage-mode=PRUNE
+  - --logging=INFO
+  - --log-destination=CONSOLE
+  - --network=mainnet
+  - --p2p-enabled=true
+  - --p2p-interface=0.0.0.0
+  - --p2p-advertised-ip={{ ansible_host }}
+  - --p2p-port=9000
+  - --p2p-advertised-port=9000
+  - --rest-api-enabled
+  - --rest-api-interface=0.0.0.0
+  - --rest-api-port=5051
+  - --rest-api-host-allowlist="*"
+  - --ee-endpoint={{ teku_execution_engine_endpoint }}
+  - --ee-jwt-secret-file=/execution-auth.jwt
+  - --metrics-enabled=true
+  - --metrics-interface=0.0.0.0
+  - --metrics-port=8008
+  - --metrics-host-allowlist="*"
+  # - --initial-state=https://$USER_ID:$TOKEN@eth2-beacon-mainnet.infura.io/eth/v2/debug/beacon/states/finalized
