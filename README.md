@@ -6,6 +6,7 @@ A collection of reusable ansible components used by the EthPandaOps team.
 
 ### Ethereum tooling
 - [beaconchain_explorer_aio](roles/beaconchain_explorer_aio/)
+- [ethereum_auth_jwt](roles/ethereum_auth_jwt)
 
 ### Ethereum clients
 - [geth](roles/geth)
@@ -13,10 +14,10 @@ A collection of reusable ansible components used by the EthPandaOps team.
 - [nimbus](roles/nimbus)
 
 ### General purpose tooling
-- [node_exporter]
-- [prometheus]
-- [docker_cleanup]
-- [docker_network]
+- [node_exporter](roles/node_exporter)
+- [prometheus](roles/prometheus)
+- [docker_cleanup](roles/docker_cleanup)
+- [docker_network](roles/docker_network)
 
 ## Usage
 
