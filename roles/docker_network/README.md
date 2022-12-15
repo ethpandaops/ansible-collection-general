@@ -1,6 +1,6 @@
-# ethpandaops.general.docker_cleanup
+# ethpandaops.general.docker_network
 
-This role will create a cronjob to clean up dangling docker resources.
+This role will create one or many docker networks.
 
 ## Requirements
 
@@ -34,5 +34,6 @@ Your playbook could look like this:
   - role: geerlingguy.pip
     pip_install_packages:
     - name: docker
-  - role: ethpandaops.general.docker_cleanup
+  - role: ethpandaops.general.docker_network
+    docker_network_name: "shared"
 ```
