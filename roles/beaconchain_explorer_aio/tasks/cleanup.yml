@@ -1,0 +1,15 @@
+- name: Stop services
+  community.docker.docker_compose:
+    project_src: "{{ beaconchain_explorer_aio_installation_dir }}"
+    state: absent
+
+- name: Delete directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ beaconchain_explorer_aio_installation_dir }}"
+    - "{{ beaconchain_explorer_aio_data_dir_explorer }}"
+    - "{{ beaconchain_explorer_aio_data_dir_postgres }}"
+    - "{{ beaconchain_explorer_aio_data_dir_bigtable }}"
+    - "{{ beaconchain_explorer_aio_data_dir_redis }}"

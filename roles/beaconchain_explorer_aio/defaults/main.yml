@@ -1,0 +1,144 @@
+---
+
+beaconchain_explorer_aio_user: beaconchainexplorer
+
+beaconchain_explorer_aio_url_erigon: http://your-erigon-node:8545
+beaconchain_explorer_aio_url_erigon_ws: ws://your-erigon-node:8545
+beaconchain_explorer_aio_url_geth: http://your-geth-node:8545
+
+beaconchain_explorer_aio_sql_init_file: files/postgres/tables.sql
+beaconchain_explorer_aio_docker_compose_file: templates/docker-compose.yml.j2
+
+beaconchain_explorer_aio_installation_dir: /opt/beaconchain-explorer-aio
+
+beaconchain_explorer_aio_docker_image_default: gobitfly/eth2-beaconchain-explorer:v1.4.1
+beaconchain_explorer_aio_docker_image_exporter: "{{ beaconchain_explorer_aio_docker_image_default }}"
+beaconchain_explorer_aio_docker_image_eth1indexer: "{{ beaconchain_explorer_aio_docker_image_default }}"
+beaconchain_explorer_aio_docker_image_statistics: "{{ beaconchain_explorer_aio_docker_image_default }}"
+beaconchain_explorer_aio_docker_image_frontend: "{{ beaconchain_explorer_aio_docker_image_default }}"
+beaconchain_explorer_aio_docker_image_frontend_updater: "{{ beaconchain_explorer_aio_docker_image_default }}"
+
+beaconchain_explorer_aio_docker_image_redis: redis:7
+beaconchain_explorer_aio_docker_image_postgres: postgres:14
+beaconchain_explorer_aio_docker_image_bigtable: guybrush/explorer-workshop-bogota # TODO get an image with little_bigtable+cbt
+
+beaconchain_explorer_aio_data_dir_explorer: /data/beaconchain-explorer-aio/explorer
+beaconchain_explorer_aio_data_dir_postgres: /data/beaconchain-explorer-aio/postgres
+beaconchain_explorer_aio_data_dir_bigtable: /data/beaconchain-explorer-aio/bigtable
+beaconchain_explorer_aio_data_dir_redis: /data/beaconchain-explorer-aio/redis
+
+# Set this to true if you want to stop everything and wipe the databases
+beaconchain_explorer_aio_cleanup_all: false
+
+beaconchain_explorer_aio_cmd_exporter:
+  - /app/explorer
+  - -config=/config.yml
+
+beaconchain_explorer_aio_cmd_eth1indexer:
+  - /app/eth1indexer
+  - -config=/config.yml
+  - -bigtable.project=explorer
+  - -bigtable.instance=beaconchain_bigtable:9000
+  - "-erigon={{ beaconchain_explorer_aio_url_erigon_ws }}"
+  - -data.concurrency=2
+  - -data.offset=0
+  - -data.start=0
+  - -data.end=0
+  - -blocks.concurrency=2
+  - -blocks.offset=0
+  - -blocks.start=0
+  - -blocks.end=0
+  - -balances.enabled
+  - -balances.batch=100
+
+beaconchain_explorer_aio_cmd_statistics:
+  - /app/statistics
+  - -config=/config.yml
+
+beaconchain_explorer_aio_cmd_frontend_updater:
+  - /app/frontend-data-updater
+  - -config=/config.yml
+
+beaconchain_explorer_aio_cmd_frontend:
+  - /app/explorer
+  - -config=/config.yml
+
+beaconchain_explorer_aio_config: |
+  # All config options can be found in here: https://github.com/gobitfly/eth2-beaconchain-explorer/blob/master/types/config.go
+  chain:
+    name: sepolia
+  readerDatabase:
+    name: db
+    host: beaconchain_postgres
+    port: "5432"
+    user: postgres
+    password: "pass"
+  writerDatabase:
+    name: db
+    host: beaconchain_postgres
+    port: "5432"
+    user: postgres
+    password: "pass"
+  bigtable:
+    project: explorer
+    instance: beaconchain_bigtable:9000
+  lastAttestationCachePath: "/data/lastAttestationCache"
+  eth1ErigonEndpoint: "{{ beaconchain_explorer_aio_url_erigon }}"
+  eth1GethEndpoint: "{{ beaconchain_explorer_aio_url_geth }}"
+  redisCacheEndpoint: 'beaconchain_redis:6379'
+  tieredCacheProvider: 'redis'
+  #tieredCacheProvider: 'bigtable'
+  frontend:
+    siteDomain: "localhost:8080"
+    siteName: "sitename"
+    siteSubtitle: "subtitle"
+    server:
+      host: '0.0.0.0' # Address to listen on
+      port: '8080' # Port to listen on
+    readerDatabase:
+      name: db
+      host: beaconchain_postgres
+      port: "5432"
+      user: postgres
+      password: "pass"
+    writerDatabase:
+      name: db
+      host: beaconchain_postgres
+      port: "5432"
+      user: postgres
+      password: "pass"
+    sessionSecret: "11111111111111111111111111111111"
+    jwtSigningSecret: "1111111111111111111111111111111111111111111111111111111111111111"
+    jwtIssuer: "localhost"
+    jwtValidityInMinutes: 30
+    maxMailsPerEmailPerDay: 10
+    mail:
+      mailgun:
+        sender: no-reply@localhost
+        domain: mg.localhost
+        privateKey: "key-11111111111111111111111111111111"
+    csrfAuthKey: '1111111111111111111111111111111111111111111111111111111111111111'
+  indexer:
+    # fullIndexOnStartup: false # Perform a one time full db index on startup
+    # indexMissingEpochsOnStartup: true # Check for missing epochs and export them after startup
+    node:
+      host: 34.176.254.248
+      port: '4000'
+      type: lighthouse
+    eth1DepositContractAddress: '0x7f02C3E3c98b133055B8B348B2Ac625669Ed295D'
+    eth1DepositContractFirstBlock: 1273020
+
+
+# This can be used to create additional config files for the beaconchain explorer.
+# It's useful when using private testnets and you need to mount a custom phase0/altair
+# as the chain config. All files will be available within the explorer containers on the
+# /custom_configs directory.
+beaconchain_explorer_aio_extra_config_files: {}
+#
+#  phase0.yml: |
+#    # NOTE: This file will appear in the container at the following path: /custom_configs/phase0.yml
+#
+#    # Extends the mainnet preset
+#    PRESET_BASE: "gnosis"
+#    # needs to exist because of Prysm. Otherwise it conflicts with mainnet genesis
+#    CONFIG_NAME: "chiado"

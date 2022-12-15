@@ -1,0 +1,63 @@
+# All config options can be found in here: https://github.com/gobitfly/eth2-beaconchain-explorer/blob/master/types/config.go
+chain:
+  name: sepolia
+readerDatabase:
+  name: db
+  host: beaconchain_postgres
+  port: "5432"
+  user: postgres
+  password: "pass"
+writerDatabase:
+  name: db
+  host: beaconchain_postgres
+  port: "5432"
+  user: postgres
+  password: "pass"
+bigtable:
+  project: explorer
+  instance: beaconchain_bigtable:9000
+lastAttestationCachePath: "/data/lastAttestationCache"
+eth1ErigonEndpoint: "{{ beaconchain_explorer_aio_url_erigon }}"
+eth1GethEndpoint: "{{ beaconchain_explorer_aio_url_geth }}"
+redisCacheEndpoint: 'beaconchain_redis:6379'
+tieredCacheProvider: 'redis'
+#tieredCacheProvider: 'bigtable'
+frontend:
+  siteDomain: "localhost:8080"
+  siteName: "sitename"
+  siteSubtitle: "subtitle"
+  server:
+    host: '0.0.0.0' # Address to listen on
+    port: '8080' # Port to listen on
+  readerDatabase:
+    name: db
+    host: beaconchain_postgres
+    port: "5432"
+    user: postgres
+    password: "pass"
+  writerDatabase:
+    name: db
+    host: beaconchain_postgres
+    port: "5432"
+    user: postgres
+    password: "pass"
+  sessionSecret: "11111111111111111111111111111111"
+  jwtSigningSecret: "1111111111111111111111111111111111111111111111111111111111111111"
+  jwtIssuer: "localhost"
+  jwtValidityInMinutes: 30
+  maxMailsPerEmailPerDay: 10
+  mail:
+    mailgun:
+      sender: no-reply@localhost
+      domain: mg.localhost
+      privateKey: "key-11111111111111111111111111111111"
+  csrfAuthKey: '1111111111111111111111111111111111111111111111111111111111111111'
+indexer:
+  # fullIndexOnStartup: false # Perform a one time full db index on startup
+  # indexMissingEpochsOnStartup: true # Check for missing epochs and export them after startup
+  node:
+    host: 34.176.254.248
+    port: '4000'
+    type: lighthouse
+  eth1DepositContractAddress: '0x7f02C3E3c98b133055B8B348B2Ac625669Ed295D'
+  eth1DepositContractFirstBlock: 1273020

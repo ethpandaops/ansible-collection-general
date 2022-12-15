@@ -1,0 +1,7 @@
+- name: Setup beaconchain explorer
+  ansible.builtin.import_tasks: setup.yml
+  when: not beaconchain_explorer_aio_cleanup_all
+
+- name: Cleanup everything
+  ansible.builtin.import_tasks: cleanup.yml
+  when: beaconchain_explorer_aio_cleanup_all
