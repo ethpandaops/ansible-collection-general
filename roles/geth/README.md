@@ -4,7 +4,7 @@ Setup [Geth](https://github.com/ethereum/go-ethereum), a ethereum execution laye
 
 ## Requirements
 
-You'll need docker on the target system. Make sure to install these upfront.
+You'll need docker on the target system. Make sure to install it upfront.
 
 ## Role Variables
 

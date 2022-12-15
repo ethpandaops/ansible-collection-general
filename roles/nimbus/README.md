@@ -4,7 +4,7 @@ Setup [Nimbus](https://github.com/status-im/nimbus-eth2), a ethereum consensus l
 
 ## Requirements
 
-You'll need docker on the target system. Make sure to install these upfront.
+You'll need docker on the target system. Make sure to install it upfront.
 
 ## Role Variables
 

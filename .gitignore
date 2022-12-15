@@ -1,3 +1,6 @@
+# Vendored ansible collections
+vendor/collections
+
 # Test outputs from ansible-test
 tests/output/
 

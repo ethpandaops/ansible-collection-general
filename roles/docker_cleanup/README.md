@@ -1,6 +1,6 @@
-# ethpandaops.general.teku
+# ethpandaops.general.docker_cleanup
 
-Setup [Teku](https://github.com/ConsenSys/teku), a ethereum consensus layer client.
+This role will create a cronjob to clean up dangling docker resources.
 
 ## Requirements
 
@@ -34,6 +34,5 @@ Your playbook could look like this:
   - role: geerlingguy.pip
     pip_install_packages:
     - name: docker
-  - role: ethpandaops.general.geth
-  - role: ethpandaops.general.teku
+  - role: ethpandaops.general.docker_cleanup
 ```

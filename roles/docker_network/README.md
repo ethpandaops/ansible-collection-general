@@ -1,6 +1,6 @@
-# ethpandaops.general.teku
+# ethpandaops.general.docker_network
 
-Setup [Teku](https://github.com/ConsenSys/teku), a ethereum consensus layer client.
+This role will create one or many docker networks.
 
 ## Requirements
 
@@ -34,6 +34,6 @@ Your playbook could look like this:
   - role: geerlingguy.pip
     pip_install_packages:
     - name: docker
-  - role: ethpandaops.general.geth
-  - role: ethpandaops.general.teku
+  - role: ethpandaops.general.docker_network
+    docker_network_name: "shared"
 ```
