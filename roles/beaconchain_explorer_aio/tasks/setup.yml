@@ -52,6 +52,7 @@
     dest: "{{ beaconchain_explorer_aio_installation_dir }}/docker-compose.yml"
     owner: "{{ beaconchain_explorer_aio_user }}"
     group: "{{ beaconchain_explorer_aio_user }}"
+    mode: '0640'
 
 - name: Create explorer config file
   ansible.builtin.copy:
@@ -59,13 +60,15 @@
     dest: "{{ beaconchain_explorer_aio_installation_dir }}/explorer/config.yml"
     owner: "{{ beaconchain_explorer_aio_user }}"
     group: "{{ beaconchain_explorer_aio_user }}"
+    mode: '0640'
 
 - name: Create custom config files
   ansible.builtin.copy:
     content: "{{ item.value }}"
-    dest: "{{ beaconchain_explorer_aio_installation_dir }}/explorer/custom_configs/{{ item.key}}"
+    dest: "{{ beaconchain_explorer_aio_installation_dir }}/explorer/custom_configs/{{ item.key }}"
     owner: "{{ beaconchain_explorer_aio_user }}"
     group: "{{ beaconchain_explorer_aio_user }}"
+    mode: '0640'
   loop: "{{ beaconchain_explorer_aio_extra_config_files | dict2items }}"
 
 - name: Create and start database services
@@ -76,10 +79,6 @@
       - postgres
       - redis
   register: beaconchain_explorer_aio_compose_db_meta
-
-- debug:
-    var: beaconchain_explorer_aio_compose_db_meta
-
 
 - name: Check that database services are running
   ansible.builtin.assert:
@@ -103,6 +102,3 @@
       - frontend-updater
       - frontend
   register: beaconchain_explorer_aio_compose_explorer_meta
-
-- debug:
-    var: beaconchain_explorer_aio_compose_explorer_meta

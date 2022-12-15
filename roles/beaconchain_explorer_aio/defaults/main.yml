@@ -8,7 +8,6 @@ beaconchain_explorer_aio_url_geth: http://your-geth-node:8545
 
 beaconchain_explorer_aio_sql_init_file: files/postgres/tables.sql
 beaconchain_explorer_aio_docker_compose_file: templates/docker-compose.yml.j2
-beaconchain_explorer_aio_config_file: templates/config.yml.j2
 
 beaconchain_explorer_aio_installation_dir: /opt/beaconchain-explorer-aio
 
