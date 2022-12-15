@@ -1,0 +1,17 @@
+node_exporter_container_name: "node_exporter"
+node_exporter_container_image: "prom/node-exporter:v1.5.0"
+node_exporter_container_env: {}
+node_exporter_container_ports:
+  - "9100:9100"
+node_exporter_container_volumes:
+  - /proc:/host/proc:ro
+  - /sys:/host/sys:ro
+  - /:/rootfs:ro
+node_exporter_container_stop_timeout: "30"
+node_exporter_container_networks: []
+node_exporter_container_command:
+  - '--path.procfs=/host/proc'
+  - '--path.rootfs=/rootfs'
+  - '--path.sysfs=/host/sys'
+  - --collector.filesystem.ignored-mount-points
+  - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"

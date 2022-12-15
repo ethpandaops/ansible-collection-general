@@ -1,0 +1,12 @@
+- name: Run node_exporter container
+  community.docker.docker_container:
+    name: "{{ node_exporter_container_name }}"
+    image: "{{ node_exporter_container_image }}"
+    state: started
+    restart_policy: always
+    stop_timeout: "{{ node_exporter_container_stop_timeout }}"
+    ports: "{{ node_exporter_container_ports }}"
+    volumes: "{{ node_exporter_container_volumes }}"
+    env: "{{ node_exporter_container_env }}"
+    networks: "{{ node_exporter_container_networks }}"
+    command: "{{ node_exporter_container_command }} "
