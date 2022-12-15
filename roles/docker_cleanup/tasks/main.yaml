@@ -1,0 +1,10 @@
+- name: Create cronjob to clean up dangling docker resources
+  become: true
+  ansible.builtin.cron:
+      name: "{{ docker_cleanup_cron_name }}"
+      minute: "{{ docker_cleanup_schedule[0] }}"
+      hour: "{{ docker_cleanup_schedule[1] }}"
+      day: "{{ docker_cleanup_schedule[2] }}"
+      month: "{{ docker_cleanup_schedule[3] }}"
+      weekday: "{{ docker_cleanup_schedule[4] }}"
+      job: "docker system prune -f &>/dev/null"
