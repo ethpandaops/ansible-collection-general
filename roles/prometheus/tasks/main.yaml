@@ -1,0 +1,44 @@
+- name: Add prometheus user
+  ansible.builtin.user:
+    name: "{{ prometheus_user }}"
+    shell: /bin/nologin
+
+- name: Get prometheus uid
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ prometheus_user }}"
+  register: prometheus_user_getent
+
+- name: Create prometheus dirs
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0777'
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_user }}"
+  loop:
+    - "{{ prometheus_paths_data }}"
+    - "{{ prometheus_paths_config }}"
+
+- name: Create prometheus config
+  ansible.builtin.copy:
+    content: "{{ prometheus_config }}"
+    dest: "{{ prometheus_paths_config }}/prometheus.yml"
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_user }}"
+    mode: '0664'
+  notify: Restart prometheus container
+
+- name: Run prometheus container
+  community.docker.docker_container:
+    name: "{{ prometheus_container_name }}"
+    image: "{{ prometheus_container_image }}"
+    user: "{{ prometheus_user_getent.ansible_facts.getent_passwd[prometheus_user][1] }}"
+    state: started
+    restart_policy: always
+    stop_timeout: "{{ prometheus_container_stop_timeout }}"
+    ports: "{{ prometheus_container_ports }}"
+    volumes: "{{ prometheus_container_volumes }}"
+    env: "{{ prometheus_container_env }}"
+    networks: "{{ prometheus_container_networks }}"
+    command: "{{ prometheus_container_command }}"

@@ -1,6 +1,6 @@
-# ethpandaops.general.node_exporter
+# ethpandaops.general.prometheus
 
-This role will run [node exporter](https://github.com/prometheus/node_exporter) within a docker container.
+This role will run [prometheus](https://github.com/prometheus/prometheus) within a docker container.
 
 ## Requirements
 
@@ -34,5 +34,5 @@ Your playbook could look like this:
   - role: geerlingguy.pip
     pip_install_packages:
     - name: docker
-  - role: ethpandaops.general.node_exporter
+  - role: ethpandaops.general.prometheus
 ```
