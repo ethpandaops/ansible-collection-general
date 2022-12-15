@@ -10,6 +10,7 @@ A collection of reusable ansible components used by the EthPandaOps team.
 ### Ethereum clients
 - [geth](roles/geth)
 - [teku](roles/teku)
+- [nimbus](roles/nimbus)
 
 ## Usage
 
