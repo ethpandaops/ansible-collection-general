@@ -1,0 +1,12 @@
+- name: create auth JWT
+  ansible.builtin.shell: >-
+    echo "0x$(openssl rand -hex 32)" > {{ ethereum_auth_jwt_path }}
+  args:
+    creates: "{{ ethereum_auth_jwt_path }}"
+  when: not ethereum_auth_jwt_predefined_enabled
+
+- name: set a predefined auth JWT
+  ansible.builtin.copy:
+    content: "{{ ethereum_auth_jwt_predefined }}"
+    dest: "{{ ethereum_auth_jwt_path }}"
+  when: ethereum_auth_jwt_predefined_enabled

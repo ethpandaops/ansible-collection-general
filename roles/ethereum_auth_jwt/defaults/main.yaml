@@ -1,0 +1,6 @@
+ethereum_auth_jwt_path: /data/execution-auth.secret
+
+# By default the role will generate a random JWT.
+# You can use a predefined JWT by setting the variable to 'true'
+ethereum_auth_jwt_predefined_enabled: false
+ethereum_auth_jwt_predefined: "0x61d2ec005cd80f094ce9c4a29ec0433f91cc078a6b263cb322deaa61dbec2bd8"
