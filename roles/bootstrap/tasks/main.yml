@@ -1,0 +1,114 @@
+- name: Try connection
+  block:
+  - name: Test connection
+    ansible.builtin.wait_for_connection:
+      timeout: "3"
+    register: bootstrap_connect
+    changed_when: false
+  rescue:
+    - name: Conenction message
+      ansible.builtin.debug:
+        msg: Failed to connect, will try to use bootstrap_ansible_user
+  always:
+    - name: Set bootstrap_ansible_user connected
+      ansible.builtin.set_fact:
+        bootstrap_ansible_user: "{{ ansible_user }}"
+      when:
+        - bootstrap_connect is succeeded
+        - ansible_user is defined
+
+    - name: Set bootstrap_ansible_user not connected
+      ansible.builtin.set_fact:
+        bootstrap_ansible_user: "{{ bootstrap_user }}"
+      when:
+        - bootstrap_connect is failed
+
+# Create default user
+- name: Ensure default user exists
+  when: bootstrap_default_user_create | bool
+  vars:
+    ansible_user: "{{ bootstrap_ansible_user | default(omit) }}"
+  block:
+    - name: Create default user group
+      ansible.builtin.group:
+        name: "{{ bootstrap_default_user }}"
+        state: present
+
+    - name: Create default user account
+      ansible.builtin.user:
+        name: "{{ bootstrap_default_user }}"
+        groups: "{{ bootstrap_default_user }},sudo"
+        append: true
+
+    - name: Allow default user to sudo without a password
+      ansible.builtin.lineinfile:
+        dest: "{{ bootstrap_sudoers_file_path }}"
+        state: "present"
+        regexp: "^%{{ bootstrap_default_user }}"
+        line: "%{{ bootstrap_default_user }} ALL=(ALL) NOPASSWD: ALL"
+
+    - name: Add SSH keys
+      loop: "{{ bootstrap_default_user_authorized_keys_plain }}"
+      ansible.posix.authorized_key:
+        user: "{{ bootstrap_default_user }}"
+        state: present
+        key: "{{ item }}"
+
+    - name: Add SSH keys from github users
+      loop: "{{ bootstrap_default_user_authorized_keys_github }}"
+      ansible.posix.authorized_key:
+        user: "{{ bootstrap_default_user }}"
+        state: present
+        key: "https://github.com/{{ item }}.keys"
+
+# Set hostname to inventory hostname by default
+- name: Set hostname
+  ansible.builtin.hostname:
+    name: "{{ inventory_hostname }}"
+
+- name: Add self to /etc/hosts
+  ansible.builtin.lineinfile:
+    dest: /etc/hosts
+    line: '{{ ansible_host }} {{ inventory_hostname }}'
+
+# Keep SSH_AUTH_SOCK when using sudo
+- name: Add self to /etc/hosts
+  ansible.builtin.lineinfile:
+    dest: /etc/sudoers
+    line: Defaults    env_keep += "SSH_AUTH_SOCK"
+
+# Harden SSHD config
+- name: Harden sshd config
+  when: bootstrap_harden_sshd_config | bool
+  block:
+    - name: Disable root login
+      ansible.builtin.lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: "^PermitRootLogin"
+        line: "PermitRootLogin no"
+        state: present
+      notify:
+        - Restart sshd
+    - name: Disable password login
+      ansible.builtin.lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: "^PasswordAuthentication"
+        line: "PasswordAuthentication no"
+        state: present
+      notify:
+        - Restart sshd
+
+# Install common packages
+- name: Install common packages
+  ansible.builtin.package:
+    name: "{{ bootstrap_default_common_packages }}"
+    state: present
+
+# Disable swap
+- name: Disable SWAP in fstab
+  ansible.builtin.replace:
+    path: /etc/fstab
+    regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
+    replace: '# \1'
+  when: bootstrap_swap_disable
+  notify: Disable SwAP

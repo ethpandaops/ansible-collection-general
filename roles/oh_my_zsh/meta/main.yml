@@ -1,0 +1,17 @@
+allow_duplicates: true
+galaxy_info:
+  author: ethpandaops
+  description: Setup and customize zsh
+  license: MIT
+  min_ansible_version: "2.1"
+  galaxy_tags: []
+  platforms:
+    - name: GenericLinux
+      versions: ["all"]
+dependencies:
+  - role: gantsign.oh-my-zsh
+    users:
+      - username: "{{ oh_my_zsh_user }}"
+        oh_my_zsh:
+          theme: "{{ oh_my_zsh_theme }}"
+          plugins: "{{ oh_my_zsh_plugins }}"

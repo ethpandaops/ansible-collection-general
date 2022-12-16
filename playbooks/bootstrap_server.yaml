@@ -1,0 +1,32 @@
+#
+# This playbook allows you to bootstrap your server with common utilities.
+#
+# You can import this playbook within yours by using the following example:
+#
+#  - ansible.builtin.import_playbook: ethpandaops.general.bootstrap_server
+#
+- name: "Bootstrap the server"
+  hosts: "{{ target | default('all') }}"
+  serial: "{{ batch_count | default('100%') }}"
+  become: true
+  gather_facts: false
+  roles:
+    - role: ethpandaops.general.bootstrap
+      tags: [bootstrap]
+
+- name: "Configure zsh for the default ansible user"
+  hosts: "{{ target | default('all') }}"
+  serial: "{{ batch_count | default('100%') }}"
+  become: true
+  roles:
+    - role: ethpandaops.general.oh_my_zsh
+      tags: ["oh_my_zsh"]
+
+- name: "Configure zsh for the root user"
+  hosts: "{{ target | default('all') }}"
+  serial: "{{ batch_count | default('100%') }}"
+  become: true
+  roles:
+    - role: ethpandaops.general.oh_my_zsh
+      oh_my_zsh_user: root
+      tags: ["oh_my_zsh"]

@@ -1,0 +1,9 @@
+- name: Restart sshd
+  ansible.builtin.service:
+    name: sshd
+    state: restarted
+
+- name: Disable SWAP
+  ansible.builtin.command: swapoff -a
+  when: bootstrap_swap_disabled.changed
+  tags: ["swap"]

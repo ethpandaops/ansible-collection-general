@@ -1,0 +1,13 @@
+- name: Get user home dir
+  ansible.builtin.user:
+    name: "{{ oh_my_zsh_user }}"
+    state: present
+  check_mode: true
+  register: oh_my_zsh_user_meta
+
+- name: Set custom .zshrc config
+  ansible.builtin.lineinfile:
+    dest: "{{ oh_my_zsh_user_meta.home }}/.zshrc"
+    state: present
+    line: "{{ item }}"
+  loop: "{{ oh_my_zsh_config }}"
