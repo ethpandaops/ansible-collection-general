@@ -1,0 +1,15 @@
+- hosts: "{{ target | default("all") }}"
+  become: true
+  gather_facts: false
+  roles:
+  - role: ethpandaops.general.bootstrap
+    tags: [bootstrap]
+
+- hosts: "{{ target | default("all") }}"
+  become: true
+  roles:
+  - role: ethpandaops.general.oh_my_zsh
+    tags: ["oh_my_zsh"]
+  - role: ethpandaops.general.oh_my_zsh
+    oh_my_zsh_user: root
+    tags: ["oh_my_zsh"]
