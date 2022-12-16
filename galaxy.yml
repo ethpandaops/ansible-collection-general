@@ -34,9 +34,9 @@ tags: []
 # L(specifiers,https://python-semanticversion.readthedocs.io/en/latest/#requirement-specification). Multiple version
 # range specifiers can be set and are separated by ','
 dependencies:
-  "community.docker": "*"
-  "community.general": "*"
-  "ansible.posix": "*"
+  "community.docker": ">=3.0.0,<4.0.0"
+  "community.general": ">=6.0.0,<7.0.0"
+  "ansible.posix": ">=1.0.0,<2.0.0"
 
 # The URL of the originating SCM repository
 repository: https://github.com/ethpandaops/ansible-collection-general

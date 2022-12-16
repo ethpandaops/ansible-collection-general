@@ -1,6 +1,6 @@
 # ethpandaops.general.bootstrap
 
-This role is does some basic server bootstraping and hardening.
+This role allows to install oh-my-zsh and customize it.
 
 ## Requirements
 
@@ -22,5 +22,5 @@ Your playbook could look like this:
 - hosts: all
   become: true
   roles:
-    - role: ethpandaops.general.bootstrap
+    - role: ethpandaops.general.oh_my_zsh
 ```
