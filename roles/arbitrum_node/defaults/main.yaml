@@ -1,0 +1,19 @@
+arbitrum_node_container_name: arbitrum_node
+arbitrum_node_container_image: offchainlabs/nitro-node:v2.0.9-51f9452
+arbitrum_node_container_env: {}
+arbitrum_node_container_ports:
+  - "127.0.0.1:8547:8547"
+  - "127.0.0.1:8548:8548"
+arbitrum_node_container_volumes:
+  - "{{ arbitrum_node_datadir }}:/home/user/.arbitrum"
+arbitrum_node_container_stop_timeout: "300"
+arbitrum_node_container_networks: []
+arbitrum_node_container_command:
+  - --l2.chain-id=42161
+  - --l1.url=http://geth:8545
+  - --metrics
+  - --metrics-server.addr=0.0.0.0
+  - --metrics-server.port=6070
+  # - --init.url=https://snapshot.arbitrum.io/mainnet/nitro.tar
+
+arbitrum_node_datadir: /data/arbitrum-nitro

@@ -1,0 +1,20 @@
+- name: Adjust datadir permissions. Container runs with UID 1000 by default
+  ansible.builtin.file:
+    dest: "{{ arbitrum_node_datadir }}"
+    owner: 1000
+    group: 1000
+    state: directory
+    recurse: true
+
+- name: Run arbitrum_node container
+  community.docker.docker_container:
+    name: "{{ arbitrum_node_container_name }}"
+    image: "{{ arbitrum_node_container_image }}"
+    state: started
+    restart_policy: always
+    stop_timeout: "{{ arbitrum_node_container_stop_timeout }}"
+    ports: "{{ arbitrum_node_container_ports }}"
+    volumes: "{{ arbitrum_node_container_volumes }}"
+    env: "{{ arbitrum_node_container_env }}"
+    networks: "{{ arbitrum_node_container_networks }}"
+    command: "{{ arbitrum_node_container_command }} "

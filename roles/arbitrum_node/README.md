@@ -1,6 +1,6 @@
-# ethpandaops.general.docker_network
+# ethpandaops.general.arbitrum_node
 
-This role will create a docker network.
+Setup a [Arbitrum Nitro Node](https://github.com/OffchainLabs/nitro), a ethereum L2 client.
 
 ## Requirements
 
@@ -29,11 +29,21 @@ Your playbook could look like this:
 ```yaml
 - hosts: localhost
   become: true
+  vars:
+    docker_network_name: shared
+    geth_container_networks:
+    - name: "{{ docker_network_name }}"
+    teku_container_networks:
+    - name: "{{ docker_network_name }}"
+    arbitrum_node_container_networks:
+    - name: "{{ docker_network_name }}"
   roles:
   - role: geerlingguy.docker
   - role: geerlingguy.pip
     pip_install_packages:
     - name: docker
   - role: ethpandaops.general.docker_network
-    docker_network_name: "shared"
+  - role: ethpandaops.general.geth
+  - role: ethpandaops.general.teku
+  - role: ethpandaops.general.arbitrum_node
 ```
