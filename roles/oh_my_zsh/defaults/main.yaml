@@ -1,0 +1,7 @@
+oh_my_zsh_user: "{{ ansible_user }}"
+oh_my_zsh_theme: powerlevel9k/powerlevel9k
+oh_my_zsh_plugins:
+  - git
+  - vi-mode
+oh_my_zsh_config:
+  - PROMPT="%{$fg[yellow]%}%n%{$fg[white]%}@%{$fg[red]%}%m%{$reset_color%} ${PROMPT}"
