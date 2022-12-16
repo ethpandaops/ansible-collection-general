@@ -101,15 +101,7 @@
 # Install common packages
 - name: Install common packages
   ansible.builtin.package:
-    name:
-      - htop
-      - tmux
-      - iftop
-      - sysstat
-      - vim
-      - jq
-      - curl
-      - wget
+    name: "{{ bootstrap_default_common_packages }}"
     state: present
 
 # Disable swap
@@ -120,4 +112,3 @@
     replace: '# \1'
   when: bootstrap_swap_disable
   notify: Disable SwAP
-  tags: ["swap"]
