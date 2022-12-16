@@ -14,6 +14,7 @@ A collection of reusable ansible components used by the EthPandaOps team.
 - [geth](roles/geth)
 - [teku](roles/teku)
 - [nimbus](roles/nimbus)
+- [arbitrum_node](roles/arbitrum_node)
 
 ### General purpose tooling
 - [node_exporter](roles/node_exporter)
