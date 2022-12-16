@@ -17,6 +17,7 @@ A collection of reusable ansible components used by the EthPandaOps team.
 - [arbitrum_node](roles/arbitrum_node)
 
 ### General purpose tooling
+- [k3s](roles/k3s)
 - [node_exporter](roles/node_exporter)
 - [prometheus](roles/prometheus)
 - [docker_cleanup](roles/docker_cleanup)

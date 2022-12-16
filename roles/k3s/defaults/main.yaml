@@ -1,0 +1,16 @@
+---
+k3s_version: v1.25.2+k3s1
+k3s_node_type: agent # can be "agent" or "server"
+k3s_systemd_dir: /etc/systemd/system
+k3s_server_location: /var/lib/rancher/k3s
+k3s_server_ip: "{{ hostvars[groups['k3s_server'][0]]['ansible_host'] | default(groups['k3s_server'][0]) }}"
+k3s_server_extra_args: >-
+  --node-external-ip={{ ansible_host }}
+k3s_agent_extra_args: >-
+  --node-external-ip={{ ansible_host }}
+
+# --flannel-iface=wg0
+
+# On an agent node:
+# --node-ip={{ wg0_ip_addr }}
+#
