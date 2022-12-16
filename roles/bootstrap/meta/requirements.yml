@@ -1,0 +1,7 @@
+roles:
+  - src: robertdebock.bootstrap
+    version: 5.0.3
+
+collections:
+  - name: ansible.posix
+    version: ">=1.0.0,<2.0.0"

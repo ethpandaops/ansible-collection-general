@@ -35,6 +35,8 @@ tags: []
 # range specifiers can be set and are separated by ','
 dependencies:
   "community.docker": "*"
+  "community.general": "*"
+  "ansible.posix": "*"
 
 # The URL of the originating SCM repository
 repository: https://github.com/ethpandaops/ansible-collection-general

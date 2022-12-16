@@ -22,6 +22,7 @@ A collection of reusable ansible components used by the EthPandaOps team.
 - [prometheus](roles/prometheus)
 - [docker_cleanup](roles/docker_cleanup)
 - [docker_network](roles/docker_network)
+- [bootstrap](roles/bootstrap)
 
 ## Usage
 

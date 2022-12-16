@@ -1,0 +1,12 @@
+bootstrap_user: root
+bootstrap_timeout: 3
+
+bootstrap_default_user_create: true
+bootstrap_default_user: devops
+bootstrap_sudoers_file_path: /etc/sudoers
+bootstrap_default_user_authorized_keys_github: []
+bootstrap_default_user_authorized_keys_plain: []
+
+bootstrap_harden_sshd_config: true
+bootstrap_rpcbind_disable: false
+bootstrap_swap_disable: true
