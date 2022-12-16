@@ -1,6 +1,6 @@
 # ethpandaops.general.docker_network
 
-This role will create one or many docker networks.
+This role will create a docker network.
 
 ## Requirements
 
