@@ -65,6 +65,7 @@
 - name: Set hostname
   ansible.builtin.hostname:
     name: "{{ inventory_hostname }}"
+  register: hostname
 
 - name: Add self to /etc/hosts
   ansible.builtin.lineinfile:
@@ -104,6 +105,11 @@
     name: "{{ bootstrap_default_common_packages }}"
     state: present
 
+- name: Check if reboot required
+  ansible.builtin.stat:
+    path: /var/run/reboot-required
+  register: reboot_required_file
+
 # Disable swap
 - name: Disable SWAP in fstab
   ansible.builtin.replace:
@@ -111,4 +117,11 @@
     regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
     replace: '# \1'
   when: bootstrap_swap_disable
-  notify: Disable SwAP
+  notify: Disable SWAP
+
+- name: Force all notified handlers to run at this point, not waiting for normal sync points (required to be triggered before reboot)
+   ansible.builtin.meta: flush_handlers
+
+- name: Reboot machine if needed
+  ansible.builtin.reboot:
+  when: hostname.changed or reboot_required_file.stat.exists
