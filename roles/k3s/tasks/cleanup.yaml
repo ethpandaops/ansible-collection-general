@@ -8,7 +8,7 @@
   ansible.builtin.systemd:
     name: k3s-agent
     daemon_reload: true
-    state: absent
+    state: stopped
     enabled: false
   when: k3s_cleanup_systemd_agent_meta.changed
 
@@ -22,7 +22,7 @@
   ansible.builtin.systemd:
     name: k3s-server
     daemon_reload: true
-    state: absent
+    state: stopped
     enabled: false
   when: k3s_cleanup_systemd_server_meta.changed
 
