@@ -1,5 +1,5 @@
 ---
-k3s_version: v1.25.2+k3s1
+k3s_version: v1.26.0+k3s1
 k3s_node_type: agent # can be "agent" or "server"
 k3s_systemd_dir: /etc/systemd/system
 k3s_server_location: /var/lib/rancher/k3s
@@ -17,6 +17,6 @@ k3s_agent_extra_args: >-
 
 
 # Enable this if you want to cleanup and uninstall the k3s service on the host
-k3s_cleanup_all: false
+k3s_cleanup: false
 # Enable this if you also want to remove the persisten volumes created by the "local-path" storage class
 k3s_cleanup_localpath_persisten_volumes: false
