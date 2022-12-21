@@ -14,3 +14,6 @@ k3s_agent_extra_args: >-
 # On an agent node:
 # --node-ip={{ wg0_ip_addr }}
 #
+
+
+k3s_cleanup_all: false
