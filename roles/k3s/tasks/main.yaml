@@ -1,13 +1,20 @@
-- name: Check for prerequirements
-  ansible.builtin.import_tasks: prereq.yaml
+- name: Setup k3s
+  when: not k3s_cleanup
+  block:
+    - name: Check for prerequirements
+      ansible.builtin.import_tasks: prereq.yaml
 
-- name: Download k3s
-  ansible.builtin.import_tasks: download.yaml
+    - name: Download k3s
+      ansible.builtin.import_tasks: download.yaml
 
-- name: Setup server node
-  ansible.builtin.import_tasks: server.yaml
-  when: k3s_node_type == "server"
+    - name: Setup server node
+      ansible.builtin.import_tasks: server.yaml
+      when: k3s_node_type == "server"
 
-- name: Setup agent node
-  ansible.builtin.import_tasks: agent.yaml
-  when: k3s_node_type == "agent"
+    - name: Setup agent node
+      ansible.builtin.import_tasks: agent.yaml
+      when: k3s_node_type == "agent"
+
+- name: Cleanup k3s
+  ansible.builtin.import_tasks: cleanup.yaml
+  when: k3s_cleanup

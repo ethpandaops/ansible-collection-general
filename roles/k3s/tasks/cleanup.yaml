@@ -1,0 +1,47 @@
+- name: Check k3s-agent systemd file
+  ansible.builtin.stat:
+    path: "{{ k3s_systemd_dir }}/k3s-agent.service"
+  register: k3s_cleanup_systemd_agent_meta
+
+- name: Disable k3s-agent service
+  ansible.builtin.systemd:
+    name: k3s-agent
+    daemon_reload: true
+    state: stopped
+    enabled: false
+  when: k3s_cleanup_systemd_agent_meta.stat.exists
+
+- name: Check k3s-server systemd file
+  ansible.builtin.stat:
+    path: "{{ k3s_systemd_dir }}/k3s-server.service"
+  register: k3s_cleanup_systemd_server_meta
+
+- name: Disable k3s-server service
+  ansible.builtin.systemd:
+    name: k3s-server
+    daemon_reload: true
+    state: stopped
+    enabled: false
+  when: k3s_cleanup_systemd_server_meta.stat.exists
+
+- name: Remove binaries and directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /usr/local/bin/k3s
+    - /usr/local/bin/kubectl
+    - /usr/local/bin/crictl
+    - /etc/rancher
+    - "~{{ ansible_user }}/.kube"
+    - "{{ k3s_server_location}}/data"
+    - "{{ k3s_server_location}}/agent"
+    - "{{ k3s_server_location}}/server"
+    - "{{ k3s_systemd_dir }}/k3s-agent.service"
+    - "{{ k3s_systemd_dir }}/k3s-server.service"
+
+- name: Remove local-path PV directories
+  ansible.builtin.file:
+    path: "{{ k3s_server_location}}/storage"
+    state: absent
+  when: k3s_cleanup_localpath_persisten_volumes
