@@ -12,7 +12,7 @@
   when: k3s_cleanup_systemd_agent_meta.stat.exists
 
 - name: Check k3s-server systemd file
-  ansible.builtin.file:
+  ansible.builtin.stat:
     path: "{{ k3s_systemd_dir }}/k3s-server.service"
   register: k3s_cleanup_systemd_server_meta
 
