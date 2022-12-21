@@ -1,5 +1,5 @@
-- name: Remove k3s-agent systemd file
-  ansible.builtin.file:
+- name: Check k3s-agent systemd file
+  ansible.builtin.stat:
     path: "{{ k3s_systemd_dir }}/k3s-agent.service"
     state: absent
   register: k3s_cleanup_systemd_agent_meta
@@ -10,9 +10,9 @@
     daemon_reload: true
     state: stopped
     enabled: false
-  when: k3s_cleanup_systemd_agent_meta.changed
+  when: k3s_cleanup_systemd_agent_meta.stat.exists
 
-- name: Remove k3s-server systemd file
+- name: Check k3s-server systemd file
   ansible.builtin.file:
     path: "{{ k3s_systemd_dir }}/k3s-server.service"
     state: absent
@@ -24,7 +24,7 @@
     daemon_reload: true
     state: stopped
     enabled: false
-  when: k3s_cleanup_systemd_server_meta.changed
+  when: k3s_cleanup_systemd_server_meta.stat.exists
 
 - name: Remove binaries and directories
   ansible.builtin.file:
@@ -37,3 +37,5 @@
     - /etc/rancher
     - "~{{ ansible_user }}/.kube"
     - "{{ k3s_server_location}}"
+    - "{{ k3s_systemd_dir }}/k3s-agent.service"
+    - "{{ k3s_systemd_dir }}/k3s-server.service"
