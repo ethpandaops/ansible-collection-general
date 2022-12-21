@@ -1,7 +1,6 @@
 - name: Check k3s-agent systemd file
   ansible.builtin.stat:
     path: "{{ k3s_systemd_dir }}/k3s-agent.service"
-    state: absent
   register: k3s_cleanup_systemd_agent_meta
 
 - name: Disable k3s-agent service
@@ -15,7 +14,6 @@
 - name: Check k3s-server systemd file
   ansible.builtin.file:
     path: "{{ k3s_systemd_dir }}/k3s-server.service"
-    state: absent
   register: k3s_cleanup_systemd_server_meta
 
 - name: Disable k3s-server service
