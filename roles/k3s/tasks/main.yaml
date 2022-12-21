@@ -1,6 +1,6 @@
 
 - name: Setup k3s
-  when: not k3s_cleanup_all
+  when: not k3s_cleanup
   block:
     - name: Check for prerequirements
       ansible.builtin.import_tasks: prereq.yaml
@@ -19,4 +19,4 @@
 
 - name: Cleanup k3s
   ansible.builtin.import_tasks: cleanup.yaml
-  when: k3s_cleanup_all
+  when: k3s_cleanup

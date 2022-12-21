@@ -34,6 +34,14 @@
     - /usr/local/bin/crictl
     - /etc/rancher
     - "~{{ ansible_user }}/.kube"
-    - "{{ k3s_server_location}}"
+    - "{{ k3s_server_location}}/data"
+    - "{{ k3s_server_location}}/agent"
+    - "{{ k3s_server_location}}/server"
     - "{{ k3s_systemd_dir }}/k3s-agent.service"
     - "{{ k3s_systemd_dir }}/k3s-server.service"
+
+- name: Remove local-path PV directories
+  ansible.builtin.file:
+    path: "{{ k3s_server_location}}/storage"
+    state: absent
+  when: k3s_cleanup_localpath_persisten_volumes
