@@ -3,4 +3,3 @@
     name: "{{ prometheus_container_name }}"
     state: started
     restart: true
-  when: prometheus_config_register.changed
