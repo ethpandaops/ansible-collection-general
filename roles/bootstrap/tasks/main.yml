@@ -105,11 +105,6 @@
     name: "{{ bootstrap_default_common_packages }}"
     state: present
 
-- name: Check if reboot required
-  ansible.builtin.stat:
-    path: /var/run/reboot-required
-  register: reboot_required_file
-
 # Disable swap
 - name: Disable SWAP in fstab
   ansible.builtin.replace:
@@ -117,12 +112,27 @@
     regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
     replace: '# \1'
   when: bootstrap_swap_disable
-  register: bootstrap_swap_disabled
   notify: Disable SWAP
 
-- name: Force all notified handlers to run at this point, not waiting for normal sync points (required to be triggered before reboot)
-  ansible.builtin.meta: flush_handlers
+- name: Check if reboot required
+  ansible.builtin.stat:
+    path: /var/run/reboot-required
+  register: bootstrap_reboot_required_file
+  
+- name: Set reboot required
+  ansible.builtin.set_fact:
+    bootstrap_reboot_required: bootstrap_reboot_required_file.stats.exists or hostname.changed
+ 
+- name: Prompt for reboot
+  ansible.builtin.pause:
+    prompt: "A reboot is required. Do you want to proceed? (y/n)"
+  when: bootstrap_reboot_required
+  register: bootrap_reboot_prompt
 
-- name: Reboot machine if needed
-  ansible.builtin.reboot:
-  when: (hostname.changed or reboot_required_file.stat.exists) and reboot_machine
+- name: Handle reboot
+  when: bootstrap_reboot_required and bootrap_reboot_prompt.user_input == "y"
+  block:
+  - name: Flush handlers
+    ansible.builtin.meta: flush_handlers
+  - name: Reboot
+    ansible.builtin.reboot:
