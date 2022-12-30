@@ -65,7 +65,7 @@
 - name: Set hostname
   ansible.builtin.hostname:
     name: "{{ inventory_hostname }}"
-  register: hostname
+  register: bootstrap_hostname
 
 - name: Add self to /etc/hosts
   ansible.builtin.lineinfile:
@@ -121,7 +121,7 @@
   
 - name: Set reboot required
   ansible.builtin.set_fact:
-    bootstrap_reboot_required: bootstrap_reboot_required_file.stats.exists or hostname.changed
+    bootstrap_reboot_required: bootstrap_reboot_required_file.stats.exists or bootstrap_hostname.changed
  
 - name: Prompt for reboot
   ansible.builtin.pause:
