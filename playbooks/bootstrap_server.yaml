@@ -10,6 +10,11 @@
   serial: "{{ batch_count | default('100%') }}"
   become: true
   gather_facts: false
+  vars_prompt:
+    - name: reboot_machine
+      prompt: "Reboot machine? yes/no (default no)"
+      private: no
+      default: no
   roles:
     - role: ethpandaops.general.bootstrap
       tags: [bootstrap]

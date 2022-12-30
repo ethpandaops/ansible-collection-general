@@ -117,11 +117,12 @@
     regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
     replace: '# \1'
   when: bootstrap_swap_disable
+  register: bootstrap_swap_disabled
   notify: Disable SWAP
 
 - name: Force all notified handlers to run at this point, not waiting for normal sync points (required to be triggered before reboot)
-   ansible.builtin.meta: flush_handlers
+  ansible.builtin.meta: flush_handlers
 
 - name: Reboot machine if needed
   ansible.builtin.reboot:
-  when: hostname.changed or reboot_required_file.stat.exists
+  when: (hostname.changed or reboot_required_file.stat.exists) and reboot_machine
