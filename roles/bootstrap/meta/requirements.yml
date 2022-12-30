@@ -1,6 +1,6 @@
 roles:
   - src: robertdebock.bootstrap
-    version: "5.2.12"
+    version: "5.2.5"
 
 collections:
   - name: ansible.posix

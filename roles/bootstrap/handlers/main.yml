@@ -5,5 +5,4 @@
 
 - name: Disable SWAP
   ansible.builtin.command: swapoff -a
-  when: bootstrap_swap_disabled.changed
   tags: ["swap"]
