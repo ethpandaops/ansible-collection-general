@@ -16,7 +16,7 @@ bootstrap_default_common_packages:
       - jq
       - curl
       - wget
-      - chrony #enabled by default on Debian
+      - chrony # enabled by default on Debian
 
 bootstrap_harden_sshd_config: true
 bootstrap_rpcbind_disable: false

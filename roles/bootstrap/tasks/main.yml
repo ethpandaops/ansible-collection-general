@@ -114,25 +114,21 @@
   when: bootstrap_swap_disable
   notify: Disable SWAP
 
+# Reboot the machine if required
 - name: Check if reboot required
   ansible.builtin.stat:
     path: /var/run/reboot-required
   register: bootstrap_reboot_required_file
-  
+
 - name: Set reboot required
   ansible.builtin.set_fact:
-    bootstrap_reboot_required: bootstrap_reboot_required_file.stats.exists or bootstrap_hostname.changed
- 
-- name: Prompt for reboot
-  ansible.builtin.pause:
-    prompt: "A reboot is required. Do you want to proceed? (y/n)"
-  when: bootstrap_reboot_required
-  register: bootrap_reboot_prompt
+    bootstrap_reboot_required: true
+  when: (bootstrap_reboot_required_file.stat.exists or bootstrap_hostname.changed) and bootstrap_reboot_if_required|default(false)
 
 - name: Handle reboot
-  when: bootstrap_reboot_required and bootrap_reboot_prompt.user_input == "y"
+  when: bootstrap_reboot_required|default(false)
   block:
-  - name: Flush handlers
-    ansible.builtin.meta: flush_handlers
-  - name: Reboot
-    ansible.builtin.reboot:
+    - name: Flush handlers
+      ansible.builtin.meta: flush_handlers
+    - name: Reboot
+      ansible.builtin.reboot:
