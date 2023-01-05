@@ -28,5 +28,5 @@ Your playbook could look like this:
 ### Enable reboot if required
 If you would like to enable the machines to reboot during bootstrap, then it can be set as an option.
 ```sh
-ansible-playbook -i inventory.yaml -e bootstrap_reboot_if_required=true
+ansible-playbook playbook.yaml -i inventory.yaml -e bootstrap_reboot_if_required=true
 ```

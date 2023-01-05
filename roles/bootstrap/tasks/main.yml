@@ -123,7 +123,7 @@
 - name: Set reboot required
   ansible.builtin.set_fact:
     bootstrap_reboot_required: true
-  when: (bootstrap_reboot_required_file.stat.exists or bootstrap_hostname.changed) and bootstrap_reboot_if_required|default(false)
+  when: (bootstrap_reboot_required_file.stat.exists or bootstrap_hostname.changed) and bootstrap_reboot_if_required
 
 - name: Handle reboot
   when: bootstrap_reboot_required|default(false)

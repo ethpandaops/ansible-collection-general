@@ -6,6 +6,7 @@ bootstrap_default_user: devops
 bootstrap_default_user_authorized_keys_github: []
 bootstrap_default_user_authorized_keys_plain: []
 bootstrap_sudoers_file_path: /etc/sudoers
+bootstrap_reboot_if_required: false
 
 bootstrap_default_common_packages:
       - htop
