@@ -1,26 +1,7 @@
-- name: Add prysm user
-  ansible.builtin.user:
-    name: "{{ prysm_user }}"
-  register: prysm_user_meta
+- name: Setup prysm
+  ansible.builtin.import_tasks: setup.yaml
+  when: not prysm_cleanup
 
-- name: Create data dir
-  ansible.builtin.file:
-    path: "{{ prysm_datadir }}"
-    state: directory
-    recurse: true
-    owner: "{{ prysm_user }}"
-    group: "{{ prysm_user }}"
-
-- name: Run prysm container
-  community.docker.docker_container:
-    name: "{{ prysm_container_name }}"
-    image: "{{ prysm_container_image }}"
-    state: started
-    restart_policy: always
-    stop_timeout: "{{ prysm_container_stop_timeout }}"
-    ports: "{{ prysm_container_ports }}"
-    volumes: "{{ prysm_container_volumes }}"
-    env: "{{ prysm_container_env }}"
-    networks: "{{ prysm_container_networks }}"
-    command: "{{ prysm_container_command }} "
-    user: "{{ prysm_user_meta.uid }}"
+- name: Cleanup prysm
+  ansible.builtin.import_tasks: cleanup.yaml
+  when: prysm_cleanup
