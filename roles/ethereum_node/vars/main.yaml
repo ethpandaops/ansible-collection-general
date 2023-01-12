@@ -1,0 +1,13 @@
+ethereum_node_supported_el:
+  - geth
+  - nethermind
+
+ethereum_node_supported_cl:
+  - lighthouse
+  - teku
+  - prysm
+  - lodestar
+  - nimbus
+
+ethereum_node_docker_networks:
+  - name: "{{ ethereum_node_docker_network_name }}"
