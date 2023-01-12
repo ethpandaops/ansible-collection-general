@@ -1,26 +1,7 @@
-- name: Add nethermind user
-  ansible.builtin.user:
-    name: "{{ nethermind_user }}"
-  register: nethermind_user_meta
+- name: Setup nethermind
+  ansible.builtin.import_tasks: setup.yaml
+  when: not nethermind_cleanup
 
-- name: Create data dir
-  ansible.builtin.file:
-    path: "{{ nethermind_datadir }}"
-    state: directory
-    recurse: true
-    owner: "{{ nethermind_user }}"
-    group: "{{ nethermind_user }}"
-
-- name: Run nethermind container
-  community.docker.docker_container:
-    name: "{{ nethermind_container_name }}"
-    image: "{{ nethermind_container_image }}"
-    state: started
-    restart_policy: always
-    stop_timeout: "{{ nethermind_container_stop_timeout }}"
-    ports: "{{ nethermind_container_ports }}"
-    volumes: "{{ nethermind_container_volumes }}"
-    env: "{{ nethermind_container_env }}"
-    networks: "{{ nethermind_container_networks }}"
-    command: "{{ nethermind_container_command }} "
-    user: "{{ nethermind_user_meta.uid }}"
+- name: Cleanup nethermind
+  ansible.builtin.import_tasks: cleanup.yaml
+  when: nethermind_cleanup

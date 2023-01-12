@@ -2,32 +2,42 @@ nethermind_user: nethermind
 nethermind_datadir: /data/nethermind
 nethermind_auth_jwt_path: /data/execution-auth.secret
 
+nethermind_cleanup: false # when set to "true" it will remove the container
+
+nethermind_ports_p2p: 30303
+nethermind_ports_http_rpc: 8545
+nethermind_ports_engine: 8551
+nethermind_ports_monitoring: 6060
+
 nethermind_container_name: nethermind
 nethermind_container_image: nethermind/nethermind:1.15.0
 nethermind_container_env: {}
 nethermind_container_ports:
-  - "127.0.0.1:8545:8545"
-  - "127.0.0.1:8551:8551"
-  - "30303:30303"
+  - "127.0.0.1:{{ nethermind_ports_http_rpc }}:{{ nethermind_ports_http_rpc }}"
+  - "127.0.0.1:{{ nethermind_ports_engine }}:{{ nethermind_ports_engine }}"
+  - "{{ nethermind_ports_p2p }}:{{ nethermind_ports_p2p }}"
+  - "{{ nethermind_ports_p2p }}:{{ nethermind_ports_p2p }}/udp"
 nethermind_container_volumes:
   - "{{ nethermind_datadir }}:/data"
   - "{{ nethermind_auth_jwt_path }}:/execution-auth.jwt:ro"
 nethermind_container_stop_timeout: "300"
 nethermind_container_networks: []
+nethermind_container_entrypoint:
+  - /nethermind/Nethermind.Runner
 nethermind_container_command:
-  --datadir=/data
-  --KeyStore.KeyStoreDirectory=/data/keystore
-  --Network.ExternalIp={{ ansible_host }}
-  --Network.P2PPort=30303
-  --Network.DiscoveryPort=30303
-  --JsonRpc.Enabled=true
-  --JsonRpc.Host=0.0.0.0
-  --JsonRpc.Port=8545
-  --Init.WebSocketsEnabled=true
-  --JsonRpc.WebSocketsPort=8545
-  --JsonRpc.JwtSecretFile=/execution-auth.jwt
-  --JsonRpc.EngineHost=0.0.0.0
-  --JsonRpc.EnginePort=8551
-  --Metrics.Enabled=true
-  --Metrics.NodeName={{ inventory_hostname_short }}
-  --Metrics.ExposePort=6060
+  - --datadir=/data
+  - --KeyStore.KeyStoreDirectory=/data/keystore
+  - --Network.ExternalIp={{ ansible_host }}
+  - --Network.P2PPort={{ nethermind_ports_p2p }}
+  - --Network.DiscoveryPort={{ nethermind_ports_p2p }}
+  - --JsonRpc.Enabled=true
+  - --JsonRpc.Host=0.0.0.0
+  - --JsonRpc.Port={{ nethermind_ports_http_rpc }}
+  - --Init.WebSocketsEnabled=true
+  - --JsonRpc.WebSocketsPort={{ nethermind_ports_http_rpc }}
+  - --JsonRpc.JwtSecretFile=/execution-auth.jwt
+  - --JsonRpc.EngineHost=0.0.0.0
+  - --JsonRpc.EnginePort={{ nethermind_ports_engine }}
+  - --Metrics.Enabled=true
+  - --Metrics.NodeName={{ inventory_hostname_short }}
+  - --Metrics.ExposePort={{ nethermind_ports_monitoring }}
