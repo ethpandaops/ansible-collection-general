@@ -1,0 +1,26 @@
+- name: Add lodestar user
+  ansible.builtin.user:
+    name: "{{ lodestar_user }}"
+  register: lodestar_user_meta
+
+- name: Create data dir
+  ansible.builtin.file:
+    path: "{{ lodestar_datadir }}"
+    state: directory
+    recurse: true
+    owner: "{{ lodestar_user }}"
+    group: "{{ lodestar_user }}"
+
+- name: Run lodestar container
+  community.docker.docker_container:
+    name: "{{ lodestar_container_name }}"
+    image: "{{ lodestar_container_image }}"
+    state: started
+    restart_policy: always
+    stop_timeout: "{{ lodestar_container_stop_timeout }}"
+    ports: "{{ lodestar_container_ports }}"
+    volumes: "{{ lodestar_container_volumes }}"
+    env: "{{ lodestar_container_env }}"
+    networks: "{{ lodestar_container_networks }}"
+    command: "{{ lodestar_container_command }} "
+    user: "{{ lodestar_user_meta.uid }}"
