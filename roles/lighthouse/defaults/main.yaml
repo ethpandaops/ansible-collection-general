@@ -1,0 +1,36 @@
+lighthouse_user: lighthouse
+lighthouse_datadir: /data/lighthouse
+lighthouse_auth_jwt_path: /data/execution-auth.secret
+lighthouse_execution_engine_endpoint: http://geth:8551
+
+lighthouse_container_name: lighthouse
+lighthouse_container_image: sigp/lighthouse:v3.4.0
+lighthouse_container_env: {}
+lighthouse_container_ports:
+  - "127.0.0.1:5052:5052"
+  - "9000:9000"
+  - "9000:9000/udp"
+lighthouse_container_volumes:
+  - "{{ lighthouse_datadir }}:/data"
+  - "{{ lighthouse_auth_jwt_path }}:/execution-auth.jwt:ro"
+lighthouse_container_stop_timeout: "300"
+lighthouse_container_networks: []
+lighthouse_container_command:
+  - --datadir=/data
+  - --disable-upnp
+  - --disable-enr-auto-update
+  - --enr-address={{ ansible_host }}
+  - --enr-tcp-port=9000
+  - --enr-udp-port=9000
+  - --listen-address=0.0.0.0
+  - --port=9000
+  - --discovery-port=9000
+  - --http
+  - --http-address=0.0.0.0
+  - --http-port=5052
+  - --execution-jwt=/execution-auth.jwt
+  - --metrics
+  - --metrics-address=0.0.0.0
+  - --metrics-allow-origin=*
+  - --metrics-port=5054
+  # - --checkpoint-sync-url=http://your-other-node
