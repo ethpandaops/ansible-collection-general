@@ -1,0 +1,33 @@
+prysm_user: prysm
+prysm_datadir: /data/prysm
+prysm_auth_jwt_path: /data/execution-auth.secret
+prysm_execution_engine_endpoint: http://geth:8551
+
+prysm_container_name: prysm
+prysm_container_image: gcr.io/prysmaticlabs/prysm/beacon-chain:v3.2.0
+prysm_container_env: {}
+prysm_container_ports:
+  - "127.0.0.1:4000:4000"
+  - "13000:13000"
+  - "12000:12000/udp"
+prysm_container_volumes:
+  - "{{ prysm_datadir }}:/data"
+  - "{{ prysm_auth_jwt_path }}:/execution-auth.jwt:ro"
+prysm_container_stop_timeout: "300"
+prysm_container_networks: []
+prysm_container_command:
+  --accept-terms-of-use=true
+  --datadir=/data
+  --p2p-host-ip=$(POD_IP)
+  --p2p-tcp-port=13000
+  --p2p-udp-port=12000
+  --rpc-host=0.0.0.0
+  --rpc-port=4000
+  --jwt-secret=/execution-auth.jwt
+  --execution-endpoint={{ prysm_execution_engine_endpoint }}
+  --grpc-gateway-host=0.0.0.0
+  --grpc-gateway-port=3500
+  --monitoring-host=0.0.0.0
+  --monitoring-port=8080
+# - --checkpoint-sync-url=http://your-other-node
+# - --genesis-beacon-api-url=http://your-other-node
