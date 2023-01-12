@@ -1,0 +1,63 @@
+- name: Add nginx-proxy user
+  ansible.builtin.user:
+    name: "{{ docker_nginx_proxy_user }}"
+  register: docker_nginx_proxy_user_meta
+
+- name: Create required directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    recurse: true
+    owner: "{{ docker_nginx_proxy_user }}"
+    group: "{{ docker_nginx_proxy_user }}"
+    mode: "0750"
+  loop:
+    - "{{ docker_nginx_proxy_datadir }}/conf"
+    - "{{ docker_nginx_proxy_datadir }}/vhost"
+    - "{{ docker_nginx_proxy_datadir }}/certs"
+    - "{{ docker_nginx_proxy_datadir }}/acme"
+
+- name: Add nginx config template
+  ansible.builtin.copy:
+    content: "{{ docker_nginx_proxy_conf_tmpl }}"
+    dest: "{{ docker_nginx_proxy_datadir }}/nginx.tmpl"
+    owner: "{{ docker_nginx_proxy_user }}"
+    group: "{{ docker_nginx_proxy_user }}"
+    mode: "0640"
+
+- name: Run nginx proxy container
+  community.general.docker_container:
+    name: "{{ docker_nginx_proxy_container_name }}"
+    image: "{{ docker_nginx_proxy_container_image }}"
+    published_ports: "{{ docker_nginx_proxy_container_published_ports }}"
+    restart_policy: "{{ docker_nginx_proxy_container_restart_policy }}"
+    networks: "{{ docker_nginx_proxy_container_networks }}"
+    networks_cli_compatible: "{{ docker_nginx_proxy_container_networks_cli_compatible }}"
+    network_mode: "{{ docker_nginx_proxy_container_network_mode }}"
+    volumes: "{{ docker_nginx_proxy_container_volumes }}"
+    env: "{{ docker_nginx_proxy_container_env }}"
+
+- name: Run docker-gen container
+  community.general.docker_container:
+    name: "{{ docker_nginx_proxy_docker_gen_container_name }}"
+    image: "{{ docker_nginx_proxy_docker_gen_container_image }}"
+    command: "{{ docker_nginx_proxy_docker_gen_container_command }}"
+    restart_policy: "{{ docker_nginx_proxy_docker_gen_container_restart_policy }}"
+    networks: "{{ docker_nginx_proxy_acme_companion_container_networks }}"
+    networks_cli_compatible: "{{ docker_nginx_proxy_docker_gen_container_networks_cli_compatible }}"
+    network_mode: "{{ docker_nginx_proxy_docker_gen_container_network_mode }}"
+    volumes: "{{ docker_nginx_proxy_docker_gen_container_volumes }}"
+    env: "{{ docker_nginx_proxy_docker_gen_container_env }}"
+    volumes_from: "{{ docker_nginx_proxy_docker_gen_container_volumes_from }}"
+
+- name: Run acme companion container
+  community.general.docker_container:
+    name: "{{ docker_nginx_proxy_acme_companion_container_name }}"
+    image: "{{ docker_nginx_proxy_acme_companion_container_image }}"
+    restart_policy: "{{ docker_nginx_proxy_acme_companion_container_restart_policy }}"
+    networks: "{{ docker_nginx_proxy_acme_companion_container_networks }}"
+    networks_cli_compatible: "{{ docker_nginx_proxy_acme_companion_container_networks_cli_compatible }}"
+    network_mode: "{{ docker_nginx_proxy_acme_companion_container_network_mode }}"
+    volumes: "{{ docker_nginx_proxy_acme_companion_container_volumes }}"
+    env: "{{ docker_nginx_proxy_acme_companion_container_env }}"
+    volumes_from: "{{ docker_nginx_proxy_docker_gen_container_volumes_from }}"
