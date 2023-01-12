@@ -29,6 +29,7 @@ lighthouse_container_command:
   - --http-address=0.0.0.0
   - --http-port=5052
   - --execution-jwt=/execution-auth.jwt
+  - --execution-endpoint={{ lighthouse_execution_engine_endpoint }}
   - --metrics
   - --metrics-address=0.0.0.0
   - --metrics-allow-origin=*
