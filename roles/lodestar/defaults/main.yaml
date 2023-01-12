@@ -23,20 +23,20 @@ lodestar_container_volumes:
 lodestar_container_stop_timeout: "300"
 lodestar_container_networks: []
 lodestar_container_command:
-  -  beacon
-  -  --dataDir=/data
-  -  --discv5
-  -  --listenAddress=0.0.0.0
-  -  --port={{ lodestar_ports_p2p_tcp }}
-  -  --enr.ip={{ ansible_host }}
-  -  --enr.tcp={{ lodestar_ports_p2p_tcp }}
-  -  --enr.udp={{ lodestar_ports_p2p_udp }}
-  -  --rest
-  -  --rest.address=0.0.0.0
-  -  --rest.port={{ lodestar_ports_http_beacon }}
-  -  --jwt-secret=/execution-auth.jwt
-  -  --execution.urls={{ lodestar_execution_engine_endpoint }}
-  -  --metrics
-  -  --metrics.address=0.0.0.0
-  -  --metrics.port={{ lodestar_ports_metrics }}
+  - beacon
+  - --dataDir=/data
+  - --discv5
+  - --listenAddress=0.0.0.0
+  - --port={{ lodestar_ports_p2p_tcp }}
+  - --enr.ip={{ ansible_host }}
+  - --enr.tcp={{ lodestar_ports_p2p_tcp }}
+  - --enr.udp={{ lodestar_ports_p2p_udp }}
+  - --rest
+  - --rest.address=0.0.0.0
+  - --rest.port={{ lodestar_ports_http_beacon }}
+  - --jwt-secret=/execution-auth.jwt
+  - --execution.urls={{ lodestar_execution_engine_endpoint }}
+  - --metrics
+  - --metrics.address=0.0.0.0
+  - --metrics.port={{ lodestar_ports_metrics }}
 # - --checkpointSyncUrl=http://your-other-node
