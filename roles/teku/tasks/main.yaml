@@ -1,26 +1,7 @@
-- name: Add teku user
-  ansible.builtin.user:
-    name: "{{ teku_user }}"
-  register: teku_user_meta
+- name: Setup teku
+  ansible.builtin.import_tasks: setup.yaml
+  when: not teku_cleanup
 
-- name: Create data dir
-  ansible.builtin.file:
-    path: "{{ teku_datadir }}"
-    state: directory
-    recurse: true
-    owner: "{{ teku_user }}"
-    group: "{{ teku_user }}"
-
-- name: Run teku container
-  community.docker.docker_container:
-    name: "{{ teku_container_name }}"
-    image: "{{ teku_container_image }}"
-    state: started
-    restart_policy: always
-    stop_timeout: "{{ teku_container_stop_timeout }}"
-    ports: "{{ teku_container_ports }}"
-    volumes: "{{ teku_container_volumes }}"
-    env: "{{ teku_container_env }}"
-    networks: "{{ teku_container_networks }}"
-    command: "{{ teku_container_command }} "
-    user: "{{ teku_user_meta.uid }}"
+- name: Cleanup teku
+  ansible.builtin.import_tasks: cleanup.yaml
+  when: teku_cleanup

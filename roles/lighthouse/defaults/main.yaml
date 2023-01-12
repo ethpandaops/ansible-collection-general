@@ -3,35 +3,44 @@ lighthouse_datadir: /data/lighthouse
 lighthouse_auth_jwt_path: /data/execution-auth.secret
 lighthouse_execution_engine_endpoint: http://geth:8551
 
+lighthouse_cleanup: false # when set to "true" it will remove the container
+
+lighthouse_ports_p2p_tcp: 9000
+lighthouse_ports_p2p_udp: 9000
+lighthouse_ports_http_beacon: 5052
+lighthouse_ports_metrics: 5054
+
 lighthouse_container_name: lighthouse
 lighthouse_container_image: sigp/lighthouse:v3.4.0
 lighthouse_container_env: {}
 lighthouse_container_ports:
-  - "127.0.0.1:5052:5052"
-  - "9000:9000"
-  - "9000:9000/udp"
+  - "127.0.0.1:{{ lighthouse_ports_http_beacon }}:{{ lighthouse_ports_http_beacon }}"
+  - "{{ lighthouse_ports_p2p_tcp }}:{{ lighthouse_ports_p2p_tcp }}"
+  - "{{ lighthouse_ports_p2p_udp }}:{{ lighthouse_ports_p2p_udp }}/udp"
 lighthouse_container_volumes:
   - "{{ lighthouse_datadir }}:/data"
   - "{{ lighthouse_auth_jwt_path }}:/execution-auth.jwt:ro"
 lighthouse_container_stop_timeout: "300"
 lighthouse_container_networks: []
 lighthouse_container_command:
+  - lighthouse
+  - beacon_node
   - --datadir=/data
   - --disable-upnp
   - --disable-enr-auto-update
   - --enr-address={{ ansible_host }}
-  - --enr-tcp-port=9000
-  - --enr-udp-port=9000
+  - --enr-tcp-port={{ lighthouse_ports_p2p_tcp }}
+  - --enr-udp-port={{ lighthouse_ports_p2p_udp }}
   - --listen-address=0.0.0.0
-  - --port=9000
-  - --discovery-port=9000
+  - --port={{ lighthouse_ports_p2p_tcp }}
+  - --discovery-port={{ lighthouse_ports_p2p_udp }}
   - --http
   - --http-address=0.0.0.0
-  - --http-port=5052
+  - --http-port={{ lighthouse_ports_http_beacon}}
   - --execution-jwt=/execution-auth.jwt
   - --execution-endpoint={{ lighthouse_execution_engine_endpoint }}
   - --metrics
   - --metrics-address=0.0.0.0
   - --metrics-allow-origin=*
-  - --metrics-port=5054
+  - --metrics-port={{ lighthouse_ports_metrics}}
   # - --checkpoint-sync-url=http://your-other-node

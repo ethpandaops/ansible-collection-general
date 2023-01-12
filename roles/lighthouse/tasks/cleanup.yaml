@@ -1,0 +1,5 @@
+- name: Remove lighthouse container
+  community.docker.docker_container:
+    name: "{{ lighthouse_container_name }}"
+    state: absent
+  when: lighthouse_cleanup

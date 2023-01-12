@@ -1,26 +1,7 @@
-- name: Add lighthouse user
-  ansible.builtin.user:
-    name: "{{ lighthouse_user }}"
-  register: lighthouse_user_meta
+- name: Setup lighthouse
+  ansible.builtin.import_tasks: setup.yaml
+  when: not lighthouse_cleanup
 
-- name: Create data dir
-  ansible.builtin.file:
-    path: "{{ lighthouse_datadir }}"
-    state: directory
-    recurse: true
-    owner: "{{ lighthouse_user }}"
-    group: "{{ lighthouse_user }}"
-
-- name: Run lighthouse container
-  community.docker.docker_container:
-    name: "{{ lighthouse_container_name }}"
-    image: "{{ lighthouse_container_image }}"
-    state: started
-    restart_policy: always
-    stop_timeout: "{{ lighthouse_container_stop_timeout }}"
-    ports: "{{ lighthouse_container_ports }}"
-    volumes: "{{ lighthouse_container_volumes }}"
-    env: "{{ lighthouse_container_env }}"
-    networks: "{{ lighthouse_container_networks }}"
-    command: "{{ lighthouse_container_command }} "
-    user: "{{ lighthouse_user_meta.uid }}"
+- name: Cleanup lighthouse
+  ansible.builtin.import_tasks: cleanup.yaml
+  when: lighthouse_cleanup
