@@ -1,0 +1,34 @@
+- name: Add dshackle user
+  ansible.builtin.user:
+    name: "{{ dshackle_user }}"
+  register: dshackle_user_meta
+
+- name: Create required directories
+  ansible.builtin.file:
+    path: "{{ dshackle_datadir }}"
+    state: directory
+    recurse: true
+    owner: "{{ dshackle_user }}"
+    group: "{{ dshackle_user }}"
+    mode: "0770"
+
+- name: Create dshackle config
+  ansible.builtin.copy:
+    dest: "{{ dshackle_datadir }}/dshackle.yaml"
+    mode: "0640"
+    owner: "{{ dshackle_user }}"
+    content: "{{ dshackle_config }}"
+  notify: Restart dshackle container
+
+- name: Run dshackle container
+  community.general.docker_container:
+    name: "{{ dshackle_container_name }}"
+    image: "{{ dshackle_container_image }}"
+    published_ports: "{{ dshackle_container_published_ports }}"
+    restart_policy: "{{ dshackle_container_restart_policy }}"
+    networks: "{{ dshackle_container_networks }}"
+    networks_cli_compatible: "{{ dshackle_container_networks_cli_compatible }}"
+    network_mode: "{{ dshackle_container_network_mode }}"
+    volumes: "{{ dshackle_container_volumes }}"
+    env: "{{ dshackle_container_env }}"
+    user: "{{dshackle_user_meta.uid }}"

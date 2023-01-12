@@ -9,6 +9,7 @@ A collection of reusable ansible components used by the EthPandaOps team.
 ### Ethereum tooling
 - [beaconchain_explorer_aio](roles/beaconchain_explorer_aio/)
 - [ethereum_auth_jwt](roles/ethereum_auth_jwt)
+- [dshackle](roles/dshackle)
 
 ### Ethereum clients
 - [geth](roles/geth)
