@@ -1,0 +1,34 @@
+lodestar_user: lodestar
+lodestar_datadir: /data/lodestar
+lodestar_auth_jwt_path: /data/execution-auth.secret
+lodestar_execution_engine_endpoint: http://geth:8551
+
+lodestar_container_name: lodestar
+lodestar_container_image: chainsafe/lodestar:v1.3.0
+lodestar_container_env: {}
+lodestar_container_ports:
+  - "127.0.0.1:9596:9596"
+  - "9000:9000"
+  - "9000:9000/udp"
+lodestar_container_volumes:
+  - "{{ lodestar_datadir }}:/data"
+  - "{{ lodestar_auth_jwt_path }}:/execution-auth.jwt:ro"
+lodestar_container_stop_timeout: "300"
+lodestar_container_networks: []
+lodestar_container_command:
+  -  beacon
+  -  --dataDir=/data
+  -  --discv5
+  -  --listenAddress=0.0.0.0
+  -  --port=9000
+  -  --enr.ip={{ ansible_host }}
+  -  --enr.tcp=9000
+  -  --enr.udp=9000
+  -  --rest
+  -  --rest.address=0.0.0.0
+  -  --rest.port=9596
+  -  --jwt-secret=/execution-auth.jwt
+  -  --metrics
+  -  --metrics.address=0.0.0.0
+  -  --metrics.port=8008
+# - --checkpointSyncUrl=http://your-other-node
