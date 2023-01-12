@@ -1,0 +1,5 @@
+- name: Remove nimbus container
+  community.docker.docker_container:
+    name: "{{ nimbus_container_name }}"
+    state: absent
+  when: nimbus_cleanup
