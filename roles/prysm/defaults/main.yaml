@@ -18,7 +18,7 @@ prysm_container_networks: []
 prysm_container_command:
   - --accept-terms-of-use=true
   - --datadir=/data
-  - --p2p-host-ip=$(POD_IP)
+  - --p2p-host-ip={{ ansible_host }}
   - --p2p-tcp-port=13000
   - --p2p-udp-port=12000
   - --rpc-host=0.0.0.0
