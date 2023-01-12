@@ -11,6 +11,8 @@ A collection of reusable ansible components used by the EthPandaOps team.
 - [ethereum_auth_jwt](roles/ethereum_auth_jwt)
 - [dshackle](roles/dshackle)
 
+### Ethereum client pair
+- [ethereum_node](roles/ethereum_node)
 ### Ethereum execution clients
 - [geth](roles/geth)
 - [nethermind](roles/nethermind)
