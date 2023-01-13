@@ -1,0 +1,5 @@
+- name: Remove nethermind container
+  community.docker.docker_container:
+    name: "{{ nethermind_container_name }}"
+    state: absent
+  when: nethermind_cleanup

@@ -1,0 +1,7 @@
+- name: Setup nethermind
+  ansible.builtin.import_tasks: setup.yaml
+  when: not nethermind_cleanup
+
+- name: Cleanup nethermind
+  ansible.builtin.import_tasks: cleanup.yaml
+  when: nethermind_cleanup

@@ -1,0 +1,5 @@
+- name: Remove prysm container
+  community.docker.docker_container:
+    name: "{{ prysm_container_name }}"
+    state: absent
+  when: prysm_cleanup

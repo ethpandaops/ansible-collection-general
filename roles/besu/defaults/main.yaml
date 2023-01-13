@@ -1,0 +1,41 @@
+besu_user: besu
+besu_datadir: /data/besu
+besu_auth_jwt_path: /data/execution-auth.secret
+
+besu_cleanup: false # when set to "true" it will remove the container
+
+besu_ports_p2p: 30303
+besu_ports_http_rpc: 8545
+besu_ports_engine: 8551
+besu_ports_metrics: 9545
+
+besu_container_name: besu
+besu_container_image: hyperledger/besu:latest
+besu_container_env: {}
+besu_container_ports:
+  - "127.0.0.1:{{ besu_ports_http_rpc }}:{{ besu_ports_http_rpc }}"
+  - "127.0.0.1:{{ besu_ports_engine }}:{{ besu_ports_engine }}"
+  - "{{ besu_ports_p2p }}:{{ besu_ports_p2p }}"
+  - "{{ besu_ports_p2p }}:{{ besu_ports_p2p }}/udp"
+besu_container_volumes:
+  - "{{ besu_datadir }}:/data"
+  - "{{ besu_auth_jwt_path }}:/execution-auth.jwt:ro"
+besu_container_stop_timeout: "300"
+besu_container_networks: []
+besu_container_command:
+  - --data-path=/data
+  - --nat-method=NONE
+  - --p2p-host={{ ansible_host }}
+  - --p2p-port={{ besu_ports_p2p }}
+  - --rpc-http-enabled
+  - --rpc-http-host=0.0.0.0
+  - --rpc-http-port={{ besu_ports_http_rpc }}
+  - --rpc-http-cors-origins=*
+  - --host-allowlist=*
+  - --engine-jwt-secret=/execution-auth.jwt
+  - --engine-rpc-port={{ besu_ports_engine }}
+  - --engine-host-allowlist=*
+  - --metrics-enabled
+  - --metrics-host=0.0.0.0
+  - --metrics-port={{ besu_ports_metrics }}
+besu_container_command_extra_args: []

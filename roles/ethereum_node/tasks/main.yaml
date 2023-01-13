@@ -1,0 +1,19 @@
+- name: Validate inputs
+  ansible.builtin.import_tasks: validations.yaml
+
+- name: Setup docker network
+  ansible.builtin.include_role:
+    name: ethpandaops.general.docker_network
+  vars:
+    docker_network_name: "{{ ethereum_node_docker_network_name }}"
+
+- name: Cleanup clients that shouldn't be running
+  ansible.builtin.import_tasks: cleanup.yaml
+
+- name: Setup execution client
+  ansible.builtin.import_tasks: setup_el.yaml
+  when: ethereum_node_el_enabled
+
+- name: Setup consensus client
+  ansible.builtin.import_tasks: setup_cl.yaml
+  when: ethereum_node_cl_enabled

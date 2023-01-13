@@ -1,0 +1,27 @@
+- name: Add nimbus user
+  ansible.builtin.user:
+    name: "{{ nimbus_user }}"
+  register: nimbus_user_meta
+
+- name: Create data dir
+  ansible.builtin.file:
+    path: "{{ nimbus_datadir }}"
+    state: directory
+    mode: '0700'
+    recurse: true
+    owner: "{{ nimbus_user }}"
+    group: "{{ nimbus_user }}"
+
+- name: Run nimbus container
+  community.docker.docker_container:
+    name: "{{ nimbus_container_name }}"
+    image: "{{ nimbus_container_image }}"
+    state: started
+    restart_policy: always
+    stop_timeout: "{{ nimbus_container_stop_timeout }}"
+    ports: "{{ nimbus_container_ports }}"
+    volumes: "{{ nimbus_container_volumes }}"
+    env: "{{ nimbus_container_env }}"
+    networks: "{{ nimbus_container_networks }}"
+    command: "{{ nimbus_container_command + nimbus_container_command_extra_args }} "
+    user: "{{ nimbus_user_meta.uid }}"

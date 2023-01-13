@@ -1,0 +1,7 @@
+- name: Setup lighthouse
+  ansible.builtin.import_tasks: setup.yaml
+  when: not lighthouse_cleanup
+
+- name: Cleanup lighthouse
+  ansible.builtin.import_tasks: cleanup.yaml
+  when: lighthouse_cleanup

@@ -1,10 +1,10 @@
 - name: Try connection
   block:
-  - name: Test connection
-    ansible.builtin.wait_for_connection:
-      timeout: "3"
-    register: bootstrap_connect
-    changed_when: false
+    - name: Test connection
+      ansible.builtin.wait_for_connection:
+        timeout: "3"
+      register: bootstrap_connect
+      changed_when: false
   rescue:
     - name: Conenction message
       ansible.builtin.debug:

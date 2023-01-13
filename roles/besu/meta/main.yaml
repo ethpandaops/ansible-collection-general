@@ -1,0 +1,4 @@
+dependencies:
+  - role: ethpandaops.general.ethereum_auth_jwt
+    vars:
+      ethereum_auth_jwt_path: "{{ besu_auth_jwt_path }}"

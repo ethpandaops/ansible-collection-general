@@ -1,0 +1,7 @@
+- name: Setup prysm
+  ansible.builtin.import_tasks: setup.yaml
+  when: not prysm_cleanup
+
+- name: Cleanup prysm
+  ansible.builtin.import_tasks: cleanup.yaml
+  when: prysm_cleanup

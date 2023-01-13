@@ -1,0 +1,43 @@
+lodestar_user: lodestar
+lodestar_datadir: /data/lodestar
+lodestar_auth_jwt_path: /data/execution-auth.secret
+lodestar_execution_engine_endpoint: http://geth:8551
+
+lodestar_cleanup: false # when set to "true" it will remove the container
+
+lodestar_ports_p2p_tcp: 9000
+lodestar_ports_p2p_udp: 9000
+lodestar_ports_http_beacon: 9596
+lodestar_ports_metrics: 8008
+
+lodestar_container_name: lodestar
+lodestar_container_image: chainsafe/lodestar:latest
+lodestar_container_env: {}
+lodestar_container_ports:
+  - "127.0.0.1:{{ lodestar_ports_http_beacon }}:{{ lodestar_ports_http_beacon }}"
+  - "{{ lodestar_ports_p2p_tcp }}:{{ lodestar_ports_p2p_tcp }}"
+  - "{{ lodestar_ports_p2p_udp }}:{{ lodestar_ports_p2p_udp }}/udp"
+lodestar_container_volumes:
+  - "{{ lodestar_datadir }}:/data"
+  - "{{ lodestar_auth_jwt_path }}:/execution-auth.jwt:ro"
+lodestar_container_stop_timeout: "300"
+lodestar_container_networks: []
+lodestar_container_command:
+  - beacon
+  - --dataDir=/data
+  - --discv5
+  - --listenAddress=0.0.0.0
+  - --port={{ lodestar_ports_p2p_tcp }}
+  - --enr.ip={{ ansible_host }}
+  - --enr.tcp={{ lodestar_ports_p2p_tcp }}
+  - --enr.udp={{ lodestar_ports_p2p_udp }}
+  - --rest
+  - --rest.address=0.0.0.0
+  - --rest.port={{ lodestar_ports_http_beacon }}
+  - --jwt-secret=/execution-auth.jwt
+  - --execution.urls={{ lodestar_execution_engine_endpoint }}
+  - --metrics
+  - --metrics.address=0.0.0.0
+  - --metrics.port={{ lodestar_ports_metrics }}
+lodestar_container_command_extra_args: []
+# - --checkpointSyncUrl=http://your-other-node

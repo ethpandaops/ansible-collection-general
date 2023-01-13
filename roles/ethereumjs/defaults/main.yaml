@@ -1,0 +1,36 @@
+ethereumjs_user: ethereumjs
+ethereumjs_datadir: /data/ethereumjs
+ethereumjs_auth_jwt_path: /data/execution-auth.secret
+
+ethereumjs_cleanup: false # when set to "true" it will remove the container
+
+ethereumjs_ports_p2p: 30303
+ethereumjs_ports_http_rpc: 8545
+ethereumjs_ports_engine: 8551
+
+ethereumjs_container_name: ethereumjs
+ethereumjs_container_image: g11tech/ethereumjs:latest
+ethereumjs_container_env: {}
+ethereumjs_container_ports:
+  - "127.0.0.1:{{ ethereumjs_ports_http_rpc }}:{{ ethereumjs_ports_http_rpc }}"
+  - "127.0.0.1:{{ ethereumjs_ports_engine }}:{{ ethereumjs_ports_engine }}"
+  - "{{ ethereumjs_ports_p2p }}:{{ ethereumjs_ports_p2p }}"
+  - "{{ ethereumjs_ports_p2p }}:{{ ethereumjs_ports_p2p }}/udp"
+ethereumjs_container_volumes:
+  - "{{ ethereumjs_datadir }}:/data"
+  - "{{ ethereumjs_auth_jwt_path }}:/execution-auth.jwt:ro"
+ethereumjs_container_stop_timeout: "300"
+ethereumjs_container_networks: []
+ethereumjs_container_command:
+  - --datadir=/data
+  - --port={{ ethereumjs_ports_p2p }}
+  - --rpc
+  - --rpcaddr=0.0.0.0
+  - --rpcport={{ ethereumjs_ports_http_rpc }}
+  - --rpcCors=*
+  - --rpcEngine
+  - --rpcEngineAddr=0.0.0.0
+  - --rpcEnginePort={{ ethereumjs_ports_engine }}
+  - --jwt-secret=/execution-auth.jwt
+  - --extIP={{ ansible_host }}
+ethereumjs_container_command_extra_args: []

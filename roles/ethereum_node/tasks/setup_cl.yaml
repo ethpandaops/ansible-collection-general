@@ -1,0 +1,59 @@
+- name: "Consensus client: lighthouse"
+  when: ethereum_node_cl == "lighthouse"
+  ansible.builtin.include_role:
+    name: ethpandaops.general.lighthouse
+  vars:
+    lighthouse_ports_p2p_tcp: "{{ ethereum_node_cl_ports_p2p_tcp }}"
+    lighthouse_ports_p2p_udp: "{{ ethereum_node_cl_ports_p2p_udp }}"
+    lighthouse_ports_http_beacon: "{{ ethereum_node_cl_ports_http_beacon }}"
+    lighthouse_ports_metrics: "{{ ethereum_node_cl_ports_metrics }}"
+    lighthouse_container_networks: "{{ ethereum_node_docker_networks }}"
+    lighthouse_execution_engine_endpoint: "{{ ethereum_node_execution_endpoint }}"
+
+- name: "Consensus client: teku"
+  when: ethereum_node_cl == "teku"
+  ansible.builtin.include_role:
+    name: ethpandaops.general.teku
+  vars:
+    teku_ports_p2p_tcp: "{{ ethereum_node_cl_ports_p2p_tcp }}"
+    teku_ports_p2p_udp: "{{ ethereum_node_cl_ports_p2p_udp }}"
+    teku_ports_http_beacon: "{{ ethereum_node_cl_ports_http_beacon }}"
+    teku_ports_metrics: "{{ ethereum_node_cl_ports_metrics }}"
+    teku_container_networks: "{{ ethereum_node_docker_networks }}"
+    teku_execution_engine_endpoint: "{{ ethereum_node_execution_endpoint }}"
+
+- name: "Consensus client: prysm"
+  when: ethereum_node_cl == "prysm"
+  ansible.builtin.include_role:
+    name: ethpandaops.general.prysm
+  vars:
+    prysm_ports_p2p_tcp: "{{ ethereum_node_cl_ports_p2p_tcp }}"
+    prysm_ports_p2p_udp: "{{ ethereum_node_cl_ports_p2p_udp }}"
+    prysm_ports_http_beacon: "{{ ethereum_node_cl_ports_http_beacon }}"
+    prysm_ports_metrics: "{{ ethereum_node_cl_ports_metrics }}"
+    prysm_container_networks: "{{ ethereum_node_docker_networks }}"
+    prysm_execution_engine_endpoint: "{{ ethereum_node_execution_endpoint }}"
+
+- name: "Consensus client: lodestar"
+  when: ethereum_node_cl == "lodestar"
+  ansible.builtin.include_role:
+    name: ethpandaops.general.lodestar
+  vars:
+    lodestar_ports_p2p_tcp: "{{ ethereum_node_cl_ports_p2p_tcp }}"
+    lodestar_ports_p2p_udp: "{{ ethereum_node_cl_ports_p2p_udp }}"
+    lodestar_ports_http_beacon: "{{ ethereum_node_cl_ports_http_beacon }}"
+    lodestar_ports_metrics: "{{ ethereum_node_cl_ports_metrics }}"
+    lodestar_container_networks: "{{ ethereum_node_docker_networks }}"
+    lodestar_execution_engine_endpoint: "{{ ethereum_node_execution_endpoint }}"
+
+- name: "Consensus client: nimbus"
+  when: ethereum_node_cl == "nimbus"
+  ansible.builtin.include_role:
+    name: ethpandaops.general.nimbus
+  vars:
+    nimbus_ports_p2p_tcp: "{{ ethereum_node_cl_ports_p2p_tcp }}"
+    nimbus_ports_p2p_udp: "{{ ethereum_node_cl_ports_p2p_udp }}"
+    nimbus_ports_http_beacon: "{{ ethereum_node_cl_ports_http_beacon }}"
+    nimbus_ports_metrics: "{{ ethereum_node_cl_ports_metrics }}"
+    nimbus_container_networks: "{{ ethereum_node_docker_networks }}"
+    nimbus_execution_engine_endpoint: "{{ ethereum_node_execution_endpoint }}"

@@ -1,0 +1,27 @@
+- name: Add erigon user
+  ansible.builtin.user:
+    name: "{{ erigon_user }}"
+  register: erigon_user_meta
+
+- name: Create data dir
+  ansible.builtin.file:
+    path: "{{ erigon_datadir }}"
+    state: directory
+    recurse: true
+    owner: "{{ erigon_user }}"
+    group: "{{ erigon_user }}"
+
+- name: Run erigon container
+  community.docker.docker_container:
+    name: "{{ erigon_container_name }}"
+    image: "{{ erigon_container_image }}"
+    state: started
+    restart_policy: always
+    stop_timeout: "{{ erigon_container_stop_timeout }}"
+    ports: "{{ erigon_container_ports }}"
+    volumes: "{{ erigon_container_volumes }}"
+    env: "{{ erigon_container_env }}"
+    networks: "{{ erigon_container_networks }}"
+    entrypoint: "{{ erigon_container_entrypoint }}"
+    command: "{{ erigon_container_command + erigon_container_command_extra_args }}"
+    user: "{{ erigon_user_meta.uid }}"

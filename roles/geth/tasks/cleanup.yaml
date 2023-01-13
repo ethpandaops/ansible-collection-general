@@ -1,0 +1,4 @@
+- name: Remove geth container
+  community.docker.docker_container:
+    name: "{{ geth_container_name }}"
+    state: absent

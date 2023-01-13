@@ -1,0 +1,42 @@
+prysm_user: prysm
+prysm_datadir: /data/prysm
+prysm_auth_jwt_path: /data/execution-auth.secret
+prysm_execution_engine_endpoint: http://geth:8551
+
+prysm_cleanup: false # when set to "true" it will remove the container
+
+prysm_ports_p2p_tcp: 13000
+prysm_ports_p2p_udp: 12000
+prysm_ports_http_beacon: 4000
+prysm_ports_metrics: 8080
+prysm_ports_grpc: 3500
+
+prysm_container_name: prysm
+prysm_container_image: gcr.io/prysmaticlabs/prysm/beacon-chain:stable
+prysm_container_env: {}
+prysm_container_ports:
+  - "127.0.0.1:{{ prysm_ports_http_beacon }}:{{ prysm_ports_http_beacon }}"
+  - "{{ prysm_ports_p2p_tcp }}:{{ prysm_ports_p2p_tcp }}"
+  - "{{ prysm_ports_p2p_udp }}:{{ prysm_ports_p2p_udp }}/udp"
+prysm_container_volumes:
+  - "{{ prysm_datadir }}:/data"
+  - "{{ prysm_auth_jwt_path }}:/execution-auth.jwt:ro"
+prysm_container_stop_timeout: "300"
+prysm_container_networks: []
+prysm_container_command:
+  - --accept-terms-of-use=true
+  - --datadir=/data
+  - --p2p-host-ip={{ ansible_host }}
+  - --p2p-tcp-port={{ prysm_ports_p2p_tcp }}
+  - --p2p-udp-port={{ prysm_ports_p2p_udp }}
+  - --rpc-host=0.0.0.0
+  - --rpc-port={{ prysm_ports_http_beacon }}
+  - --jwt-secret=/execution-auth.jwt
+  - --execution-endpoint={{ prysm_execution_engine_endpoint }}
+  - --grpc-gateway-host=0.0.0.0
+  - --grpc-gateway-port={{ prysm_ports_grpc }}
+  - --monitoring-host=0.0.0.0
+  - --monitoring-port={{ prysm_ports_metrics }}
+prysm_container_command_extra_args: []
+# - --checkpoint-sync-url=http://your-other-node
+# - --genesis-beacon-api-url=http://your-other-node

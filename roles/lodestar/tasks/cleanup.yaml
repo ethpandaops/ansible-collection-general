@@ -1,0 +1,5 @@
+- name: Remove lodestar container
+  community.docker.docker_container:
+    name: "{{ lodestar_container_name }}"
+    state: absent
+  when: lodestar_cleanup

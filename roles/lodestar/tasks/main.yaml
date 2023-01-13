@@ -1,0 +1,7 @@
+- name: Setup lodestar
+  ansible.builtin.import_tasks: setup.yaml
+  when: not lodestar_cleanup
+
+- name: Cleanup lodestar
+  ansible.builtin.import_tasks: cleanup.yaml
+  when: lodestar_cleanup

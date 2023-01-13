@@ -2,13 +2,21 @@ geth_user: geth
 geth_datadir: /data/geth
 geth_auth_jwt_path: /data/execution-auth.secret
 
+geth_cleanup: false # when set to "true" it will remove the container
+
+geth_ports_p2p: 30303
+geth_ports_http_rpc: 8545
+geth_ports_engine: 8551
+geth_ports_metrics: 6060
+
 geth_container_name: geth
-geth_container_image: ethereum/client-go:v1.10.26
+geth_container_image: ethereum/client-go:stable
 geth_container_env: {}
 geth_container_ports:
-  - "127.0.0.1:8545:8545"
-  - "127.0.0.1:8551:8551"
-  - "30303:30303"
+  - "127.0.0.1:{{ geth_ports_http_rpc }}:{{ geth_ports_http_rpc }}"
+  - "127.0.0.1:{{ geth_ports_engine }}:{{ geth_ports_engine }}"
+  - "{{ geth_ports_p2p }}:{{ geth_ports_p2p }}"
+  - "{{ geth_ports_p2p }}:{{ geth_ports_p2p }}/udp"
 geth_container_volumes:
   - "{{ geth_datadir }}:/data"
   - "{{ geth_auth_jwt_path }}:/execution-auth.jwt:ro"
@@ -16,14 +24,18 @@ geth_container_stop_timeout: "300"
 geth_container_networks: []
 geth_container_command:
   - --datadir=/data
+  - --port={{ geth_ports_p2p }}
   - --http
   - --http.addr=0.0.0.0
+  - --http.port={{ geth_ports_http_rpc }}
   - --http.api=eth,net,web3
   - --http.vhosts=*
   - --authrpc.addr=0.0.0.0
+  - --authrpc.port={{ geth_ports_engine }}
   - --authrpc.vhosts=*
   - --authrpc.jwtsecret=/execution-auth.jwt
   - --nat=extip:{{ ansible_host }}
   - --metrics
-  - --metrics.port=6060
+  - --metrics.port={{ geth_ports_metrics }}
   - --metrics.addr=0.0.0.0
+geth_container_command_extra_args: []

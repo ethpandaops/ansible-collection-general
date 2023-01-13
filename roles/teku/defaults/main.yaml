@@ -3,13 +3,20 @@ teku_datadir: /data/teku
 teku_auth_jwt_path: /data/execution-auth.secret
 teku_execution_engine_endpoint: http://geth:8551
 
+teku_cleanup: false # when set to "true" it will remove the container
+
+teku_ports_p2p_tcp: 9000
+teku_ports_p2p_udp: 9000
+teku_ports_http_beacon: 5051
+teku_ports_metrics: 8008
+
 teku_container_name: teku
-teku_container_image: consensys/teku:22.12.0
+teku_container_image: consensys/teku:latest
 teku_container_env: {}
 teku_container_ports:
-  - "127.0.0.1:5051:5051"
-  - "9000:9000"
-  - "9000:9000/udp"
+  - "127.0.0.1:{{ teku_ports_http_beacon }}:{{ teku_ports_http_beacon }}"
+  - "{{ teku_ports_p2p_tcp }}:{{ teku_ports_p2p_tcp }}"
+  - "{{ teku_ports_p2p_udp }}:{{ teku_ports_p2p_udp }}/udp"
 teku_container_volumes:
   - "{{ teku_datadir }}:/data"
   - "{{ teku_auth_jwt_path }}:/execution-auth.jwt:ro"
@@ -17,23 +24,24 @@ teku_container_stop_timeout: "300"
 teku_container_networks: []
 teku_container_command:
   - --data-path=/data
-  - --data-storage-mode=PRUNE
-  - --logging=INFO
   - --log-destination=CONSOLE
-  - --network=mainnet
   - --p2p-enabled=true
   - --p2p-interface=0.0.0.0
   - --p2p-advertised-ip={{ ansible_host }}
-  - --p2p-port=9000
-  - --p2p-advertised-port=9000
+  - --p2p-port={{ teku_ports_p2p_tcp }}
+  - --p2p-advertised-port={{ teku_ports_p2p_udp }}
   - --rest-api-enabled
   - --rest-api-interface=0.0.0.0
-  - --rest-api-port=5051
+  - --rest-api-port={{ teku_ports_http_beacon }}
   - --rest-api-host-allowlist="*"
   - --ee-endpoint={{ teku_execution_engine_endpoint }}
   - --ee-jwt-secret-file=/execution-auth.jwt
   - --metrics-enabled=true
   - --metrics-interface=0.0.0.0
-  - --metrics-port=8008
+  - --metrics-port={{ teku_ports_metrics }}
   - --metrics-host-allowlist="*"
-  # - --initial-state=https://$USER_ID:$TOKEN@eth2-beacon-mainnet.infura.io/eth/v2/debug/beacon/states/finalized
+teku_container_command_extra_args:
+  - --data-storage-mode=PRUNE
+# - --network=mainnet
+# - --initial-state=http://your-other-node/eth/v2/debug/beacon/states/finalized
+# - --logging=INFO

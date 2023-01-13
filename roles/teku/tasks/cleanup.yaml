@@ -1,0 +1,5 @@
+- name: Remove teku container
+  community.docker.docker_container:
+    name: "{{ teku_container_name }}"
+    state: absent
+  when: teku_cleanup

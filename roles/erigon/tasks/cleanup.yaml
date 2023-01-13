@@ -1,0 +1,4 @@
+- name: Remove erigon container
+  community.docker.docker_container:
+    name: "{{ erigon_container_name }}"
+    state: absent

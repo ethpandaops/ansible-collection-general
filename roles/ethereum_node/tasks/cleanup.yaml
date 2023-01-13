@@ -1,0 +1,69 @@
+- name: "Cleanup execution client: besu"
+  when: (ethereum_node_el != "besu") or (not ethereum_node_el_enabled)
+  ansible.builtin.include_role:
+    name: ethpandaops.general.besu
+  vars:
+    besu_cleanup: true
+
+- name: "Cleanup execution client: geth"
+  when: (ethereum_node_el != "geth") or (not ethereum_node_el_enabled)
+  ansible.builtin.include_role:
+    name: ethpandaops.general.geth
+  vars:
+    geth_cleanup: true
+
+- name: "Cleanup execution client: erigon"
+  when: (ethereum_node_el != "erigon") or (not ethereum_node_el_enabled)
+  ansible.builtin.include_role:
+    name: ethpandaops.general.erigon
+  vars:
+    erigon_cleanup: true
+
+- name: "Cleanup execution client: nethermind"
+  when: (ethereum_node_el != "nethermind") or (not ethereum_node_el_enabled)
+  ansible.builtin.include_role:
+    name: ethpandaops.general.nethermind
+  vars:
+    nethermind_cleanup: true
+
+- name: "Cleanup execution client: ethereumjs"
+  when: (ethereum_node_el != "ethereumjs") or (not ethereum_node_el_enabled)
+  ansible.builtin.include_role:
+    name: ethpandaops.general.ethereumjs
+  vars:
+    ethereumjs_cleanup: true
+
+- name: "Cleanup consensus client: lighthouse"
+  when: (ethereum_node_cl != "lighthouse") or (not ethereum_node_cl_enabled)
+  ansible.builtin.include_role:
+    name: ethpandaops.general.lighthouse
+  vars:
+    lighthouse_cleanup: true
+
+- name: "Cleanup consensus client: teku"
+  when: (ethereum_node_cl != "teku") or (not ethereum_node_cl_enabled)
+  ansible.builtin.include_role:
+    name: ethpandaops.general.teku
+  vars:
+    teku_cleanup: true
+
+- name: "Cleanup consensus client: prysm"
+  when: (ethereum_node_cl != "prysm") or (not ethereum_node_cl_enabled)
+  ansible.builtin.include_role:
+    name: ethpandaops.general.prysm
+  vars:
+    prysm_cleanup: true
+
+- name: "Cleanup consensus client: lodestar"
+  when: (ethereum_node_cl != "lodestar") or (not ethereum_node_cl_enabled)
+  ansible.builtin.include_role:
+    name: ethpandaops.general.lodestar
+  vars:
+    lodestar_cleanup: true
+
+- name: "Cleanup consensus client: nimbus"
+  when: (ethereum_node_cl != "nimbus") or (not ethereum_node_cl_enabled)
+  ansible.builtin.include_role:
+    name: ethpandaops.general.nimbus
+  vars:
+    nimbus_cleanup: true

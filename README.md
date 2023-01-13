@@ -11,10 +11,22 @@ A collection of reusable ansible components used by the EthPandaOps team.
 - [ethereum_auth_jwt](roles/ethereum_auth_jwt)
 - [dshackle](roles/dshackle)
 
-### Ethereum clients
+### Ethereum client pair
+- [ethereum_node](roles/ethereum_node)
+### Ethereum execution clients
+- [besu](roles/besu)
 - [geth](roles/geth)
+- [erigon](roles/erigon)
+- [nethermind](roles/nethermind)
+- [ethereumjs](roles/ethereumjs)
+### Ethereum consensus clients
 - [teku](roles/teku)
 - [nimbus](roles/nimbus)
+- [prysm](roles/prysm)
+- [lodestar](roles/lodestar)
+- [lighthouse](roles/lighthouse)
+
+### Ethereum L2 clients
 - [arbitrum_node](roles/arbitrum_node)
 
 ### General purpose tooling

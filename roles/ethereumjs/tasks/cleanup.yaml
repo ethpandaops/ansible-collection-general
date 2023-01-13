@@ -1,0 +1,4 @@
+- name: Remove ethereumjs container
+  community.docker.docker_container:
+    name: "{{ ethereumjs_container_name }}"
+    state: absent
