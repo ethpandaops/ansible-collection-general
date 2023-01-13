@@ -11,7 +11,7 @@ teku_ports_http_beacon: 5051
 teku_ports_metrics: 8008
 
 teku_container_name: teku
-teku_container_image: consensys/teku:22.12.0
+teku_container_image: consensys/teku:latest
 teku_container_env: {}
 teku_container_ports:
   - "127.0.0.1:{{ teku_ports_http_beacon }}:{{ teku_ports_http_beacon }}"

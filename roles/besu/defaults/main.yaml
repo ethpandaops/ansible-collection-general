@@ -10,7 +10,7 @@ besu_ports_engine: 8551
 besu_ports_metrics: 9545
 
 besu_container_name: besu
-besu_container_image: hyperledger/besu:22.10.3
+besu_container_image: hyperledger/besu:latest
 besu_container_env: {}
 besu_container_ports:
   - "127.0.0.1:{{ besu_ports_http_rpc }}:{{ besu_ports_http_rpc }}"

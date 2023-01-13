@@ -12,7 +12,7 @@ prysm_ports_metrics: 8080
 prysm_ports_grpc: 3500
 
 prysm_container_name: prysm
-prysm_container_image: gcr.io/prysmaticlabs/prysm/beacon-chain:v3.2.0
+prysm_container_image: gcr.io/prysmaticlabs/prysm/beacon-chain:stable
 prysm_container_env: {}
 prysm_container_ports:
   - "127.0.0.1:{{ prysm_ports_http_beacon }}:{{ prysm_ports_http_beacon }}"

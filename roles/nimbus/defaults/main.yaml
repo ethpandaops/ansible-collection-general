@@ -11,7 +11,7 @@ nimbus_ports_http_beacon: 5051
 nimbus_ports_metrics: 8008
 
 nimbus_container_name: nimbus
-nimbus_container_image: statusim/nimbus-eth2:amd64-v22.11.1
+nimbus_container_image: statusim/nimbus-eth2:amd64-latest
 nimbus_container_env: {}
 nimbus_container_ports:
   - "127.0.0.1:{{ nimbus_ports_http_beacon }}:{{ nimbus_ports_http_beacon }}"

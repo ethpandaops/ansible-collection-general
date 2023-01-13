@@ -11,7 +11,7 @@ lodestar_ports_http_beacon: 9596
 lodestar_ports_metrics: 8008
 
 lodestar_container_name: lodestar
-lodestar_container_image: chainsafe/lodestar:v1.3.0
+lodestar_container_image: chainsafe/lodestar:latest
 lodestar_container_env: {}
 lodestar_container_ports:
   - "127.0.0.1:{{ lodestar_ports_http_beacon }}:{{ lodestar_ports_http_beacon }}"

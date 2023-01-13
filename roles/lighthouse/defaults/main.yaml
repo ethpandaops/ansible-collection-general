@@ -11,7 +11,7 @@ lighthouse_ports_http_beacon: 5052
 lighthouse_ports_metrics: 5054
 
 lighthouse_container_name: lighthouse
-lighthouse_container_image: sigp/lighthouse:v3.4.0
+lighthouse_container_image: sigp/lighthouse:latest
 lighthouse_container_env: {}
 lighthouse_container_ports:
   - "127.0.0.1:{{ lighthouse_ports_http_beacon }}:{{ lighthouse_ports_http_beacon }}"

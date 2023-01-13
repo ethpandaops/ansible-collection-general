@@ -10,7 +10,7 @@ nethermind_ports_engine: 8551
 nethermind_ports_metrics: 6060
 
 nethermind_container_name: nethermind
-nethermind_container_image: nethermind/nethermind:1.15.0
+nethermind_container_image: nethermind/nethermind:latest
 nethermind_container_env: {}
 nethermind_container_ports:
   - "127.0.0.1:{{ nethermind_ports_http_rpc }}:{{ nethermind_ports_http_rpc }}"
