@@ -7,7 +7,7 @@ besu_cleanup: false # when set to "true" it will remove the container
 besu_ports_p2p: 30303
 besu_ports_http_rpc: 8545
 besu_ports_engine: 8551
-besu_ports_metrics: 6060
+besu_ports_metrics: 9545
 
 besu_container_name: besu
 besu_container_image: hyperledger/besu:22.10.3
