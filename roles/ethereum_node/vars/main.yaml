@@ -3,6 +3,7 @@ ethereum_node_supported_el:
   - geth
   - erigon
   - nethermind
+  - ethereumjs
 
 ethereum_node_supported_cl:
   - lighthouse

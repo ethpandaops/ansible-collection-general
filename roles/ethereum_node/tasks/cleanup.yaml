@@ -26,6 +26,13 @@
   vars:
     nethermind_cleanup: true
 
+- name: "Cleanup execution client: ethereumjs"
+  when: (ethereum_node_el != "ethereumjs") or (not ethereum_node_el_enabled)
+  ansible.builtin.include_role:
+    name: ethpandaops.general.ethereumjs
+  vars:
+    ethereumjs_cleanup: true
+
 - name: "Cleanup consensus client: lighthouse"
   when: (ethereum_node_cl != "lighthouse") or (not ethereum_node_cl_enabled)
   ansible.builtin.include_role:
@@ -59,4 +66,4 @@
   ansible.builtin.include_role:
     name: ethpandaops.general.nimbus
   vars:
-    lodestar_cleanup: true
+    nimbus_cleanup: true

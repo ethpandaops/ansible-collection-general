@@ -23,6 +23,7 @@ It uses the following underyling roles:
 - [ethpandaops.general.geth](../geth)
 - [ethpandaops.general.erigon](../erigon)
 - [ethpandaops.general.nethermind](../nethermind)
+- [ethpandaops.general.ethereumjs](../ethereumjs)
 
 ## Requirements
 
