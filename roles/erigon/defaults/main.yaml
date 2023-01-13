@@ -1,0 +1,45 @@
+erigon_user: erigon
+erigon_datadir: /data/erigon
+erigon_auth_jwt_path: /data/execution-auth.secret
+
+erigon_cleanup: false # when set to "true" it will remove the container
+
+erigon_ports_p2p: 30303
+erigon_ports_http_rpc: 8545
+erigon_ports_engine: 8551
+erigon_ports_metrics: 6060
+
+##
+## Main container
+##
+erigon_container_name: erigon
+erigon_container_image: thorax/erigon:stable
+erigon_container_env: {}
+erigon_container_ports:
+  - "127.0.0.1:{{ erigon_ports_engine }}:{{ erigon_ports_engine }}"
+  - "{{ erigon_ports_p2p }}:{{ erigon_ports_p2p }}"
+  - "{{ erigon_ports_p2p }}:{{ erigon_ports_p2p}}/udp"
+erigon_container_volumes:
+  - "{{ erigon_datadir }}:/data"
+  - "{{ erigon_auth_jwt_path }}:/execution-auth.jwt:ro"
+erigon_container_stop_timeout: "300"
+erigon_container_networks: []
+erigon_container_entrypoint:
+  - erigon
+erigon_container_command:
+  - --datadir=/data
+  - --nat=extip:{{ ansible_host }}
+  - --port={{ erigon_ports_p2p }}
+  - --http
+  - --http.addr=0.0.0.0
+  - --http.port={{ erigon_ports_http_rpc }}
+  - --authrpc.jwtsecret=/execution-auth.jwt
+  - --authrpc.addr=0.0.0.0
+  - --authrpc.port={{ erigon_ports_engine }}
+  - --authrpc.vhosts=*
+  - --externalcl
+  - --metrics
+  - --metrics.addr=0.0.0.0
+  - --metrics.port={{ erigon_ports_metrics }}
+erigon_container_command_extra_args:
+  - --prune=htc
