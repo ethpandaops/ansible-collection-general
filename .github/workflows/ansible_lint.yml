@@ -30,9 +30,16 @@ jobs:
       - name: Run setup
         run: ./setup.sh
 
-      - name: Lint
+      - name: Lint roles
         run: >
-          ansible-lint
+          ansible-lint roles/
+          --nocolor
+          --exclude .github
+          --profile production
+
+      - name: Lint playbooks
+        run: >
+          ansible-lint playbooks/
           --nocolor
           --exclude .github
           --profile production
