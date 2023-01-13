@@ -4,7 +4,7 @@ json_exporter_datadir: /data/json-exporter
 json_exporter_container_image: quay.io/prometheuscommunity/json-exporter:v0.5.0
 json_exporter_container_name: json-exporter
 json_exporter_container_ports:
-  - "7979:7979"
+  - "127.0.0.1:7979:7979"
 json_exporter_container_restart_policy: always
 json_exporter_container_networks_cli_compatible: yes
 json_exporter_container_network_mode: default

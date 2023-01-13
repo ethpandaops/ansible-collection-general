@@ -9,7 +9,7 @@
     state: directory
     recurse: true
     owner: "{{ json_exporter_user }}"
-    group: "10001"
+    group: "{{ json_exporter_user }}"
     mode: "0770"
 
 - name: Create json-exporter config
@@ -32,4 +32,4 @@
     network_mode: "{{ json_exporter_container_network_mode }}"
     volumes: "{{ json_exporter_container_volumes }}"
     env: "{{ json_exporter_container_env }}"
-    user: "{{json_exporter_user_meta.uid }}:10001"
+    user: "{{ json_exporter_user_meta.uid }}"
