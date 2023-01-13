@@ -31,6 +31,7 @@ A collection of reusable ansible components used by the EthPandaOps team.
 
 ### General purpose tooling
 - [k3s](roles/k3s)
+- [json_exporter](roles/json_exporter)
 - [node_exporter](roles/node_exporter)
 - [prometheus](roles/prometheus)
 - [docker_cleanup](roles/docker_cleanup)
