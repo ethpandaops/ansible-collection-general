@@ -21,6 +21,7 @@ It uses the following underyling roles:
 ### Execution layer clients
 - [ethpandaops.general.besu](../besu)
 - [ethpandaops.general.geth](../geth)
+- [ethpandaops.general.erigon](../erigon)
 - [ethpandaops.general.nethermind](../nethermind)
 
 ## Requirements

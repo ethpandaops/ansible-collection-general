@@ -12,6 +12,13 @@
   vars:
     geth_cleanup: true
 
+- name: "Cleanup execution client: erigon"
+  when: (ethereum_node_el != "erigon") or (not ethereum_node_el_enabled)
+  ansible.builtin.include_role:
+    name: ethpandaops.general.erigon
+  vars:
+    erigon_cleanup: true
+
 - name: "Cleanup execution client: nethermind"
   when: (ethereum_node_el != "nethermind") or (not ethereum_node_el_enabled)
   ansible.builtin.include_role:

@@ -1,6 +1,7 @@
 ethereum_node_supported_el:
   - besu
   - geth
+  - erigon
   - nethermind
 
 ethereum_node_supported_cl:
