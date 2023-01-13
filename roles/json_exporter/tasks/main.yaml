@@ -1,0 +1,33 @@
+- name: Add json-exporter user
+  ansible.builtin.user:
+    name: "{{ json_exporter_user }}"
+  register: json_exporter_user_meta
+
+- name: Create required directories
+  ansible.builtin.file:
+    path: "{{ json_exporter_datadir }}"
+    state: directory
+    recurse: true
+    owner: "{{ json_exporter_user }}"
+    group: "{{ json_exporter_user }}"
+    mode: "0770"
+
+- name: Create json-exporter config
+  ansible.builtin.copy:
+    content: "{{ json_exporter_config }}"
+    dest: "{{ json_exporter_datadir }}/config.yml"
+    owner: "{{ json_exporter_user }}"
+    group: "{{ json_exporter_user }}"
+    mode: '0664'
+  notify: Restart json-exporter container
+
+- name: Run json-exporter container
+  community.general.docker_container:
+    name: "{{ json_exporter_container_name }}"
+    image: "{{ json_exporter_container_image }}"
+    ports: "{{ json_exporter_container_ports }}"
+    restart_policy: "{{ json_exporter_container_restart_policy }}"
+    networks: "{{ json_exporter_container_networks }}"
+    volumes: "{{ json_exporter_container_volumes }}"
+    env: "{{ json_exporter_container_env }}"
+    user: "{{ json_exporter_user_meta.uid }}"

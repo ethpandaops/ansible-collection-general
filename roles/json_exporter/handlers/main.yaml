@@ -1,0 +1,5 @@
+- name: Restart json-exporter container
+  community.docker.docker_container:
+    name: "{{ json_exporter_container_name }}"
+    state: started
+    restart: true
