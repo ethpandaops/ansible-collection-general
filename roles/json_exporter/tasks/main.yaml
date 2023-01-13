@@ -28,8 +28,6 @@
     ports: "{{ json_exporter_container_ports }}"
     restart_policy: "{{ json_exporter_container_restart_policy }}"
     networks: "{{ json_exporter_container_networks }}"
-    networks_cli_compatible: "{{ json_exporter_container_networks_cli_compatible }}"
-    network_mode: "{{ json_exporter_container_network_mode }}"
     volumes: "{{ json_exporter_container_volumes }}"
     env: "{{ json_exporter_container_env }}"
     user: "{{ json_exporter_user_meta.uid }}"

@@ -6,8 +6,6 @@ json_exporter_container_name: json-exporter
 json_exporter_container_ports:
   - "127.0.0.1:7979:7979"
 json_exporter_container_restart_policy: always
-json_exporter_container_networks_cli_compatible: yes
-json_exporter_container_network_mode: default
 json_exporter_container_networks: []
 json_exporter_container_volumes_from: []
 json_exporter_container_volumes:
