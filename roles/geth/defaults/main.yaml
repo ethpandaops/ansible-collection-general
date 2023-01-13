@@ -7,7 +7,7 @@ geth_cleanup: false # when set to "true" it will remove the container
 geth_ports_p2p: 30303
 geth_ports_http_rpc: 8545
 geth_ports_engine: 8551
-geth_ports_monitoring: 6060
+geth_ports_metrics: 6060
 
 geth_container_name: geth
 geth_container_image: ethereum/client-go:v1.10.26
@@ -36,6 +36,6 @@ geth_container_command:
   - --authrpc.jwtsecret=/execution-auth.jwt
   - --nat=extip:{{ ansible_host }}
   - --metrics
-  - --metrics.port={{ geth_ports_monitoring }}
+  - --metrics.port={{ geth_ports_metrics }}
   - --metrics.addr=0.0.0.0
 geth_container_command_extra_args: []

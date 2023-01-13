@@ -6,7 +6,7 @@
     besu_ports_p2p: "{{ ethereum_node_el_ports_p2p_tcp }}"
     besu_ports_http_rpc: "{{ ethereum_node_el_ports_http_rpc }}"
     besu_ports_engine: "{{ ethereum_node_el_ports_engine }}"
-    besu_ports_monitoring: "{{ ethereum_node_el_ports_metrics }}"
+    besu_ports_metrics: "{{ ethereum_node_el_ports_metrics }}"
     besu_container_networks: "{{ ethereum_node_docker_networks }}"
 
 - name: "Execution client: geth"
@@ -17,7 +17,7 @@
     geth_ports_p2p: "{{ ethereum_node_el_ports_p2p_tcp }}"
     geth_ports_http_rpc: "{{ ethereum_node_el_ports_http_rpc }}"
     geth_ports_engine: "{{ ethereum_node_el_ports_engine }}"
-    geth_ports_monitoring: "{{ ethereum_node_el_ports_metrics }}"
+    geth_ports_metrics: "{{ ethereum_node_el_ports_metrics }}"
     geth_container_networks: "{{ ethereum_node_docker_networks }}"
 
 - name: "Execution client: nethermind"
@@ -28,5 +28,5 @@
     nethermind_ports_p2p: "{{ ethereum_node_el_ports_p2p_tcp }}"
     nethermind_ports_http_rpc: "{{ ethereum_node_el_ports_http_rpc }}"
     nethermind_ports_engine: "{{ ethereum_node_el_ports_engine }}"
-    nethermind_ports_monitoring: "{{ ethereum_node_el_ports_metrics }}"
+    nethermind_ports_metrics: "{{ ethereum_node_el_ports_metrics }}"
     nethermind_container_networks: "{{ ethereum_node_docker_networks }}"

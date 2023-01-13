@@ -7,7 +7,7 @@ nethermind_cleanup: false # when set to "true" it will remove the container
 nethermind_ports_p2p: 30303
 nethermind_ports_http_rpc: 8545
 nethermind_ports_engine: 8551
-nethermind_ports_monitoring: 6060
+nethermind_ports_metrics: 6060
 
 nethermind_container_name: nethermind
 nethermind_container_image: nethermind/nethermind:1.15.0
@@ -40,5 +40,5 @@ nethermind_container_command:
   - --JsonRpc.EnginePort={{ nethermind_ports_engine }}
   - --Metrics.Enabled=true
   - --Metrics.NodeName={{ inventory_hostname_short }}
-  - --Metrics.ExposePort={{ nethermind_ports_monitoring }}
+  - --Metrics.ExposePort={{ nethermind_ports_metrics }}
 nethermind_container_command_extra_args: []
