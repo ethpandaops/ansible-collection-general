@@ -14,6 +14,7 @@ A collection of reusable ansible components used by the EthPandaOps team.
 ### Ethereum client pair
 - [ethereum_node](roles/ethereum_node)
 ### Ethereum execution clients
+- [besu](roles/besu)
 - [geth](roles/geth)
 - [nethermind](roles/nethermind)
 ### Ethereum consensus clients

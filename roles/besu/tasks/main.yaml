@@ -1,0 +1,7 @@
+- name: Setup besu
+  ansible.builtin.import_tasks: setup.yaml
+  when: not besu_cleanup
+
+- name: Cleanup besu
+  ansible.builtin.import_tasks: cleanup.yaml
+  when: besu_cleanup

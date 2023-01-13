@@ -1,0 +1,26 @@
+- name: Add besu user
+  ansible.builtin.user:
+    name: "{{ besu_user }}"
+  register: besu_user_meta
+
+- name: Create data dir
+  ansible.builtin.file:
+    path: "{{ besu_datadir }}"
+    state: directory
+    recurse: true
+    owner: "{{ besu_user }}"
+    group: "{{ besu_user }}"
+
+- name: Run besu container
+  community.docker.docker_container:
+    name: "{{ besu_container_name }}"
+    image: "{{ besu_container_image }}"
+    state: started
+    restart_policy: always
+    stop_timeout: "{{ besu_container_stop_timeout }}"
+    ports: "{{ besu_container_ports }}"
+    volumes: "{{ besu_container_volumes }}"
+    env: "{{ besu_container_env }}"
+    networks: "{{ besu_container_networks }}"
+    command: "{{ besu_container_command + besu_container_command_extra_args }}"
+    user: "{{ besu_user_meta.uid }}"
