@@ -31,4 +31,4 @@
     network_mode: "{{ dshackle_container_network_mode }}"
     volumes: "{{ dshackle_container_volumes }}"
     env: "{{ dshackle_container_env }}"
-    user: "{{dshackle_user_meta.uid }}"
+    user: "{{ dshackle_user_meta.uid }}"

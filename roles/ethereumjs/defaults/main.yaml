@@ -15,7 +15,7 @@ ethereumjs_container_ports:
   - "127.0.0.1:{{ ethereumjs_ports_http_rpc }}:{{ ethereumjs_ports_http_rpc }}"
   - "127.0.0.1:{{ ethereumjs_ports_engine }}:{{ ethereumjs_ports_engine }}"
   - "{{ ethereumjs_ports_p2p }}:{{ ethereumjs_ports_p2p }}"
-  - "{{ ethereumjs_ports_p2p }}:{{ ethereumjs_ports_p2p}}/udp"
+  - "{{ ethereumjs_ports_p2p }}:{{ ethereumjs_ports_p2p }}/udp"
 ethereumjs_container_volumes:
   - "{{ ethereumjs_datadir }}:/data"
   - "{{ ethereumjs_auth_jwt_path }}:/execution-auth.jwt:ro"

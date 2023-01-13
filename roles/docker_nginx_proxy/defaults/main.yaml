@@ -1,7 +1,8 @@
 docker_nginx_proxy_user: nginx-proxy
 docker_nginx_proxy_datadir: /opt/nginx-proxy
 docker_nginx_proxy_default_email: "mail@yourdomain.tld"
-docker_nginx_proxy_conf_tmpl: "{{ lookup('ansible.builtin.url', 'https://raw.githubusercontent.com/nginx-proxy/nginx-proxy/main/nginx.tmpl', split_lines=False) }}"
+docker_nginx_proxy_conf_tmpl: >-
+  {{ lookup('ansible.builtin.url', 'https://raw.githubusercontent.com/nginx-proxy/nginx-proxy/main/nginx.tmpl', split_lines=False) }}
 
 ############################################################################
 ## Nginx
@@ -10,7 +11,7 @@ docker_nginx_proxy_container_image: nginx:alpine
 docker_nginx_proxy_container_name: nginx-proxy
 docker_nginx_proxy_container_published_ports: ["80:80", "443:443"]
 docker_nginx_proxy_container_restart_policy: always
-docker_nginx_proxy_container_networks_cli_compatible: yes
+docker_nginx_proxy_container_networks_cli_compatible: true
 docker_nginx_proxy_container_network_mode: default
 docker_nginx_proxy_container_networks: []
 docker_nginx_proxy_container_env: {}
@@ -30,7 +31,7 @@ docker_nginx_proxy_docker_gen_container_command: >-
   -notify-sighup nginx-proxy
   -watch /etc/docker-gen/templates/nginx.tmpl /etc/nginx/conf.d/default.conf
 docker_nginx_proxy_docker_gen_container_restart_policy: always
-docker_nginx_proxy_docker_gen_container_networks_cli_compatible: yes
+docker_nginx_proxy_docker_gen_container_networks_cli_compatible: true
 docker_nginx_proxy_docker_gen_container_network_mode: default
 docker_nginx_proxy_docker_gen_container_networks: []
 docker_nginx_proxy_docker_gen_container_env: {}
@@ -46,7 +47,7 @@ docker_nginx_proxy_docker_gen_container_volumes:
 docker_nginx_proxy_acme_companion_container_image: nginxproxy/acme-companion
 docker_nginx_proxy_acme_companion_container_name: nginx-proxy-acme
 docker_nginx_proxy_acme_companion_container_restart_policy: always
-docker_nginx_proxy_acme_companion_container_networks_cli_compatible: yes
+docker_nginx_proxy_acme_companion_container_networks_cli_compatible: true
 docker_nginx_proxy_acme_companion_container_network_mode: default
 docker_nginx_proxy_acme_companion_container_networks: []
 docker_nginx_proxy_acme_companion_container_volumes_from:

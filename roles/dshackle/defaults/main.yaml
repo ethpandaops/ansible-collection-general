@@ -5,7 +5,7 @@ dshackle_container_image: emeraldpay/dshackle
 dshackle_container_name: dshackle
 dshackle_container_published_ports: []
 dshackle_container_restart_policy: always
-dshackle_container_networks_cli_compatible: yes
+dshackle_container_networks_cli_compatible: true
 dshackle_container_network_mode: default
 dshackle_container_networks: []
 dshackle_container_volumes_from: []

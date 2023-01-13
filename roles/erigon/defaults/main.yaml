@@ -18,7 +18,7 @@ erigon_container_env: {}
 erigon_container_ports:
   - "127.0.0.1:{{ erigon_ports_engine }}:{{ erigon_ports_engine }}"
   - "{{ erigon_ports_p2p }}:{{ erigon_ports_p2p }}"
-  - "{{ erigon_ports_p2p }}:{{ erigon_ports_p2p}}/udp"
+  - "{{ erigon_ports_p2p }}:{{ erigon_ports_p2p }}/udp"
 erigon_container_volumes:
   - "{{ erigon_datadir }}:/data"
   - "{{ erigon_auth_jwt_path }}:/execution-auth.jwt:ro"

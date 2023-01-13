@@ -36,12 +36,12 @@ lighthouse_container_command:
   - --discovery-port={{ lighthouse_ports_p2p_udp }}
   - --http
   - --http-address=0.0.0.0
-  - --http-port={{ lighthouse_ports_http_beacon}}
+  - --http-port={{ lighthouse_ports_http_beacon }}
   - --execution-jwt=/execution-auth.jwt
   - --execution-endpoint={{ lighthouse_execution_engine_endpoint }}
   - --metrics
   - --metrics-address=0.0.0.0
   - --metrics-allow-origin=*
-  - --metrics-port={{ lighthouse_ports_metrics}}
+  - --metrics-port={{ lighthouse_ports_metrics }}
 lighthouse_container_command_extra_args: []
   # - --checkpoint-sync-url=http://your-other-node

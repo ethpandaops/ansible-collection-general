@@ -5,7 +5,7 @@
   ansible.builtin.include_role:
     name: ethpandaops.general.docker_network
   vars:
-    docker_network_name: "{{ ethereum_node_docker_network_name}}"
+    docker_network_name: "{{ ethereum_node_docker_network_name }}"
 
 - name: Cleanup clients that shouldn't be running
   ansible.builtin.import_tasks: cleanup.yaml

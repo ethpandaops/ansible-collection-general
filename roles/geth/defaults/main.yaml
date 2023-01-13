@@ -16,7 +16,7 @@ geth_container_ports:
   - "127.0.0.1:{{ geth_ports_http_rpc }}:{{ geth_ports_http_rpc }}"
   - "127.0.0.1:{{ geth_ports_engine }}:{{ geth_ports_engine }}"
   - "{{ geth_ports_p2p }}:{{ geth_ports_p2p }}"
-  - "{{ geth_ports_p2p }}:{{ geth_ports_p2p}}/udp"
+  - "{{ geth_ports_p2p }}:{{ geth_ports_p2p }}/udp"
 geth_container_volumes:
   - "{{ geth_datadir }}:/data"
   - "{{ geth_auth_jwt_path }}:/execution-auth.jwt:ro"

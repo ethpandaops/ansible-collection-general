@@ -16,7 +16,7 @@ besu_container_ports:
   - "127.0.0.1:{{ besu_ports_http_rpc }}:{{ besu_ports_http_rpc }}"
   - "127.0.0.1:{{ besu_ports_engine }}:{{ besu_ports_engine }}"
   - "{{ besu_ports_p2p }}:{{ besu_ports_p2p }}"
-  - "{{ besu_ports_p2p }}:{{ besu_ports_p2p}}/udp"
+  - "{{ besu_ports_p2p }}:{{ besu_ports_p2p }}/udp"
 besu_container_volumes:
   - "{{ besu_datadir }}:/data"
   - "{{ besu_auth_jwt_path }}:/execution-auth.jwt:ro"
