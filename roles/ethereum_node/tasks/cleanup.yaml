@@ -1,3 +1,10 @@
+- name: "Cleanup execution client: besu"
+  when: (ethereum_node_el != "besu") or (not ethereum_node_el_enabled)
+  ansible.builtin.include_role:
+    name: ethpandaops.general.besu
+  vars:
+    besu_cleanup: true
+
 - name: "Cleanup execution client: geth"
   when: (ethereum_node_el != "geth") or (not ethereum_node_el_enabled)
   ansible.builtin.include_role:

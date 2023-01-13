@@ -19,6 +19,7 @@ It uses the following underyling roles:
 - [ethpandaops.general.lighthouse](../lighthouse)
 
 ### Execution layer clients
+- [ethpandaops.general.besu](../besu)
 - [ethpandaops.general.geth](../geth)
 - [ethpandaops.general.nethermind](../nethermind)
 

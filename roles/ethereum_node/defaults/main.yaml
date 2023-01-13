@@ -1,6 +1,6 @@
 ethereum_node_docker_network_name: shared
 
-ethereum_node_el: geth # Valid options: geth, nethermind
+ethereum_node_el: besu # Valid options: besu, geth, nethermind
 ethereum_node_el_enabled: true
 ethereum_node_el_ports_p2p_tcp: 30303
 ethereum_node_el_ports_p2p_udp: 30303

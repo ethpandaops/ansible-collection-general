@@ -1,4 +1,5 @@
 ethereum_node_supported_el:
+  - besu
   - geth
   - nethermind
 
