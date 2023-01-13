@@ -38,3 +38,4 @@ geth_container_command:
   - --metrics
   - --metrics.port={{ geth_ports_monitoring }}
   - --metrics.addr=0.0.0.0
+geth_container_command_extra_args: []

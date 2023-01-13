@@ -22,5 +22,5 @@
     volumes: "{{ teku_container_volumes }}"
     env: "{{ teku_container_env }}"
     networks: "{{ teku_container_networks }}"
-    command: "{{ teku_container_command }} "
+    command: "{{ teku_container_command + teku_container_command_extra_args }} "
     user: "{{ teku_user_meta.uid }}"

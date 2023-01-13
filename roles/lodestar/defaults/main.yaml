@@ -39,4 +39,5 @@ lodestar_container_command:
   - --metrics
   - --metrics.address=0.0.0.0
   - --metrics.port={{ lodestar_ports_metrics }}
+lodestar_container_command_extra_args: []
 # - --checkpointSyncUrl=http://your-other-node

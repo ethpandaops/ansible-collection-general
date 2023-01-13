@@ -22,5 +22,5 @@
     volumes: "{{ geth_container_volumes }}"
     env: "{{ geth_container_env }}"
     networks: "{{ geth_container_networks }}"
-    command: "{{ geth_container_command }} "
+    command: "{{ geth_container_command + geth_container_command_extra_args }}"
     user: "{{ geth_user_meta.uid }}"

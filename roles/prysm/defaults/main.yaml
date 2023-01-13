@@ -37,5 +37,6 @@ prysm_container_command:
   - --grpc-gateway-port={{ prysm_ports_grpc }}
   - --monitoring-host=0.0.0.0
   - --monitoring-port={{ prysm_ports_metrics }}
+prysm_container_command_extra_args: []
 # - --checkpoint-sync-url=http://your-other-node
 # - --genesis-beacon-api-url=http://your-other-node

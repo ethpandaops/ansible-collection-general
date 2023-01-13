@@ -23,5 +23,5 @@
     volumes: "{{ nimbus_container_volumes }}"
     env: "{{ nimbus_container_env }}"
     networks: "{{ nimbus_container_networks }}"
-    command: "{{ nimbus_container_command }} "
+    command: "{{ nimbus_container_command + nimbus_container_command_extra_args }} "
     user: "{{ nimbus_user_meta.uid }}"

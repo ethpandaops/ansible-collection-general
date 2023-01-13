@@ -22,5 +22,5 @@
     volumes: "{{ lighthouse_container_volumes }}"
     env: "{{ lighthouse_container_env }}"
     networks: "{{ lighthouse_container_networks }}"
-    command: "{{ lighthouse_container_command }} "
+    command: "{{ lighthouse_container_command + lighthouse_container_command_extra_args }} "
     user: "{{ lighthouse_user_meta.uid }}"

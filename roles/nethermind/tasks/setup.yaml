@@ -23,6 +23,6 @@
     env: "{{ nethermind_container_env }}"
     networks: "{{ nethermind_container_networks }}"
     entrypoint: "{{ nethermind_container_entrypoint }} "
-    command: "{{ nethermind_container_command }} "
+    command: "{{ nethermind_container_command + nethermind_container_command_extra_args}} "
     user: "{{ nethermind_user_meta.uid }}"
     working_dir: "{{ nethermind_datadir }}"

@@ -41,3 +41,4 @@ nethermind_container_command:
   - --Metrics.Enabled=true
   - --Metrics.NodeName={{ inventory_hostname_short }}
   - --Metrics.ExposePort={{ nethermind_ports_monitoring }}
+nethermind_container_command_extra_args: []

@@ -24,10 +24,7 @@ teku_container_stop_timeout: "300"
 teku_container_networks: []
 teku_container_command:
   - --data-path=/data
-  - --data-storage-mode=PRUNE
-  - --logging=INFO
   - --log-destination=CONSOLE
-  - --network=mainnet
   - --p2p-enabled=true
   - --p2p-interface=0.0.0.0
   - --p2p-advertised-ip={{ ansible_host }}
@@ -43,4 +40,8 @@ teku_container_command:
   - --metrics-interface=0.0.0.0
   - --metrics-port={{ teku_ports_metrics }}
   - --metrics-host-allowlist="*"
-  # - --initial-state=http://your-other-node/eth/v2/debug/beacon/states/finalized
+teku_container_command_extra_args:
+  - --data-storage-mode=PRUNE
+# - --network=mainnet
+# - --initial-state=http://your-other-node/eth/v2/debug/beacon/states/finalized
+# - --logging=INFO

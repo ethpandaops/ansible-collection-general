@@ -22,5 +22,5 @@
     volumes: "{{ prysm_container_volumes }}"
     env: "{{ prysm_container_env }}"
     networks: "{{ prysm_container_networks }}"
-    command: "{{ prysm_container_command }} "
+    command: "{{ prysm_container_command + prysm_container_command_extra_args }} "
     user: "{{ prysm_user_meta.uid }}"

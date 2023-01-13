@@ -43,4 +43,5 @@ lighthouse_container_command:
   - --metrics-address=0.0.0.0
   - --metrics-allow-origin=*
   - --metrics-port={{ lighthouse_ports_metrics}}
+lighthouse_container_command_extra_args: []
   # - --checkpoint-sync-url=http://your-other-node
