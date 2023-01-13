@@ -41,5 +41,5 @@ erigon_container_command:
   - --metrics
   - --metrics.addr=0.0.0.0
   - --metrics.port={{ erigon_ports_metrics }}
-erigon_container_command_extra_args:
-  - --prune=htc
+erigon_container_command_extra_args: []
+#  - --prune=htc
