@@ -63,3 +63,17 @@ If you would like to run a geth and lighthouse node, then your playbook could lo
     ethereum_node_el: geth
     ethereum_node_cl: lighthouse
 ```
+
+If you want to set client specific configuration you could do it by overwriting the the client specific default variables. For example, if you want to provide extra arguments to your lighthouse command and run a specific version of geth, then you could do it like this:
+
+```yaml
+  - role: ethpandaops.general.ethereum_node
+    # Define which clients you want to use
+    ethereum_node_el: geth
+    ethereum_node_cl: lighthouse
+    # Overwrite a specific lighthouse variable. Check lighthouse/defaults/main.yaml
+    lighthouse_container_command_extra_args:
+      - --checkpoint-sync-url=http://your-other-node
+    # Overwrite a specific geth variable. Check geth/defaults/main.yaml
+    geth_container_image: ethereum/client-go:latest
+```
