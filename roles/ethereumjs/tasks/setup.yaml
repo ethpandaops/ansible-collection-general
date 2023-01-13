@@ -1,0 +1,26 @@
+- name: Add ethereumjs user
+  ansible.builtin.user:
+    name: "{{ ethereumjs_user }}"
+  register: ethereumjs_user_meta
+
+- name: Create data dir
+  ansible.builtin.file:
+    path: "{{ ethereumjs_datadir }}"
+    state: directory
+    recurse: true
+    owner: "{{ ethereumjs_user }}"
+    group: "{{ ethereumjs_user }}"
+
+- name: Run ethereumjs container
+  community.docker.docker_container:
+    name: "{{ ethereumjs_container_name }}"
+    image: "{{ ethereumjs_container_image }}"
+    state: started
+    restart_policy: always
+    stop_timeout: "{{ ethereumjs_container_stop_timeout }}"
+    ports: "{{ ethereumjs_container_ports }}"
+    volumes: "{{ ethereumjs_container_volumes }}"
+    env: "{{ ethereumjs_container_env }}"
+    networks: "{{ ethereumjs_container_networks }}"
+    command: "{{ ethereumjs_container_command + ethereumjs_container_command_extra_args }}"
+    user: "{{ ethereumjs_user_meta.uid }}"

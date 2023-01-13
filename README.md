@@ -18,6 +18,7 @@ A collection of reusable ansible components used by the EthPandaOps team.
 - [geth](roles/geth)
 - [erigon](roles/erigon)
 - [nethermind](roles/nethermind)
+- [ethereumjs](roles/ethereumjs)
 ### Ethereum consensus clients
 - [teku](roles/teku)
 - [nimbus](roles/nimbus)
