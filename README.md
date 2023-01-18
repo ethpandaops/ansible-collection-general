@@ -40,6 +40,7 @@ A collection of reusable ansible components used by the EthPandaOps team.
 - [bootstrap](roles/bootstrap)
 - [oh_my_zsh](roles/oh_my_zsh)
 - [litestream](roles/litestream)
+- [s3_cron_backup](roles/s3_cron_backup)
 
 ## Usage
 
