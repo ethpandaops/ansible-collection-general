@@ -1,0 +1,30 @@
+litestream_user: "litestream"
+
+litestream_container_name: "litestream"
+litestream_container_image: "litestream/litestream"
+litestream_container_env:
+  LITESTREAM_ACCESS_KEY_ID: ""
+  LITESTREAM_SECRET_ACCESS_KEY: ""
+litestream_container_ports: []
+#  - "127.0.0.1:9090:9090" # metrics
+litestream_container_volumes:
+  - "{{ litestream_paths_config }}/litestream.yml:/etc/litestream.yml"
+  - "{{ litestream_paths_data }}:/data"
+
+litestream_container_stop_timeout: "120"
+litestream_container_networks: []
+
+litestream_paths_data: /data/path/to/your/sqlite_directory
+
+litestream_paths_config: /etc/litestream/
+
+litestream_container_command:
+  - 'replicate'
+
+# https://litestream.io/reference/config/
+litestream_config: |
+  addr: ":9090"
+  dbs:
+    - path: /data/db.sqlite
+      replicas:
+        - url: s3://mybkt.litestream.io/db1
