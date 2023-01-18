@@ -8,38 +8,38 @@ A collection of reusable ansible components used by the EthPandaOps team.
 
 ### Ethereum tooling
 - [beaconchain_explorer_aio](roles/beaconchain_explorer_aio/)
-- [ethereum_auth_jwt](roles/ethereum_auth_jwt)
 - [dshackle](roles/dshackle)
+- [ethereum_auth_jwt](roles/ethereum_auth_jwt)
 
 ### Ethereum client pair
 - [ethereum_node](roles/ethereum_node)
 ### Ethereum execution clients
 - [besu](roles/besu)
-- [geth](roles/geth)
 - [erigon](roles/erigon)
-- [nethermind](roles/nethermind)
 - [ethereumjs](roles/ethereumjs)
+- [geth](roles/geth)
+- [nethermind](roles/nethermind)
 ### Ethereum consensus clients
-- [teku](roles/teku)
+- [lighthouse](roles/lighthouse)
+- [lodestar](roles/lodestar)
 - [nimbus](roles/nimbus)
 - [prysm](roles/prysm)
-- [lodestar](roles/lodestar)
-- [lighthouse](roles/lighthouse)
+- [teku](roles/teku)
 
 ### Ethereum L2 clients
 - [arbitrum_node](roles/arbitrum_node)
 
 ### General purpose tooling
-- [k3s](roles/k3s)
-- [json_exporter](roles/json_exporter)
-- [node_exporter](roles/node_exporter)
-- [prometheus](roles/prometheus)
+- [bootstrap](roles/bootstrap)
 - [docker_cleanup](roles/docker_cleanup)
 - [docker_network](roles/docker_network)
 - [docker_nginx_proxy](roles/docker_nginx_proxy)
-- [bootstrap](roles/bootstrap)
-- [oh_my_zsh](roles/oh_my_zsh)
+- [json_exporter](roles/json_exporter)
+- [k3s](roles/k3s)
 - [litestream](roles/litestream)
+- [node_exporter](roles/node_exporter)
+- [oh_my_zsh](roles/oh_my_zsh)
+- [prometheus](roles/prometheus)
 - [s3_cron_backup](roles/s3_cron_backup)
 
 ## Usage
