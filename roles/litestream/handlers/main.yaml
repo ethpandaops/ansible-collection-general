@@ -1,0 +1,5 @@
+- name: Restart litestream container
+  community.docker.docker_container:
+    name: "{{ litestream_container_name }}"
+    state: started
+    restart: true

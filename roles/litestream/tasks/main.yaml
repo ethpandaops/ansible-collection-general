@@ -1,0 +1,43 @@
+- name: Add litestream user
+  ansible.builtin.user:
+    name: "{{ litestream_user }}"
+    shell: /bin/nologin
+
+- name: Get litestream uid
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ litestream_user }}"
+  register: litestream_user_getent
+
+- name: Create litestream dirs
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0777'
+    owner: "{{ litestream_user }}"
+    group: "{{ litestream_user }}"
+  loop:
+    - "{{ litestream_paths_config }}"
+
+- name: Create litestream config
+  ansible.builtin.copy:
+    content: "{{ litestream_config }}"
+    dest: "{{ litestream_paths_config }}/litestream.yml"
+    owner: "{{ litestream_user }}"
+    group: "{{ litestream_user }}"
+    mode: '0664'
+  notify: Restart litestream container
+
+- name: Run litestream container
+  community.docker.docker_container:
+    name: "{{ litestream_container_name }}"
+    image: "{{ litestream_container_image }}"
+    user: "{{ litestream_user_getent.ansible_facts.getent_passwd[litestream_user][1] }}"
+    state: started
+    restart_policy: always
+    stop_timeout: "{{ litestream_container_stop_timeout }}"
+    ports: "{{ litestream_container_ports }}"
+    volumes: "{{ litestream_container_volumes }}"
+    env: "{{ litestream_container_env }}"
+    networks: "{{ litestream_container_networks }}"
+    command: "{{ litestream_container_command }}"
