@@ -1,0 +1,15 @@
+s3_cron_backup_container_name: "s3_cron_backup"
+s3_cron_backup_container_image: "peterrus/s3-cron-backup:v1.4.1@sha256:a3597cb31130190c5079952ec8883b8cae2b5913042ba3870222b9bd154a5122"
+s3_cron_backup_container_env:
+  AWS_ACCESS_KEY_ID: ""
+  AWS_SECRET_ACCESS_KEY: ""
+  AWS_DEFAULT_REGION: us-east-1
+  S3_BUCKET_URL: s3://name-of-your-bucket/
+  CRON_SCHEDULE: "0 * * * *"
+  BACKUP_NAME: make-something-up
+s3_cron_backup_container_ports: []
+s3_cron_backup_container_volumes:
+  - "/your-data-dir:/data:ro"  # Anything under /data will be backed up
+
+s3_cron_backup_container_stop_timeout: "10"
+s3_cron_backup_container_networks: []

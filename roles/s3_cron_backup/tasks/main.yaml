@@ -1,0 +1,11 @@
+- name: Run s3_cron_backup container
+  community.docker.docker_container:
+    name: "{{ s3_cron_backup_container_name }}"
+    image: "{{ s3_cron_backup_container_image }}"
+    state: started
+    restart_policy: always
+    stop_timeout: "{{ s3_cron_backup_container_stop_timeout }}"
+    ports: "{{ s3_cron_backup_container_ports }}"
+    volumes: "{{ s3_cron_backup_container_volumes }}"
+    env: "{{ s3_cron_backup_container_env }}"
+    networks: "{{ s3_cron_backup_container_networks }}"
