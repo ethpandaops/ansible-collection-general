@@ -63,6 +63,74 @@ beaconchain_explorer_aio_cmd_frontend:
   - /app/explorer
   - -config=/config.yml
 
+beaconchain_frontend_config: |
+  # All config options can be found in here: https://github.com/gobitfly/eth2-beaconchain-explorer/blob/master/types/config.go
+  chain:
+    name: sepolia
+  readerDatabase:
+    name: db
+    host: beaconchain_postgres
+    port: "5432"
+    user: postgres
+    password: "pass"
+  writerDatabase:
+    name: db
+    host: beaconchain_postgres
+    port: "5432"
+    user: postgres
+    password: "pass"
+  bigtable:
+    project: explorer
+    instance: beaconchain_bigtable:9000
+  lastAttestationCachePath: "/data/lastAttestationCache"
+  eth1ErigonEndpoint: "{{ beaconchain_explorer_aio_url_erigon }}"
+  eth1GethEndpoint: "{{ beaconchain_explorer_aio_url_geth }}"
+  redisCacheEndpoint: 'beaconchain_redis:6379'
+  tieredCacheProvider: 'redis'
+  frontend:
+    siteDomain: "localhost:8080"
+    siteName: "Beaconchain Explorer"
+    siteSubtitle: "Testnet"
+    server:
+      host: '0.0.0.0' # Address to listen on
+      port: '8080' # Port to listen on
+    readerDatabase:
+      name: db
+      host: beaconchain_postgres
+      port: "5432"
+      user: postgres
+      password: "pass"
+    writerDatabase:
+      name: db
+      host: beaconchain_postgres
+      port: "5432"
+      user: postgres
+      password: "pass"
+    sessionSecret: "11111111111111111111111111111111"
+    jwtSigningSecret: "1111111111111111111111111111111111111111111111111111111111111111"
+    jwtIssuer: "localhost"
+    jwtValidityInMinutes: 30
+    maxMailsPerEmailPerDay: 10
+    mail:
+      mailgun:
+        sender: no-reply@localhost
+        domain: mg.localhost
+        privateKey: "key-11111111111111111111111111111111"
+    csrfAuthKey: '1111111111111111111111111111111111111111111111111111111111111111'
+  indexer:
+    indexMissingEpochsOnStartup: true # Check for missing epochs and export them after startup
+    #updateAllEpochStatistics: true
+    #fixCanonOnStartup: true
+    #fullIndexOnStartup: true
+    #checkAllBlocksOnStartup: true
+    node:
+      host: "{{ beaconchain_explorer_remote_ethereum_node }}"
+      port: '4000'
+      type: lighthouse
+    eth1DepositContractAddress: '{{ "%#x" % (beaconchain_explorer_aio_extra_config_files["phase0.yml"] | from_yaml)["DEPOSIT_CONTRACT_ADDRESS"] }}'
+    eth1DepositContractFirstBlock: 0
+
+
 beaconchain_explorer_aio_config: |
   # All config options can be found in here: https://github.com/gobitfly/eth2-beaconchain-explorer/blob/master/types/config.go
   chain:
@@ -119,14 +187,18 @@ beaconchain_explorer_aio_config: |
         privateKey: "key-11111111111111111111111111111111"
     csrfAuthKey: '1111111111111111111111111111111111111111111111111111111111111111'
   indexer:
-    # fullIndexOnStartup: false # Perform a one time full db index on startup
-    # indexMissingEpochsOnStartup: true # Check for missing epochs and export them after startup
+    enabled: true
+    indexMissingEpochsOnStartup: true # Check for missing epochs and export them after startup
+    # updateAllEpochStatistics: true
+    # fixCanonOnStartup: true
+    # fullIndexOnStartup: true
+    # checkAllBlocksOnStartup: true
     node:
-      host: 34.176.254.248
+      host: "{{ beaconchain_explorer_remote_ethereum_node }}"
       port: '4000'
       type: lighthouse
-    eth1DepositContractAddress: '0x7f02C3E3c98b133055B8B348B2Ac625669Ed295D'
-    eth1DepositContractFirstBlock: 1273020
+    eth1DepositContractAddress: ''{{ "%#x" % (beaconchain_explorer_aio_extra_config_files["phase0.yml"] | from_yaml)["DEPOSIT_CONTRACT_ADDRESS"] }}'
+    eth1DepositContractFirstBlock: 0
 
 
 # This can be used to create additional config files for the beaconchain explorer.
