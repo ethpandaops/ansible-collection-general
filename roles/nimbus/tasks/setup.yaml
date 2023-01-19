@@ -12,7 +12,6 @@
     owner: "{{ nimbus_user }}"
     group: "{{ nimbus_user }}"
 
-
 - name: Create validator data dir
   ansible.builtin.file:
     path: "{{ item }}"
@@ -24,7 +23,6 @@
     - "{{ nimbus_validator_datadir }}/keys"
     - "{{ nimbus_validator_datadir }}/secrets"
   when: nimbus_validator_enabled
-
 
 - name: Run nimbus container
   community.docker.docker_container:

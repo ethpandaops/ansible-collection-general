@@ -50,6 +50,7 @@ nimbus_container_command:
   - --metrics-port={{ nimbus_ports_metrics }}
   - --metrics-address=0.0.0.0
 nimbus_container_command_extra_args: []
+  # - --graffiti=hello-world
 
 ################################################################################
 ##
