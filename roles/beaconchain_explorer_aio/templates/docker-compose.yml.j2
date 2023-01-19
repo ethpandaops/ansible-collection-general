@@ -65,7 +65,7 @@ services:
     volumes:
       - /etc/passwd:/etc/passwd:ro
       - /etc/group:/etc/group:ro
-      - "{{ beaconchain_explorer_aio_installation_dir }}/explorer/config.yml:/config.yml:ro"
+      - "{{ beaconchain_explorer_aio_installation_dir }}/explorer/frontend_config.yml:/config.yml:ro"
       - "{{ beaconchain_explorer_aio_installation_dir }}/explorer/custom_configs:/custom_configs:ro"
       - "{{ beaconchain_explorer_aio_data_dir_explorer }}:/data"
   #######################################################################
@@ -82,7 +82,7 @@ services:
     volumes:
       - /etc/passwd:/etc/passwd:ro
       - /etc/group:/etc/group:ro
-      - "{{ beaconchain_explorer_aio_installation_dir }}/explorer/config.yml:/config.yml:ro"
+      - "{{ beaconchain_explorer_aio_installation_dir }}/explorer/frontend_config.yml:/config.yml:ro"
       - "{{ beaconchain_explorer_aio_installation_dir }}/explorer/custom_configs:/custom_configs:ro"
       - "{{ beaconchain_explorer_aio_data_dir_explorer }}:/data"
     ports:

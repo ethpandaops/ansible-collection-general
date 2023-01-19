@@ -198,6 +198,8 @@ create table validatorqueue_exit
     primary key (index, publickey)
 );
 
+create table epochs_notified (epoch int not null primary key, sentOn timestamp not null);
+
 drop table if exists epochs;
 create table epochs
 (
@@ -207,6 +209,7 @@ create table epochs
     attesterslashingscount  int    not null,
     attestationscount       int    not null,
     depositscount           int    not null,
+    withdrawalcount         int    not null,
     voluntaryexitscount     int    not null,
     validatorscount         int    not null,
     averagevalidatorbalance bigint not null,
@@ -240,25 +243,26 @@ create table blocks
     attesterslashingscount      int     not null,
     attestationscount           int     not null,
     depositscount               int     not null,
+    withdrawalcount             int     not null,
     voluntaryexitscount         int     not null,
     proposer                    int     not null,
     status                      text    not null, /* Can be 0 = scheduled, 1 proposed, 2 missed, 3 orphaned */
 
     -- https://ethereum.github.io/beacon-APIs/#/Beacon/getBlockV2
     -- https://github.com/ethereum/consensus-specs/blob/v1.1.9/specs/bellatrix/beacon-chain.md#executionpayload
-    exec_parent_hash            bytea,
-    exec_fee_recipient          bytea,
-    exec_state_root             bytea,
-    exec_receipts_root          bytea,
-    exec_logs_bloom             bytea,
-    exec_random                 bytea,
-    exec_block_number           int,
-    exec_gas_limit              int,
-    exec_gas_used               int,
-    exec_timestamp              int,
-    exec_extra_data             bytea,
+    exec_parent_hash            bytea, 
+    exec_fee_recipient          bytea, 
+    exec_state_root             bytea, 
+    exec_receipts_root          bytea, 
+    exec_logs_bloom             bytea, 
+    exec_random                 bytea, 
+    exec_block_number           int,   
+    exec_gas_limit              int,   
+    exec_gas_used               int,   
+    exec_timestamp              int,   
+    exec_extra_data             bytea, 
     exec_base_fee_per_gas       bigint,
-    exec_block_hash             bytea,
+    exec_block_hash             bytea, 
     exec_transactions_count     int     not null default 0,
 
     primary key (slot, blockroot)
@@ -268,6 +272,32 @@ create index idx_blocks_epoch on blocks (epoch);
 create index idx_blocks_graffiti_text on blocks using gin (graffiti_text gin_trgm_ops);
 create index idx_blocks_blockrootstatus on blocks (blockroot, status);
 create index idx_blocks_exec_block_number on blocks (exec_block_number);
+
+drop table if exists blocks_withdrawals;
+create table blocks_withdrawals
+(
+    block_slot         int not null,
+    withdrawalindex    int not null,
+    validatorindex     int not null,
+    address            bytea not null,
+    amount             bigint not null, -- in GWei
+    primary key (block_slot, withdrawalindex)
+);
+
+create index idx_blocks_withdrawals_recipient on blocks_withdrawals (address);
+create index idx_blocks_withdrawals_validatorindex on blocks_withdrawals (validatorindex);
+
+create table blocks_bls_change
+(
+    block_slot           int     not null,
+    validatorindex       int     not null,
+    signature            bytea   not null,
+    pubkey               bytea   not null,
+    address              bytea   not null,
+    primary key (block_slot, validatorindex)
+);
+create index idx_blocks_bls_change_pubkey on blocks_bls_change (pubkey);
+create index idx_blocks_bls_change_address on blocks_bls_change (address);
 
 drop table if exists blocks_transactions;
 create table blocks_transactions
@@ -451,7 +481,7 @@ create table users_datatable
     key            character varying(256)      not null,
     state          jsonb                       not null,
     updated_at     timestamp without time zone not null default 'now()',
-    primary key (user_id, key)
+    primary key (user_id, key) 
 );
 
 drop table if exists users_stripe_subscriptions;
@@ -472,7 +502,7 @@ create table users_app_subscriptions
     id              serial                        not null,
     user_id         int                           not null,
     product_id      character varying(256)        not null,
-    price_micros    int                           not null,
+    price_micros    bigint                        not null,
     currency        character varying(10)         not null,
     created_at      timestamp without time zone   not null,
     updated_at      timestamp without time zone   not null,
@@ -611,7 +641,7 @@ create table validator_tags
 
 drop table if exists users_webhooks;
 create table users_webhooks
-(
+(   
     id                serial                  not null,
     user_id           int                     not null,
     -- label             varchar(200)            not null,
@@ -650,8 +680,6 @@ create table api_statistics
     count  int                         not null default 0,
     primary key (ts, apikey, call)
 );
-
-
 
 drop table if exists stake_pools_stats;
 create table stake_pools_stats
@@ -854,7 +882,7 @@ create table eth_store_stats
     consensus_rewards_sum_wei numeric not null,
     total_rewards_wei numeric not null,
     apr float   not null,
-
+    
     primary key(day, validator)
 );
 create index idx_eth_store_validator on eth_store_stats (validator, day desc);
@@ -873,7 +901,7 @@ create table historical_pool_performance
     consensus_rewards_sum_wei numeric not null,
     total_rewards_wei numeric not null,
     apr float   not null,
-
+    
     primary key(day, pool)
 );
 create index idx_historical_pool_performance_pool on historical_pool_performance (pool, day desc);
@@ -950,6 +978,7 @@ CREATE TABLE validator_queue_deposits (
 CREATE INDEX idx_validator_queue_deposits_block_slot ON validator_queue_deposits USING btree (block_slot);
 CREATE UNIQUE INDEX idx_validator_queue_deposits_validatorindex ON validator_queue_deposits USING btree (validatorindex);
 
+drop table if exists service_status;
 create table service_status (name text not null, executable_name text not null, version text not null, pid int not null, status text not null, metadata jsonb, last_update timestamp not null, primary key (name, executable_name, version, pid));
 
 DROP TABLE IF EXISTS chart_series;

@@ -62,6 +62,14 @@
     group: "{{ beaconchain_explorer_aio_user }}"
     mode: '0640'
 
+- name: Create frontend config file
+  ansible.builtin.copy:
+    content: "{{ beaconchain_frontend_config }}"
+    dest: "{{ beaconchain_explorer_aio_installation_dir }}/explorer/frontend_config.yml"
+    owner: "{{ beaconchain_explorer_aio_user }}"
+    group: "{{ beaconchain_explorer_aio_user }}"
+    mode: '0640'
+
 - name: Create custom config files
   ansible.builtin.copy:
     content: "{{ item.value }}"
