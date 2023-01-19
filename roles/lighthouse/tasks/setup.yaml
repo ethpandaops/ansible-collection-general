@@ -32,6 +32,7 @@
     recurse: true
     owner: "{{ lighthouse_user }}"
     group: "{{ lighthouse_user }}"
+  loop:
     - "{{ lighthouse_validator_datadir }}/keys"
     - "{{ lighthouse_validator_datadir }}/secrets"
   when: lighthouse_validator_enabled
