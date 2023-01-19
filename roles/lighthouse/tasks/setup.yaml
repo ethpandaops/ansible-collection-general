@@ -24,3 +24,30 @@
     networks: "{{ lighthouse_container_networks }}"
     command: "{{ lighthouse_container_command + lighthouse_container_command_extra_args }} "
     user: "{{ lighthouse_user_meta.uid }}"
+
+- name: Create validator data dir
+  ansible.builtin.file:
+    path: "{{ lighthouse_validator_datadir }}"
+    state: directory
+    recurse: true
+    owner: "{{ lighthouse_user }}"
+    group: "{{ lighthouse_user }}"
+  #loop:
+  #  - "{{ lighthouse_validator_datadir }}/secrets"
+  #  - "{{ lighthouse_validator_datadir }}/validators"
+  when: lighthouse_validator_enabled
+
+- name: Run lighthouse validator container
+  community.docker.docker_container:
+    name: "{{ lighthouse_validator_container_name }}"
+    image: "{{ lighthouse_validator_container_image }}"
+    state: started
+    restart_policy: always
+    stop_timeout: "{{ lighthouse_validator_container_stop_timeout }}"
+    ports: "{{ lighthouse_validator_container_ports }}"
+    volumes: "{{ lighthouse_validator_container_volumes }}"
+    env: "{{ lighthouse_validator_container_env }}"
+    networks: "{{ lighthouse_validator_container_networks }}"
+    command: "{{ lighthouse_validator_container_command + lighthouse_validator_container_command_extra_args }} "
+    user: "{{ lighthouse_user_meta.uid }}"
+  when: lighthouse_validator_enabled
