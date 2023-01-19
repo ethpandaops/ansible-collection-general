@@ -67,7 +67,7 @@ lodestar_validator_container_networks: []
 lodestar_validator_container_command:
   - validator
   - --dataDir=/validator-data
-  - --keystoresDir=/validator-data/keystores
+  - --keystoresDir=/validator-data/keys
   - --secretsDir=/validator-data/secrets
   - --beaconNodes=http://{{ lodestar_container_name }}:{{ lodestar_ports_http_beacon }}
   - --suggestedFeeRecipient={{ lodestar_validator_fee_recipient }}

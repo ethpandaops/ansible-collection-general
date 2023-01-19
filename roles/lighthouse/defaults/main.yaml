@@ -71,7 +71,7 @@ lighthouse_validator_container_networks: []
 lighthouse_validator_container_command:
   - lighthouse
   - validator_client
-  - --validators-dir=/validator-data/validators
+  - --validators-dir=/validator-data/keys
   - --secrets-dir=/validator-data/secrets
   - --beacon-nodes=http://{{ lighthouse_container_name }}:{{ lighthouse_ports_http_beacon }}
   - --init-slashing-protection

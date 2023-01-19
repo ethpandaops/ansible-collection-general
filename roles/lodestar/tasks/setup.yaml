@@ -27,11 +27,14 @@
 
 - name: Create validator data dir
   ansible.builtin.file:
-    path: "{{ lodestar_validator_datadir }}"
+    path: "{{ item }}"
     state: directory
     recurse: true
     owner: "{{ lodestar_user }}"
     group: "{{ lodestar_user }}"
+  loop:
+    - "{{ lodestar_validator_datadir }}/keys"
+    - "{{ lodestar_validator_datadir }}/secrets"
   when: lodestar_validator_enabled
 
 - name: Run lodestar validator container
