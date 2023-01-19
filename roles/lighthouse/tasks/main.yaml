@@ -4,4 +4,3 @@
 
 - name: Cleanup lighthouse
   ansible.builtin.import_tasks: cleanup.yaml
-  when: lighthouse_cleanup
