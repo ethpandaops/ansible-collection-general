@@ -3,3 +3,9 @@
     name: "{{ lodestar_container_name }}"
     state: absent
   when: lodestar_cleanup
+
+- name: Remove lodestar validator container
+  community.docker.docker_container:
+    name: "{{ lodestar_validator_container_name }}"
+    state: absent
+  when: lodestar_cleanup or (not lodestar_validator_enabled)

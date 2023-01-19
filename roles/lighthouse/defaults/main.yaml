@@ -16,7 +16,7 @@ lighthouse_validator_datadir: /data/lighthouse-validator
 
 ################################################################################
 ##
-## Beacon chain container configuration
+## Beacon node container configuration
 ##
 ################################################################################
 lighthouse_container_name: lighthouse
@@ -83,3 +83,4 @@ lighthouse_validator_container_command:
 lighthouse_validator_container_command_extra_args: []
   # - --http
   # - --http-port=5062
+  # - --graffiti=hello-world

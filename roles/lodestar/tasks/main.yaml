@@ -4,4 +4,3 @@
 
 - name: Cleanup lodestar
   ansible.builtin.import_tasks: cleanup.yaml
-  when: lodestar_cleanup
