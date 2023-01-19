@@ -3,7 +3,7 @@ lodestar_datadir: /data/lodestar
 lodestar_auth_jwt_path: /data/execution-auth.secret
 lodestar_execution_engine_endpoint: http://geth:8551
 
-lodestar_cleanup: false # when set to "true" it will remove the container
+lodestar_cleanup: false # when set to "true" it will remove the container(s)
 
 lodestar_ports_p2p_tcp: 9000
 lodestar_ports_p2p_udp: 9000

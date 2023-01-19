@@ -3,3 +3,9 @@
     name: "{{ prysm_container_name }}"
     state: absent
   when: prysm_cleanup
+
+- name: Remove prysm validator container
+  community.docker.docker_container:
+    name: "{{ prysm_validator_container_name }}"
+    state: absent
+  when: prysm_cleanup or (not prysm_validator_enabled)

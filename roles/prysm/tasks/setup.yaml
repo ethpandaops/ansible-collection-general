@@ -24,3 +24,27 @@
     networks: "{{ prysm_container_networks }}"
     command: "{{ prysm_container_command + prysm_container_command_extra_args }} "
     user: "{{ prysm_user_meta.uid }}"
+
+- name: Create validator data dir
+  ansible.builtin.file:
+    path: "{{ prysm_validator_datadir }}"
+    state: directory
+    recurse: true
+    owner: "{{ prysm_user }}"
+    group: "{{ prysm_user }}"
+  when: prysm_validator_enabled
+
+- name: Run prysm validator container
+  community.docker.docker_container:
+    name: "{{ prysm_validator_container_name }}"
+    image: "{{ prysm_validator_container_image }}"
+    state: started
+    restart_policy: always
+    stop_timeout: "{{ prysm_validator_container_stop_timeout }}"
+    ports: "{{ prysm_validator_container_ports }}"
+    volumes: "{{ prysm_validator_container_volumes }}"
+    env: "{{ prysm_validator_container_env }}"
+    networks: "{{ prysm_validator_container_networks }}"
+    command: "{{ prysm_validator_container_command + prysm_validator_container_command_extra_args }} "
+    user: "{{ prysm_user_meta.uid }}"
+  when: prysm_validator_enabled
