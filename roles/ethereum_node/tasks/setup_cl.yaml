@@ -9,6 +9,8 @@
     lighthouse_ports_metrics: "{{ ethereum_node_cl_ports_metrics }}"
     lighthouse_container_networks: "{{ ethereum_node_docker_networks }}"
     lighthouse_execution_engine_endpoint: "{{ ethereum_node_execution_endpoint }}"
+    lighthouse_validator_enabled: "{{ ethereum_node_cl_validator_enabled }}"
+    lighthouse_validator_container_networks: "{{ ethereum_node_docker_networks }}"
 
 - name: "Consensus client: teku"
   when: ethereum_node_cl == "teku"
@@ -21,6 +23,8 @@
     teku_ports_metrics: "{{ ethereum_node_cl_ports_metrics }}"
     teku_container_networks: "{{ ethereum_node_docker_networks }}"
     teku_execution_engine_endpoint: "{{ ethereum_node_execution_endpoint }}"
+    teku_validator_enabled: "{{ ethereum_node_cl_validator_enabled }}"
+    teku_validator_container_networks: "{{ ethereum_node_docker_networks }}"
 
 - name: "Consensus client: prysm"
   when: ethereum_node_cl == "prysm"
@@ -33,6 +37,8 @@
     prysm_ports_metrics: "{{ ethereum_node_cl_ports_metrics }}"
     prysm_container_networks: "{{ ethereum_node_docker_networks }}"
     prysm_execution_engine_endpoint: "{{ ethereum_node_execution_endpoint }}"
+    prysm_validator_enabled: "{{ ethereum_node_cl_validator_enabled }}"
+    prysm_validator_container_networks: "{{ ethereum_node_docker_networks }}"
 
 - name: "Consensus client: lodestar"
   when: ethereum_node_cl == "lodestar"
@@ -45,6 +51,8 @@
     lodestar_ports_metrics: "{{ ethereum_node_cl_ports_metrics }}"
     lodestar_container_networks: "{{ ethereum_node_docker_networks }}"
     lodestar_execution_engine_endpoint: "{{ ethereum_node_execution_endpoint }}"
+    lodestar_validator_enabled: "{{ ethereum_node_cl_validator_enabled }}"
+    lodestar_validator_container_networks: "{{ ethereum_node_docker_networks }}"
 
 - name: "Consensus client: nimbus"
   when: ethereum_node_cl == "nimbus"
@@ -57,3 +65,5 @@
     nimbus_ports_metrics: "{{ ethereum_node_cl_ports_metrics }}"
     nimbus_container_networks: "{{ ethereum_node_docker_networks }}"
     nimbus_execution_engine_endpoint: "{{ ethereum_node_execution_endpoint }}"
+    nimbus_validator_enabled: "{{ ethereum_node_cl_validator_enabled }}"
+    nimbus_validator_container_networks: "{{ ethereum_node_docker_networks }}"

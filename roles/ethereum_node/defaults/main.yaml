@@ -10,6 +10,7 @@ ethereum_node_el_ports_metrics: 6060
 
 ethereum_node_cl: lighthouse # Valid options: lighthouse, lodestar, teku, prysm
 ethereum_node_cl_enabled: true
+ethereum_node_cl_validator_enabled: false
 ethereum_node_cl_ports_p2p_tcp: 9000
 ethereum_node_cl_ports_p2p_udp: 9000
 ethereum_node_cl_ports_http_beacon: 5052
