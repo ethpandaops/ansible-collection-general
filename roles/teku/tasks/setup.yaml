@@ -11,6 +11,18 @@
     owner: "{{ teku_user }}"
     group: "{{ teku_user }}"
 
+- name: Create validator data dir
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    recurse: true
+    owner: "{{ teku_user }}"
+    group: "{{ teku_user }}"
+  loop:
+    - "{{ teku_validator_datadir }}/keys"
+    - "{{ teku_validator_datadir }}/secrets"
+  when: teku_validator_enabled
+
 - name: Run teku container
   community.docker.docker_container:
     name: "{{ teku_container_name }}"
@@ -19,8 +31,20 @@
     restart_policy: always
     stop_timeout: "{{ teku_container_stop_timeout }}"
     ports: "{{ teku_container_ports }}"
-    volumes: "{{ teku_container_volumes }}"
+    volumes: >-
+      {{
+        teku_validator_enabled | ternary(
+          teku_container_volumes + teku_container_validator_volumes,
+          teku_container_volumes
+        )
+      }}
     env: "{{ teku_container_env }}"
     networks: "{{ teku_container_networks }}"
-    command: "{{ teku_container_command + teku_container_command_extra_args }} "
+    command: >-
+      {{
+        teku_validator_enabled | ternary(
+          teku_container_command + teku_container_validator_args + teku_container_command_extra_args,
+          teku_container_command + teku_container_command_extra_args,
+        )
+      }}
     user: "{{ teku_user_meta.uid }}"
