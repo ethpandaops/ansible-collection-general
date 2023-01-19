@@ -19,6 +19,8 @@ services:
     environment:
       - INDEXER_ENABLED=true
       - BIGTABLE_EMULATOR_HOST=beaconchain_bigtable:9000
+    ports:
+      - 8082:8082
   #######################################################################
   eth1indexer:
     container_name: beaconchain_eth1indexer
