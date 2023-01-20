@@ -3,13 +3,22 @@ lodestar_datadir: /data/lodestar
 lodestar_auth_jwt_path: /data/execution-auth.secret
 lodestar_execution_engine_endpoint: http://geth:8551
 
-lodestar_cleanup: false # when set to "true" it will remove the container
+lodestar_cleanup: false # when set to "true" it will remove the container(s)
 
 lodestar_ports_p2p_tcp: 9000
 lodestar_ports_p2p_udp: 9000
 lodestar_ports_http_beacon: 9596
 lodestar_ports_metrics: 8008
 
+lodestar_validator_enabled: false
+lodestar_validator_fee_recipient: "0xF29Ff96aaEa6C9A1fBa851f74737f3c069d4f1a9" # theprotocolguild.eth
+lodestar_validator_datadir: /data/lodestar-validator
+
+################################################################################
+##
+## Beacon node container configuration
+##
+################################################################################
 lodestar_container_name: lodestar
 lodestar_container_image: chainsafe/lodestar:latest
 lodestar_container_env: {}
@@ -41,3 +50,27 @@ lodestar_container_command:
   - --metrics.port={{ lodestar_ports_metrics }}
 lodestar_container_command_extra_args: []
 # - --checkpointSyncUrl=http://your-other-node
+
+################################################################################
+##
+## Validator container configuration
+##
+################################################################################
+lodestar_validator_container_name: "{{ lodestar_container_name }}-validator"
+lodestar_validator_container_image: "{{ lodestar_container_image }}"
+lodestar_validator_container_env: {}
+lodestar_validator_container_ports: []
+lodestar_validator_container_volumes:
+  - "{{ lodestar_validator_datadir }}:/validator-data"
+lodestar_validator_container_stop_timeout: "300"
+lodestar_validator_container_networks: []
+lodestar_validator_container_command:
+  - validator
+  - --dataDir=/validator-data
+  - --keystoresDir=/validator-data/keys
+  - --secretsDir=/validator-data/secrets
+  - --beaconNodes=http://{{ lodestar_container_name }}:{{ lodestar_ports_http_beacon }}
+  - --suggestedFeeRecipient={{ lodestar_validator_fee_recipient }}
+lodestar_validator_container_command_extra_args: []
+  # - --builder
+  # - --graffiti=hello-world

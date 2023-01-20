@@ -10,6 +10,15 @@ nimbus_ports_p2p_udp: 9000
 nimbus_ports_http_beacon: 5051
 nimbus_ports_metrics: 8008
 
+nimbus_validator_enabled: false
+nimbus_validator_fee_recipient: "0xF29Ff96aaEa6C9A1fBa851f74737f3c069d4f1a9" # theprotocolguild.eth
+nimbus_validator_datadir: /data/nimbus-validator
+
+################################################################################
+##
+## Beacon node container configuration
+##
+################################################################################
 nimbus_container_name: nimbus
 nimbus_container_image: statusim/nimbus-eth2:amd64-latest
 nimbus_container_env: {}
@@ -34,10 +43,23 @@ nimbus_container_command:
   - --rest
   - --rest-port={{ nimbus_ports_http_beacon }}
   - --rest-address=0.0.0.0
-  - --rest-allow-origin="*"
+  - --rest-allow-origin=*
   - --web3-url={{ nimbus_execution_engine_endpoint }}
   - --jwt-secret=/execution-auth.jwt
   - --metrics
   - --metrics-port={{ nimbus_ports_metrics }}
   - --metrics-address=0.0.0.0
 nimbus_container_command_extra_args: []
+  # - --graffiti=hello-world
+
+################################################################################
+##
+## Validator specific configuration
+##
+################################################################################
+nimbus_container_validator_args:
+  - --validators-dir=/validator-data/keys
+  - --secrets-dir=/validator-data/secrets
+  - --suggested-fee-recipient={{ nimbus_validator_fee_recipient }}
+nimbus_container_validator_volumes:
+  - "{{ nimbus_validator_datadir }}:/validator-data"

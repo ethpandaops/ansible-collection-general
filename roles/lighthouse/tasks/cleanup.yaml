@@ -3,3 +3,9 @@
     name: "{{ lighthouse_container_name }}"
     state: absent
   when: lighthouse_cleanup
+
+- name: Remove lighthouse validator container
+  community.docker.docker_container:
+    name: "{{ lighthouse_validator_container_name }}"
+    state: absent
+  when: lighthouse_cleanup or (not lighthouse_validator_enabled)

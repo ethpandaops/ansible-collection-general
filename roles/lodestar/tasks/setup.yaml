@@ -24,3 +24,30 @@
     networks: "{{ lodestar_container_networks }}"
     command: "{{ lodestar_container_command }} "
     user: "{{ lodestar_user_meta.uid }}"
+
+- name: Create validator data dir
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    recurse: true
+    owner: "{{ lodestar_user }}"
+    group: "{{ lodestar_user }}"
+  loop:
+    - "{{ lodestar_validator_datadir }}/keys"
+    - "{{ lodestar_validator_datadir }}/secrets"
+  when: lodestar_validator_enabled
+
+- name: Run lodestar validator container
+  community.docker.docker_container:
+    name: "{{ lodestar_validator_container_name }}"
+    image: "{{ lodestar_validator_container_image }}"
+    state: started
+    restart_policy: always
+    stop_timeout: "{{ lodestar_validator_container_stop_timeout }}"
+    ports: "{{ lodestar_validator_container_ports }}"
+    volumes: "{{ lodestar_validator_container_volumes }}"
+    env: "{{ lodestar_validator_container_env }}"
+    networks: "{{ lodestar_validator_container_networks }}"
+    command: "{{ lodestar_validator_container_command + lodestar_validator_container_command_extra_args }} "
+    user: "{{ lodestar_user_meta.uid }}"
+  when: lodestar_validator_enabled

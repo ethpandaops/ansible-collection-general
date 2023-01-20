@@ -3,7 +3,7 @@ prysm_datadir: /data/prysm
 prysm_auth_jwt_path: /data/execution-auth.secret
 prysm_execution_engine_endpoint: http://geth:8551
 
-prysm_cleanup: false # when set to "true" it will remove the container
+prysm_cleanup: false # when set to "true" it will remove the container(s)
 
 prysm_ports_p2p_tcp: 13000
 prysm_ports_p2p_udp: 12000
@@ -11,6 +11,15 @@ prysm_ports_http_beacon: 4000
 prysm_ports_metrics: 8080
 prysm_ports_grpc: 3500
 
+prysm_validator_enabled: false
+prysm_validator_fee_recipient: "0xF29Ff96aaEa6C9A1fBa851f74737f3c069d4f1a9" # theprotocolguild.eth
+prysm_validator_datadir: /data/prysm-validator
+
+################################################################################
+##
+## Beacon node container configuration
+##
+################################################################################
 prysm_container_name: prysm
 prysm_container_image: gcr.io/prysmaticlabs/prysm/beacon-chain:stable
 prysm_container_env: {}
@@ -40,3 +49,29 @@ prysm_container_command:
 prysm_container_command_extra_args: []
 # - --checkpoint-sync-url=http://your-other-node
 # - --genesis-beacon-api-url=http://your-other-node
+
+################################################################################
+##
+## Validator container configuration
+##
+################################################################################
+prysm_validator_container_name: "{{ prysm_container_name }}-validator"
+prysm_validator_container_image: "gcr.io/prysmaticlabs/prysm/validator:stable"
+prysm_validator_container_env: {}
+prysm_validator_container_ports: []
+prysm_validator_container_volumes:
+  - "{{ prysm_validator_datadir }}:/validator-data"
+prysm_validator_container_stop_timeout: "300"
+prysm_validator_container_networks: []
+prysm_validator_container_command:
+  - --accept-terms-of-use=true
+  - --datadir=/validator-data
+  - --wallet-dir=/validator-data/wallet
+  - --wallet-password-file=/validator-data/wallet_pass.txt
+  - --beacon-rpc-provider=http://{{ prysm_container_name }}:{{ prysm_ports_http_beacon }}
+  - --suggested-fee-recipient={{ prysm_validator_fee_recipient }}
+  - --monitoring-host=0.0.0.0
+  - --monitoring-port={{ prysm_ports_metrics }}
+
+prysm_validator_container_command_extra_args: []
+  # - --graffiti=hello-world

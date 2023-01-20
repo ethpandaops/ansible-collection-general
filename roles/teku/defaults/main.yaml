@@ -10,6 +10,15 @@ teku_ports_p2p_udp: 9000
 teku_ports_http_beacon: 5051
 teku_ports_metrics: 8008
 
+teku_validator_enabled: false
+teku_validator_fee_recipient: "0xF29Ff96aaEa6C9A1fBa851f74737f3c069d4f1a9" # theprotocolguild.eth
+teku_validator_datadir: /data/teku-validator
+
+################################################################################
+##
+## Beacon node container configuration
+##
+################################################################################
 teku_container_name: teku
 teku_container_image: consensys/teku:latest
 teku_container_env: {}
@@ -33,15 +42,28 @@ teku_container_command:
   - --rest-api-enabled
   - --rest-api-interface=0.0.0.0
   - --rest-api-port={{ teku_ports_http_beacon }}
-  - --rest-api-host-allowlist="*"
+  - --rest-api-host-allowlist=*
   - --ee-endpoint={{ teku_execution_engine_endpoint }}
   - --ee-jwt-secret-file=/execution-auth.jwt
   - --metrics-enabled=true
   - --metrics-interface=0.0.0.0
   - --metrics-port={{ teku_ports_metrics }}
-  - --metrics-host-allowlist="*"
+  - --metrics-host-allowlist=*
 teku_container_command_extra_args:
   - --data-storage-mode=PRUNE
 # - --network=mainnet
 # - --initial-state=http://your-other-node/eth/v2/debug/beacon/states/finalized
 # - --logging=INFO
+# - ---validators-graffiti=hello-world
+
+################################################################################
+##
+## Validator specific configuration
+##
+################################################################################
+teku_container_validator_args:
+  - --validator-keys=/validator-data/keys:/validator-data/secrets
+  - --validators-proposer-default-fee-recipient={{ teku_validator_fee_recipient }}
+  - --validators-keystore-locking-enabled=false
+teku_container_validator_volumes:
+  - "{{ teku_validator_datadir }}:/validator-data"

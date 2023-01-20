@@ -12,6 +12,18 @@
     owner: "{{ nimbus_user }}"
     group: "{{ nimbus_user }}"
 
+- name: Create validator data dir
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    recurse: true
+    owner: "{{ nimbus_user }}"
+    group: "{{ nimbus_user }}"
+  loop:
+    - "{{ nimbus_validator_datadir }}/keys"
+    - "{{ nimbus_validator_datadir }}/secrets"
+  when: nimbus_validator_enabled
+
 - name: Run nimbus container
   community.docker.docker_container:
     name: "{{ nimbus_container_name }}"
@@ -20,8 +32,20 @@
     restart_policy: always
     stop_timeout: "{{ nimbus_container_stop_timeout }}"
     ports: "{{ nimbus_container_ports }}"
-    volumes: "{{ nimbus_container_volumes }}"
+    volumes: >-
+      {{
+        nimbus_validator_enabled | ternary(
+          nimbus_container_volumes + nimbus_container_validator_volumes,
+          nimbus_container_volumes
+        )
+      }}
     env: "{{ nimbus_container_env }}"
     networks: "{{ nimbus_container_networks }}"
-    command: "{{ nimbus_container_command + nimbus_container_command_extra_args }} "
+    command: >-
+      {{
+        nimbus_validator_enabled | ternary(
+          nimbus_container_command + nimbus_container_validator_args + nimbus_container_command_extra_args,
+          nimbus_container_command + nimbus_container_command_extra_args,
+        )
+      }}
     user: "{{ nimbus_user_meta.uid }}"

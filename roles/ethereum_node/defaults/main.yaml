@@ -15,4 +15,7 @@ ethereum_node_cl_ports_p2p_udp: 9000
 ethereum_node_cl_ports_http_beacon: 5052
 ethereum_node_cl_ports_metrics: 5054
 
+ethereum_node_cl_validator_enabled: false
+ethereum_node_cl_validator_fee_recipient: "0xF29Ff96aaEa6C9A1fBa851f74737f3c069d4f1a9" # theprotocolguild.eth
+
 ethereum_node_execution_endpoint: "http://{{ ethereum_node_el }}:{{ ethereum_node_el_ports_engine }}"
