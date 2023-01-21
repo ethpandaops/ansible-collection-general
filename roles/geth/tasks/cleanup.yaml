@@ -1,4 +1,7 @@
-- name: Remove geth container
+- name: Remove geth containers
   community.docker.docker_container:
-    name: "{{ geth_container_name }}"
+    name: "{{ item }}"
     state: absent
+  loop:
+    - "{{ geth_container_name }}"
+    - "{{ geth_container_name }}-init"
