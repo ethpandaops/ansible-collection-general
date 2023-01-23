@@ -8,7 +8,8 @@ node_exporter_container_volumes:
   - /sys:/host/sys:ro
   - /:/rootfs:ro
 node_exporter_container_stop_timeout: "30"
-node_exporter_container_networks: []
+node_exporter_container_networks:
+  - name: "host"
 node_exporter_container_command:
   - '--path.procfs=/host/proc'
   - '--path.rootfs=/rootfs'
