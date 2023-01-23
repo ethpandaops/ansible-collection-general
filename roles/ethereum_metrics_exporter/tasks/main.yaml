@@ -9,4 +9,4 @@
     volumes: "{{ ethereum_metrics_exporter_container_volumes }}"
     env: "{{ ethereum_metrics_exporter_container_env }}"
     networks: "{{ ethereum_metrics_exporter_container_networks }}"
-    command: "{{ ethereum_metrics_exporter_container_command }} "
+    command: "{{ ethereum_metrics_exporter_container_command }}"
