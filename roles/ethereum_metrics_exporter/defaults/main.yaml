@@ -1,7 +1,7 @@
 ethereum_metrics_exporter_el_endpoint: http://your-el-node:8545
 ethereum_metrics_exporter_cl_endpoint: http://your-cl-node:4000
 
-ethereum_metrics_exporter_container_name: "ethereum_metrics_exporter"
+ethereum_metrics_exporter_container_name: "ethereum-metrics-exporter"
 ethereum_metrics_exporter_container_image: "samcm/ethereum-metrics-exporter:latest"
 ethereum_metrics_exporter_container_env: {}
 ethereum_metrics_exporter_container_ports: []
