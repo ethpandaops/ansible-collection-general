@@ -43,3 +43,18 @@ erigon_container_command:
   - --metrics.port={{ erigon_ports_metrics }}
 erigon_container_command_extra_args: []
 #  - --prune=htc
+
+
+# Only required changing when running custom networks
+erigon_init_custom_network: false
+erigon_init_custom_network_genesis_file: /config/genesis.json
+erigon_init_custom_network_container_env: {}
+erigon_init_custom_network_container_volumes:
+  - "{{ erigon_datadir }}:/data"
+  - "{{ erigon_init_custom_network_genesis_file }}:/genesis.json:ro"
+erigon_init_custom_network_container_entrypoint:
+  - erigon
+erigon_init_custom_network_container_command:
+  - --datadir=/data
+  - init
+  - /genesis.json

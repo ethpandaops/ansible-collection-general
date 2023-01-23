@@ -11,6 +11,29 @@
     owner: "{{ erigon_user }}"
     group: "{{ erigon_user }}"
 
+- name: Init custom network
+  when: erigon_init_custom_network
+  block:
+    - name: Check for empty chaindata dir
+      ansible.builtin.stat:
+        path: "{{ erigon_datadir }}/chaindata"
+      register: erigon_init_custom_network_chaindata_stat
+    - name: Chaindata is empty, run erigon init container
+      community.docker.docker_container:
+        name: "{{ erigon_container_name }}-init"
+        image: "{{ erigon_container_image }}"
+        detach: false
+        auto_remove: true
+        restart_policy: "no"
+        state: started
+        volumes: "{{ erigon_init_custom_network_container_volumes }}"
+        env: "{{ erigon_init_custom_network_container_env }}"
+        networks: "{{ erigon_container_networks }}"
+        entrypoint: "{{ erigon_init_custom_network_container_entrypoint }}"
+        command: "{{ erigon_init_custom_network_container_command }}"
+        user: "{{ erigon_user_meta.uid }}"
+      when: not erigon_init_custom_network_chaindata_stat.stat.exists
+
 - name: Run erigon container
   community.docker.docker_container:
     name: "{{ erigon_container_name }}"
