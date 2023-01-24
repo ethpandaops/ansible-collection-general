@@ -32,6 +32,8 @@ prysm_container_volumes:
   - "{{ prysm_auth_jwt_path }}:/execution-auth.jwt:ro"
 prysm_container_stop_timeout: "300"
 prysm_container_networks: []
+prysm_container_entrypoint:
+  - /app/cmd/beacon-chain/beacon-chain
 prysm_container_command:
   - --accept-terms-of-use=true
   - --datadir=/data
@@ -63,6 +65,8 @@ prysm_validator_container_volumes:
   - "{{ prysm_validator_datadir }}:/validator-data"
 prysm_validator_container_stop_timeout: "300"
 prysm_validator_container_networks: []
+prysm_validator_container_entrypoint:
+  -  /app/cmd/validator/validator
 prysm_validator_container_command:
   - --accept-terms-of-use=true
   - --datadir=/validator-data

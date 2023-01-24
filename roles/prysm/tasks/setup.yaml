@@ -22,7 +22,8 @@
     volumes: "{{ prysm_container_volumes }}"
     env: "{{ prysm_container_env }}"
     networks: "{{ prysm_container_networks }}"
-    command: "{{ prysm_container_command + prysm_container_command_extra_args }} "
+    entrypoint: "{{ prysm_container_entrypoint }}"
+    command: "{{ prysm_container_command + prysm_container_command_extra_args }}"
     user: "{{ prysm_user_meta.uid }}"
 
 - name: Create validator data dir
@@ -45,6 +46,7 @@
     volumes: "{{ prysm_validator_container_volumes }}"
     env: "{{ prysm_validator_container_env }}"
     networks: "{{ prysm_validator_container_networks }}"
-    command: "{{ prysm_validator_container_command + prysm_validator_container_command_extra_args }} "
+    entrypoint: "{{ prysm_validator_container_entrypoint }}"
+    command: "{{ prysm_validator_container_command + prysm_validator_container_command_extra_args }}"
     user: "{{ prysm_user_meta.uid }}"
   when: prysm_validator_enabled
