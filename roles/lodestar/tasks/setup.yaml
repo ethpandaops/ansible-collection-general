@@ -22,7 +22,7 @@
     volumes: "{{ lodestar_container_volumes }}"
     env: "{{ lodestar_container_env }}"
     networks: "{{ lodestar_container_networks }}"
-    command: "{{ lodestar_container_command }} "
+    command: "{{ lodestar_container_command + lodestar_container_command_extra_args }} "
     user: "{{ lodestar_user_meta.uid }}"
 
 - name: Create validator data dir
