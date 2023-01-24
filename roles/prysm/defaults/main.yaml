@@ -66,7 +66,7 @@ prysm_validator_container_volumes:
 prysm_validator_container_stop_timeout: "300"
 prysm_validator_container_networks: []
 prysm_validator_container_entrypoint:
-  -  /app/cmd/validator/validator
+  - /app/cmd/validator/validator
 prysm_validator_container_command:
   - --accept-terms-of-use=true
   - --datadir=/validator-data
