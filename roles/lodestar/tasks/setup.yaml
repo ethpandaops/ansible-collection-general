@@ -33,6 +33,7 @@
     owner: "{{ lodestar_user }}"
     group: "{{ lodestar_user }}"
   loop:
+    - "{{ lodestar_validator_datadir }}"
     - "{{ lodestar_validator_datadir }}/keys"
     - "{{ lodestar_validator_datadir }}/secrets"
   when: lodestar_validator_enabled
