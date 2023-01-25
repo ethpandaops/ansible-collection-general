@@ -5,11 +5,14 @@
 
 - name: Create data dir
   ansible.builtin.file:
-    path: "{{ nethermind_datadir }}"
+    path: "{{ item }}"
     state: directory
     recurse: true
     owner: "{{ nethermind_user }}"
     group: "{{ nethermind_user }}"
+  loop:
+    - "{{ nethermind_datadir }}"
+    - "{{ nethermind_datadir }}/nethermind"
 
 - name: Run nethermind container
   community.docker.docker_container:
