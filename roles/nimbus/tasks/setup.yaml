@@ -20,6 +20,7 @@
     owner: "{{ nimbus_user }}"
     group: "{{ nimbus_user }}"
   loop:
+    - "{{ nimbus_validator_datadir }}"
     - "{{ nimbus_validator_datadir }}/keys"
     - "{{ nimbus_validator_datadir }}/secrets"
   when: nimbus_validator_enabled

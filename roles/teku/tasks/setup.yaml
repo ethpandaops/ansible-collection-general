@@ -19,6 +19,7 @@
     owner: "{{ teku_user }}"
     group: "{{ teku_user }}"
   loop:
+    - "{{ teku_validator_datadir }}"
     - "{{ teku_validator_datadir }}/keys"
     - "{{ teku_validator_datadir }}/secrets"
   when: teku_validator_enabled
