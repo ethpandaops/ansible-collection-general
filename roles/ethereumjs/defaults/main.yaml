@@ -22,11 +22,11 @@ ethereumjs_container_volumes:
 ethereumjs_container_stop_timeout: "300"
 ethereumjs_container_networks: []
 ethereumjs_container_command:
-  - --datadir=/data
+  - --dataDir=/data
   - --port={{ ethereumjs_ports_p2p }}
   - --rpc
-  - --rpcaddr=0.0.0.0
-  - --rpcport={{ ethereumjs_ports_http_rpc }}
+  - --rpcAddr=0.0.0.0
+  - --rpcPort={{ ethereumjs_ports_http_rpc }}
   - --rpcCors=*
   - --rpcEngine
   - --rpcEngineAddr=0.0.0.0
