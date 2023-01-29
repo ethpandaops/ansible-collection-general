@@ -25,6 +25,9 @@ It uses the following underyling roles:
 - [ethpandaops.general.nethermind](../nethermind)
 - [ethpandaops.general.ethereumjs](../ethereumjs)
 
+### Metrics collection
+- [ethpandaops.general.ethereum_metrics_exporter](../ethereum_metrics_exporter)
+
 ## Requirements
 
 You'll need docker on the target system. Make sure to install it upfront.
@@ -36,6 +39,8 @@ Default variables are defined in [defaults/main.yaml](defaults/main.yaml)
 You can also overwrite any of the default variables used by the specific EL or CL client roles too.
 
 E.g. For geth that would be [ethpandaops.general.geth/defaults/main.yaml](../geth/defaults/main.yaml).
+
+To enable the `ethereum-metrics-exporter` you need to set `ethereum_node_metrics_exporter_enabled: true`. By default it's disabled.
 
 
 ## Dependencies
