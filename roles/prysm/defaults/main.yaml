@@ -7,9 +7,9 @@ prysm_cleanup: false # when set to "true" it will remove the container(s)
 
 prysm_ports_p2p_tcp: 13000
 prysm_ports_p2p_udp: 12000
-prysm_ports_http_beacon: 4000
+prysm_ports_http_beacon: 3500
 prysm_ports_metrics: 8080
-prysm_ports_grpc: 3500
+prysm_ports_grpc: 4000
 
 prysm_validator_enabled: false
 prysm_validator_fee_recipient: "0xF29Ff96aaEa6C9A1fBa851f74737f3c069d4f1a9" # theprotocolguild.eth
@@ -41,11 +41,11 @@ prysm_container_command:
   - --p2p-tcp-port={{ prysm_ports_p2p_tcp }}
   - --p2p-udp-port={{ prysm_ports_p2p_udp }}
   - --rpc-host=0.0.0.0
-  - --rpc-port={{ prysm_ports_http_beacon }}
+  - --rpc-port={{ prysm_ports_grpc }}
   - --jwt-secret=/execution-auth.jwt
   - --execution-endpoint={{ prysm_execution_engine_endpoint }}
   - --grpc-gateway-host=0.0.0.0
-  - --grpc-gateway-port={{ prysm_ports_grpc }}
+  - --grpc-gateway-port={{ prysm_ports_http_beacon }}
   - --monitoring-host=0.0.0.0
   - --monitoring-port={{ prysm_ports_metrics }}
 prysm_container_command_extra_args: []
