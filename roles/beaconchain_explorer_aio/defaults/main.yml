@@ -22,6 +22,9 @@ beaconchain_explorer_aio_docker_image_redis: redis:7
 beaconchain_explorer_aio_docker_image_postgres: postgres:14
 beaconchain_explorer_aio_docker_image_bigtable: guybrush/explorer-workshop-bogota # TODO get an image with little_bigtable+cbt
 
+# Using an external google bigtable
+google_bigtable: false
+
 beaconchain_explorer_aio_data_dir_explorer: /data/beaconchain-explorer-aio/explorer
 beaconchain_explorer_aio_data_dir_postgres: /data/beaconchain-explorer-aio/postgres
 beaconchain_explorer_aio_data_dir_bigtable: /data/beaconchain-explorer-aio/bigtable
@@ -37,8 +40,8 @@ beaconchain_explorer_aio_cmd_exporter:
 beaconchain_explorer_aio_cmd_eth1indexer:
   - /app/eth1indexer
   - -config=/config.yml
-  - -bigtable.project=explorer
-  - -bigtable.instance=beaconchain_bigtable:9000
+  - -bigtable.project=etherchain
+  - -bigtable.instance=devnet
   - "-erigon={{ beaconchain_explorer_aio_url_erigon_ws }}"
   - -data.concurrency=2
   - -data.offset=0
