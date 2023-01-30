@@ -50,10 +50,10 @@
     mode: "0640"
     owner: "{{ beaconchain_explorer_aio_user }}"
     group: "{{ beaconchain_explorer_aio_user }}"
-  
+
 - name: Copy bigtable_secret file
   ansible.builtin.copy:
-    content: "{{lookup('pipe', 'keybase fs read /keybase/team/ethereum.devops/withdrawals/bigtable_secret.json')}}" 
+    content: "{{ lookup('pipe', 'keybase fs read /keybase/team/ethereum.devops/withdrawals/bigtable_secret.json') }}"
     dest: "{{ beaconchain_explorer_aio_installation_dir }}/bigtable_secret.json"
     mode: "0640"
     owner: "{{ beaconchain_explorer_aio_user }}"
