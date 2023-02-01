@@ -37,6 +37,8 @@ geth_container_command:
   - --metrics.port={{ geth_ports_metrics }}
   - --metrics.addr=0.0.0.0
 geth_container_command_extra_args: []
+#  - --http.api=eth,net,web3
+#  - --http.vhosts=*
 
 # Only required changing when running custom networks
 geth_init_custom_network: false
