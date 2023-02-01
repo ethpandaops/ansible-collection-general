@@ -28,8 +28,6 @@ geth_container_command:
   - --http
   - --http.addr=0.0.0.0
   - --http.port={{ geth_ports_http_rpc }}
-  - --http.api=eth,net,web3
-  - --http.vhosts=*
   - --authrpc.addr=0.0.0.0
   - --authrpc.port={{ geth_ports_engine }}
   - --authrpc.vhosts=*
