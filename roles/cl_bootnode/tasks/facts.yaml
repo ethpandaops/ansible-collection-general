@@ -1,0 +1,10 @@
+- name: Get ENR record
+  ansible.builtin.uri:
+    url: http://127.0.0.1:8002/enr
+    return_content: true
+  register: cl_bootnode_facts_collect_enr
+
+- name: Set fact "cl_bootnode_facts_enr"
+  ansible.builtin.set_fact:
+    cl_bootnode_facts_enr: "{{ cl_bootnode_facts_collect_enr.content }}"
+    cacheable: true
