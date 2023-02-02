@@ -10,3 +10,7 @@
     env: "{{ cl_bootnode_container_env }}"
     networks: "{{ cl_bootnode_container_networks }}"
     command: "{{ cl_bootnode_container_command }}"
+
+- name: Set facts
+  ansible.builtin.import_tasks: facts.yaml
+  when: cl_bootnode_set_facts

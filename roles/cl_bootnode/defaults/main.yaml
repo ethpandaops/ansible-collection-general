@@ -1,5 +1,7 @@
 cl_bootnode_privkey: "0000000000000000000000000000000000000000000000000000000000000000"
 
+cl_bootnode_set_facts: true
+
 cl_bootnode_container_name: "cl-bootnode"
 cl_bootnode_container_image: "protolambda/eth2-bootnode:cleanup"
 cl_bootnode_container_env: {}

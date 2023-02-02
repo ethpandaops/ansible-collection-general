@@ -10,6 +10,12 @@ You'll need docker on the target system. Make sure to install it upfront.
 
 Default variables are defined in [defaults/main.yaml](defaults/main.yaml)
 
+## Facts
+
+This role will set some facts which allow you to access the following data via hostvars:
+
+- `cl_bootnode_facts_enr` - Public ENR for the bootnode
+
 ## Dependencies
 
 You'll need docker to run this role. One way of installing docker could be via ansible galaxy with the following dependencies set within `requirements.yaml`:
