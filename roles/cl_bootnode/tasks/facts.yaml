@@ -4,7 +4,7 @@
     return_content: true
   register: cl_bootnode_facts_collect_enr
 
-- name: Set fact "cl_bootnode_facts_enr"
+- name: Set fact "cl_bootnode_fact_enr"
   ansible.builtin.set_fact:
-    cl_bootnode_facts_enr: "{{ cl_bootnode_facts_collect_enr.content }}"
+    cl_bootnode_fact_enr: "{{ cl_bootnode_facts_collect_enr.content }}"
     cacheable: true

@@ -14,7 +14,7 @@ Default variables are defined in [defaults/main.yaml](defaults/main.yaml)
 
 This role will set some facts which allow you to access the following data via hostvars:
 
-- `cl_bootnode_facts_enr` - Public ENR for the bootnode
+- `cl_bootnode_fact_enr` - Public ENR for the bootnode
 
 ## Dependencies
 
