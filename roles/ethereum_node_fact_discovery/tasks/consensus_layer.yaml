@@ -3,6 +3,9 @@
     url: "{{ ethereum_node_fact_discovery_cl_uri }}"
     return_content: true
   register: ethereum_node_fact_discovery_beacon_node_identity
+  until: ethereum_node_fact_discovery_beacon_node_identity.status == 200
+  retries: "{{ ethereum_node_fact_discovery_cl_retries }}"
+  delay: "{{ ethereum_node_fact_discovery_cl_delay }}"
 
 - name: Set consensus node facts
   ansible.builtin.set_fact:
