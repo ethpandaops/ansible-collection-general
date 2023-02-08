@@ -21,6 +21,9 @@
 - name: Collect and set facts about the nodes
   ansible.builtin.include_role:
     name: ethpandaops.general.ethereum_node_fact_discovery
+    apply:
+      tags:
+        - ethereum_node_fact_discovery
   tags:
     - ethereum_node_fact_discovery
   vars:
