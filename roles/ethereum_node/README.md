@@ -25,6 +25,9 @@ It uses the following underyling roles:
 - [ethpandaops.general.nethermind](../nethermind)
 - [ethpandaops.general.ethereumjs](../ethereumjs)
 
+### Facts discovery
+- [ethpandaops.general.ethereum_node_fact_discovery](../ethereum_node_fact_discovery)
+
 ### Metrics collection
 - [ethpandaops.general.ethereum_metrics_exporter](../ethereum_metrics_exporter)
 

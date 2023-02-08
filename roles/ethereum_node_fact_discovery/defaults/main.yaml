@@ -1,0 +1,16 @@
+ethereum_node_fact_discovery_el: true
+ethereum_node_fact_discovery_cl: true
+
+# How to find the EL node key on the target system
+ethereum_node_fact_discovery_el_key_cmd:
+  besu: cat /data/besu/key | cut -d 'x' -f2
+  geth: cat /data/geth/geth/nodekey
+  erigon: cat /data/erigon/nodekey
+  nethermind: xxd -p -c32 /data/nethermind/keystore/node.key.plain
+
+# How to find the EL enode on the target system
+ethereum_node_fact_discovery_el_enode_cmd:
+  ethereumjs: cat /data/ethereumjs/genesis/rlpx
+
+# How to find the CL data
+ethereum_node_fact_discovery_cl_uri: http://localhost:5052/eth/v1/node/identity

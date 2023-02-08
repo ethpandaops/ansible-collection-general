@@ -1,0 +1,44 @@
+- name: Handle Besu, Geth, Erigon, Nethermind enode
+  when: ethereum_node_el in ["besu", "geth", "erigon", "nethermind"]
+  block:
+    - name: Get EL node key
+      ansible.builtin.shell: "{{ ethereum_node_fact_discovery_el_key_cmd[ethereum_node_el] }}" # noqa command-instead-of-shell
+      register: ethereum_node_fact_discovery_el_nodekey
+      changed_when: false
+      failed_when: (ethereum_node_fact_discovery_el_nodekey.rc != 0) or (ethereum_node_fact_discovery_el_nodekey.stdout == "")
+
+    - name: Turn EL nodekey into enode
+      ansible.builtin.command: >-
+        docker run -t --rm ethereum/client-go:alltools-latest bootnode -writeaddress -nodekeyhex {{ ethereum_node_fact_discovery_el_nodekey.stdout }}
+      vars:
+        ansible_connection: local
+      delegate_to: 127.0.0.1
+      become: false
+      register: ethereum_node_fact_discovery_el_pubkey
+      changed_when: false
+      failed_when: (ethereum_node_fact_discovery_el_pubkey.rc != 0) or (ethereum_node_fact_discovery_el_pubkey.stdout == "")
+
+    - name: Store enode var "ethereum_node_fact_el_enode"
+      ansible.builtin.set_fact: # noqa yaml[line-length]
+        ethereum_node_fact_el_enode: >-
+          enode://{{ ethereum_node_fact_discovery_el_pubkey.stdout }}@{{ ansible_host }}:{{ ethereum_node_el_ports_p2p_tcp }}?discport={{ ethereum_node_el_ports_p2p_udp }}
+        cacheable: true
+
+- name: Handle EthereumJS enode
+  when: ethereum_node_el in ["ethereumjs"]
+  block:
+    - name: Get enode
+      ansible.builtin.command: "{{ ethereum_node_fact_discovery_el_enode_cmd[ethereum_node_el] }}"
+      register: ethereum_node_fact_discovery_el_enode
+      changed_when: false
+
+    - name: Store enode var "ethereum_node_fact_el_enode"
+      ansible.builtin.set_fact:
+        ethereum_node_fact_el_enode: "{{ ethereum_node_fact_discovery_el_enode.stdout }}"
+        cacheable: true
+
+- name: Show execution node facts
+  ansible.builtin.debug:
+    var: "{{ item }}"
+  loop:
+    - ethereum_node_fact_el_enode

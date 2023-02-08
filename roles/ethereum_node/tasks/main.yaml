@@ -18,6 +18,16 @@
   ansible.builtin.import_tasks: setup_cl.yaml
   when: ethereum_node_cl_enabled
 
+- name: Collect and set facts about the nodes
+  ansible.builtin.include_role:
+    name: ethpandaops.general.ethereum_node_fact_discovery
+  tags:
+    - ethereum_node_fact_discovery
+  vars:
+    ethereum_node_fact_discovery_el: "{{ ethereum_node_el_enabled }}"
+    ethereum_node_fact_discovery_cl: "{{ ethereum_node_cl_enabled }}"
+  when: ethereum_node_fact_discovery_enabled
+
 - name: Setup metrics exporter
   ansible.builtin.include_role:
     name: ethpandaops.general.ethereum_metrics_exporter
