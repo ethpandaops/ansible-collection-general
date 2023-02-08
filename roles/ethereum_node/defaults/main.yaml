@@ -21,6 +21,9 @@ ethereum_node_cl_ports_metrics: 5054
 ethereum_node_cl_validator_enabled: false
 ethereum_node_cl_validator_fee_recipient: "0xF29Ff96aaEa6C9A1fBa851f74737f3c069d4f1a9" # theprotocolguild.eth
 
+# Fact discovery
+ethereum_node_fact_discovery_enabled: true
+
 # Metrics exporter
 ethereum_node_metrics_exporter_enabled: false
 
