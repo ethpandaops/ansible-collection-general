@@ -1,0 +1,32 @@
+xatu_sentry_user: "xatu-sentry"
+
+xatu_sentry_container_name: "xatu-sentry"
+xatu_sentry_container_image: "ethpandaops/xatu:latest"
+xatu_sentry_container_env: {}
+xatu_sentry_container_ports: []
+xatu_sentry_container_volumes:
+  - "{{ xatu_sentry_paths_config }}/config.yaml:/config.yaml:ro"
+
+xatu_sentry_container_stop_timeout: "120"
+xatu_sentry_container_networks: []
+
+xatu_sentry_paths_config: /etc/xatu-sentry/
+
+xatu_sentry_container_command:
+  - sentry
+  - --config=/config.yaml
+
+xatu_sentry_config: |
+  logging: "info"
+  metricsAddr: ":9090"
+  name:  "{{ inventory_hostname }}"
+  ethereum:
+    beaconNodeAddress: your-beacon-node:4000
+  outputs:
+  - name: grpc
+    type: xatu
+    config:
+      address: remote-xatu-server
+      # tls: true
+      # headers:
+      #  authorization: "Basic {{ (xatu_server_username + ":" + xatu_server_password) | b64encode }}"

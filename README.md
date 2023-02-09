@@ -12,7 +12,7 @@ A collection of reusable ansible components used by the EthPandaOps team.
 - [dshackle](roles/dshackle)
 - [ethereum_auth_jwt](roles/ethereum_auth_jwt)
 - [ethereum_metrics_exporter](roles/ethereum_metrics_exporter)
-
+- [xatu_sentry](roles/xatu_sentry)
 
 ### Ethereum client pair
 - [ethereum_node](roles/ethereum_node)

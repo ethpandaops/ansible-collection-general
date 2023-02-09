@@ -1,0 +1,43 @@
+- name: Add xatu sentry user
+  ansible.builtin.user:
+    name: "{{ xatu_sentry_user }}"
+    shell: /bin/nologin
+
+- name: Get xatu sentry uid
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ xatu_sentry_user }}"
+  register: xatu_sentry_user_getent
+
+- name: Create xatu sentry dirs
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0777'
+    owner: "{{ xatu_sentry_user }}"
+    group: "{{ xatu_sentry_user }}"
+  loop:
+    - "{{ xatu_sentry_paths_config }}"
+
+- name: Create xatu sentry config
+  ansible.builtin.copy:
+    content: "{{ xatu_sentry_config }}"
+    dest: "{{ xatu_sentry_paths_config }}/config.yaml"
+    owner: "{{ xatu_sentry_user }}"
+    group: "{{ xatu_sentry_user }}"
+    mode: '0640'
+  notify: Restart xatu sentry container
+
+- name: Run xatu sentry container
+  community.docker.docker_container:
+    name: "{{ xatu_sentry_container_name }}"
+    image: "{{ xatu_sentry_container_image }}"
+    user: "{{ xatu_sentry_user_getent.ansible_facts.getent_passwd[xatu_sentry_user][1] }}"
+    state: started
+    restart_policy: always
+    stop_timeout: "{{ xatu_sentry_container_stop_timeout }}"
+    ports: "{{ xatu_sentry_container_ports }}"
+    volumes: "{{ xatu_sentry_container_volumes }}"
+    env: "{{ xatu_sentry_container_env }}"
+    networks: "{{ xatu_sentry_container_networks }}"
+    command: "{{ xatu_sentry_container_command }}"
