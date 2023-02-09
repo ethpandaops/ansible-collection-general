@@ -29,7 +29,6 @@ ethereum_node_metrics_exporter_enabled: false
 
 # Xatu sentry
 ethereum_node_xatu_sentry_enabled: false
-ethereum_node_xatu_sentry_config: |
 
 # Generated RPC/Engine/Beacon endpoints
 ethereum_node_el_engine_endpoint: "http://{{ ethereum_node_el }}:{{ ethereum_node_el_ports_engine }}"

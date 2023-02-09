@@ -16,17 +16,23 @@ xatu_sentry_container_command:
   - sentry
   - --config=/config.yaml
 
+xatu_sentry_config_name: "{{ inventory_hostname }}"
+xatu_sentry_config_beacon_uri: your-beacon-node:4000
+xatu_sentry_config_server_address: remote-xatu-server:1234
+xatu_sentry_config_server_auth_user: xatu-user
+xatu_sentry_config_server_auth_password: xatu-password
+
 xatu_sentry_config: |
   logging: "info"
   metricsAddr: ":9090"
-  name:  "{{ inventory_hostname }}"
+  name: "{{ xatu_sentry_config_name }}"
   ethereum:
-    beaconNodeAddress: your-beacon-node:4000
+    beaconNodeAddress: {{ xatu_sentry_config_beacon_uri }}
   outputs:
   - name: grpc
     type: xatu
     config:
-      address: remote-xatu-server
-      # tls: true
-      # headers:
-      #  authorization: "Basic {{ (xatu_server_username + ":" + xatu_server_password) | b64encode }}"
+      address: {{ xatu_sentry_config_server_address }}
+      tls: true
+      headers:
+        authorization: "Basic {{ (xatu_sentry_config_server_auth_user + ":" + xatu_sentry_config_server_auth_password) | b64encode }}"
