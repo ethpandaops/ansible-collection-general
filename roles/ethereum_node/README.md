@@ -28,8 +28,9 @@ It uses the following underyling roles:
 ### Facts discovery
 - [ethpandaops.general.ethereum_node_fact_discovery](../ethereum_node_fact_discovery)
 
-### Metrics collection
+### Metrics/Events collection
 - [ethpandaops.general.ethereum_metrics_exporter](../ethereum_metrics_exporter)
+- [ethpandaops.general.xatu_sentry](../xatu_sentry)
 
 ## Requirements
 
