@@ -40,8 +40,8 @@ beaconchain_explorer_aio_cmd_exporter:
 beaconchain_explorer_aio_cmd_eth1indexer:
   - /app/eth1indexer
   - -config=/config.yml
-  - -bigtable.project=etherchain
-  - -bigtable.instance=devnet
+  - -bigtable.project="{{ 'etherchain' if google_bigtable else 'explorer' }}"
+  - -bigtable.instance="{{ 'devnet' if google_bigtable else 'beaconchain_bigtable:9000' }}"
   - "-erigon={{ beaconchain_explorer_aio_url_erigon_ws }}"
   - -data.concurrency=2
   - -data.offset=0
@@ -57,6 +57,8 @@ beaconchain_explorer_aio_cmd_eth1indexer:
 beaconchain_explorer_aio_cmd_statistics:
   - /app/statistics
   - -config=/config.yml
+  - -validators.enabled
+  - -charts.enabled
 
 beaconchain_explorer_aio_cmd_frontend_updater:
   - /app/frontend-data-updater

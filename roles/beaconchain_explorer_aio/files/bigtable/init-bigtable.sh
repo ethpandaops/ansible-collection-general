@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-
-INSTANCE="devnet"
-PROJECT="etherchain"
+export BIGTABLE_EMULATOR_HOST="beaconchain_bigtable:9000"
+INSTANCE="beaconchain_bigtable:9000"
+PROJECT="explorer"
 
 cbt -project $PROJECT -instance $INSTANCE createtable beaconchain
 cbt -project $PROJECT -instance $INSTANCE createtable blocks

@@ -45,7 +45,7 @@
 
 - name: Copy the postgres table sql file from github
   ansible.builtin.get_url:
-    url: https://raw.githubusercontent.com/gobitfly/eth2-beaconchain-explorer/feature/withdrawals/tables.sql
+    url: https://raw.githubusercontent.com/gobitfly/eth2-beaconchain-explorer/master/tables.sql
     dest: "{{ beaconchain_explorer_aio_installation_dir }}/postgres/tables.sql"
     mode: "0640"
     owner: "{{ beaconchain_explorer_aio_user }}"
@@ -107,10 +107,11 @@
       - beaconchain_explorer_aio_compose_db_meta.services["postgres"]["beaconchain_postgres"].state.running
       - beaconchain_explorer_aio_compose_db_meta.services["redis"]["beaconchain_redis"].state.running
 
-# - name: Init bigtable
-#   ansible.builtin.shell: "docker exec beaconchain_bigtable /init-bigtable.sh && touch {{ beaconchain_explorer_aio_installation_dir }}/bigtable/initialized"
-#   args:
-#     creates: "{{ beaconchain_explorer_aio_installation_dir }}/bigtable/initialized"
+- name: Init bigtable
+  ansible.builtin.shell: "docker exec beaconchain_bigtable /init-bigtable.sh && touch {{ beaconchain_explorer_aio_installation_dir }}/bigtable/initialized"
+  args:
+    creates: "{{ beaconchain_explorer_aio_installation_dir }}/bigtable/initialized"
+  when: not google_bigtable
 
 - name: Create remaining explorer services
   community.docker.docker_compose:

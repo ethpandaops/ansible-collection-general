@@ -14,12 +14,16 @@ services:
       - /etc/passwd:/etc/passwd:ro
       - /etc/group:/etc/group:ro
       - "{{ beaconchain_explorer_aio_installation_dir }}/explorer/config.yml:/config.yml:ro"
-      - "{{ beaconchain_explorer_aio_installation_dir }}/bigtable_secret.json:/bigtable_secret.json:ro"
       - "{{ beaconchain_explorer_aio_installation_dir }}/explorer/custom_configs:/custom_configs:ro"
       - "{{ beaconchain_explorer_aio_data_dir_explorer }}:/data"
+{% if google_bigtable %}
+      - "{{ beaconchain_explorer_aio_installation_dir }}/bigtable_secret.json:/bigtable_secret.json:ro"
+{% endif %}
     environment:
       - INDEXER_ENABLED=true
+{% if google_bigtable %}
       - GOOGLE_APPLICATION_CREDENTIALS=/bigtable_secret.json
+{% endif %}
     ports:
       - 8082:8082
   #######################################################################
@@ -33,12 +37,14 @@ services:
     volumes:
       - /etc/passwd:/etc/passwd:ro
       - /etc/group:/etc/group:ro
-      - "{{ beaconchain_explorer_aio_installation_dir }}/bigtable_secret.json:/bigtable_secret.json:ro"
       - "{{ beaconchain_explorer_aio_installation_dir }}/explorer/config.yml:/config.yml:ro"
       - "{{ beaconchain_explorer_aio_installation_dir }}/explorer/custom_configs:/custom_configs:ro"
       - "{{ beaconchain_explorer_aio_data_dir_explorer }}:/data"
+{% if google_bigtable %}
+      - "{{ beaconchain_explorer_aio_installation_dir }}/bigtable_secret.json:/bigtable_secret.json:ro" 
     environment:
       - GOOGLE_APPLICATION_CREDENTIALS=/bigtable_secret.json
+{% endif %}
   #######################################################################
   statistics:
     container_name: beaconchain_statistics
@@ -53,8 +59,14 @@ services:
       - "{{ beaconchain_explorer_aio_installation_dir }}/explorer/config.yml:/config.yml:ro"
       - "{{ beaconchain_explorer_aio_installation_dir }}/explorer/custom_configs:/custom_configs:ro"
       - "{{ beaconchain_explorer_aio_data_dir_explorer }}:/data"
+{% if google_bigtable %}
+      - "{{ beaconchain_explorer_aio_installation_dir }}/bigtable_secret.json:/bigtable_secret.json:ro"
+{% endif %}
     environment:
       - INDEXER_ENABLED=false
+{% if google_bigtable %}
+      - GOOGLE_APPLICATION_CREDENTIALS=/bigtable_secret.json
+{% endif %}
   #######################################################################
   frontend-updater:
     container_name: beaconchain_frontend_updater
@@ -63,16 +75,15 @@ services:
     stop_grace_period: 5m
     restart: always
     command: {{ beaconchain_explorer_aio_cmd_frontend_updater | to_yaml }}
-    environment:
-      - FRONTEND_ENABLED=true
-      - GOOGLE_APPLICATION_CREDENTIALS=/bigtable_secret.json
     volumes:
       - /etc/passwd:/etc/passwd:ro
       - /etc/group:/etc/group:ro
-      - "{{ beaconchain_explorer_aio_installation_dir }}/bigtable_secret.json:/bigtable_secret.json:ro"
       - "{{ beaconchain_explorer_aio_installation_dir }}/explorer/frontend_config.yml:/config.yml:ro"
       - "{{ beaconchain_explorer_aio_installation_dir }}/explorer/custom_configs:/custom_configs:ro"
       - "{{ beaconchain_explorer_aio_data_dir_explorer }}:/data"
+    environment:
+      - FRONTEND_ENABLED=true
+
   #######################################################################
   frontend:
     container_name: beaconchain_frontend
@@ -81,18 +92,22 @@ services:
     stop_grace_period: 5m
     restart: always
     command: {{ beaconchain_explorer_aio_cmd_frontend | to_yaml }}
-    environment:
-      - FRONTEND_ENABLED=true
-      - GOOGLE_APPLICATION_CREDENTIALS=/bigtable_secret.json
     volumes:
       - /etc/passwd:/etc/passwd:ro
       - /etc/group:/etc/group:ro
-      - "{{ beaconchain_explorer_aio_installation_dir }}/bigtable_secret.json:/bigtable_secret.json:ro"
       - "{{ beaconchain_explorer_aio_installation_dir }}/explorer/frontend_config.yml:/config.yml:ro"
       - "{{ beaconchain_explorer_aio_installation_dir }}/explorer/custom_configs:/custom_configs:ro"
       - "{{ beaconchain_explorer_aio_data_dir_explorer }}:/data"
+{% if google_bigtable %}
+      - "{{ beaconchain_explorer_aio_installation_dir }}/bigtable_secret.json:/bigtable_secret.json:ro"
+{% endif %}
     ports:
       - 8080:8080
+    environment:
+      - FRONTEND_ENABLED=true
+{% if google_bigtable %}
+      - GOOGLE_APPLICATION_CREDENTIALS=/bigtable_secret.json
+{% endif %}
   #######################################################################
   #                              DATABASES
   #######################################################################
@@ -124,22 +139,24 @@ services:
       - "{{ beaconchain_explorer_aio_installation_dir }}/postgres/tables.sql:/docker-entrypoint-initdb.d/init.sql"
       - "{{ beaconchain_explorer_aio_data_dir_postgres }}:/var/lib/postgresql/data"
   #######################################################################
-  #bigtable:
-  # container_name: beaconchain_bigtable
-  #  image: "{{ beaconchain_explorer_aio_docker_image_bigtable }}"
-  #  user: "{{ beaconchain_explorer_aio_user_uid }}"
-  #  stop_grace_period: 5m
-  #  restart: always
-  #  entrypoint:
-  #    - little_bigtable
-  #  command:
-  #    - -db-file=/data/db
-  #    - -host=0.0.0.0
-  #    - -port=9000
-  #  volumes:
-  #    - /etc/passwd:/etc/passwd:ro
-  #    - /etc/group:/etc/group:ro
-  #    - "{{ beaconchain_explorer_aio_installation_dir }}/bigtable/init-bigtable.sh:/init-bigtable.sh"
-  #    - "{{ beaconchain_explorer_aio_installation_dir }}/bigtable/cbt-definitions.yml:/cbt-definitions.yml"
-  #    - "{{ beaconchain_explorer_aio_installation_dir }}/bigtable/eth1.proto:/eth1.proto"
-  #    - "{{ beaconchain_explorer_aio_data_dir_bigtable }}:/data"
+{% if not google_bigtable %}
+  bigtable:
+   container_name: beaconchain_bigtable
+    image: "{{ beaconchain_explorer_aio_docker_image_bigtable }}"
+    user: "{{ beaconchain_explorer_aio_user_uid }}"
+    stop_grace_period: 5m
+    restart: always
+    entrypoint:
+      - little_bigtable
+    command:
+      - -db-file=/data/db
+      - -host=0.0.0.0
+      - -port=9000
+    volumes:
+      - /etc/passwd:/etc/passwd:ro
+      - /etc/group:/etc/group:ro
+      - "{{ beaconchain_explorer_aio_installation_dir }}/bigtable/init-bigtable.sh:/init-bigtable.sh"
+      - "{{ beaconchain_explorer_aio_installation_dir }}/bigtable/cbt-definitions.yml:/cbt-definitions.yml"
+      - "{{ beaconchain_explorer_aio_installation_dir }}/bigtable/eth1.proto:/eth1.proto"
+      - "{{ beaconchain_explorer_aio_data_dir_bigtable }}:/data"
+{% endif %}
