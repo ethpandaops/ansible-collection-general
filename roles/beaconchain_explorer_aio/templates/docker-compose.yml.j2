@@ -147,7 +147,7 @@ services:
   #######################################################################
 {% if not google_bigtable %}
   bigtable:
-   container_name: beaconchain_bigtable
+    container_name: beaconchain_bigtable
     image: "{{ beaconchain_explorer_aio_docker_image_bigtable }}"
     user: "{{ beaconchain_explorer_aio_user_uid }}"
     stop_grace_period: 5m
