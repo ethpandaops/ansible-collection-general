@@ -81,8 +81,14 @@ services:
       - "{{ beaconchain_explorer_aio_installation_dir }}/explorer/frontend_config.yml:/config.yml:ro"
       - "{{ beaconchain_explorer_aio_installation_dir }}/explorer/custom_configs:/custom_configs:ro"
       - "{{ beaconchain_explorer_aio_data_dir_explorer }}:/data"
+{% if google_bigtable %}
+      - "{{ beaconchain_explorer_aio_installation_dir }}/bigtable_secret.json:/bigtable_secret.json:ro"
+{% endif %}
     environment:
       - FRONTEND_ENABLED=true
+{% if google_bigtable %}
+      - GOOGLE_APPLICATION_CREDENTIALS=/bigtable_secret.json
+{% endif %}
 
   #######################################################################
   frontend:
