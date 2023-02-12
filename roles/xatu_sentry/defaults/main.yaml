@@ -21,6 +21,7 @@ xatu_sentry_config_beacon_uri: your-beacon-node:4000
 xatu_sentry_config_server_address: remote-xatu-server:1234
 xatu_sentry_config_server_auth_user: xatu-user
 xatu_sentry_config_server_auth_password: xatu-password
+xatu_sentry_config_network_name_override: ""
 
 xatu_sentry_config: |
   logging: "info"
@@ -28,6 +29,7 @@ xatu_sentry_config: |
   name: "{{ xatu_sentry_config_name }}"
   ethereum:
     beaconNodeAddress: {{ xatu_sentry_config_beacon_uri }}
+    overrideNetworkName: {{ xatu_sentry_config_network_name_override }}
   outputs:
   - name: grpc
     type: xatu
