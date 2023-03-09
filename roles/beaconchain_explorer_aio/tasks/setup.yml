@@ -11,7 +11,7 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    mode: '0750'
+    mode: "0750"
     owner: "{{ beaconchain_explorer_aio_user }}"
     group: "{{ beaconchain_explorer_aio_user }}"
   loop:

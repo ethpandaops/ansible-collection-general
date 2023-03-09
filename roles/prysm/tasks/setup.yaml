@@ -7,7 +7,7 @@
   ansible.builtin.file:
     path: "{{ prysm_datadir }}"
     state: directory
-    recurse: true
+    mode: "0750"
     owner: "{{ prysm_user }}"
     group: "{{ prysm_user }}"
 
@@ -30,7 +30,7 @@
   ansible.builtin.file:
     path: "{{ prysm_validator_datadir }}"
     state: directory
-    recurse: true
+    mode: "0750"
     owner: "{{ prysm_user }}"
     group: "{{ prysm_user }}"
   when: prysm_validator_enabled
