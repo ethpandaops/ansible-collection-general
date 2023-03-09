@@ -4,6 +4,7 @@
     owner: 1000
     group: 1000
     state: directory
+    mode: "0750"
 
 - name: Run arbitrum_node container
   community.docker.docker_container:

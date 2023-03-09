@@ -7,6 +7,7 @@
   ansible.builtin.file:
     path: "{{ besu_datadir }}"
     state: directory
+    mode: "0750"
     owner: "{{ besu_user }}"
     group: "{{ besu_user }}"
 
