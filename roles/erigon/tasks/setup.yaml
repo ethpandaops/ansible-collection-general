@@ -7,7 +7,6 @@
   ansible.builtin.file:
     path: "{{ erigon_datadir }}"
     state: directory
-    recurse: true
     owner: "{{ erigon_user }}"
     group: "{{ erigon_user }}"
 

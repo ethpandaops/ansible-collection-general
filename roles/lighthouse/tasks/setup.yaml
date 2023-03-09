@@ -7,7 +7,6 @@
   ansible.builtin.file:
     path: "{{ lighthouse_datadir }}"
     state: directory
-    recurse: true
     owner: "{{ lighthouse_user }}"
     group: "{{ lighthouse_user }}"
 
@@ -29,7 +28,6 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    recurse: true
     owner: "{{ lighthouse_user }}"
     group: "{{ lighthouse_user }}"
   loop:

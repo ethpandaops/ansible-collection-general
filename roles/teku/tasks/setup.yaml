@@ -7,7 +7,6 @@
   ansible.builtin.file:
     path: "{{ teku_datadir }}"
     state: directory
-    recurse: true
     owner: "{{ teku_user }}"
     group: "{{ teku_user }}"
 
@@ -15,7 +14,6 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    recurse: true
     owner: "{{ teku_user }}"
     group: "{{ teku_user }}"
   loop:

@@ -7,7 +7,6 @@
   ansible.builtin.file:
     path: "{{ geth_datadir }}"
     state: directory
-    recurse: true
     owner: "{{ geth_user }}"
     group: "{{ geth_user }}"
 

@@ -8,7 +8,6 @@
     path: "{{ nimbus_datadir }}"
     state: directory
     mode: '0700'
-    recurse: true
     owner: "{{ nimbus_user }}"
     group: "{{ nimbus_user }}"
 
@@ -16,7 +15,6 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    recurse: true
     owner: "{{ nimbus_user }}"
     group: "{{ nimbus_user }}"
   loop:

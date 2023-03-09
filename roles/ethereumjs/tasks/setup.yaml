@@ -7,7 +7,6 @@
   ansible.builtin.file:
     path: "{{ ethereumjs_datadir }}"
     state: directory
-    recurse: true
     owner: "{{ ethereumjs_user }}"
     group: "{{ ethereumjs_user }}"
 

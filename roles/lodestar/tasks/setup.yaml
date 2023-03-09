@@ -7,7 +7,6 @@
   ansible.builtin.file:
     path: "{{ lodestar_datadir }}"
     state: directory
-    recurse: true
     owner: "{{ lodestar_user }}"
     group: "{{ lodestar_user }}"
 
@@ -29,7 +28,6 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    recurse: true
     owner: "{{ lodestar_user }}"
     group: "{{ lodestar_user }}"
   loop:

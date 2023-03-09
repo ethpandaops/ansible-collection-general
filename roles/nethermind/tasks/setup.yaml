@@ -7,7 +7,6 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    recurse: true
     owner: "{{ nethermind_user }}"
     group: "{{ nethermind_user }}"
   loop:
