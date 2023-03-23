@@ -61,6 +61,20 @@
         state: present
         key: "https://github.com/{{ item }}.keys"
 
+    - name: Add additional SSH keys from github users
+      loop: "{{ bootstrap_additional_user_authorized_keys_github }}"
+      ansible.posix.authorized_key:
+        user: "{{ bootstrap_default_user }}"
+        state: present
+        key: "https://github.com/{{ item }}.keys"
+
+    - name: Add additional SSH keys
+      loop: "{{ bootstrap_additional_user_authorized_keys_plain }}"
+      ansible.posix.authorized_key:
+        user: "{{ bootstrap_default_user }}"
+        state: present
+        key: "https://github.com/{{ item }}.keys"
+
 # Set hostname to inventory hostname by default
 - name: Set hostname
   ansible.builtin.hostname:
