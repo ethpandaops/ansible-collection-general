@@ -11,6 +11,8 @@ mev_boost_cleanup: false # when set to "true" it will remove the container(s)
 mev_boost_container_name: mev_boost
 mev_boost_container_image: flashbots/mev-boost:1.5.0
 mev_boost_container_env: {}
+mev_boost_container_ports:
+  - "127.0.0.1:{{ mev_boost_container_port }}:{{ mev_boost_container_port }}"
 
 mev_boost_network: goerli
 mev_boost_timeout: "15000"

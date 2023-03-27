@@ -10,6 +10,14 @@
 - name: Cleanup clients that shouldn't be running
   ansible.builtin.import_tasks: cleanup.yaml
 
+- name: Setup mev_boost
+  ansible.builtin.include_role:
+    name: ethpandaops.general.mev_boost
+  vars:
+    mev_boost_container_networks: "{{ ethereum_node_docker_networks }}"
+    mev_boost_container_port: "{{ ethereum_node_mev_boost_http_port }}"
+  when: ethereum_node_mev_boost_enabled
+
 - name: Setup execution client
   ansible.builtin.import_tasks: setup_el.yaml
   when: ethereum_node_el_enabled
