@@ -1,0 +1,8 @@
+---
+# tasks file for mev_boost
+- name: Setup mev_boost
+  ansible.builtin.import_tasks: setup.yaml
+  when: not mev_boost_cleanup
+
+- name: Cleanup mev_boost
+  ansible.builtin.import_tasks: cleanup.yaml

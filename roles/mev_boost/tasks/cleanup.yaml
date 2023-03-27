@@ -1,0 +1,5 @@
+- name: Remove mev_boost container
+  community.docker.docker_container:
+    name: "{{ mev_boost_container_name }}"
+    state: absent
+  when: mev_boost_cleanup
