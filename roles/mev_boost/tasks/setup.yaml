@@ -3,14 +3,6 @@
     name: "{{ mev_boost_user }}"
   register: mev_boost_user_meta
 
-- name: Create data dir
-  ansible.builtin.file:
-    path: "{{ mev_boost_datadir }}"
-    state: directory
-    mode: "0750"
-    owner: "{{ mev_boost_user }}"
-    group: "{{ mev_boost_user }}"
-
 - name: Run mev_boost container
   community.docker.docker_container:
     name: "{{ mev_boost_container_name }}"
