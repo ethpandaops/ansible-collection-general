@@ -26,7 +26,6 @@ ethereum_node_fact_discovery_enabled: true
 
 # Mev boost
 ethereum_node_mev_boost_enabled: false
-ethereum_node_mev_boost_http_port: 18550
 
 # Metrics exporter
 ethereum_node_metrics_exporter_enabled: false
