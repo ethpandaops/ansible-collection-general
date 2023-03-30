@@ -24,6 +24,9 @@ ethereum_node_cl_validator_fee_recipient: "0xF29Ff96aaEa6C9A1fBa851f74737f3c069d
 # Fact discovery
 ethereum_node_fact_discovery_enabled: true
 
+# Mev boost
+ethereum_node_mev_boost_enabled: false
+
 # Metrics exporter
 ethereum_node_metrics_exporter_enabled: false
 

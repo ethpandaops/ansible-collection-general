@@ -1,0 +1,18 @@
+- name: Add mev_boost user
+  ansible.builtin.user:
+    name: "{{ mev_boost_user }}"
+  register: mev_boost_user_meta
+
+- name: Run mev_boost container
+  community.docker.docker_container:
+    name: "{{ mev_boost_container_name }}"
+    image: "{{ mev_boost_container_image }}"
+    state: started
+    restart_policy: always
+    stop_timeout: "{{ mev_boost_container_stop_timeout }}"
+    volumes: "{{ mev_boost_container_volumes }}"
+    env: "{{ mev_boost_container_env }}"
+    networks: "{{ mev_boost_container_networks }}"
+    ports: "{{ mev_boost_container_ports }}"
+    command: "{{ mev_boost_container_command + mev_boost_container_command_extra_args }} "
+    user: "{{ mev_boost_user_meta.uid }}"
