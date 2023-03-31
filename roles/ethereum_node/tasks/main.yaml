@@ -17,16 +17,13 @@
     mev_boost_container_networks: "{{ ethereum_node_docker_networks }}"
   when: ethereum_node_mev_boost_enabled
 
-- name: Setup json_rpc_snooper
-  ansible.builtin.include_role:
-    name: ethpandaops.general.json_rpc_snooper
-  vars:
-    json_rpc_snooper_container_networks: "{{ ethereum_node_docker_networks }}"
-  when: ethereum_node_json_rpc_snooper_enabled
-
 - name: Setup execution client
   ansible.builtin.import_tasks: setup_el.yaml
   when: ethereum_node_el_enabled
+
+- name: Setup execution client rpc snooper
+  ansible.builtin.import_tasks: setup_snooper.yaml
+  when: ethereum_node_json_rpc_snooper_enabled or ethereum_node_json_rpc_snooper_engine_enabled
 
 - name: Setup consensus client
   ansible.builtin.import_tasks: setup_cl.yaml
