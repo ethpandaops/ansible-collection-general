@@ -1,0 +1,26 @@
+json_rpc_snooper_user: json_rpc_snooper
+
+json_rpc_snooper_cleanup: false # when set to "true" it will remove the container(s)
+
+################################################################################
+##
+## json_rpc_snooper container configuration
+##
+################################################################################
+json_rpc_snooper_container_name: snooper
+json_rpc_snooper_container_image: parithoshj/json_rpc_snoop:v1.0.0-x86
+json_rpc_snooper_container_env: {}
+json_rpc_snooper_port: 8560
+json_rpc_snooper_target: http://jsonrpc-target:8888
+json_rpc_snooper_container_ports:
+  - "127.0.0.1:{{ json_rpc_snooper_port }}:{{ json_rpc_snooper_port }}"
+
+json_rpc_snooper_container_networks: []
+json_rpc_snooper_container_volumes: []
+json_rpc_snooper_container_command:
+  - "./json_rpc_snoop"
+  - "-b=0.0.0.0"
+  - "-p={{ json_rpc_snooper_port }}"
+  - "{{ json_rpc_snooper_target }}"
+
+json_rpc_snooper_container_command_extra_args: []

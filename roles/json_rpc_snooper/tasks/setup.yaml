@@ -1,0 +1,17 @@
+- name: Add json_rpc_snooper user
+  ansible.builtin.user:
+    name: "{{ json_rpc_snooper_user }}"
+  register: json_rpc_snooper_user_meta
+
+- name: Run json_rpc_snooper container
+  community.docker.docker_container:
+    name: "{{ json_rpc_snooper_container_name }}"
+    image: "{{ json_rpc_snooper_container_image }}"
+    state: started
+    restart_policy: always
+    volumes: "{{ json_rpc_snooper_container_volumes }}"
+    env: "{{ json_rpc_snooper_container_env }}"
+    networks: "{{ json_rpc_snooper_container_networks }}"
+    ports: "{{ json_rpc_snooper_container_ports }}"
+    command: "{{ json_rpc_snooper_container_command + json_rpc_snooper_container_command_extra_args }} "
+    user: "{{ json_rpc_snooper_user_meta.uid }}"
