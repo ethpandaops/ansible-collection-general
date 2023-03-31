@@ -46,6 +46,7 @@ A collection of reusable ansible components used by the EthPandaOps team.
 - [oh_my_zsh](roles/oh_my_zsh)
 - [prometheus](roles/prometheus)
 - [s3_cron_backup](roles/s3_cron_backup)
+- [json_rpc_snooper](roles/json_rpc_snooper)
 
 ## Usage
 

@@ -1,0 +1,8 @@
+---
+# tasks file for json_rpc_snooper
+- name: Setup json_rpc_snooper
+  ansible.builtin.import_tasks: setup.yaml
+  when: not json_rpc_snooper_cleanup
+
+- name: Cleanup json_rpc_snooper
+  ansible.builtin.import_tasks: cleanup.yaml

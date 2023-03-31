@@ -1,0 +1,5 @@
+- name: Remove json_rpc_snooper container
+  community.docker.docker_container:
+    name: "{{ json_rpc_snooper_container_name }}"
+    state: absent
+  when: json_rpc_snooper_cleanup
