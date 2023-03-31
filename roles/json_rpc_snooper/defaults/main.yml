@@ -19,6 +19,7 @@ json_rpc_snooper_container_networks: []
 json_rpc_snooper_container_volumes: []
 json_rpc_snooper_container_command:
   - "./json_rpc_snoop"
+  - "-b=0.0.0.0"
   - "-p={{ json_rpc_snooper_port }}"
   - "{{ json_rpc_snooper_target }}"
 
