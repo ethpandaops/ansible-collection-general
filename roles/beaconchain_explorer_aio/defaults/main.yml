@@ -6,7 +6,7 @@ beaconchain_explorer_aio_url_erigon: http://your-erigon-node:8545
 beaconchain_explorer_aio_url_erigon_ws: ws://your-erigon-node:8545
 beaconchain_explorer_aio_url_geth: http://your-geth-node:8545
 
-beaconchain_explorer_aio_sql_init_file: files/postgres/tables.sql
+beaconchain_explorer_aio_sql_init_file_url: https://raw.githubusercontent.com/gobitfly/eth2-beaconchain-explorer/master/tables.sql
 beaconchain_explorer_aio_docker_compose_file: templates/docker-compose.yml.j2
 
 beaconchain_explorer_aio_installation_dir: /opt/beaconchain-explorer-aio
@@ -21,6 +21,25 @@ beaconchain_explorer_aio_docker_image_frontend_updater: "{{ beaconchain_explorer
 beaconchain_explorer_aio_docker_image_redis: redis:7
 beaconchain_explorer_aio_docker_image_postgres: postgres:14
 beaconchain_explorer_aio_docker_image_bigtable: guybrush/explorer-workshop-bogota # TODO get an image with little_bigtable+cbt
+
+
+beaconchain_explorer_aio_bigtable_external_enabled: false
+beaconchain_explorer_aio_bigtable_external_application_credentials: |
+  {
+    "type": "service_account",
+    "project_id": "etherchain",
+    "private_key_id": "",
+    "private_key": "-----BEGIN PRIVATE KEY-----\...\n-----END PRIVATE KEY-----\n",
+    "client_email": "",
+    "client_id": "",
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://oauth2.googleapis.com/token",
+    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+    "client_x509_cert_url": ""
+  }
+
+beaconchain_explorer_aio_bigtable_project: explorer
+beaconchain_explorer_aio_bigtable_instance: beaconchain_bigtable:9000
 
 beaconchain_explorer_aio_data_dir_explorer: /data/beaconchain-explorer-aio/explorer
 beaconchain_explorer_aio_data_dir_postgres: /data/beaconchain-explorer-aio/postgres
@@ -37,9 +56,9 @@ beaconchain_explorer_aio_cmd_exporter:
 beaconchain_explorer_aio_cmd_eth1indexer:
   - /app/eth1indexer
   - -config=/config.yml
-  - -bigtable.project=explorer
-  - -bigtable.instance=beaconchain_bigtable:9000
-  - "-erigon={{ beaconchain_explorer_aio_url_erigon_ws }}"
+  - -bigtable.project={{ beaconchain_explorer_aio_bigtable_project }}
+  - -bigtable.instance={{ beaconchain_explorer_aio_bigtable_instance }}
+  - -erigon={{ beaconchain_explorer_aio_url_erigon_ws }}
   - -data.concurrency=2
   - -data.offset=0
   - -data.start=0
@@ -54,6 +73,8 @@ beaconchain_explorer_aio_cmd_eth1indexer:
 beaconchain_explorer_aio_cmd_statistics:
   - /app/statistics
   - -config=/config.yml
+  - -validators.enabled
+  - -charts.enabled
 
 beaconchain_explorer_aio_cmd_frontend_updater:
   - /app/frontend-data-updater

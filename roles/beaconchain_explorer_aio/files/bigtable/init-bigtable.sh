@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 export BIGTABLE_EMULATOR_HOST="beaconchain_bigtable:9000"
 INSTANCE="beaconchain_bigtable:9000"
 PROJECT="explorer"

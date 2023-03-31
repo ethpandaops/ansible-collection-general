@@ -16,9 +16,16 @@ services:
       - "{{ beaconchain_explorer_aio_installation_dir }}/explorer/config.yml:/config.yml:ro"
       - "{{ beaconchain_explorer_aio_installation_dir }}/explorer/custom_configs:/custom_configs:ro"
       - "{{ beaconchain_explorer_aio_data_dir_explorer }}:/data"
+{%- if beaconchain_explorer_aio_bigtable_external_enabled %}
+      - "{{ beaconchain_explorer_aio_installation_dir }}/bigtable_secret.json:/bigtable_secret.json:ro"
+{%- endif %}
     environment:
       - INDEXER_ENABLED=true
+{%- if beaconchain_explorer_aio_bigtable_external_enabled %}
+      - GOOGLE_APPLICATION_CREDENTIALS=/bigtable_secret.json
+{%- else %}
       - BIGTABLE_EMULATOR_HOST=beaconchain_bigtable:9000
+{%- endif %}
     ports:
       - 8082:8082
   #######################################################################
@@ -35,8 +42,15 @@ services:
       - "{{ beaconchain_explorer_aio_installation_dir }}/explorer/config.yml:/config.yml:ro"
       - "{{ beaconchain_explorer_aio_installation_dir }}/explorer/custom_configs:/custom_configs:ro"
       - "{{ beaconchain_explorer_aio_data_dir_explorer }}:/data"
+{%- if beaconchain_explorer_aio_bigtable_external_enabled %}
+      - "{{ beaconchain_explorer_aio_installation_dir }}/bigtable_secret.json:/bigtable_secret.json:ro"
+{%- endif %}
     environment:
+{%- if beaconchain_explorer_aio_bigtable_external_enabled %}
+      - GOOGLE_APPLICATION_CREDENTIALS=/bigtable_secret.json
+{%- else %}
       - BIGTABLE_EMULATOR_HOST=beaconchain_bigtable:9000
+{%- endif %}
   #######################################################################
   statistics:
     container_name: beaconchain_statistics
@@ -51,8 +65,16 @@ services:
       - "{{ beaconchain_explorer_aio_installation_dir }}/explorer/config.yml:/config.yml:ro"
       - "{{ beaconchain_explorer_aio_installation_dir }}/explorer/custom_configs:/custom_configs:ro"
       - "{{ beaconchain_explorer_aio_data_dir_explorer }}:/data"
+{%- if beaconchain_explorer_aio_bigtable_external_enabled %}
+      - "{{ beaconchain_explorer_aio_installation_dir }}/bigtable_secret.json:/bigtable_secret.json:ro"
+{%- endif %}
     environment:
       - INDEXER_ENABLED=false
+{%- if beaconchain_explorer_aio_bigtable_external_enabled %}
+      - GOOGLE_APPLICATION_CREDENTIALS=/bigtable_secret.json
+{%- else %}
+      - BIGTABLE_EMULATOR_HOST=beaconchain_bigtable:9000
+{%- endif %}
   #######################################################################
   frontend-updater:
     container_name: beaconchain_frontend_updater
@@ -61,15 +83,23 @@ services:
     stop_grace_period: 5m
     restart: always
     command: {{ beaconchain_explorer_aio_cmd_frontend_updater | to_yaml }}
-    environment:
-      - FRONTEND_ENABLED=true
-      - BIGTABLE_EMULATOR_HOST=beaconchain_bigtable:9000
     volumes:
       - /etc/passwd:/etc/passwd:ro
       - /etc/group:/etc/group:ro
       - "{{ beaconchain_explorer_aio_installation_dir }}/explorer/frontend_config.yml:/config.yml:ro"
       - "{{ beaconchain_explorer_aio_installation_dir }}/explorer/custom_configs:/custom_configs:ro"
       - "{{ beaconchain_explorer_aio_data_dir_explorer }}:/data"
+{% if beaconchain_explorer_aio_bigtable_external_enabled %}
+      - "{{ beaconchain_explorer_aio_installation_dir }}/bigtable_secret.json:/bigtable_secret.json:ro"
+{% endif %}
+    environment:
+      - FRONTEND_ENABLED=true
+{% if beaconchain_explorer_aio_bigtable_external_enabled %}
+      - GOOGLE_APPLICATION_CREDENTIALS=/bigtable_secret.json
+{%- else %}
+      - BIGTABLE_EMULATOR_HOST=beaconchain_bigtable:9000
+{% endif %}
+
   #######################################################################
   frontend:
     container_name: beaconchain_frontend
@@ -78,17 +108,24 @@ services:
     stop_grace_period: 5m
     restart: always
     command: {{ beaconchain_explorer_aio_cmd_frontend | to_yaml }}
-    environment:
-      - FRONTEND_ENABLED=true
-      - BIGTABLE_EMULATOR_HOST=beaconchain_bigtable:9000
     volumes:
       - /etc/passwd:/etc/passwd:ro
       - /etc/group:/etc/group:ro
       - "{{ beaconchain_explorer_aio_installation_dir }}/explorer/frontend_config.yml:/config.yml:ro"
       - "{{ beaconchain_explorer_aio_installation_dir }}/explorer/custom_configs:/custom_configs:ro"
       - "{{ beaconchain_explorer_aio_data_dir_explorer }}:/data"
+{% if beaconchain_explorer_aio_bigtable_external_enabled %}
+      - "{{ beaconchain_explorer_aio_installation_dir }}/bigtable_secret.json:/bigtable_secret.json:ro"
+{% endif %}
     ports:
       - 8080:8080
+    environment:
+      - FRONTEND_ENABLED=true
+{% if beaconchain_explorer_aio_bigtable_external_enabled %}
+      - GOOGLE_APPLICATION_CREDENTIALS=/bigtable_secret.json
+{%- else %}
+      - BIGTABLE_EMULATOR_HOST=beaconchain_bigtable:9000
+{% endif %}
   #######################################################################
   #                              DATABASES
   #######################################################################
@@ -120,6 +157,7 @@ services:
       - "{{ beaconchain_explorer_aio_installation_dir }}/postgres/tables.sql:/docker-entrypoint-initdb.d/init.sql"
       - "{{ beaconchain_explorer_aio_data_dir_postgres }}:/var/lib/postgresql/data"
   #######################################################################
+{%- if not beaconchain_explorer_aio_bigtable_external_enabled %}
   bigtable:
     container_name: beaconchain_bigtable
     image: "{{ beaconchain_explorer_aio_docker_image_bigtable }}"
@@ -139,5 +177,4 @@ services:
       - "{{ beaconchain_explorer_aio_installation_dir }}/bigtable/cbt-definitions.yml:/cbt-definitions.yml"
       - "{{ beaconchain_explorer_aio_installation_dir }}/bigtable/eth1.proto:/eth1.proto"
       - "{{ beaconchain_explorer_aio_data_dir_bigtable }}:/data"
-    environment:
-      - BIGTABLE_EMULATOR_HOST=beaconchain_bigtable:9000
+{%- endif %}

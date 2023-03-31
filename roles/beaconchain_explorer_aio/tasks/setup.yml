@@ -33,9 +33,6 @@
     owner: "{{ beaconchain_explorer_aio_user }}"
     group: "{{ beaconchain_explorer_aio_user }}"
   loop:
-    - src: "{{ beaconchain_explorer_aio_sql_init_file }}"
-      dest: "{{ beaconchain_explorer_aio_installation_dir }}/postgres/tables.sql"
-      mode: "0640"
     - src: "files/bigtable/eth1.proto"
       dest: "{{ beaconchain_explorer_aio_installation_dir }}/bigtable/eth1.proto"
       mode: "0640"
@@ -45,6 +42,23 @@
     - src: "files/bigtable/init-bigtable.sh"
       dest: "{{ beaconchain_explorer_aio_installation_dir }}/bigtable/init-bigtable.sh"
       mode: "0700"
+
+- name: Copy the postgres table sql file
+  ansible.builtin.get_url:
+    url: "{{ beaconchain_explorer_aio_sql_init_file_url }}"
+    dest: "{{ beaconchain_explorer_aio_installation_dir }}/postgres/tables.sql"
+    mode: "0640"
+    owner: "{{ beaconchain_explorer_aio_user }}"
+    group: "{{ beaconchain_explorer_aio_user }}"
+
+- name: Copy bigtable application credentials file
+  ansible.builtin.copy:
+    content: "{{ beaconchain_explorer_aio_bigtable_external_application_credentials }}"
+    dest: "{{ beaconchain_explorer_aio_installation_dir }}/bigtable_secret.json"
+    mode: "0640"
+    owner: "{{ beaconchain_explorer_aio_user }}"
+    group: "{{ beaconchain_explorer_aio_user }}"
+  when: beaconchain_explorer_aio_bigtable_external_enabled
 
 - name: Copy docker-compose template
   ansible.builtin.template:
@@ -83,7 +97,6 @@
   community.docker.docker_compose:
     project_src: "{{ beaconchain_explorer_aio_installation_dir }}"
     services:
-      - bigtable
       - postgres
       - redis
   register: beaconchain_explorer_aio_compose_db_meta
@@ -91,14 +104,26 @@
 - name: Check that database services are running
   ansible.builtin.assert:
     that:
-      - beaconchain_explorer_aio_compose_db_meta.services["bigtable"]["beaconchain_bigtable"].state.running
       - beaconchain_explorer_aio_compose_db_meta.services["postgres"]["beaconchain_postgres"].state.running
       - beaconchain_explorer_aio_compose_db_meta.services["redis"]["beaconchain_redis"].state.running
 
-- name: Init bigtable
-  ansible.builtin.shell: "docker exec beaconchain_bigtable /init-bigtable.sh && touch {{ beaconchain_explorer_aio_installation_dir }}/bigtable/initialized"
-  args:
-    creates: "{{ beaconchain_explorer_aio_installation_dir }}/bigtable/initialized"
+- name: Start bigtable emulator
+  when: not beaconchain_explorer_aio_bigtable_external_enabled
+  block:
+    - name: Create and start database service
+      community.docker.docker_compose:
+        project_src: "{{ beaconchain_explorer_aio_installation_dir }}"
+        services:
+          - bigtable
+      register: beaconchain_explorer_aio_compose_db_bigtable_meta
+    - name: Check that bigtable service is running
+      ansible.builtin.assert:
+        that:
+          - beaconchain_explorer_aio_compose_db_meta.services["postgres"]["beaconchain_bigtable"].state.running
+    - name: Init bigtable
+      ansible.builtin.shell: "docker exec beaconchain_bigtable /init-bigtable.sh && touch {{ beaconchain_explorer_aio_installation_dir }}/bigtable/initialized"
+      args:
+        creates: "{{ beaconchain_explorer_aio_installation_dir }}/bigtable/initialized"
 
 - name: Create remaining explorer services
   community.docker.docker_compose:
