@@ -21,9 +21,8 @@
   ansible.builtin.import_tasks: setup_el.yaml
   when: ethereum_node_el_enabled
 
-- name: Setup execution client rpc snooper
-  ansible.builtin.import_tasks: setup_snooper.yaml
-  when: ethereum_node_json_rpc_snooper_enabled or ethereum_node_json_rpc_snooper_engine_enabled
+- name: Configure JSON RPC Snooper
+  ansible.builtin.import_tasks: snooper.yaml
 
 - name: Setup consensus client
   ansible.builtin.import_tasks: setup_cl.yaml
