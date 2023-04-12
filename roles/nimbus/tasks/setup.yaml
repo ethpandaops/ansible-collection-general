@@ -40,10 +40,7 @@
       }}
     env: "{{ nimbus_container_env }}"
     networks: "{{ nimbus_container_networks }}"
-    command: >-
-      {{
-          nimbus_checkpoint_container_command + nimbus_checkpoint_container_command_extra_args,
-      }}
+    command: {{ nimbus_checkpoint_container_command + nimbus_checkpoint_container_command_extra_args }}
     user: "{{ nimbus_user_meta.uid }}"
 
 - name: Run nimbus container
