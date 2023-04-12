@@ -31,13 +31,7 @@
     image: "{{ nimbus_container_image }}"
     state: started
     stop_timeout: "{{ nimbus_container_stop_timeout }}"
-    volumes: >-
-      {{
-        nimbus_validator_enabled | ternary(
-          nimbus_container_volumes + nimbus_container_validator_volumes,
-          nimbus_container_volumes
-        )
-      }}
+    volumes: {{ nimbus_container_volumes }}
     env: "{{ nimbus_container_env }}"
     networks: "{{ nimbus_container_networks }}"
     command: {{ nimbus_checkpoint_container_command + nimbus_checkpoint_container_command_extra_args }}
