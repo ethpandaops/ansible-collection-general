@@ -21,7 +21,6 @@ nimbus_validator_datadir: /data/nimbus-validator
 ################################################################################
 nimbus_checkpoint_container_name: nimbus_checkpoint
 nimbus_checkpoint_container_command:
-  - nimbus_beacon_node
   - trustedNodeSync
   - --data-dir=/data
 nimbus_checkpoint_container_command_extra_args: []
