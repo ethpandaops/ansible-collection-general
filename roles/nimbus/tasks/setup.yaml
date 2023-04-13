@@ -31,13 +31,13 @@
     image: "{{ nimbus_container_image }}"
     state: started
     detach: false
-    auto_remove: {{ nimbus_checkpoint_autoremove_enabled }}
+    auto_remove: "{{ nimbus_checkpoint_autoremove_enabled }}"
     restart_policy: "no"
     stop_timeout: "{{ nimbus_container_stop_timeout }}"
-    volumes: {{ nimbus_container_volumes }}
+    volumes: "{{ nimbus_container_volumes }}"
     env: "{{ nimbus_container_env }}"
     networks: "{{ nimbus_container_networks }}"
-    command: {{ nimbus_checkpoint_container_command + nimbus_checkpoint_container_command_extra_args }}
+    command: "{{ nimbus_checkpoint_container_command + nimbus_checkpoint_container_command_extra_args }}"
     user: "{{ nimbus_user_meta.uid }}"
 
 - name: Run nimbus container
