@@ -26,7 +26,7 @@ nimbus_checkpoint_container_command:
   - --data-dir=/data
 nimbus_checkpoint_container_command_extra_args: []
 nimbus_checkpoint_sync_enabled: false
-nimbus_checkpoint_autoremove_enabled: true
+nimbus_checkpoint_autoremove_enabled: false
 ################################################################################
 ##
 ## Beacon node container configuration
