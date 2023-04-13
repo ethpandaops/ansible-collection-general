@@ -42,6 +42,7 @@ geth_container_command_extra_args: []
 
 # Only required changing when running custom networks
 geth_init_custom_network: false
+geth_init_autoremove_enabled: true
 geth_init_custom_network_genesis_file: /config/genesis.json
 geth_init_custom_network_container_env: {}
 geth_init_custom_network_container_volumes:

@@ -30,6 +30,9 @@
     name: "{{ nimbus_checkpoint_container_name }}"
     image: "{{ nimbus_container_image }}"
     state: started
+    detach: false
+    auto_remove: {{ nimbus_checkpoint_autoremove_enabled }}
+    restart_policy: "no"
     stop_timeout: "{{ nimbus_container_stop_timeout }}"
     volumes: {{ nimbus_container_volumes }}
     env: "{{ nimbus_container_env }}"
