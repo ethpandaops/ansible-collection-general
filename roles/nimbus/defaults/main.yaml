@@ -16,6 +16,19 @@ nimbus_validator_datadir: /data/nimbus-validator
 
 ################################################################################
 ##
+## Checkpoint sync container configuration
+##
+################################################################################
+nimbus_checkpoint_container_name: nimbus_checkpoint
+nimbus_checkpoint_container_command:
+  - nimbus_beacon_node
+  - trustedNodeSync
+  - --data-dir=/data
+nimbus_checkpoint_container_command_extra_args: []
+nimbus_checkpoint_sync_enabled: false
+nimbus_checkpoint_autoremove_enabled: false
+################################################################################
+##
 ## Beacon node container configuration
 ##
 ################################################################################

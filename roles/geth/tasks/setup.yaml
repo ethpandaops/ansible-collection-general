@@ -23,7 +23,7 @@
         name: "{{ geth_container_name }}-init"
         image: "{{ geth_container_image }}"
         detach: false
-        auto_remove: true
+        auto_remove: "{{ geth_init_autoremove_enabled }}"
         restart_policy: "no"
         state: started
         volumes: "{{ geth_init_custom_network_container_volumes }}"
