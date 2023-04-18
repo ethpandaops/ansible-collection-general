@@ -12,7 +12,7 @@
     group: "{{ nimbus_user }}"
 
 - name: Set permissions
-  ansible.builtin.shell: "chown -R {{ nimbus_user }}:{{ nimbus_user }} {{ nimbus_datadir }}"
+  ansible.builtin.command: "chown -R {{ nimbus_user }}:{{ nimbus_user }} {{ nimbus_datadir }}" # noqa deprecated-command-syntax
 
 - name: Create validator data dir
   ansible.builtin.file:
@@ -28,7 +28,7 @@
   when: nimbus_validator_enabled
 
 - name: Set permissions for validator data dir
-  ansible.builtin.shell: "chown -R {{ nimbus_user }}:{{ nimbus_user }} {{ nimbus_validator_datadir }}"
+  ansible.builtin.command: "chown -R {{ nimbus_user }}:{{ nimbus_user }} {{ nimbus_validator_datadir }}" # noqa deprecated-command-syntax
   when: nimbus_validator_enabled
 
 - name: Checkpoint sync nimbus node

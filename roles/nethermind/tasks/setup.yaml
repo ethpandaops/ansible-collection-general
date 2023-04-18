@@ -15,7 +15,7 @@
     - "{{ nethermind_datadir }}/nethermind"
 
 - name: Set permissions
-  ansible.builtin.shell: "chown -R {{ nethermind_user }}:{{ nethermind_user }} {{ nethermind_datadir }}"
+  ansible.builtin.command: "chown -R {{ nethermind_user }}:{{ nethermind_user }} {{ nethermind_datadir }}" # noqa deprecated-command-syntax
 
 - name: Run nethermind container
   community.docker.docker_container:
