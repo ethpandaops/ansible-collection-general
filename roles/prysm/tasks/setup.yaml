@@ -13,6 +13,7 @@
 
 - name: Set permissions
   ansible.builtin.command: "chown -R {{ prysm_user }}:{{ prysm_user }} {{ prysm_datadir }}" # noqa deprecated-command-syntax
+  changed_when: false
 
 - name: Run prysm container
   community.docker.docker_container:
@@ -40,6 +41,7 @@
 
 - name: Set permissions for validator data dir
   ansible.builtin.command: "chown -R {{ prysm_user }}:{{ prysm_user }} {{ prysm_validator_datadir }}" # noqa deprecated-command-syntax
+  changed_when: false
   when: prysm_validator_enabled
 
 - name: Run prysm validator container

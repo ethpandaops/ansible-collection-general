@@ -13,6 +13,7 @@
 
 - name: Set permissions
   ansible.builtin.command: "chown -R {{ lighthouse_user }}:{{ lighthouse_user }} {{ lighthouse_datadir }}" # noqa deprecated-command-syntax
+  changed_when: false
 
 - name: Run lighthouse container
   community.docker.docker_container:
@@ -43,6 +44,7 @@
 
 - name: Set permissions for validator data dir
   ansible.builtin.command: "chown -R {{ lighthouse_user }}:{{ lighthouse_user }} {{ lighthouse_validator_datadir }}" # noqa deprecated-command-syntax
+  changed_when: false
   when: lighthouse_validator_enabled
 
 - name: Run lighthouse validator container

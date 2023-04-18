@@ -13,6 +13,7 @@
 
 - name: Set permissions
   ansible.builtin.command: "chown -R {{ ethereumjs_user }}:{{ ethereumjs_user }} {{ ethereumjs_datadir }}" # noqa deprecated-command-syntax
+  changed_when: false
 
 - name: Run ethereumjs container
   community.docker.docker_container:

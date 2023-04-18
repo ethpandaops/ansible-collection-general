@@ -13,6 +13,7 @@
 
 - name: Set permissions
   ansible.builtin.command: "chown -R {{ teku_user }}:{{ teku_user }} {{ teku_datadir }}" # noqa deprecated-command-syntax
+  changed_when: false
 
 - name: Create validator data dir
   ansible.builtin.file:
@@ -29,6 +30,7 @@
 
 - name: Set permissions for validator data dir
   ansible.builtin.command: "chown -R {{ teku_user }}:{{ teku_user }} {{ teku_validator_datadir }}" # noqa deprecated-command-syntax
+  changed_when: false
   when: teku_validator_enabled
 
 - name: Run teku container

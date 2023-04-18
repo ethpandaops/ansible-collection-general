@@ -13,6 +13,7 @@
 
 - name: Set permissions
   ansible.builtin.command: "chown -R {{ besu_user }}:{{ besu_user }} {{ besu_datadir }}" # noqa deprecated-command-syntax
+  changed_when: false
 
 - name: Run besu container
   community.docker.docker_container:
