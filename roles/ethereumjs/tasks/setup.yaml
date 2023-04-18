@@ -11,6 +11,9 @@
     owner: "{{ ethereumjs_user }}"
     group: "{{ ethereumjs_user }}"
 
+- name: Set permissions
+  ansible.builtin.shell: "chown -R {{ ethereumjs_user }}:{{ ethereumjs_user }} {{ ethereumjs_datadir }}"
+
 - name: Run ethereumjs container
   community.docker.docker_container:
     name: "{{ ethereumjs_container_name }}"

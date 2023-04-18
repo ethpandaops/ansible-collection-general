@@ -11,6 +11,9 @@
     owner: "{{ nimbus_user }}"
     group: "{{ nimbus_user }}"
 
+- name: Set permissions
+  ansible.builtin.shell: "chown -R {{ nimbus_user }}:{{ nimbus_user }} {{ nimbus_datadir }}"
+
 - name: Create validator data dir
   ansible.builtin.file:
     path: "{{ item }}"
@@ -22,6 +25,10 @@
     - "{{ nimbus_validator_datadir }}"
     - "{{ nimbus_validator_datadir }}/keys"
     - "{{ nimbus_validator_datadir }}/secrets"
+  when: nimbus_validator_enabled
+
+- name: Set permissions for validator data dir
+  ansible.builtin.shell: "chown -R {{ nimbus_user }}:{{ nimbus_user }} {{ nimbus_validator_datadir }}"
   when: nimbus_validator_enabled
 
 - name: Checkpoint sync nimbus node

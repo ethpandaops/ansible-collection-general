@@ -6,6 +6,9 @@
     state: directory
     mode: "0750"
 
+- name: Set permissions
+  ansible.builtin.shell: "chown -R 1000:1000 {{ arbitrum_node_datadir }}"
+
 - name: Run arbitrum_node container
   community.docker.docker_container:
     name: "{{ arbitrum_node_container_name }}"

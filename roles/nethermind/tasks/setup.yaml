@@ -14,6 +14,9 @@
     - "{{ nethermind_datadir }}"
     - "{{ nethermind_datadir }}/nethermind"
 
+- name: Set permissions
+  ansible.builtin.shell: "chown -R {{ nethermind_user }}:{{ nethermind_user }} {{ nethermind_datadir }}"
+
 - name: Run nethermind container
   community.docker.docker_container:
     name: "{{ nethermind_container_name }}"
