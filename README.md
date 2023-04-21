@@ -12,6 +12,7 @@ A collection of reusable ansible components used by the EthPandaOps team.
 - [dshackle](roles/dshackle)
 - [ethereum_auth_jwt](roles/ethereum_auth_jwt)
 - [ethereum_metrics_exporter](roles/ethereum_metrics_exporter)
+- [ethstats](roles/ethstats)
 - [xatu_sentry](roles/xatu_sentry)
 - [mev_boost](roles/mev_boost)
 
