@@ -1,0 +1,23 @@
+- name: Add ethstats user
+  ansible.builtin.user:
+    name: "{{ ethstats_user }}"
+  register: ethstats_user_meta
+
+- name: Check ethstats websocket secret
+  ansible.builtin.assert:
+    that:
+      - ethstats_container_env.WS_SECRET != ""
+    fail_msg: "'ethstats_container_env.WS_SECRET' can't be empty"
+
+- name: Run ethstats container
+  community.general.docker_container:
+    name: "{{ ethstats_container_name }}"
+    image: "{{ ethstats_container_image }}"
+    published_ports: "{{ ethstats_container_published_ports }}"
+    restart_policy: "{{ ethstats_container_restart_policy }}"
+    networks: "{{ ethstats_container_networks }}"
+    networks_cli_compatible: "{{ ethstats_container_networks_cli_compatible }}"
+    network_mode: "{{ ethstats_container_network_mode }}"
+    volumes: "{{ ethstats_container_volumes }}"
+    env: "{{ ethstats_container_env }}"
+    user: "{{ ethstats_user_meta.uid }}"

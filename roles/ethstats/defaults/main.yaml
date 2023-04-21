@@ -1,0 +1,14 @@
+ethstats_user: ethstats
+
+# Image is based on https://github.com/goerli/ethstats-server/pull/32
+ethstats_container_image: skylenet/ethstats-server:pow-latest
+ethstats_container_name: ethstats
+ethstats_container_published_ports: []
+ethstats_container_restart_policy: always
+ethstats_container_networks_cli_compatible: true
+ethstats_container_network_mode: default
+ethstats_container_networks: []
+ethstats_container_volumes_from: []
+ethstats_container_volumes: []
+ethstats_container_env:
+  WS_SECRET: "" # shared secret required for incoming websocket connections
