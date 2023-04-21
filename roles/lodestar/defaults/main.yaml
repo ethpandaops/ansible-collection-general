@@ -39,7 +39,8 @@ lodestar_container_command:
   - --port={{ lodestar_ports_p2p_tcp }}
   - --enr.ip={{ ansible_host }}
   - --enr.tcp={{ lodestar_ports_p2p_tcp }}
-  - --enr.udp={{ lodestar_ports_p2p_udp }}
+  # temp bug: https://github.com/ChainSafe/lodestar/issues/3462
+  #- --enr.udp={{ lodestar_ports_p2p_udp }}
   - --rest
   - --rest.address=0.0.0.0
   - --rest.port={{ lodestar_ports_http_beacon }}
