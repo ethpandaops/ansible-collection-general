@@ -11,6 +11,10 @@
     owner: "{{ lodestar_user }}"
     group: "{{ lodestar_user }}"
 
+- name: Set permissions
+  ansible.builtin.command: "chown -R {{ lodestar_user }}:{{ lodestar_user }} {{ lodestar_datadir }}" # noqa deprecated-command-syntax
+  changed_when: false
+
 - name: Run lodestar container
   community.docker.docker_container:
     name: "{{ lodestar_container_name }}"
@@ -37,6 +41,11 @@
     - "{{ lodestar_validator_datadir }}"
     - "{{ lodestar_validator_datadir }}/keys"
     - "{{ lodestar_validator_datadir }}/secrets"
+  when: lodestar_validator_enabled
+
+- name: Set permissions for validator data dir
+  ansible.builtin.command: "chown -R {{ lodestar_user }}:{{ lodestar_user }} {{ lodestar_validator_datadir }}" # noqa deprecated-command-syntax
+  changed_when: false
   when: lodestar_validator_enabled
 
 - name: Run lodestar validator container

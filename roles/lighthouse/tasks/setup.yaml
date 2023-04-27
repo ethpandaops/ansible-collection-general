@@ -11,6 +11,10 @@
     owner: "{{ lighthouse_user }}"
     group: "{{ lighthouse_user }}"
 
+- name: Set permissions
+  ansible.builtin.command: "chown -R {{ lighthouse_user }}:{{ lighthouse_user }} {{ lighthouse_datadir }}" # noqa deprecated-command-syntax
+  changed_when: false
+
 - name: Run lighthouse container
   community.docker.docker_container:
     name: "{{ lighthouse_container_name }}"
@@ -37,6 +41,11 @@
     - "{{ lighthouse_validator_datadir }}"
     - "{{ lighthouse_validator_datadir }}/keys"
     - "{{ lighthouse_validator_datadir }}/secrets"
+  when: lighthouse_validator_enabled
+
+- name: Set permissions for validator data dir
+  ansible.builtin.command: "chown -R {{ lighthouse_user }}:{{ lighthouse_user }} {{ lighthouse_validator_datadir }}" # noqa deprecated-command-syntax
+  changed_when: false
   when: lighthouse_validator_enabled
 
 - name: Run lighthouse validator container

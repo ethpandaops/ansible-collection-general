@@ -11,6 +11,10 @@
     owner: "{{ geth_user }}"
     group: "{{ geth_user }}"
 
+- name: Set permissions
+  ansible.builtin.command: "chown -R {{ geth_user }}:{{ geth_user }} {{ geth_datadir }}" # noqa deprecated-command-syntax
+  changed_when: false
+
 - name: Init custom network
   when: geth_init_custom_network
   block:
@@ -23,7 +27,7 @@
         name: "{{ geth_container_name }}-init"
         image: "{{ geth_container_image }}"
         detach: false
-        auto_remove: true
+        auto_remove: "{{ geth_init_autoremove_enabled }}"
         restart_policy: "no"
         state: started
         volumes: "{{ geth_init_custom_network_container_volumes }}"

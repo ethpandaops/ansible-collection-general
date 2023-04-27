@@ -11,6 +11,10 @@
     owner: "{{ erigon_user }}"
     group: "{{ erigon_user }}"
 
+- name: Set permissions
+  ansible.builtin.command: "chown -R {{ erigon_user }}:{{ erigon_user }} {{ erigon_datadir }}" # noqa deprecated-command-syntax
+  changed_when: false
+
 - name: Init custom network
   when: erigon_init_custom_network
   block:

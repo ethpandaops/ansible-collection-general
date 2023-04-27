@@ -119,7 +119,7 @@
     - name: Check that bigtable service is running
       ansible.builtin.assert:
         that:
-          - beaconchain_explorer_aio_compose_db_meta.services["postgres"]["beaconchain_bigtable"].state.running
+          - beaconchain_explorer_aio_compose_db_bigtable_meta.services["bigtable"]["beaconchain_bigtable"].state.running
     - name: Init bigtable
       ansible.builtin.shell: "docker exec beaconchain_bigtable /init-bigtable.sh && touch {{ beaconchain_explorer_aio_installation_dir }}/bigtable/initialized"
       args:
