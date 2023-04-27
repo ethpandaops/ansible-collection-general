@@ -63,3 +63,6 @@ nimbus_container_validator_args:
   - --suggested-fee-recipient={{ nimbus_validator_fee_recipient }}
 nimbus_container_validator_volumes:
   - "{{ nimbus_validator_datadir }}:/validator-data"
+
+# Default image pull policy
+image_pull_policy: false

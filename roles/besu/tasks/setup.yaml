@@ -23,4 +23,5 @@
     env: "{{ besu_container_env }}"
     networks: "{{ besu_container_networks }}"
     command: "{{ besu_container_command + besu_container_command_extra_args }}"
-    user: "{{ besu_user_meta.uid }}"
+    user: "{{ besu_user_meta.uid }}" 
+    pull: "{{ image_pull_policy }}"

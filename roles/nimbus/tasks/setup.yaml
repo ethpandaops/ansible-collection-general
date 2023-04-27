@@ -49,3 +49,4 @@
         )
       }}
     user: "{{ nimbus_user_meta.uid }}"
+    pull: "{{ image_pull_policy }}"
