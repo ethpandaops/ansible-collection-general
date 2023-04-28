@@ -10,7 +10,7 @@ beaconchain_explorer_aio_sql_init_file_url: https://raw.githubusercontent.com/go
 beaconchain_explorer_aio_docker_compose_file: templates/docker-compose.yml.j2
 
 beaconchain_explorer_aio_installation_dir: /opt/beaconchain-explorer-aio
-
+beaconchain_explorer_aio_network: []
 beaconchain_explorer_aio_docker_image_default: gobitfly/eth2-beaconchain-explorer:v1.4.1
 beaconchain_explorer_aio_docker_image_exporter: "{{ beaconchain_explorer_aio_docker_image_default }}"
 beaconchain_explorer_aio_docker_image_eth1indexer: "{{ beaconchain_explorer_aio_docker_image_default }}"

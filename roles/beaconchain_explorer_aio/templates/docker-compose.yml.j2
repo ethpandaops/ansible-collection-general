@@ -1,4 +1,7 @@
 version: '3'
+networks:
+  {{ beaconchain_explorer_aio_network }}:
+    external: true
 services:
   #######################################################################
   #                              EXPLORER
@@ -10,6 +13,8 @@ services:
     stop_grace_period: 5m
     restart: always
     command: {{ beaconchain_explorer_aio_cmd_exporter | to_yaml }}
+    networks:
+      - "{{ beaconchain_explorer_aio_network }}"
     volumes:
       - /etc/passwd:/etc/passwd:ro
       - /etc/group:/etc/group:ro
@@ -36,6 +41,8 @@ services:
     stop_grace_period: 5m
     restart: always
     command: {{ beaconchain_explorer_aio_cmd_eth1indexer | to_yaml }}
+    networks: 
+      - "{{ beaconchain_explorer_aio_network }}"
     volumes:
       - /etc/passwd:/etc/passwd:ro
       - /etc/group:/etc/group:ro
@@ -59,6 +66,8 @@ services:
     stop_grace_period: 5m
     restart: always
     command: {{ beaconchain_explorer_aio_cmd_statistics | to_yaml }}
+    networks: 
+      - "{{ beaconchain_explorer_aio_network }}"
     volumes:
       - /etc/passwd:/etc/passwd:ro
       - /etc/group:/etc/group:ro
@@ -83,6 +92,8 @@ services:
     stop_grace_period: 5m
     restart: always
     command: {{ beaconchain_explorer_aio_cmd_frontend_updater | to_yaml }}
+    networks: 
+      - "{{ beaconchain_explorer_aio_network }}"
     volumes:
       - /etc/passwd:/etc/passwd:ro
       - /etc/group:/etc/group:ro
@@ -108,6 +119,8 @@ services:
     stop_grace_period: 5m
     restart: always
     command: {{ beaconchain_explorer_aio_cmd_frontend | to_yaml }}
+    networks: 
+      - "{{ beaconchain_explorer_aio_network }}"
     volumes:
       - /etc/passwd:/etc/passwd:ro
       - /etc/group:/etc/group:ro
@@ -135,6 +148,8 @@ services:
     user: "{{ beaconchain_explorer_aio_user_uid }}"
     stop_grace_period: 5m
     restart: always
+    networks: 
+      - "{{ beaconchain_explorer_aio_network }}"
     volumes:
       - /etc/passwd:/etc/passwd:ro
       - /etc/group:/etc/group:ro
@@ -146,6 +161,8 @@ services:
     user: "{{ beaconchain_explorer_aio_user_uid }}"
     stop_grace_period: 5m
     restart: always
+    networks: 
+      - "{{ beaconchain_explorer_aio_network }}"
     environment:
       - POSTGRES_PASSWORD=pass
       - POSTGRES_USER=postgres
@@ -164,6 +181,8 @@ services:
     user: "{{ beaconchain_explorer_aio_user_uid }}"
     stop_grace_period: 5m
     restart: always
+    networks: 
+      - "{{ beaconchain_explorer_aio_network }}"
     entrypoint:
       - little_bigtable
     command:

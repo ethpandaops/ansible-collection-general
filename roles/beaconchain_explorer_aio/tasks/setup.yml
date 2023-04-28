@@ -3,6 +3,12 @@
     name: "{{ beaconchain_explorer_aio_user }}"
   register: beaconchain_explorer_aio_user_meta
 
+- name: Setup docker network
+  ansible.builtin.include_role:
+    name: ethpandaops.general.docker_network
+  vars:
+    docker_network_name: "{{ beaconchain_explorer_aio_network }}"
+
 - name: Setting host facts using complex arguments
   ansible.builtin.set_fact:
     beaconchain_explorer_aio_user_uid: "{{ beaconchain_explorer_aio_user_meta.uid }}"
