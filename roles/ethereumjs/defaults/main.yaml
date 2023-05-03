@@ -34,3 +34,6 @@ ethereumjs_container_command:
   - --jwt-secret=/execution-auth.jwt
   - --extIP={{ ansible_host }}
 ethereumjs_container_command_extra_args: []
+
+# Default image pull policy
+ethereumjs_container_pull: false

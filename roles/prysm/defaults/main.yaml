@@ -79,3 +79,6 @@ prysm_validator_container_command:
 
 prysm_validator_container_command_extra_args: []
   # - --graffiti=hello-world
+
+# Default image pull policy
+prysm_container_pull: false

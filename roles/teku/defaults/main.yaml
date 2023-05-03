@@ -67,3 +67,6 @@ teku_container_validator_args:
   - --validators-keystore-locking-enabled=false
 teku_container_validator_volumes:
   - "{{ teku_validator_datadir }}:/validator-data"
+
+# Default image pull policy
+teku_container_pull: false

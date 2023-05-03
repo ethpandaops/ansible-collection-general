@@ -33,3 +33,4 @@
     command: "{{ nethermind_container_command + nethermind_container_command_extra_args }} "
     user: "{{ nethermind_user_meta.uid }}"
     working_dir: "{{ nethermind_datadir }}"
+    pull: "{{ nethermind_container_pull | bool }}"

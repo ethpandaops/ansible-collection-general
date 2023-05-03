@@ -52,3 +52,6 @@ geth_init_custom_network_container_command:
   - --datadir=/data
   - init
   - /genesis.json
+
+# Default image pull policy
+geth_container_pull: false

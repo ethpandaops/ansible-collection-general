@@ -84,3 +84,6 @@ lighthouse_validator_container_command_extra_args: []
   # - --http
   # - --http-port=5062
   # - --graffiti=hello-world
+
+# Default image pull policy
+lighthouse_container_pull: false

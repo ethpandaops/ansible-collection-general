@@ -39,3 +39,6 @@ besu_container_command:
   - --metrics-host=0.0.0.0
   - --metrics-port={{ besu_ports_metrics }}
 besu_container_command_extra_args: []
+
+# Default image pull policy
+besu_container_pull: false
