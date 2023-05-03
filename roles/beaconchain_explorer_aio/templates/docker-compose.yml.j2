@@ -1,4 +1,11 @@
 version: '3'
+{% if beaconchain_explorer_aio_networks is defined and beaconchain_explorer_aio_networks|length > 0 %}
+networks:
+{% for network in beaconchain_explorer_aio_networks %}
+  {{ network }}:
+    external: true
+{% endfor %}
+{% endif %}
 services:
   #######################################################################
   #                              EXPLORER
@@ -10,6 +17,9 @@ services:
     stop_grace_period: 5m
     restart: always
     command: {{ beaconchain_explorer_aio_cmd_exporter | to_yaml }}
+{%- if beaconchain_explorer_aio_networks is defined and beaconchain_explorer_aio_networks|length > 0 %}
+    networks: {{ beaconchain_explorer_aio_networks | to_yaml }}
+{%- endif %}
     volumes:
       - /etc/passwd:/etc/passwd:ro
       - /etc/group:/etc/group:ro
@@ -36,6 +46,9 @@ services:
     stop_grace_period: 5m
     restart: always
     command: {{ beaconchain_explorer_aio_cmd_eth1indexer | to_yaml }}
+{%- if beaconchain_explorer_aio_networks is defined and beaconchain_explorer_aio_networks|length > 0 %}
+    networks: {{ beaconchain_explorer_aio_networks | to_yaml }}
+{%- endif %}
     volumes:
       - /etc/passwd:/etc/passwd:ro
       - /etc/group:/etc/group:ro
@@ -59,6 +72,9 @@ services:
     stop_grace_period: 5m
     restart: always
     command: {{ beaconchain_explorer_aio_cmd_statistics | to_yaml }}
+{%- if beaconchain_explorer_aio_networks is defined and beaconchain_explorer_aio_networks|length > 0 %}
+    networks: {{ beaconchain_explorer_aio_networks | to_yaml }}
+{%- endif %}
     volumes:
       - /etc/passwd:/etc/passwd:ro
       - /etc/group:/etc/group:ro
@@ -83,6 +99,9 @@ services:
     stop_grace_period: 5m
     restart: always
     command: {{ beaconchain_explorer_aio_cmd_frontend_updater | to_yaml }}
+{%- if beaconchain_explorer_aio_networks is defined and beaconchain_explorer_aio_networks|length > 0 %}
+    networks: {{ beaconchain_explorer_aio_networks | to_yaml }}
+{%- endif %}
     volumes:
       - /etc/passwd:/etc/passwd:ro
       - /etc/group:/etc/group:ro
@@ -108,6 +127,9 @@ services:
     stop_grace_period: 5m
     restart: always
     command: {{ beaconchain_explorer_aio_cmd_frontend | to_yaml }}
+{%- if beaconchain_explorer_aio_networks is defined and beaconchain_explorer_aio_networks|length > 0 %}
+    networks: {{ beaconchain_explorer_aio_networks | to_yaml }}
+{%- endif %}
     volumes:
       - /etc/passwd:/etc/passwd:ro
       - /etc/group:/etc/group:ro
@@ -135,6 +157,9 @@ services:
     user: "{{ beaconchain_explorer_aio_user_uid }}"
     stop_grace_period: 5m
     restart: always
+{% if beaconchain_explorer_aio_networks is defined and beaconchain_explorer_aio_networks|length > 0 %}
+    networks: {{ beaconchain_explorer_aio_networks | to_yaml }}
+{%- endif %}
     volumes:
       - /etc/passwd:/etc/passwd:ro
       - /etc/group:/etc/group:ro
@@ -146,6 +171,9 @@ services:
     user: "{{ beaconchain_explorer_aio_user_uid }}"
     stop_grace_period: 5m
     restart: always
+{% if beaconchain_explorer_aio_networks is defined and beaconchain_explorer_aio_networks|length > 0 %}
+    networks: {{ beaconchain_explorer_aio_networks | to_yaml }}
+{%- endif %}
     environment:
       - POSTGRES_PASSWORD=pass
       - POSTGRES_USER=postgres
@@ -164,6 +192,9 @@ services:
     user: "{{ beaconchain_explorer_aio_user_uid }}"
     stop_grace_period: 5m
     restart: always
+{% if beaconchain_explorer_aio_networks is defined and beaconchain_explorer_aio_networks|length > 0 %}
+    networks: {{ beaconchain_explorer_aio_networks | to_yaml }}
+{%- endif %}
     entrypoint:
       - little_bigtable
     command:
