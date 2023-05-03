@@ -7,7 +7,7 @@
     mode: "0750"
 
 - name: Set permissions
-  ansible.builtin.command: "chown -R 1000:1000 {{ arbitrum_node_datadir }}" # noqa deprecated-command-syntax
+  ansible.builtin.command: "chown -R 1000:1000 {{ arbitrum_node_datadir }}" # noqa no-free-form
   changed_when: false
 
 - name: Run arbitrum_node container

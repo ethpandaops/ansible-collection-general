@@ -12,7 +12,7 @@
     group: "{{ besu_user }}"
 
 - name: Set permissions
-  ansible.builtin.command: "chown -R {{ besu_user }}:{{ besu_user }} {{ besu_datadir }}" # noqa deprecated-command-syntax
+  ansible.builtin.command: "chown -R {{ besu_user }}:{{ besu_user }} {{ besu_datadir }}" # noqa no-free-form
   changed_when: false
 
 - name: Run besu container

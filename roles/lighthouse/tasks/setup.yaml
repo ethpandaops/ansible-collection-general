@@ -12,7 +12,7 @@
     group: "{{ lighthouse_user }}"
 
 - name: Set permissions
-  ansible.builtin.command: "chown -R {{ lighthouse_user }}:{{ lighthouse_user }} {{ lighthouse_datadir }}" # noqa deprecated-command-syntax
+  ansible.builtin.command: "chown -R {{ lighthouse_user }}:{{ lighthouse_user }} {{ lighthouse_datadir }}" # noqa no-free-form
   changed_when: false
 
 - name: Run lighthouse container
@@ -44,7 +44,7 @@
   when: lighthouse_validator_enabled
 
 - name: Set permissions for validator data dir
-  ansible.builtin.command: "chown -R {{ lighthouse_user }}:{{ lighthouse_user }} {{ lighthouse_validator_datadir }}" # noqa deprecated-command-syntax
+  ansible.builtin.command: "chown -R {{ lighthouse_user }}:{{ lighthouse_user }} {{ lighthouse_validator_datadir }}" # noqa no-free-form
   changed_when: false
   when: lighthouse_validator_enabled
 
