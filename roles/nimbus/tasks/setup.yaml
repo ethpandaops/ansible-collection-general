@@ -74,4 +74,4 @@
         )
       }}
     user: "{{ nimbus_user_meta.uid }}"
-    pull: "{{ nimbus_container_pull }}"
+    pull: "{{ nimbus_container_pull | bool }}"

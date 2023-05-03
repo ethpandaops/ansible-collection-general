@@ -28,4 +28,4 @@
     networks: "{{ besu_container_networks }}"
     command: "{{ besu_container_command + besu_container_command_extra_args }}"
     user: "{{ besu_user_meta.uid }}"
-    pull: "{{ besu_container_pull }}"
+    pull: "{{ besu_container_pull | bool }}"

@@ -28,7 +28,7 @@
     networks: "{{ lighthouse_container_networks }}"
     command: "{{ lighthouse_container_command + lighthouse_container_command_extra_args }} "
     user: "{{ lighthouse_user_meta.uid }}"
-    pull: "{{ lighthouse_container_pull }}"
+    pull: "{{ lighthouse_container_pull | bool }}"
 
 - name: Create validator data dir
   ansible.builtin.file:
@@ -61,5 +61,5 @@
     networks: "{{ lighthouse_validator_container_networks }}"
     command: "{{ lighthouse_validator_container_command + lighthouse_validator_container_command_extra_args }} "
     user: "{{ lighthouse_user_meta.uid }}"
-    pull: "{{ lighthouse_container_pull }}"
+    pull: "{{ lighthouse_container_pull | bool }}"
   when: lighthouse_validator_enabled

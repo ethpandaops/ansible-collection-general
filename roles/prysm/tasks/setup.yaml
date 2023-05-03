@@ -29,7 +29,7 @@
     entrypoint: "{{ prysm_container_entrypoint }}"
     command: "{{ prysm_container_command + prysm_container_command_extra_args }}"
     user: "{{ prysm_user_meta.uid }}"
-    pull: "{{ prysm_container_pull }}"
+    pull: "{{ prysm_container_pull | bool }}"
 
 - name: Create validator data dir
   ansible.builtin.file:
@@ -59,5 +59,5 @@
     entrypoint: "{{ prysm_validator_container_entrypoint }}"
     command: "{{ prysm_validator_container_command + prysm_validator_container_command_extra_args }}"
     user: "{{ prysm_user_meta.uid }}"
-    pull: "{{ prysm_container_pull }}"
+    pull: "{{ prysm_container_pull | bool }}"
   when: prysm_validator_enabled

@@ -28,4 +28,4 @@
     networks: "{{ ethereumjs_container_networks }}"
     command: "{{ ethereumjs_container_command + ethereumjs_container_command_extra_args }}"
     user: "{{ ethereumjs_user_meta.uid }}"
-    pull: "{{ ethereumjs_container_pull }}"
+    pull: "{{ ethereumjs_container_pull | bool }}"
