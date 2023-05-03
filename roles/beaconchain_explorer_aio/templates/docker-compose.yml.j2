@@ -1,7 +1,9 @@
 version: '3'
 networks:
-  {{ beaconchain_explorer_aio_networks }}:
+{% for network in beaconchain_explorer_aio_networks %}
+  {{ network }}:
     external: true
+{% endfor %}
 services:
   #######################################################################
   #                              EXPLORER
@@ -14,7 +16,7 @@ services:
     restart: always
     command: {{ beaconchain_explorer_aio_cmd_exporter | to_yaml }}
     networks:
-      - "{{ beaconchain_explorer_aio_networks }}"
+      - "{{ beaconchain_explorer_aio_networks | to_yaml }}"
     volumes:
       - /etc/passwd:/etc/passwd:ro
       - /etc/group:/etc/group:ro
@@ -42,7 +44,7 @@ services:
     restart: always
     command: {{ beaconchain_explorer_aio_cmd_eth1indexer | to_yaml }}
     networks: 
-      - "{{ beaconchain_explorer_aio_networks }}"
+      - "{{ beaconchain_explorer_aio_networks | to_yaml }}"
     volumes:
       - /etc/passwd:/etc/passwd:ro
       - /etc/group:/etc/group:ro
@@ -67,7 +69,7 @@ services:
     restart: always
     command: {{ beaconchain_explorer_aio_cmd_statistics | to_yaml }}
     networks: 
-      - "{{ beaconchain_explorer_aio_networks }}"
+      - "{{ beaconchain_explorer_aio_networks | to_yaml }}"
     volumes:
       - /etc/passwd:/etc/passwd:ro
       - /etc/group:/etc/group:ro
@@ -93,7 +95,7 @@ services:
     restart: always
     command: {{ beaconchain_explorer_aio_cmd_frontend_updater | to_yaml }}
     networks: 
-      - "{{ beaconchain_explorer_aio_networks }}"
+      - "{{ beaconchain_explorer_aio_networks | to_yaml }}"
     volumes:
       - /etc/passwd:/etc/passwd:ro
       - /etc/group:/etc/group:ro
@@ -120,7 +122,7 @@ services:
     restart: always
     command: {{ beaconchain_explorer_aio_cmd_frontend | to_yaml }}
     networks: 
-      - "{{ beaconchain_explorer_aio_networks }}"
+      - "{{ beaconchain_explorer_aio_networks | to_yaml }}"
     volumes:
       - /etc/passwd:/etc/passwd:ro
       - /etc/group:/etc/group:ro
@@ -149,7 +151,7 @@ services:
     stop_grace_period: 5m
     restart: always
     networks: 
-      - "{{ beaconchain_explorer_aio_networks }}"
+      - "{{ beaconchain_explorer_aio_networks | to_yaml }}"
     volumes:
       - /etc/passwd:/etc/passwd:ro
       - /etc/group:/etc/group:ro
@@ -162,7 +164,7 @@ services:
     stop_grace_period: 5m
     restart: always
     networks: 
-      - "{{ beaconchain_explorer_aio_networks }}"
+      - "{{ beaconchain_explorer_aio_networks | to_yaml }}"
     environment:
       - POSTGRES_PASSWORD=pass
       - POSTGRES_USER=postgres
@@ -182,7 +184,7 @@ services:
     stop_grace_period: 5m
     restart: always
     networks: 
-      - "{{ beaconchain_explorer_aio_networks }}"
+      - "{{ beaconchain_explorer_aio_networks | to_yaml }}"
     entrypoint:
       - little_bigtable
     command:
