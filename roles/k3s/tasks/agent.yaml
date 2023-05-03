@@ -4,7 +4,7 @@
     dest: "{{ k3s_systemd_dir }}/k3s-agent.service"
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
 
 - name: Enable and check K3s service
   ansible.builtin.systemd:
