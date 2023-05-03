@@ -35,7 +35,7 @@
         networks: "{{ geth_container_networks }}"
         command: "{{ geth_init_custom_network_container_command }}"
         user: "{{ geth_user_meta.uid }}"
-        pull: "{{ image_pull_policy }}"
+        pull: "{{ geth_container_pull }}"
       when: not geth_init_custom_network_chaindata_stat.stat.exists
 
 - name: Run geth container
@@ -51,4 +51,4 @@
     networks: "{{ geth_container_networks }}"
     command: "{{ geth_container_command + geth_container_command_extra_args }}"
     user: "{{ geth_user_meta.uid }}"
-    pull: "{{ image_pull_policy }}"
+    pull: "{{ geth_container_pull }}"

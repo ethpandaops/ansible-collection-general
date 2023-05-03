@@ -36,4 +36,4 @@ ethereumjs_container_command:
 ethereumjs_container_command_extra_args: []
 
 # Default image pull policy
-image_pull_policy: false
+ethereumjs_container_pull: false

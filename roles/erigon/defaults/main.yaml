@@ -60,4 +60,4 @@ erigon_init_custom_network_container_command:
   - /genesis.json
 
 # Default image pull policy
-image_pull_policy: false
+erigon_container_pull: false

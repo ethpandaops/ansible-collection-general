@@ -36,7 +36,7 @@
         entrypoint: "{{ erigon_init_custom_network_container_entrypoint }}"
         command: "{{ erigon_init_custom_network_container_command }}"
         user: "{{ erigon_user_meta.uid }}"
-        pull: "{{ image_pull_policy }}"
+        pull: "{{ erigon_container_pull }}"
       when: not erigon_init_custom_network_chaindata_stat.stat.exists
 
 - name: Run erigon container
@@ -53,4 +53,4 @@
     entrypoint: "{{ erigon_container_entrypoint }}"
     command: "{{ erigon_container_command + erigon_container_command_extra_args }}"
     user: "{{ erigon_user_meta.uid }}"
-    pull: "{{ image_pull_policy }}"
+    pull: "{{ erigon_container_pull }}"
