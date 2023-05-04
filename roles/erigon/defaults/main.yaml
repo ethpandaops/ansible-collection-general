@@ -37,7 +37,6 @@ erigon_container_command:
   - --authrpc.addr=0.0.0.0
   - --authrpc.port={{ erigon_ports_engine }}
   - --authrpc.vhosts=*
-  - --externalcl
   - --metrics
   - --metrics.addr=0.0.0.0
   - --metrics.port={{ erigon_ports_metrics }}
