@@ -1,4 +1,5 @@
 tx_fuzz_user: "tx_fuzz"
+tx_fuzz_cleanup: false # when set to "true" it will remove the container
 
 tx_fuzz_container_name: "tx_fuzz"
 tx_fuzz_container_image: "ethpandaops/tx-fuzz:latest"
