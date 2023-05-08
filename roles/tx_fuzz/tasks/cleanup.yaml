@@ -1,0 +1,5 @@
+- name: Remove tx_fuzz container
+  community.docker.docker_container:
+    name: "{{ tx_fuzz_container_name }}"
+    state: absent
+  when: tx_fuzz_cleanup

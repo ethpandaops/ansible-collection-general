@@ -1,0 +1,7 @@
+- name: Setup tx_fuzz
+  ansible.builtin.import_tasks: setup.yaml
+  when: not tx_fuzz_cleanup
+
+- name: Cleanup tx_fuzz
+  ansible.builtin.import_tasks: cleanup.yaml
+  when: tx_fuzz_cleanup
