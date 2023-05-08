@@ -1,0 +1,20 @@
+tx_fuzz_user: "tx_fuzz"
+
+tx_fuzz_container_name: "tx_fuzz"
+tx_fuzz_container_image: "ethpandaops/tx-fuzz:latest"
+tx_fuzz_container_env: {}
+tx_fuzz_container_ports: []
+tx_fuzz_container_volumes: []
+
+tx_fuzz_container_stop_timeout: "300"
+tx_fuzz_container_networks: []
+
+tx_fuzz_container_command:
+  - {{ tx_fuzz_rpc_url }}
+  - spam
+  - {{ tx_fuzz_private_key }}
+  - {{ tx_fuzz_public_key }}
+
+tx_fuzz_rpc_url: your-execution-node:8545
+tx_fuzz_private_key: ""
+tx_fuzz_public_key: ""
