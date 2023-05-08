@@ -43,6 +43,8 @@ nimbus_container_volumes:
   - "{{ nimbus_auth_jwt_path }}:/execution-auth.jwt:ro"
 nimbus_container_stop_timeout: "300"
 nimbus_container_networks: []
+nimbus_container_entrypoint:
+  - beacon_node
 nimbus_container_command:
   - --non-interactive=true
   - --data-dir=/data
