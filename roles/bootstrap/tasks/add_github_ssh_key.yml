@@ -1,0 +1,6 @@
+- name: Add SSH keys from github user
+  loop: "{{ lookup('url', 'https://github.com/' + outer_item + '.keys').splitlines() }}"
+  ansible.posix.authorized_key:
+    user: "{{ bootstrap_default_user }}"
+    state: present
+    key: "{{ item + ' # github:' + outer_item }}"
