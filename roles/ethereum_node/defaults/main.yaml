@@ -1,4 +1,5 @@
 ethereum_node_docker_network_name: shared
+ethereum_node_skip_cleanup: false
 
 # Execution layer client
 ethereum_node_el: ethereumjs # Valid options: besu, geth, erigon, nethermind

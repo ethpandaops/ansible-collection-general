@@ -9,6 +9,7 @@
 
 - name: Cleanup clients that shouldn't be running
   ansible.builtin.import_tasks: cleanup.yaml
+  when: not ethereum_node_skip_cleanup
 
 - name: Setup mev_boost
   ansible.builtin.include_role:
