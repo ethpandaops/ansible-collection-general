@@ -1,0 +1,5 @@
+- name: Remove mev_mock_relay_builder container
+  community.docker.docker_container:
+    name: "{{ mev_mock_relay_builder_container_name }}"
+    state: absent
+  when: mev_mock_relay_builder_cleanup

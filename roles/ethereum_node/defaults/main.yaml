@@ -37,6 +37,9 @@ ethereum_node_json_rpc_snooper_engine_name: "snooper-engine"
 # Mev boost
 ethereum_node_mev_boost_enabled: false
 
+# Mev mock relay builder
+ethereum_node_mev_mock_relay_builder_enabled: false
+
 # Metrics exporter
 ethereum_node_metrics_exporter_enabled: false
 

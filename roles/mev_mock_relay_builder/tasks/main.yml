@@ -1,0 +1,8 @@
+---
+# tasks file for mev_mock_relay_builder
+- name: Setup mev_mock_relay_builder
+  ansible.builtin.import_tasks: setup.yaml
+  when: not mev_mock_relay_builder_cleanup
+
+- name: Cleanup mev_mock_relay_builder
+  ansible.builtin.import_tasks: cleanup.yaml

@@ -18,6 +18,16 @@
     mev_boost_container_networks: "{{ ethereum_node_docker_networks }}"
   when: ethereum_node_mev_boost_enabled
 
+- name: Setup mev_mock_relay_builder
+  ansible.builtin.include_role:
+    name: ethpandaops.general.mev_mock_relay_builder
+  vars:
+    mev_mock_relay_builder_container_networks: "{{ ethereum_node_docker_networks }}"
+    mev_mock_relay_builder_beacon_uri: "{{ ethereum_node_cl_beacon_endpoint }}"
+    mev_mock_relay_builder_el_uri: >-
+      {{ ethereum_node_json_rpc_snooper_engine_enabled | ternary(ethereum_node_el_engine_snooper_endpoint, ethereum_node_el_engine_endpoint) }}
+  when: ethereum_node_mev_mock_relay_builder_enabled
+
 - name: Setup execution client
   ansible.builtin.import_tasks: setup_el.yaml
   when: ethereum_node_el_enabled

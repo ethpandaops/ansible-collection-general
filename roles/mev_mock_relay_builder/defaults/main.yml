@@ -1,0 +1,32 @@
+mev_mock_relay_builder_user: mev_mock_relay_builder
+
+mev_mock_relay_builder_cleanup: false # when set to "true" it will remove the container(s)
+
+################################################################################
+##
+## mev_mock_relay_builder container configuration
+##
+################################################################################
+mev_mock_relay_builder_container_name: mev_mock_relay_builder
+mev_mock_relay_builder_container_image: ethpandaops/mock-builder:1.0.0
+mev_mock_relay_builder_container_env: {}
+mev_mock_relay_builder_server_port: 18550
+mev_mock_relay_builder_container_ports:
+  - "127.0.0.1:{{ mev_mock_relay_builder_server_port }}:{{ mev_mock_relay_builder_server_port }}"
+
+mev_mock_relay_builder_container_stop_timeout: "300"
+mev_mock_relay_builder_container_networks: []
+mev_mock_relay_builder_container_volumes:
+  - "{{ mev_mock_relay_builder_auth_jwt_path }}:/execution-auth.jwt:ro"
+
+mev_mock_relay_builder_container_command:
+  - -port={{ mev_mock_relay_builder_server_port }}
+  - -jwt-secret=/execution-auth.jwt
+  - -bid-multiplier=2
+  - -cl={{ mev_mock_relay_builder_beacon_uri }}
+  - -el={{ mev_mock_relay_builder_el_uri }}
+
+mev_mock_relay_builder_beacon_uri: your-beacon-node:5052
+mev_mock_relay_builder_el_uri: your-engine-api:8551
+mev_mock_relay_builder_auth_jwt_path: /data/execution-auth.secret
+mev_mock_relay_builder_container_command_extra_args: []
