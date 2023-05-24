@@ -20,7 +20,7 @@ mev_mock_relay_builder_container_volumes:
   - "{{ mev_mock_relay_builder_auth_jwt_path }}:/execution-auth.jwt:ro"
 
 mev_mock_relay_builder_container_command:
-  - -port={{mev_mock_relay_builder_server_port}}
+  - -port={{ mev_mock_relay_builder_server_port }}
   - -jwt-secret=/execution-auth.jwt
   - -bid-multiplier=2
   - -cl={{ mev_mock_relay_builder_beacon_uri }}
