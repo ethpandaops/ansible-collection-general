@@ -5,7 +5,7 @@
     mode: '0440'
     backup: true
 
-- name: Read user ssh keys from file
+- name: Read user SSH keys from file
   ansible.builtin.command: cat ~/.ssh/github_{{ outer_item }}.keys
   register: bootstrap_downloaded_ssh_keys
   changed_when: false
