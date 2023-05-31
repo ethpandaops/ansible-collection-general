@@ -1,0 +1,35 @@
+#NOTE: Run this script in zsh not bash or sh! 
+declare -a execution_client=("besu" "erigon" "geth" "nethermind" "ethereumjs" "reth")
+declare -a consensus_client=("lighthouse" "lodestar" "nimbus" "prysm" "teku" "grandine")
+typeset -A endpoints
+typeset -A hostname
+typeset -A repo
+
+### Set docker images with tags
+repo[besu]="hyperledger/besu:23.4.0"
+repo[erigon]="thorax/erigon:v2.43.0"
+repo[geth]="ethereum/client-go:v1.12.0"
+repo[nethermind]="nethermind/nethermind:1.18.1"
+repo[lighthouse]="sigp/lighthouse:v4.2.0"
+repo[lodestar]="chainsafe/lodestar:v1.8.0"
+repo[nimbus]="statusim/nimbus-eth2:amd64-v23.5.1"
+repo[prysm]="ethpandaops/prysm:v4.0.5"
+repo[teku]="consensys/teku:23.5.0"
+repo[grandine]="sifrai/grandine:unstable"
+repo[ethereumjs]="ethereumjs/ethereumjs-monorepo:latest"
+repo[reth]="ethpandaops/reth:latest"
+
+### Execution endpoint definitions
+endpoints[grandine]="eth1-rpc-urls"
+endpoints[lighthouse]="execution-endpoint"
+endpoints[lodestar]="execution.urls"
+endpoints[nimbus]="web3-url"
+endpoints[prysm]="execution-endpoint"
+endpoints[teku]="ee-endpoint"
+
+### Set default values
+declare p2pPort="{{ p2pPort }}"
+export network="{{ network }}"
+export location="{{ location }}"
+export domain="{{ domain }}"
+

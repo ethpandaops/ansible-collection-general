@@ -1,0 +1,6 @@
+- name: Generate zsh files
+  ansible.builtin.import_tasks: generator.yml
+
+- name: Execute zsh files
+  ansible.builtin.import_tasks: executor.yml
+

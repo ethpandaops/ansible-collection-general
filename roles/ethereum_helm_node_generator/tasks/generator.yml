@@ -1,0 +1,17 @@
+- name: Create a temp directory for the zsh files
+  ansible.builtin.file:
+    path: "{{ ethereum_helm_node_generator_temp_dir }}"
+    state: directory
+
+- name: Debug variable name
+  debug:
+    msg: "{{ lookup('ansible.builtin.file', item).network }}"
+  loop: "{{ variable_files }}"
+  loop_control:
+    loop_var: item
+
+- name: Template a file for {{  network }} at {{ location }}
+  ansible.builtin.template:
+    src: templates/generator.zsh.j2
+    dest: "{{ ethereum_helm_node_generator_temp_dir }}/generator_{{ location }}_{{ ethereum_helm_node_generator_variable_file.network }}.zsh"
+  delegate_to: localhost
