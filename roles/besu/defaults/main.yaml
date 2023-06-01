@@ -41,4 +41,4 @@ besu_container_command:
 besu_container_command_extra_args: []
 
 # Default image pull policy
-besu_container_pull: false
+besu_container_pull: true
