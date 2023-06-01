@@ -76,4 +76,4 @@ lodestar_validator_container_command_extra_args: []
   # - --graffiti=hello-world
 
 # Default image pull policy
-lodestar_container_pull: true
+lodestar_container_pull: false

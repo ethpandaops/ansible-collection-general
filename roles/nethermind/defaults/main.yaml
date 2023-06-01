@@ -44,4 +44,4 @@ nethermind_container_command:
 nethermind_container_command_extra_args: []
 
 # Default image pull policy
-nethermind_container_pull: true
+nethermind_container_pull: false

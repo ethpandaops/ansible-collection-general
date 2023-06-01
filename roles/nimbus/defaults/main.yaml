@@ -77,4 +77,4 @@ nimbus_container_validator_volumes:
   - "{{ nimbus_validator_datadir }}:/validator-data"
 
 # Default image pull policy
-nimbus_container_pull: true
+nimbus_container_pull: false
