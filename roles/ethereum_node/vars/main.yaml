@@ -14,3 +14,6 @@ ethereum_node_supported_cl:
 
 ethereum_node_docker_networks:
   - name: "{{ ethereum_node_docker_network_name }}"
+
+ethereum_node_execution_engine_endpoint: >-
+  {{ ethereum_node_json_rpc_snooper_engine_enabled | ternary(ethereum_node_el_engine_snooper_endpoint, ethereum_node_el_engine_endpoint) }}
