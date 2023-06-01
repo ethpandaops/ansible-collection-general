@@ -8,6 +8,7 @@
     lighthouse_ports_http_beacon: "{{ ethereum_node_cl_ports_http_beacon }}"
     lighthouse_ports_metrics: "{{ ethereum_node_cl_ports_metrics }}"
     lighthouse_container_networks: "{{ ethereum_node_docker_networks }}"
+    lighthouse_container_pull: "{{ ethereum_node_images_always_pull }}"
     lighthouse_execution_engine_endpoint: >-
       {{ ethereum_node_json_rpc_snooper_engine_enabled | ternary(ethereum_node_el_engine_snooper_endpoint, ethereum_node_el_engine_endpoint) }}
     lighthouse_validator_enabled: "{{ ethereum_node_cl_validator_enabled }}"
@@ -24,6 +25,7 @@
     teku_ports_http_beacon: "{{ ethereum_node_cl_ports_http_beacon }}"
     teku_ports_metrics: "{{ ethereum_node_cl_ports_metrics }}"
     teku_container_networks: "{{ ethereum_node_docker_networks }}"
+    teku_container_pull: "{{ ethereum_node_images_always_pull }}"
     teku_execution_engine_endpoint: >-
       {{ ethereum_node_json_rpc_snooper_engine_enabled | ternary(ethereum_node_el_engine_snooper_endpoint, ethereum_node_el_engine_endpoint) }}
     teku_validator_enabled: "{{ ethereum_node_cl_validator_enabled }}"
@@ -40,6 +42,7 @@
     prysm_ports_http_beacon: "{{ ethereum_node_cl_ports_http_beacon }}"
     prysm_ports_metrics: "{{ ethereum_node_cl_ports_metrics }}"
     prysm_container_networks: "{{ ethereum_node_docker_networks }}"
+    prysm_container_pull: "{{ ethereum_node_images_always_pull }}"
     prysm_execution_engine_endpoint: >-
       {{ ethereum_node_json_rpc_snooper_engine_enabled | ternary(ethereum_node_el_engine_snooper_endpoint, ethereum_node_el_engine_endpoint) }}
     prysm_validator_enabled: "{{ ethereum_node_cl_validator_enabled }}"
@@ -56,6 +59,7 @@
     lodestar_ports_http_beacon: "{{ ethereum_node_cl_ports_http_beacon }}"
     lodestar_ports_metrics: "{{ ethereum_node_cl_ports_metrics }}"
     lodestar_container_networks: "{{ ethereum_node_docker_networks }}"
+    lodestar_container_pull: "{{ ethereum_node_images_always_pull }}"
     lodestar_execution_engine_endpoint: >-
       {{ ethereum_node_json_rpc_snooper_engine_enabled | ternary(ethereum_node_el_engine_snooper_endpoint, ethereum_node_el_engine_endpoint) }}
     lodestar_validator_enabled: "{{ ethereum_node_cl_validator_enabled }}"
@@ -72,6 +76,7 @@
     nimbus_ports_http_beacon: "{{ ethereum_node_cl_ports_http_beacon }}"
     nimbus_ports_metrics: "{{ ethereum_node_cl_ports_metrics }}"
     nimbus_container_networks: "{{ ethereum_node_docker_networks }}"
+    nimbus_container_pull: "{{ ethereum_node_images_always_pull }}"
     nimbus_execution_engine_endpoint: >-
       {{ ethereum_node_json_rpc_snooper_engine_enabled | ternary(ethereum_node_el_engine_snooper_endpoint, ethereum_node_el_engine_endpoint) }}
     nimbus_validator_enabled: "{{ ethereum_node_cl_validator_enabled }}"
