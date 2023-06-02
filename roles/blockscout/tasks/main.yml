@@ -1,0 +1,7 @@
+- name: Setup blockscout
+  ansible.builtin.import_tasks: setup.yml
+  when: not blockscout_cleanup_all
+
+- name: Cleanup everything
+  ansible.builtin.import_tasks: cleanup.yml
+  when: blockscout_cleanup_all

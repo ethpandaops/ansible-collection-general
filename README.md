@@ -8,13 +8,14 @@ A collection of reusable ansible components used by the EthPandaOps team.
 
 ### Ethereum tooling
 - [beaconchain_explorer_aio](roles/beaconchain_explorer_aio)
+- [blockscout](roles/blockscout)
 - [cl_bootnode](roles/cl_bootnode)
 - [dshackle](roles/dshackle)
 - [ethereum_auth_jwt](roles/ethereum_auth_jwt)
 - [ethereum_metrics_exporter](roles/ethereum_metrics_exporter)
 - [ethstats](roles/ethstats)
-- [xatu_sentry](roles/xatu_sentry)
 - [mev_boost](roles/mev_boost)
+- [xatu_sentry](roles/xatu_sentry)
 
 ### Ethereum client pair
 - [ethereum_node](roles/ethereum_node)
@@ -41,13 +42,13 @@ A collection of reusable ansible components used by the EthPandaOps team.
 - [docker_network](roles/docker_network)
 - [docker_nginx_proxy](roles/docker_nginx_proxy)
 - [json_exporter](roles/json_exporter)
+- [json_rpc_snooper](roles/json_rpc_snooper)
 - [k3s](roles/k3s)
 - [litestream](roles/litestream)
 - [node_exporter](roles/node_exporter)
 - [oh_my_zsh](roles/oh_my_zsh)
 - [prometheus](roles/prometheus)
 - [s3_cron_backup](roles/s3_cron_backup)
-- [json_rpc_snooper](roles/json_rpc_snooper)
 
 ## Usage
 
