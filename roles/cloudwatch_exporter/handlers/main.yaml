@@ -1,0 +1,5 @@
+- name: Restart cloudwatch-exporter container
+  community.docker.docker_container:
+    name: "{{ cloudwatch_exporter_container_name }}"
+    state: started
+    restart: true

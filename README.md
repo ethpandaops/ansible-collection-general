@@ -40,7 +40,6 @@ A collection of reusable ansible components used by the EthPandaOps team.
 - [docker_cleanup](roles/docker_cleanup)
 - [docker_network](roles/docker_network)
 - [docker_nginx_proxy](roles/docker_nginx_proxy)
-- [json_exporter](roles/json_exporter)
 - [k3s](roles/k3s)
 - [litestream](roles/litestream)
 - [node_exporter](roles/node_exporter)
@@ -48,6 +47,10 @@ A collection of reusable ansible components used by the EthPandaOps team.
 - [prometheus](roles/prometheus)
 - [s3_cron_backup](roles/s3_cron_backup)
 - [json_rpc_snooper](roles/json_rpc_snooper)
+
+### Prometheus exporters
+- [cloudwatch_exporter](roles/cloudwatch_exporter)
+- [json_exporter](roles/json_exporter)
 
 ## Usage
 
