@@ -1,6 +1,8 @@
 cloudwatch_exporter_user: cloudwatch-exporter
 cloudwatch_exporter_datadir: /data/cloudwatch-exporter
 
+cloudwatch_exporter_cleanup: false # when set to "true" it will remove the container(s)
+
 cloudwatch_exporter_container_image: quay.io/prometheus/cloudwatch-exporter:v0.15.4
 cloudwatch_exporter_container_name: cloudwatch-exporter
 cloudwatch_exporter_container_ports:
