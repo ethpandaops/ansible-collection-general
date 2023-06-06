@@ -1,0 +1,28 @@
+cloudwatch_exporter_user: cloudwatch-exporter
+cloudwatch_exporter_datadir: /data/cloudwatch-exporter
+
+cloudwatch_exporter_cleanup: false # when set to "true" it will remove the container(s)
+
+cloudwatch_exporter_container_image: quay.io/prometheus/cloudwatch-exporter:v0.15.4
+cloudwatch_exporter_container_name: cloudwatch-exporter
+cloudwatch_exporter_container_ports:
+  - "127.0.0.1:9106:9106"
+cloudwatch_exporter_container_restart_policy: always
+cloudwatch_exporter_container_networks: []
+cloudwatch_exporter_container_volumes_from: []
+cloudwatch_exporter_container_volumes:
+  - "{{ cloudwatch_exporter_datadir }}/config.yml:/config/config.yml:ro"
+cloudwatch_exporter_container_env:
+  AWS_ACCESS_KEY_ID: ""
+  AWS_SECRET_ACCESS_KEY: ""
+  AWS_DEFAULT_REGION: "us-east-1"
+
+cloudwatch_exporter_config: |
+  region: {{ cloudwatch_exporter_container_env.AWS_DEFAULT_REGION }}
+  metrics:
+  - aws_namespace: AWS/ELB
+    aws_metric_name: RequestCount
+    aws_dimensions: [AvailabilityZone, LoadBalancerName]
+    aws_dimension_select:
+      LoadBalancerName: [myLB]
+    aws_statistics: [Sum]

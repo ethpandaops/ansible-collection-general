@@ -1,0 +1,5 @@
+- name: Remove cloudwatch-exporter container
+  community.docker.docker_container:
+    name: "{{ cloudwatch_exporter_container_name }}"
+    state: absent
+  when: cloudwatch_exporter_cleanup
