@@ -21,7 +21,7 @@ ethereum_genesis_generator_config_files:
   cl/config.yaml: "{{ lookup('ansible.builtin.url', 'https://raw.githubusercontent.com/ethpandaops/ethereum-genesis-generator/master/config-example/cl/config.yaml', split_lines=false) }}" # noqa yaml[line-length]
   cl/mnemonics.yaml: "{{ lookup('ansible.builtin.url', 'https://raw.githubusercontent.com/ethpandaops/ethereum-genesis-generator/master/config-example/cl/mnemonics.yaml', split_lines=false) }}" # noqa yaml[line-length]
   el/genesis-config.yaml: "{{ lookup('ansible.builtin.url', 'https://raw.githubusercontent.com/ethpandaops/ethereum-genesis-generator/master/config-example/el/genesis-config.yaml', split_lines=false) }}" # noqa yaml[line-length]
-  values.env: |-  # noqa yaml[line-length]
+  values.env: |-
     export CHAIN_ID="{{ ethereum_genesis_chain_id }}"
     export DEPOSIT_CONTRACT_ADDRESS="0x6f22fFbC56eFF051aECF839396DD1eD9aD6BBA9D"
     export EL_AND_CL_MNEMONIC="{{ ethereum_genesis_mnemonic }}"

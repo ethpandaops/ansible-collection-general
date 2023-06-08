@@ -11,6 +11,12 @@
         state: directory
         mode: '0755'
 
+    - name: Create generic prysm wallet password file
+      ansible.builtin.copy:
+        content: "prysm"
+        dest: "{{ ethereum_genesis_validator_keys_output_dir }}/prysm_wallet_pass.txt"
+        mode: "0644"
+
     - name: Create validator keys
       loop: "{{ ethereum_genesis_validator_keyranges | dict2items }}"
       ansible.builtin.shell: >
