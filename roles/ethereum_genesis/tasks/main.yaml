@@ -1,0 +1,30 @@
+- name: "Run genesis generation"
+  vars:
+    ansible_connection: local
+  delegate_to: 127.0.0.1
+  run_once: true
+  become: false
+  block:
+    - name: Check if genesis output dir exists
+      ansible.builtin.stat:
+        path: "{{ ethereum_genesis_generator_output_dir }}"
+      register: ethereum_genesis_generator_output_dir_register
+
+    - name: Run genesis config generation
+      ansible.builtin.import_tasks: generate_genesis.yaml
+      when: >
+        not ethereum_genesis_generator_output_dir_register.stat.exists and
+        not ethereum_genesis_cleanup
+
+    - name: Check if validator key output dir exists
+      ansible.builtin.stat:
+        path: "{{ ethereum_genesis_validator_keys_output_dir }}"
+      register: ethereum_genesis_validator_keys_output_dir_register
+
+    - name: Run validator key generation
+      ansible.builtin.import_tasks: generate_validator_keys.yaml
+      when: not ethereum_genesis_cleanup
+
+    - name: Cleanup
+      ansible.builtin.import_tasks: cleanup.yaml
+      when: ethereum_genesis_cleanup

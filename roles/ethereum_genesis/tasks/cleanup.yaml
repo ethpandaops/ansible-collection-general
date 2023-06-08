@@ -1,0 +1,14 @@
+- name: Cleanup everything
+  vars:
+    ansible_connection: local
+  delegate_to: 127.0.0.1
+  run_once: true
+  become: false
+  block:
+    - name: Remove dirs
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - "{{ ethereum_genesis_generator_output_dir }}"
+        - "{{ ethereum_genesis_validator_keys_output_dir }}"
