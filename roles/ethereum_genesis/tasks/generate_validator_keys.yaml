@@ -1,0 +1,62 @@
+- name: "Run validator key generation"
+  vars:
+    ansible_connection: local
+  delegate_to: 127.0.0.1
+  run_once: true
+  become: false
+  block:
+    - name: Create output directory for validator keys
+      ansible.builtin.file:
+        path: "{{ ethereum_genesis_validator_keys_output_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Create generic prysm wallet password file
+      ansible.builtin.copy:
+        content: "prysm"
+        dest: "{{ ethereum_genesis_validator_keys_output_dir }}/prysm_wallet_pass.txt"
+        mode: "0644"
+
+    - name: Create validator keys
+      loop: "{{ ethereum_genesis_validator_keyranges | dict2items }}"
+      ansible.builtin.shell: >
+        docker run --rm -t -u $UID
+        --entrypoint eth2-val-tools
+        --platform linux/amd64
+        -v {{ ethereum_genesis_validator_keys_output_dir }}:/output
+        {{ ethereum_genesis_generator_container_image }}
+        keystores
+        --insecure
+        --prysm-pass="prysm"
+        --out-loc="/output/{{ item.key }}"
+        --source-min="{{ item.value.start }}"
+        --source-max="{{ item.value.end }}"
+        --source-mnemonic="{{ ethereum_genesis_validator_mnemonic }}"
+      args:
+        creates: "{{ ethereum_genesis_validator_keys_output_dir }}/{{ item.key }}"
+
+    - name: Create bls address change operations
+      when: ethereum_genesis_validator_bls_change_operations_enabled
+      loop: "{{ ethereum_genesis_validator_keyranges | dict2items }}"
+      vars:
+        genesis_validator_root: >-
+          {{ (lookup('file', ethereum_genesis_generator_output_dir + '/parsedBeaconState.json') | from_json).genesis_validators_root }}
+        fork_version: >-
+          {{ '%#x' % (lookup('file', ethereum_genesis_generator_output_dir + '/config.yaml') | from_yaml).GENESIS_FORK_VERSION }}
+      ansible.builtin.shell: >
+        docker run --rm -t -u $UID
+        --entrypoint eth2-val-tools
+        --platform linux/amd64
+        -v {{ ethereum_genesis_validator_keys_output_dir }}:/output
+        {{ ethereum_genesis_generator_container_image }}
+        bls-address-change
+        --source-min="{{ item.value.start }}"
+        --source-max="{{ item.value.end }}"
+        --withdrawals-mnemonic="{{ ethereum_genesis_validator_mnemonic }}"
+        --genesis-validators-root="{{ genesis_validator_root }}"
+        --fork-version="{{ fork_version }}"
+        --execution-address="{{ ethereum_genesis_validator_bls_change_execution_address }}"
+        --as-json-list=true
+        > "{{ ethereum_genesis_validator_keys_output_dir }}/{{ item.key }}/change_operations.json"
+      args:
+        creates: "{{ ethereum_genesis_validator_keys_output_dir }}/{{ item.key }}/change_operations.json"
