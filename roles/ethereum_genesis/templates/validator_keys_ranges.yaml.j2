@@ -1,0 +1,17 @@
+ranges: 
+{%- set printed_hosts = [] -%}
+{%- set hosts_to_print = [] -%}
+{% for group in groups %}
+{% for host in groups[group] %}
+{% if hostvars[host]['validator_start'] is defined and hostvars[host]['validator_end'] is defined %}
+{% if host not in printed_hosts %}
+{%- set _ = printed_hosts.append(host) -%}
+{%- set _ = hosts_to_print.append({'host': host, 'start': hostvars[host]['validator_start']}) -%}
+{% endif %}
+{% endif %}
+{% endfor %}
+{% endfor %}
+
+{% for host in hosts_to_print | sort(attribute='start') %}
+  {{ hostvars[host.host]['validator_start'] }}-{{ hostvars[host.host]['validator_end'] }}: {{ host.host }}
+{% endfor %}

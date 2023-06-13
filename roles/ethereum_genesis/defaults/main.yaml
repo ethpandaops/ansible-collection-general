@@ -54,3 +54,5 @@ ethereum_genesis_validator_keyranges:
   lighthouse-geth-4: { start: 300, end: 400 }
   lighthouse-geth-5: { start: 400, end: 500 }
   lighthouse-geth-6: { start: 500, end: 600 }
+
+validator_key_ranges_path: "{{ ansible_inventory_sources[0] | dirname }}/validator_keys_ranges.yaml"
