@@ -43,6 +43,7 @@ lodestar_container_command:
   - --rest
   - --rest.address=0.0.0.0
   - --rest.port={{ lodestar_ports_http_beacon }}
+  - --rest.namespace=*
   - --jwt-secret=/execution-auth.jwt
   - --execution.urls={{ lodestar_execution_engine_endpoint }}
   - --metrics
