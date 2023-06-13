@@ -12,7 +12,7 @@ ethereum_genesis_fork_version_suffix: "{{ 999999 | random(start=100000, seed=eth
 ethereum_genesis_timestamp: "{{ lookup('ansible.builtin.pipe', '{{ ethereum_genesis_timestamp_relative_cmd[ansible_system] }}') }}"
 ethereum_genesis_timestamp_relative_cmd:
   Linux: "date +%s -d '+45 minutes'"
-  Darwin: "date -v +45m +%s"
+  Darwin: "date -v +45M +%s"
 ethereum_genesis_mnemonic: "sleep moment list remain like wall lake industry canvas wonder ecology elite duck salad naive syrup frame brass utility club odor country obey pudding" # noqa yaml[line-length]
 
 ethereum_genesis_generator_container_image: ethpandaops/ethereum-genesis-generator:latest
