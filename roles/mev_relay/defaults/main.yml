@@ -18,7 +18,7 @@ mev_relay_db_container_env:
   POSTGRESQL_USERNAME: postgres
   POSTGRESQL_PASSWORD: postgres
   POSTGRESQL_DATABASE: boostrelay
-mev_relay_container_ports:
+mev_relay_db_container_ports:
   - "127.0.0.1:{{ mev_relay_database_port }}:{{ mev_relay_database_port }}"
 mev_relay_container_volumes:
   - "{{ mev_relay_datadir }}:/bitnami/postgresql"
