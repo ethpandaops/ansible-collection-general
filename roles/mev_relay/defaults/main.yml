@@ -20,7 +20,7 @@ mev_relay_db_container_env:
   POSTGRESQL_DATABASE: boostrelay
 mev_relay_db_container_ports:
   - "127.0.0.1:{{ mev_relay_database_port }}:{{ mev_relay_database_port }}"
-mev_relay_container_volumes:
+mev_relay_db_container_volumes:
   - "{{ mev_relay_datadir }}:/bitnami/postgresql"
 mev_relay_db_container_stop_timeout: "300"
 mev_relay_db_container_pull: false
