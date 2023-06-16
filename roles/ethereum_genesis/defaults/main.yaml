@@ -1,0 +1,56 @@
+ethereum_genesis_cleanup: false # If set to 'true', it cleans up the network and validator key output dirs
+
+# Genesis configs
+
+ethereum_genesis_network_project: testing
+ethereum_genesis_network_name: devnet-X
+
+ethereum_genesis_network_seed: "{{ ethereum_genesis_network_project }}/{{ ethereum_genesis_network_name }}"
+ethereum_genesis_chain_id: "70{{ 99999999 | random(start=10000000, seed=ethereum_genesis_network_seed) }}"
+ethereum_genesis_fork_version_suffix: "{{ 999999 | random(start=100000, seed=ethereum_genesis_network_seed) }}"
+
+ethereum_genesis_timestamp: "{{ lookup('ansible.builtin.pipe', '{{ ethereum_genesis_timestamp_relative_cmd[ansible_system] }}') }}"
+ethereum_genesis_timestamp_relative_cmd:
+  Linux: "date +%s -d '+45 minutes'"
+  Darwin: "date -v +45M +%s"
+ethereum_genesis_mnemonic: "sleep moment list remain like wall lake industry canvas wonder ecology elite duck salad naive syrup frame brass utility club odor country obey pudding" # noqa yaml[line-length]
+
+ethereum_genesis_generator_container_image: ethpandaops/ethereum-genesis-generator:latest
+ethereum_genesis_generator_output_dir: "{{ ansible_inventory_sources[0] | dirname }}/files/ethereum-network-config"
+ethereum_genesis_generator_config_files:
+  cl/config.yaml: "{{ lookup('ansible.builtin.url', 'https://raw.githubusercontent.com/ethpandaops/ethereum-genesis-generator/master/config-example/cl/config.yaml', split_lines=false) }}" # noqa yaml[line-length]
+  cl/mnemonics.yaml: "{{ lookup('ansible.builtin.url', 'https://raw.githubusercontent.com/ethpandaops/ethereum-genesis-generator/master/config-example/cl/mnemonics.yaml', split_lines=false) }}" # noqa yaml[line-length]
+  el/genesis-config.yaml: "{{ lookup('ansible.builtin.url', 'https://raw.githubusercontent.com/ethpandaops/ethereum-genesis-generator/master/config-example/el/genesis-config.yaml', split_lines=false) }}" # noqa yaml[line-length]
+  values.env: |-
+    export CHAIN_ID="{{ ethereum_genesis_chain_id }}"
+    export DEPOSIT_CONTRACT_ADDRESS="0x6f22fFbC56eFF051aECF839396DD1eD9aD6BBA9D"
+    export EL_AND_CL_MNEMONIC="{{ ethereum_genesis_mnemonic }}"
+    export CL_EXEC_BLOCK="0"
+    export DEPOSIT_CONTRACT_BLOCK="0x0000000000000000000000000000000000000000000000000000000000000000"
+    export NUMBER_OF_VALIDATORS=600
+    export GENESIS_FORK_VERSION="0x10{{ ethereum_genesis_fork_version_suffix }}"
+    export ALTAIR_FORK_VERSION="0x20{{ ethereum_genesis_fork_version_suffix }}"
+    export BELLATRIX_FORK_VERSION="0x30{{ ethereum_genesis_fork_version_suffix }}"
+    export CAPELLA_FORK_VERSION="0x40{{ ethereum_genesis_fork_version_suffix }}"
+    export CAPELLA_FORK_EPOCH="1"
+    export DENEB_FORK_VERSION="0x50{{ ethereum_genesis_fork_version_suffix }}"
+    export DENEB_FORK_EPOCH="2"
+    export WITHDRAWAL_TYPE="0x00"
+    export WITHDRAWAL_ADDRESS={{ ethereum_genesis_validator_bls_change_execution_address }}
+    export BEACON_STATIC_ENR=""
+    export GENESIS_TIMESTAMP={{ ethereum_genesis_timestamp }}
+    export GENESIS_DELAY=60
+
+# Validator specific configs
+
+ethereum_genesis_validator_keys_output_dir: "{{ ansible_inventory_sources[0] | dirname }}/files/validator_keys"
+ethereum_genesis_validator_mnemonic: "{{ ethereum_genesis_mnemonic }}"
+ethereum_genesis_validator_bls_change_operations_enabled: true
+ethereum_genesis_validator_bls_change_execution_address: "0x0000000000000000000000000000000000000000"
+ethereum_genesis_validator_keyranges:
+  lighthouse-geth-1: { start: 0, end: 100 }
+  lighthouse-geth-2: { start: 100, end: 200 }
+  lighthouse-geth-3: { start: 200, end: 300 }
+  lighthouse-geth-4: { start: 300, end: 400 }
+  lighthouse-geth-5: { start: 400, end: 500 }
+  lighthouse-geth-6: { start: 500, end: 600 }

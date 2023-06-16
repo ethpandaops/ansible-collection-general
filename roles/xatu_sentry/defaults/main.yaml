@@ -1,3 +1,5 @@
+xatu_sentry_cleanup: false
+
 xatu_sentry_user: "xatu-sentry"
 
 xatu_sentry_container_name: "xatu-sentry"

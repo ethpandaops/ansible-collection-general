@@ -1,0 +1,14 @@
+- name: Setup xatu sentry
+  ansible.builtin.include_role:
+    name: ethpandaops.general.xatu_sentry
+  vars:
+    xatu_sentry_config_beacon_uri: "{{ ethereum_node_cl_beacon_endpoint }}"
+    xatu_sentry_container_networks: "{{ ethereum_node_docker_networks }}"
+  when: ethereum_node_xatu_sentry_enabled
+
+- name: Cleanup xatu sentry
+  ansible.builtin.include_role:
+    name: ethpandaops.general.xatu_sentry
+  vars:
+    xatu_sentry_cleanup: true
+  when: not ethereum_node_xatu_sentry_enabled

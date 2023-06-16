@@ -1,0 +1,4 @@
+- name: Remove xatu sentry container
+  community.docker.docker_container:
+    name: "{{ xatu_sentry_container_name }}"
+    state: absent
