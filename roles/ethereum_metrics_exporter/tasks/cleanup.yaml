@@ -1,0 +1,4 @@
+- name: Remove ethereum-metrics-exporter container
+  community.docker.docker_container:
+    name: "{{ ethereum_metrics_exporter_container_name }}"
+    state: absent

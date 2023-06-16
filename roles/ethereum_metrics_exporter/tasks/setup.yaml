@@ -1,0 +1,12 @@
+- name: Run ethereum_metrics_exporter container
+  community.docker.docker_container:
+    name: "{{ ethereum_metrics_exporter_container_name }}"
+    image: "{{ ethereum_metrics_exporter_container_image }}"
+    state: started
+    restart_policy: always
+    stop_timeout: "{{ ethereum_metrics_exporter_container_stop_timeout }}"
+    ports: "{{ ethereum_metrics_exporter_container_ports }}"
+    volumes: "{{ ethereum_metrics_exporter_container_volumes }}"
+    env: "{{ ethereum_metrics_exporter_container_env }}"
+    networks: "{{ ethereum_metrics_exporter_container_networks }}"
+    command: "{{ ethereum_metrics_exporter_container_command }}"
