@@ -13,11 +13,13 @@ mev_relay_db_enabled: true
 mev_relay_db_datadir: "{{ mev_relay_datadir }}/mev-relay-database"
 mev_relay_db_container_name: mev-relay-database
 mev_relay_db_container_image: bitnami/postgresql:15
+mev_relay_database_port: 5432
 mev_relay_db_container_env:
   POSTGRESQL_USERNAME: postgres
   POSTGRESQL_PASSWORD: postgres
   POSTGRESQL_DATABASE: boostrelay
-mev_relay_container_ports: []
+mev_relay_container_ports:
+  - "127.0.0.1:{{ mev_relay_database_port }}:{{ mev_relay_database_port }}"
 mev_relay_container_volumes:
   - "{{ mev_relay_datadir }}:/bitnami/postgresql"
 mev_relay_db_container_stop_timeout: "300"
@@ -30,9 +32,11 @@ mev_relay_redis_enabled: true
 mev_relay_redis_datadir: "{{ mev_relay_datadir }}/mev-relay-redis"
 mev_relay_redis_container_name: mev-relay-redis
 mev_relay_redis_container_image: bitnami/redis:6.2.12
+mev_relay_redis_port: 6379
 mev_relay_redis_container_env:
   ALLOW_EMPTY_PASSWORD=yes
-mev_relay_redis_container_ports: []
+mev_relay_redis_container_ports:
+  - "127.0.0.1:{{ mev_relay_redis_port }}:{{ mev_relay_redis_port }}"
 mev_relay_redis_container_volumes:
   - "{{ mev_relay_datadir }}:/bitnami/redis/data"
 mev_relay_redis_container_stop_timeout: "300"
