@@ -1,3 +1,5 @@
+ethereum_metrics_exporter_cleanup: false
+
 ethereum_metrics_exporter_el_endpoint: http://your-el-node:8545
 ethereum_metrics_exporter_cl_endpoint: http://your-cl-node:4000
 
