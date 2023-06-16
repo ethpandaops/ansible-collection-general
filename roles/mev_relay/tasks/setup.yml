@@ -13,9 +13,9 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    mode: "0770"
+    mode: "0777"
     owner: "{{ mev_relay_user }}"
-    group: "1001"
+    group: "{{ mev_relay_user }}"
   loop:
     - "{{ mev_relay_api_datadir }}"
     - "{{ mev_relay_website_datadir }}"
