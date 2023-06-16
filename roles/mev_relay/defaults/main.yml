@@ -64,7 +64,7 @@ mev_relay_housekeeper_container_command_extra_args: []
 mev_relay_api_enabled: true
 mev_relay_api_datadir: "{{ mev_relay_datadir }}/mev-relay-database"
 mev_relay_api_container_name: mev-relay-database
-mev_relay_api_container_image: bitnami/postgresql:15
+mev_relay_api_container_image: flashbots/mev-boost-relay:latest
 mev_relay_api_container_env: []
 mev_relay_api_container_ports: []
 mev_relay_api_container_volumes: []
@@ -80,7 +80,7 @@ mev_relay_api_container_command_extra_args: []
 mev_relay_website_enabled: true
 mev_relay_website_datadir: "{{ mev_relay_datadir }}/mev-relay-database"
 mev_relay_website_container_name: mev-relay-database
-mev_relay_website_container_image: bitnami/postgresql:15
+mev_relay_website_container_image: flashbots/mev-boost-relay:latest
 mev_relay_website_container_env: []
 mev_relay_website_container_ports: []
 mev_relay_website_container_volumes: []
