@@ -56,7 +56,7 @@ mev_relay_housekeeper_container_stop_timeout: "300"
 mev_relay_housekeeper_container_pull: false
 mev_relay_housekeeper_container_networks: "{{ mev_relay_docker_networks }}"
 mev_relay_housekeeper_container_command:
-  - /home/ubuntu/boost-relay/mev-boost-relay housekeeper
+  - housekeeper
 mev_relay_housekeeper_container_command_extra_args: []
 
 # ------------------------------------------------------------------
@@ -72,7 +72,7 @@ mev_relay_api_container_stop_timeout: "300"
 mev_relay_api_container_pull: false
 mev_relay_api_container_networks: "{{ mev_relay_docker_networks }}"
 mev_relay_api_container_command:
-  - /home/ubuntu/boost-relay/mev-boost-relay api
+  - api
 mev_relay_api_container_command_extra_args: []
 
 # ------------------------------------------------------------------
@@ -88,5 +88,5 @@ mev_relay_website_container_stop_timeout: "300"
 mev_relay_website_container_pull: false
 mev_relay_website_container_networks: "{{ mev_relay_docker_networks }}"
 mev_relay_website_container_command:
-  - /home/ubuntu/boost-relay/mev-boost-relay website
+  - website
 mev_relay_website_container_command_extra_args: []
