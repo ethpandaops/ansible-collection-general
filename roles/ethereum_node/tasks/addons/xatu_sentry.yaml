@@ -10,5 +10,5 @@
   ansible.builtin.include_role:
     name: ethpandaops.general.xatu_sentry
   vars:
-    ethereum_metrics_exporter_cleanup: true
+    xatu_sentry_cleanup: true
   when: not ethereum_node_xatu_sentry_enabled
