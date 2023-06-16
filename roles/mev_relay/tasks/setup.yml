@@ -1,0 +1,91 @@
+- name: Add mev_relay user
+  ansible.builtin.user:
+    name: "{{ mev_relay_user }}"
+  register: mev_relay_user_meta
+
+- name: Setup docker network
+  ansible.builtin.include_role:
+    name: ethpandaops.general.docker_network
+  vars:
+    docker_network_name: "{{ mev_relay_docker_network_name }}"
+
+- name: Create directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0770"
+    owner: "{{ mev_relay_user }}"
+    group: "1001"
+  loop:
+    - "{{ mev_relay_api_datadir }}"
+    - "{{ mev_relay_website_datadir }}"
+    - "{{ mev_relay_housekeeper_datadir }}"
+    - "{{ mev_relay_db_datadir }}"
+
+- name: Setup mev_relay database container
+  community.docker.docker_container:
+    name: "{{ mev_relay_db_container_name }}"
+    image: "{{ mev_relay_db_container_image }}"
+    state: '{{ mev_relay_db_enabled | ternary("started", "absent") }}'
+    restart_policy: always
+    stop_timeout: "{{ mev_relay_db_container_stop_timeout }}"
+    ports: "{{ mev_relay_db_container_ports }}"
+    volumes: "{{ mev_relay_db_container_volumes }}"
+    env: "{{ mev_relay_db_container_env }}"
+    networks: "{{ mev_relay_db_container_networks }}"
+    pull: "{{ mev_relay_db_container_pull | bool }}"
+
+- name: Setup mev_relay redis container
+  community.docker.docker_container:
+    name: "{{ mev_relay_redis_container_name }}"
+    image: "{{ mev_relay_redis_container_image }}"
+    state: '{{ mev_relay_redis_enabled | ternary("started", "absent") }}'
+    restart_policy: always
+    stop_timeout: "{{ mev_relay_redis_container_stop_timeout }}"
+    ports: "{{ mev_relay_redis_container_ports }}"
+    volumes: "{{ mev_relay_redis_container_volumes }}"
+    env: "{{ mev_relay_redis_container_env }}"
+    networks: "{{ mev_relay_redis_container_networks }}"
+    pull: "{{ mev_relay_redis_container_pull | bool }}"
+
+- name: Setup mev_relay_housekeeper container
+  community.docker.docker_container:
+    name: "{{ mev_relay_housekeeper_container_name }}"
+    image: "{{ mev_relay_housekeeper_container_image }}"
+    state: '{{ mev_relay_housekeeper_enabled | ternary("started", "absent") }}'
+    restart_policy: always
+    stop_timeout: "{{ mev_relay_housekeeper_container_stop_timeout }}"
+    ports: "{{ mev_relay_housekeeper_container_ports }}"
+    volumes: "{{ mev_relay_housekeeper_container_volumes }}"
+    env: "{{ mev_relay_housekeeper_container_env }}"
+    networks: "{{ mev_relay_housekeeper_container_networks }}"
+    pull: "{{ mev_relay_housekeeper_container_pull | bool }}"
+    command: "{{ mev_relay_housekeeper_container_command + mev_relay_housekeeper_container_command_extra_args }} "
+
+- name: Setup mev_relay_api container
+  community.docker.docker_container:
+    name: "{{ mev_relay_api_container_name }}"
+    image: "{{ mev_relay_api_container_image }}"
+    state: '{{ mev_relay_api_enabled | ternary("started", "absent") }}'
+    restart_policy: always
+    stop_timeout: "{{ mev_relay_api_container_stop_timeout }}"
+    ports: "{{ mev_relay_api_container_ports }}"
+    volumes: "{{ mev_relay_api_container_volumes }}"
+    env: "{{ mev_relay_api_container_env }}"
+    networks: "{{ mev_relay_api_container_networks }}"
+    pull: "{{ mev_relay_api_container_pull | bool }}"
+    command: "{{ mev_relay_api_container_command + mev_relay_api_container_command_extra_args }} "
+
+- name: Setup mev_relay_website container
+  community.docker.docker_container:
+    name: "{{ mev_relay_website_container_name }}"
+    image: "{{ mev_relay_website_container_image }}"
+    state: '{{ mev_relay_website_enabled | ternary("started", "absent") }}'
+    restart_policy: always
+    stop_timeout: "{{ mev_relay_website_container_stop_timeout }}"
+    ports: "{{ mev_relay_website_container_ports }}"
+    volumes: "{{ mev_relay_website_container_volumes }}"
+    env: "{{ mev_relay_website_container_env }}"
+    networks: "{{ mev_relay_website_container_networks }}"
+    pull: "{{ mev_relay_website_container_pull | bool }}"
+    command: "{{ mev_relay_website_container_command + mev_relay_website_container_command_extra_args }} "

@@ -1,0 +1,7 @@
+- name: Setup mev_relay
+  ansible.builtin.import_tasks: setup.yml
+  when: not mev_relay_cleanup_all
+
+- name: Cleanup everything
+  ansible.builtin.import_tasks: cleanup.yml
+  when: mev_relay_cleanup_all
