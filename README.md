@@ -53,6 +53,9 @@ A collection of reusable ansible components used by the EthPandaOps team.
 - [cloudwatch_exporter](roles/cloudwatch_exporter)
 - [json_exporter](roles/json_exporter)
 
+### Hetzner
+- [hetzner_vswitch](roles/hetzner_vswitch)
+
 ## Usage
 
 Currently we're not publishing the collection to Ansible Galaxy. We'll do that once it grows bigger.

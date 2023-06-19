@@ -1,0 +1,9 @@
+# /etc/network/interfaces.d/{{ interface_name }}.{{ vlan_id }}
+auto {{ interface_name }}.{{ vlan_id }}
+iface {{ interface_name }}.{{ vlan_id }} inet static
+  address {{ ip_address }}
+  netmask {{ netmask }}
+  vlan-raw-device {{ interface_name }}
+  mtu {{ mtu }}
+  up ip route add {{ network }} via {{ gateway }} dev {{ interface_name }}.{{ vlan_id }}
+  down ip route del {{ network }} via {{ gateway }} dev {{ interface_name }}.{{ vlan_id }}
