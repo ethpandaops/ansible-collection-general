@@ -1,0 +1,7 @@
+---
+- name: Remove network interface configuration
+  ansible.builtin.file:
+    path: "/etc/network/interfaces.d/{{ interface_name }}.{{ vlan_id }}"
+    state: absent
+  notify:
+    - Restart networking
