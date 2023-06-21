@@ -70,7 +70,7 @@ lodestar_validator_container_command:
   - --keystoresDir=/validator-data/keys
   - --secretsDir=/validator-data/secrets
   - --beaconNodes=http://{{ lodestar_container_name }}:{{ lodestar_ports_http_beacon }}
-  - --suggestedFeeRecipient={{ lodestar_validator_fee_recipient }}
+
 lodestar_validator_container_command_extra_args: []
   # - --builder
   # - --graffiti=hello-world
