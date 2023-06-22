@@ -1,0 +1,25 @@
+vector_user: vector
+vector_datadir: /data/vector
+
+vector_cleanup: false # when set to "true" it will remove the container(s)
+
+vector_container_image: timberio/vector:0.30.0-alpine
+vector_container_name: vector
+vector_container_ports: []
+vector_container_restart_policy: always
+vector_container_networks: []
+vector_container_volumes_from: []
+vector_container_volumes:
+  - "{{ vector_datadir }}/vector.toml:/etc/vector/vector.toml:ro"
+  - "/var/run/docker.sock:/var/run/docker.sock:ro"
+vector_container_env: {}
+
+vector_config: |
+  [sources.in]
+    type = "docker_logs"
+    exclude_containers = ["{{ vector_container_name }}"]
+
+  [sinks.out]
+    type = "console"
+    inputs = ["in"]
+    encoding.codec = "json"
