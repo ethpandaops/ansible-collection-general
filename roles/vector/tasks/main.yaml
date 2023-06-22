@@ -1,0 +1,7 @@
+- name: Setup vector
+  ansible.builtin.import_tasks: setup.yaml
+  when: not vector_cleanup
+
+- name: Cleanup vector
+  ansible.builtin.import_tasks: cleanup.yaml
+  when: vector_cleanup
