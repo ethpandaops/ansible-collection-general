@@ -1,0 +1,72 @@
+- name: "Run genesis generation"
+  vars:
+    ansible_connection: local
+  delegate_to: 127.0.0.1
+  run_once: true
+  become: false
+  block:
+    - name: Create temporary config directory
+      ansible.builtin.tempfile:
+        state: directory
+        suffix: ethereum-genesis-config-input
+      register: ethereum_genesis_generator_tmp_config_dir_register
+
+    - name: Create temporary output directory
+      ansible.builtin.tempfile:
+        state: directory
+        suffix: ethereum-genesis-config-output
+      register: ethereum_genesis_generator_tmp_output_dir_register
+
+    - name: Create config file directories
+      ansible.builtin.file:
+        path: "{{ ethereum_genesis_generator_tmp_config_dir_register.path }}/{{ item.key | dirname }}"
+        state: directory
+        mode: '0755'
+      loop: "{{ ethereum_genesis_generator_config_files | dict2items }}"
+
+    - name: Copy config files
+      ansible.builtin.copy:
+        content: "{{ item.value }}"
+        dest: "{{ ethereum_genesis_generator_tmp_config_dir_register.path }}/{{ item.key }}"
+        mode: "0644"
+      loop: "{{ ethereum_genesis_generator_config_files | dict2items }}"
+
+    - name: Run genesis generator
+      ansible.builtin.shell: >
+        docker run --rm -t -u $UID --platform linux/amd64
+        -v {{ ethereum_genesis_generator_tmp_output_dir_register.path }}:/data
+        -v {{ ethereum_genesis_generator_tmp_config_dir_register.path }}:/config
+        {{ ethereum_genesis_generator_container_image }} all
+      register: ethereum_genesis_generator_cmd
+      changed_when: false
+      failed_when: (ethereum_genesis_generator_cmd.rc != 0) or (ethereum_genesis_generator_cmd.stdout == "")
+
+    - name: Create final output directory
+      ansible.builtin.file:
+        path: "{{ ethereum_genesis_generator_output_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Move tmp output to final output dir
+      ansible.builtin.shell: >
+        mv {{ ethereum_genesis_generator_tmp_output_dir_register.path }}/custom_config_data/* {{ ethereum_genesis_generator_output_dir }}
+      changed_when: true
+
+    - name: Cleanup tmp dirs
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - "{{ ethereum_genesis_generator_tmp_config_dir_register.path }}"
+        - "{{ ethereum_genesis_generator_tmp_output_dir_register.path }}"
+
+    - name: Info
+      ansible.builtin.debug:
+        msg: "Genesis configs can be found in the following directory: {{ ethereum_genesis_generator_output_dir }}"
+  rescue:
+    - name: Inform of failure
+      ansible.builtin.debug:
+        msg: |
+          Something went wrong. Some useful information that can be used to debug the problem:
+          - Temp config dir: {{ ethereum_genesis_generator_tmp_config_dir_register.path }}
+          - Temp output dir: {{ ethereum_genesis_generator_tmp_output_dir_register.path }}

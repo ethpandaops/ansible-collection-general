@@ -33,7 +33,7 @@
   when: ethereum_node_el_enabled
 
 - name: Configure JSON RPC Snooper
-  ansible.builtin.import_tasks: snooper.yaml
+  ansible.builtin.import_tasks: addons/snooper.yaml
 
 - name: Setup consensus client
   ansible.builtin.import_tasks: setup_cl.yaml
@@ -52,19 +52,8 @@
     ethereum_node_fact_discovery_cl: "{{ ethereum_node_cl_enabled }}"
   when: ethereum_node_fact_discovery_enabled
 
-- name: Setup metrics exporter
-  ansible.builtin.include_role:
-    name: ethpandaops.general.ethereum_metrics_exporter
-  vars:
-    ethereum_metrics_exporter_el_endpoint: "{{ ethereum_node_el_rpc_endpoint }}"
-    ethereum_metrics_exporter_cl_endpoint: "{{ ethereum_node_cl_beacon_endpoint }}"
-    ethereum_metrics_exporter_container_networks: "{{ ethereum_node_docker_networks }}"
-  when: ethereum_node_metrics_exporter_enabled
+- name: Configure metrics exporter
+  ansible.builtin.import_tasks: addons/metrics_exporter.yaml
 
-- name: Setup xatu sentry
-  ansible.builtin.include_role:
-    name: ethpandaops.general.xatu_sentry
-  vars:
-    xatu_sentry_config_beacon_uri: "{{ ethereum_node_cl_beacon_endpoint }}"
-    xatu_sentry_container_networks: "{{ ethereum_node_docker_networks }}"
-  when: ethereum_node_xatu_sentry_enabled
+- name: Configure xatu sentry
+  ansible.builtin.import_tasks: addons/xatu_sentry.yaml

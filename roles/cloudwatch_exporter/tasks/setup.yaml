@@ -1,0 +1,33 @@
+- name: Add cloudwatch-exporter user
+  ansible.builtin.user:
+    name: "{{ cloudwatch_exporter_user }}"
+  register: cloudwatch_exporter_user_meta
+
+- name: Create required directories
+  ansible.builtin.file:
+    path: "{{ cloudwatch_exporter_datadir }}"
+    state: directory
+    recurse: true
+    owner: "{{ cloudwatch_exporter_user }}"
+    group: "{{ cloudwatch_exporter_user }}"
+    mode: "0770"
+
+- name: Create cloudwatch-exporter config
+  ansible.builtin.copy:
+    content: "{{ cloudwatch_exporter_config }}"
+    dest: "{{ cloudwatch_exporter_datadir }}/config.yml"
+    owner: "{{ cloudwatch_exporter_user }}"
+    group: "{{ cloudwatch_exporter_user }}"
+    mode: '0664'
+  notify: Restart cloudwatch-exporter container
+
+- name: Run cloudwatch-exporter container
+  community.general.docker_container:
+    name: "{{ cloudwatch_exporter_container_name }}"
+    image: "{{ cloudwatch_exporter_container_image }}"
+    ports: "{{ cloudwatch_exporter_container_ports }}"
+    restart_policy: "{{ cloudwatch_exporter_container_restart_policy }}"
+    networks: "{{ cloudwatch_exporter_container_networks }}"
+    volumes: "{{ cloudwatch_exporter_container_volumes }}"
+    env: "{{ cloudwatch_exporter_container_env }}"
+    user: "{{ cloudwatch_exporter_user_meta.uid }}"

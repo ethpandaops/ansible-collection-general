@@ -1,0 +1,7 @@
+- name: Setup cloudwatch-exporter
+  ansible.builtin.import_tasks: setup.yaml
+  when: not cloudwatch_exporter_cleanup
+
+- name: Cleanup cloudwatch-exporter
+  ansible.builtin.import_tasks: cleanup.yaml
+  when: cloudwatch_exporter_cleanup

@@ -1,0 +1,15 @@
+- name: Setup metrics exporter
+  ansible.builtin.include_role:
+    name: ethpandaops.general.ethereum_metrics_exporter
+  vars:
+    ethereum_metrics_exporter_el_endpoint: "{{ ethereum_node_el_rpc_endpoint }}"
+    ethereum_metrics_exporter_cl_endpoint: "{{ ethereum_node_cl_beacon_endpoint }}"
+    ethereum_metrics_exporter_container_networks: "{{ ethereum_node_docker_networks }}"
+  when: ethereum_node_metrics_exporter_enabled
+
+- name: Cleanup metrics exporter
+  ansible.builtin.include_role:
+    name: ethpandaops.general.ethereum_metrics_exporter
+  vars:
+    ethereum_metrics_exporter_cleanup: true
+  when: not ethereum_node_metrics_exporter_enabled
