@@ -1,6 +1,6 @@
 # ethpandaops.general.cl_bootnode
 
-This role will run [eth2-bootnode]](https://github.com/protolambda/eth2-bootnode) within a docker container.
+This role will run [eth2-bootnode](https://github.com/protolambda/eth2-bootnode) within a docker container.
 
 ## Requirements
 
