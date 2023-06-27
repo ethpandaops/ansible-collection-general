@@ -1,0 +1,20 @@
+- name: Stop blockscout containers
+  community.docker.docker_container:
+    name: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ blockscout_container_name }}"
+    - "{{ blockscout_db_container_name }}"
+    - "{{ blockscout_cache_container_name }}"
+    - "{{ blockscout_smart_contract_verifier_container_name }}"
+    - "{{ blockscout_sig_provider_container_name }}"
+    - "{{ blockscout_visualizer_container_name }}"
+
+- name: Delete data directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ blockscout_datadir }}"
+    - "{{ blockscout_db_datadir }}"
+    - "{{ blockscout_cache_datadir }}"
