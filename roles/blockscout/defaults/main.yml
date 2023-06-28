@@ -77,9 +77,12 @@ blockscout_db_container_env:
   POSTGRESQL_USERNAME: postgres
   POSTGRESQL_PASSWORD: postgres
   POSTGRESQL_DATABASE: blockscout
+blockscout_db_custom_postgres_config: |
+  max_connections = 1024
 blockscout_db_container_ports: []
 blockscout_db_container_volumes:
-  - "{{ blockscout_db_datadir }}:/bitnami/postgresql"
+  - "{{ blockscout_db_datadir }}/db:/bitnami/postgresql"
+  - "{{ blockscout_db_datadir }}/conf.d://opt/bitnami/postgresql/conf/conf.d:ro"
 blockscout_db_container_stop_timeout: "300"
 blockscout_db_container_pull: false
 blockscout_db_container_networks: "{{ blockscout_docker_networks }}"

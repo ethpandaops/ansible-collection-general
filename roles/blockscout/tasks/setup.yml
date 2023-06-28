@@ -18,8 +18,17 @@
     group: "{{ blockscout_user }}"
   loop:
     - "{{ blockscout_datadir }}"
-    - "{{ blockscout_db_datadir }}"
+    - "{{ blockscout_db_datadir }}/conf.d"
+    - "{{ blockscout_db_datadir }}/db"
     - "{{ blockscout_cache_datadir }}"
+
+- name: Copy custom postgres config
+  ansible.builtin.copy:
+    content: "{{ blockscout_db_custom_postgres_config }}"
+    dest: "{{ blockscout_db_datadir }}/conf.d/custom.conf"
+    owner: "{{ blockscout_user }}"
+    group: "{{ blockscout_user }}"
+    mode: '0664'
 
 - name: Setup blockscout database container
   community.docker.docker_container:
