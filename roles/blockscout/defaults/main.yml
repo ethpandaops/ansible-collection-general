@@ -13,6 +13,12 @@ blockscout_docker_networks:
 blockscout_enabled: true
 blockscout_container_name: blockscout
 blockscout_container_image: blockscout/blockscout:5.1.5
+blockscout_container_entrypoint:
+  - /bin/sh
+  - -ace
+  - >-
+    bin/blockscout eval "Elixir.Explorer.ReleaseTasks.create_and_migrate()";
+    exec bin/blockscout start;
 blockscout_container_env:
   # For all env variables, check https://docs.blockscout.com/for-developers/information-and-settings/env-variables
   ETHEREUM_JSONRPC_VARIANT: geth

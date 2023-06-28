@@ -104,3 +104,4 @@
     networks: "{{ blockscout_container_networks }}"
     pull: "{{ blockscout_container_pull | bool }}"
     user: "{{ blockscout_user_meta.uid }}"
+    entrypoint: "{{ blockscout_container_entrypoint }}"
