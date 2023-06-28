@@ -82,7 +82,7 @@ blockscout_db_container_networks: "{{ blockscout_docker_networks }}"
 blockscout_cache_enabled: true
 blockscout_cache_datadir: "{{ blockscout_datadir }}/blockscout-cache"
 blockscout_cache_container_name: blockscout-cache
-blockscout_cache_container_image: bitnami/redis:7
+blockscout_cache_container_image: bitnami/redis:7.0
 blockscout_cache_container_env:
   ALLOW_EMPTY_PASSWORD: "yes"
 blockscout_cache_container_ports: []
