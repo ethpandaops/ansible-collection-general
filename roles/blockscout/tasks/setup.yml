@@ -13,13 +13,22 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    mode: "0770"
+    mode: "0750"
     owner: "{{ blockscout_user }}"
-    group: "1001"
+    group: "{{ blockscout_user }}"
   loop:
     - "{{ blockscout_datadir }}"
-    - "{{ blockscout_db_datadir }}"
+    - "{{ blockscout_db_datadir }}/conf.d"
+    - "{{ blockscout_db_datadir }}/db"
     - "{{ blockscout_cache_datadir }}"
+
+- name: Copy custom postgres config
+  ansible.builtin.copy:
+    content: "{{ blockscout_db_custom_postgres_config }}"
+    dest: "{{ blockscout_db_datadir }}/conf.d/custom.conf"
+    owner: "{{ blockscout_user }}"
+    group: "{{ blockscout_user }}"
+    mode: '0664'
 
 - name: Setup blockscout database container
   community.docker.docker_container:
@@ -33,6 +42,7 @@
     env: "{{ blockscout_db_container_env }}"
     networks: "{{ blockscout_db_container_networks }}"
     pull: "{{ blockscout_db_container_pull | bool }}"
+    user: "{{ blockscout_user_meta.uid }}"
 
 - name: Setup blockscout cache container
   community.docker.docker_container:
@@ -46,6 +56,7 @@
     env: "{{ blockscout_cache_container_env }}"
     networks: "{{ blockscout_cache_container_networks }}"
     pull: "{{ blockscout_cache_container_pull | bool }}"
+    user: "{{ blockscout_user_meta.uid }}"
 
 - name: Setup blockscout smart-contract-verifier
   community.docker.docker_container:
@@ -59,6 +70,7 @@
     env: "{{ blockscout_smart_contract_verifier_container_env }}"
     networks: "{{ blockscout_smart_contract_verifier_container_networks }}"
     pull: "{{ blockscout_smart_contract_verifier_container_pull | bool }}"
+    user: "{{ blockscout_user_meta.uid }}"
 
 - name: Setup blockscout sig-provider
   community.docker.docker_container:
@@ -72,6 +84,7 @@
     env: "{{ blockscout_sig_provider_container_env }}"
     networks: "{{ blockscout_sig_provider_container_networks }}"
     pull: "{{ blockscout_sig_provider_container_pull | bool }}"
+    user: "{{ blockscout_user_meta.uid }}"
 
 - name: Setup blockscout visualizer
   community.docker.docker_container:
@@ -85,6 +98,7 @@
     env: "{{ blockscout_visualizer_container_env }}"
     networks: "{{ blockscout_visualizer_container_networks }}"
     pull: "{{ blockscout_visualizer_container_pull | bool }}"
+    user: "{{ blockscout_user_meta.uid }}"
 
 - name: Setup blockscout
   community.docker.docker_container:
@@ -98,3 +112,7 @@
     env: "{{ blockscout_container_env }}"
     networks: "{{ blockscout_container_networks }}"
     pull: "{{ blockscout_container_pull | bool }}"
+    # user: "{{ blockscout_user_meta.uid }}"
+    # commented out because we can't run as "blockscout" user due to:
+    #   ** (File.Error) could not write to file "/app/lib/tzdata-1.1.1/priv/latest_remote_poll.txt": permission denied
+    entrypoint: "{{ blockscout_container_entrypoint }}"

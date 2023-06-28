@@ -13,6 +13,12 @@ blockscout_docker_networks:
 blockscout_enabled: true
 blockscout_container_name: blockscout
 blockscout_container_image: blockscout/blockscout:5.1.5
+blockscout_container_entrypoint:
+  - /bin/sh
+  - -ace
+  - >-
+    bin/blockscout eval "Elixir.Explorer.ReleaseTasks.create_and_migrate()";
+    exec bin/blockscout start;
 blockscout_container_env:
   # For all env variables, check https://docs.blockscout.com/for-developers/information-and-settings/env-variables
   ETHEREUM_JSONRPC_VARIANT: geth
@@ -45,15 +51,15 @@ blockscout_container_env:
   # Account: https://docs.blockscout.com/for-developers/configuration-options/my-account-settings
   ACCOUNT_ENABLED: "false"
   # Smart contract verifier
-  MICROSERVICE_SC_VERIFIER_ENABLED: "{{ blockscout_smart_contract_verifier_enabled }}"
+  MICROSERVICE_SC_VERIFIER_ENABLED: '"{{ blockscout_smart_contract_verifier_enabled }}"'
   MICROSERVICE_SC_VERIFIER_URL: "http://{{ blockscout_smart_contract_verifier_container_name }}:8050/"
   MICROSERVICE_SC_VERIFIER_TYPE: sc_verifier
   MICROSERVICE_ETH_BYTECODE_DB_INTERVAL_BETWEEN_LOOKUPS: 10m
   # Visualizer
-  MICROSERVICE_VISUALIZE_SOL2UML_ENABLED: "{{ blockscout_visualizer_enabled }}"
+  MICROSERVICE_VISUALIZE_SOL2UML_ENABLED: '"{{ blockscout_visualizer_enabled }}"'
   MICROSERVICE_VISUALIZE_SOL2UML_URL: "http://{{ blockscout_visualizer_container_name }}:8050/"
   # Signature provider
-  MICROSERVICE_SIG_PROVIDER_ENABLED: "{{ blockscout_sig_provider_enabled }}"
+  MICROSERVICE_SIG_PROVIDER_ENABLED: '"{{ blockscout_sig_provider_enabled }}"'
   MICROSERVICE_SIG_PROVIDER_URL: "http://{{ blockscout_sig_provider_container_name }}:8050/"
   DECODE_NOT_A_CONTRACT_CALLS: "true"
 blockscout_container_ports: []
@@ -71,9 +77,12 @@ blockscout_db_container_env:
   POSTGRESQL_USERNAME: postgres
   POSTGRESQL_PASSWORD: postgres
   POSTGRESQL_DATABASE: blockscout
+blockscout_db_custom_postgres_config: |
+  max_connections = 1024
 blockscout_db_container_ports: []
 blockscout_db_container_volumes:
-  - "{{ blockscout_db_datadir }}:/bitnami/postgresql"
+  - "{{ blockscout_db_datadir }}/db:/bitnami/postgresql"
+  - "{{ blockscout_db_datadir }}/conf.d://opt/bitnami/postgresql/conf/conf.d:ro"
 blockscout_db_container_stop_timeout: "300"
 blockscout_db_container_pull: false
 blockscout_db_container_networks: "{{ blockscout_docker_networks }}"
@@ -82,7 +91,7 @@ blockscout_db_container_networks: "{{ blockscout_docker_networks }}"
 blockscout_cache_enabled: true
 blockscout_cache_datadir: "{{ blockscout_datadir }}/blockscout-cache"
 blockscout_cache_container_name: blockscout-cache
-blockscout_cache_container_image: bitnami/redis:7
+blockscout_cache_container_image: bitnami/redis:7.0
 blockscout_cache_container_env:
   ALLOW_EMPTY_PASSWORD: "yes"
 blockscout_cache_container_ports: []
