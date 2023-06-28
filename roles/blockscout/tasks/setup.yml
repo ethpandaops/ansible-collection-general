@@ -13,9 +13,9 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    mode: "0770"
+    mode: "0750"
     owner: "{{ blockscout_user }}"
-    group: "1001"
+    group: "{{ blockscout_user }}"
   loop:
     - "{{ blockscout_datadir }}"
     - "{{ blockscout_db_datadir }}"
@@ -33,6 +33,7 @@
     env: "{{ blockscout_db_container_env }}"
     networks: "{{ blockscout_db_container_networks }}"
     pull: "{{ blockscout_db_container_pull | bool }}"
+    user: "{{ blockscout_user_meta.uid }}"
 
 - name: Setup blockscout cache container
   community.docker.docker_container:
@@ -46,6 +47,7 @@
     env: "{{ blockscout_cache_container_env }}"
     networks: "{{ blockscout_cache_container_networks }}"
     pull: "{{ blockscout_cache_container_pull | bool }}"
+    user: "{{ blockscout_user_meta.uid }}"
 
 - name: Setup blockscout smart-contract-verifier
   community.docker.docker_container:
@@ -59,6 +61,7 @@
     env: "{{ blockscout_smart_contract_verifier_container_env }}"
     networks: "{{ blockscout_smart_contract_verifier_container_networks }}"
     pull: "{{ blockscout_smart_contract_verifier_container_pull | bool }}"
+    user: "{{ blockscout_user_meta.uid }}"
 
 - name: Setup blockscout sig-provider
   community.docker.docker_container:
@@ -72,6 +75,7 @@
     env: "{{ blockscout_sig_provider_container_env }}"
     networks: "{{ blockscout_sig_provider_container_networks }}"
     pull: "{{ blockscout_sig_provider_container_pull | bool }}"
+    user: "{{ blockscout_user_meta.uid }}"
 
 - name: Setup blockscout visualizer
   community.docker.docker_container:
@@ -85,6 +89,7 @@
     env: "{{ blockscout_visualizer_container_env }}"
     networks: "{{ blockscout_visualizer_container_networks }}"
     pull: "{{ blockscout_visualizer_container_pull | bool }}"
+    user: "{{ blockscout_user_meta.uid }}"
 
 - name: Setup blockscout
   community.docker.docker_container:
@@ -98,3 +103,4 @@
     env: "{{ blockscout_container_env }}"
     networks: "{{ blockscout_container_networks }}"
     pull: "{{ blockscout_container_pull | bool }}"
+    user: "{{ blockscout_user_meta.uid }}"
