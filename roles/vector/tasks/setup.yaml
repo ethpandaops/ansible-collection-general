@@ -1,13 +1,20 @@
+- name: Get docker group
+  ansible.builtin.getent:
+    database: group
+    key: docker
+  register: vector_docker_group_meta
+
 - name: Add vector user
   ansible.builtin.user:
     name: "{{ vector_user }}"
+    groups: docker
+    append: true
   register: vector_user_meta
 
 - name: Create required directories
   ansible.builtin.file:
     path: "{{ vector_datadir }}"
     state: directory
-    recurse: true
     owner: "{{ vector_user }}"
     group: "{{ vector_user }}"
     mode: "0770"
@@ -31,3 +38,4 @@
     volumes: "{{ vector_container_volumes }}"
     env: "{{ vector_container_env }}"
     user: "{{ vector_user_meta.uid }}"
+    groups: "{{ vector_docker_group_meta.ansible_facts.getent_group.docker[1] }}"
