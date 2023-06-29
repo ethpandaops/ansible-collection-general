@@ -15,7 +15,7 @@
 - name: Create vector config
   ansible.builtin.copy:
     content: "{{ vector_config }}"
-    dest: "{{ vector_datadir }}/config.yml"
+    dest: "{{ vector_datadir }}/vector.toml"
     owner: "{{ vector_user }}"
     group: "{{ vector_user }}"
     mode: '0664'
