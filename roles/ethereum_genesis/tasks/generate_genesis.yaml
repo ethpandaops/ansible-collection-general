@@ -63,10 +63,11 @@
     - name: Info
       ansible.builtin.debug:
         msg: "Genesis configs can be found in the following directory: {{ ethereum_genesis_generator_output_dir }}"
-  rescue:
+  always:
     - name: Inform of failure
       ansible.builtin.debug:
         msg: |
           Something went wrong. Some useful information that can be used to debug the problem:
           - Temp config dir: {{ ethereum_genesis_generator_tmp_config_dir_register.path }}
           - Temp output dir: {{ ethereum_genesis_generator_tmp_output_dir_register.path }}
+      when: (ethereum_genesis_generator_cmd.rc != 0) or (ethereum_genesis_generator_cmd.stdout == "")
