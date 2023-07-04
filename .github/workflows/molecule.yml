@@ -11,8 +11,8 @@ defaults:
 
 jobs:
 
-  lint:
-    name: Lint
+  molecule:
+    name: Molecule
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
