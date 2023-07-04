@@ -1,0 +1,35 @@
+name: Ansible CI
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+defaults:
+  run:
+    working-directory: ansible_collections/ethpandaops/general
+
+jobs:
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          path: ansible_collections/ethpandaops/general
+
+      - name: Set up python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install asdf
+        uses: asdf-vm/actions/setup@v1
+
+      - name: Run setup
+        run: ./setup.sh
+
+      - name: Run molecule
+        working-directory: ./roles/blockscout
+        run: molecule test
