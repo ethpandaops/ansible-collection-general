@@ -1,0 +1,9 @@
+ansible-lint==6.15.0
+ansible==7.5.0
+molecule-containers==2.0.0
+molecule==5.0.1
+netaddr==0.8.0
+pip==23.1.2
+#requests==2.28.2 # https://github.com/docker/docker-py/issues/3113
+#urllib3==1.26.15
+#websocket-client==0.59.0
