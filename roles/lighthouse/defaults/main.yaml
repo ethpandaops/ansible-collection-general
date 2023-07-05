@@ -29,6 +29,7 @@ lighthouse_container_ports:
 lighthouse_container_volumes:
   - "{{ lighthouse_datadir }}:/data"
   - "{{ lighthouse_auth_jwt_path }}:/execution-auth.jwt:ro"
+lighthouse_container_security_opts: []
 lighthouse_container_stop_timeout: "300"
 lighthouse_container_networks: []
 lighthouse_container_command:
@@ -66,6 +67,7 @@ lighthouse_validator_container_env: {}
 lighthouse_validator_container_ports: []
 lighthouse_validator_container_volumes:
   - "{{ lighthouse_validator_datadir }}:/validator-data"
+lighthouse_validator_container_security_opts: []
 lighthouse_validator_container_stop_timeout: "300"
 lighthouse_validator_container_networks: []
 lighthouse_validator_container_command:
