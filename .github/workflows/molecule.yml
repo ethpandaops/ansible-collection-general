@@ -31,5 +31,5 @@ jobs:
         run: ./setup.sh
 
       - name: Run molecule
-        working-directory: roles/blockscout
+        working-directory: ansible_collections/ethpandaops/general/roles/blockscout
         run: molecule test
