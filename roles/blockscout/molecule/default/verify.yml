@@ -1,6 +1,6 @@
 - name: Verify
   hosts: all
   tasks:
-  - name: TODO
-    ansible.builtin.debug:
-      msg: TODO
+    - name: TODO
+      ansible.builtin.debug:
+        msg: TODO

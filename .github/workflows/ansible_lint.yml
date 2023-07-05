@@ -42,6 +42,7 @@ jobs:
           ansible-lint playbooks/
           --nocolor
           --exclude .github
+          --exclude vendor
           --profile production
 
       - name: Sanity test

@@ -2,8 +2,9 @@
   hosts: all
   become: true
   pre_tasks:
-    - ansible.builtin.apt:
-        update_cache: yes
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
   roles:
     - role: geerlingguy.docker
     - role: geerlingguy.pip

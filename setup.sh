@@ -15,4 +15,4 @@ asdf install
 pip install -r requirements.txt
 
 # Install ansible collection depdendencies
-ansible-galaxy collection install -r requirements.yaml --force
+ansible-galaxy install -r requirements.yaml --force
