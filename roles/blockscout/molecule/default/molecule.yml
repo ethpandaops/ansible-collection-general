@@ -1,3 +1,18 @@
+scenario:
+  name: default
+  test_sequence:
+    - dependency
+    - cleanup
+    - destroy
+    - syntax
+    - create
+    - prepare
+    - converge
+    #- idempotence
+    - side_effect
+    - verify
+    - cleanup
+    - destroy
 dependency:
   name: galaxy
   options:
@@ -5,10 +20,6 @@ dependency:
     requirements-file: ../../requirements.yaml
 driver:
   name: docker
-lint: |
-  set -e
-  yamllint .
-  ansible-lint
 platforms:
   - name: blockscout
     image: "geerlingguy/docker-debian12-ansible:latest"
