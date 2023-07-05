@@ -22,6 +22,7 @@ erigon_container_ports:
 erigon_container_volumes:
   - "{{ erigon_datadir }}:/data"
   - "{{ erigon_auth_jwt_path }}:/execution-auth.jwt:ro"
+erigon_container_security_opts: []
 erigon_container_stop_timeout: "300"
 erigon_container_networks: []
 erigon_container_entrypoint:

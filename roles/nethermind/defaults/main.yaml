@@ -20,6 +20,7 @@ nethermind_container_ports:
 nethermind_container_volumes:
   - "{{ nethermind_datadir }}:/data"
   - "{{ nethermind_auth_jwt_path }}:/execution-auth.jwt:ro"
+nethermind_container_security_opts: []
 nethermind_container_stop_timeout: "300"
 nethermind_container_networks: []
 nethermind_container_entrypoint:
