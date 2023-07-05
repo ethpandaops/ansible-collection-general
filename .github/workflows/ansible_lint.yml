@@ -35,6 +35,7 @@ jobs:
           ansible-lint roles/
           --nocolor
           --exclude .github
+          --exclude vendor
           --profile production
 
       - name: Lint playbooks
