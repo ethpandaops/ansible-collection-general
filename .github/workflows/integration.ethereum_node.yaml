@@ -16,7 +16,7 @@ jobs:
     permissions:
       pull-requests: read
     outputs:
-      roles: ${{ steps.filter.outputs.changes }}
+      ethereum_node: ${{ steps.filter.outputs.ethereum_node }}
     steps:
       - uses: dorny/paths-filter@v2
         id: filter
@@ -27,7 +27,7 @@ jobs:
   # Integration test using molecule
   job:
     needs: changes
-    if: ${{ needs.changes.outputs.roles.ethereum_node == 'true' }}
+    if: ${{ needs.changes.outputs.ethereum_node == 'true' }}
     concurrency:
       group: >-
         ${{ github.head_ref }}-ethereum-node-${{ matrix.consensus }}-${{ matrix.execution }}
