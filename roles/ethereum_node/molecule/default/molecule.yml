@@ -34,6 +34,7 @@ provisioner:
   inventory:
     group_vars:
       all:
+        ethereum_node_skip_cleanup: true
         ethereum_node_announced_ip: 127.0.0.1
         docker_daemon_options:
           storage-driver: "vfs"
