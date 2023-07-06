@@ -1,4 +1,4 @@
-name: Ansible CI
+name: Integration
 on:
   pull_request:
   push:
@@ -10,26 +10,38 @@ defaults:
     working-directory: ansible_collections/ethpandaops/general
 
 jobs:
-
-  molecule:
-    name: Molecule
+  # Job for change detection
+  changes:
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      roles: ${{ steps.filter.outputs.changes }}
+    steps:
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            blockscout: roles/blockscout
+
+  # Integration test using molecule
+  job:
+    needs: changes
+    concurrency:
+      group: ${{ github.head_ref }}-${{ matrix.role }}
+      cancel-in-progress: true
+    strategy:
+      matrix:
+        role: ${{ fromJSON(needs.changes.outputs.roles) }}
+    runs-on: ubuntu-latest
+    name:
     steps:
       - uses: actions/checkout@v3
         with:
           path: ansible_collections/ethpandaops/general
 
-      - name: Set up python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-
-      - name: Install asdf
-        uses: asdf-vm/actions/setup@v1
-
-      - name: Run setup
-        run: ./setup.sh
+      - uses: ./.github/actions/setup
 
       - name: Run molecule
-        working-directory: ansible_collections/ethpandaops/general/roles/blockscout
+        working-directory: ansible_collections/ethpandaops/general/roles/${{ matrix.role }}
         run: molecule test

@@ -1,0 +1,10 @@
+name: Install deps
+description: Install deps
+runs:
+  using: composite
+  steps:
+    - name: Install asdf
+      uses: asdf-vm/actions/setup@v1
+
+    - name: Run setup
+      run: ./setup.sh
