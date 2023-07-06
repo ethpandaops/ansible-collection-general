@@ -100,7 +100,7 @@ Make sure you have `asdf` installed and then you can run the `./setup.sh` script
 For linting and sanity checks you can run the following commands:
 
 ```sh
-ansible-lint --exclude .github --profile production
+ansible-lint
 ansible-test sanity
 ```
 
