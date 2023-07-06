@@ -40,7 +40,7 @@ jobs:
         with:
           path: ansible_collections/ethpandaops/general
 
-      - uses: ansible_collections/ethpandaops/general/.github/actions/setup
+      - uses: ./ansible_collections/ethpandaops/general/.github/actions/setup
 
       - name: Run molecule
         working-directory: ansible_collections/ethpandaops/general/roles/${{ matrix.role }}
