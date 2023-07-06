@@ -1,6 +1,7 @@
 besu_user: besu
 besu_datadir: /data/besu
 besu_auth_jwt_path: /data/execution-auth.secret
+besu_announced_ip: "{{ ansible_host }}"
 
 besu_cleanup: false # when set to "true" it will remove the container
 
@@ -25,7 +26,7 @@ besu_container_networks: []
 besu_container_command:
   - --data-path=/data
   - --nat-method=NONE
-  - --p2p-host={{ ansible_host }}
+  - --p2p-host={{ besu_announced_ip }}
   - --p2p-port={{ besu_ports_p2p }}
   - --rpc-http-enabled
   - --rpc-http-host=0.0.0.0

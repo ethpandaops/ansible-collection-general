@@ -3,6 +3,7 @@
   ansible.builtin.include_role:
     name: ethpandaops.general.lighthouse
   vars:
+    lighthouse_announced_ip: "{{ ethereum_node_announced_ip }}"
     lighthouse_ports_p2p_tcp: "{{ ethereum_node_cl_ports_p2p_tcp }}"
     lighthouse_ports_p2p_udp: "{{ ethereum_node_cl_ports_p2p_udp }}"
     lighthouse_ports_http_beacon: "{{ ethereum_node_cl_ports_http_beacon }}"
@@ -19,6 +20,7 @@
   ansible.builtin.include_role:
     name: ethpandaops.general.teku
   vars:
+    teku_announced_ip: "{{ ethereum_node_announced_ip }}"
     teku_ports_p2p_tcp: "{{ ethereum_node_cl_ports_p2p_tcp }}"
     teku_ports_p2p_udp: "{{ ethereum_node_cl_ports_p2p_udp }}"
     teku_ports_http_beacon: "{{ ethereum_node_cl_ports_http_beacon }}"
@@ -35,6 +37,7 @@
   ansible.builtin.include_role:
     name: ethpandaops.general.prysm
   vars:
+    prysm_announced_ip: "{{ ethereum_node_announced_ip }}"
     prysm_ports_p2p_tcp: "{{ ethereum_node_cl_ports_p2p_tcp }}"
     prysm_ports_p2p_udp: "{{ ethereum_node_cl_ports_p2p_udp }}"
     prysm_ports_http_beacon: "{{ ethereum_node_cl_ports_http_beacon }}"
@@ -51,6 +54,7 @@
   ansible.builtin.include_role:
     name: ethpandaops.general.lodestar
   vars:
+    lodestar_announced_ip: "{{ ethereum_node_announced_ip }}"
     lodestar_ports_p2p_tcp: "{{ ethereum_node_cl_ports_p2p_tcp }}"
     lodestar_ports_p2p_udp: "{{ ethereum_node_cl_ports_p2p_udp }}"
     lodestar_ports_http_beacon: "{{ ethereum_node_cl_ports_http_beacon }}"
@@ -67,6 +71,7 @@
   ansible.builtin.include_role:
     name: ethpandaops.general.nimbus
   vars:
+    nimbus_announced_ip: "{{ ethereum_node_announced_ip }}"
     nimbus_ports_p2p_tcp: "{{ ethereum_node_cl_ports_p2p_tcp }}"
     nimbus_ports_p2p_udp: "{{ ethereum_node_cl_ports_p2p_udp }}"
     nimbus_ports_http_beacon: "{{ ethereum_node_cl_ports_http_beacon }}"

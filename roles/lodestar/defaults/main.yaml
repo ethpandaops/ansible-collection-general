@@ -2,6 +2,7 @@ lodestar_user: lodestar
 lodestar_datadir: /data/lodestar
 lodestar_auth_jwt_path: /data/execution-auth.secret
 lodestar_execution_engine_endpoint: http://geth:8551
+lodestar_announced_ip: "{{ ansible_host }}"
 
 lodestar_cleanup: false # when set to "true" it will remove the container(s)
 
@@ -37,7 +38,7 @@ lodestar_container_command:
   - --discv5
   - --listenAddress=0.0.0.0
   - --port={{ lodestar_ports_p2p_tcp }}
-  - --enr.ip={{ ansible_host }}
+  - --enr.ip={{ lodestar_announced_ip }}
   - --enr.tcp={{ lodestar_ports_p2p_tcp }}
   - --enr.udp={{ lodestar_ports_p2p_udp }}
   - --rest

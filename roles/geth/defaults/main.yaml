@@ -1,6 +1,7 @@
 geth_user: geth
 geth_datadir: /data/geth
 geth_auth_jwt_path: /data/execution-auth.secret
+geth_announced_ip: "{{ ansible_host }}"
 
 geth_cleanup: false # when set to "true" it will remove the container
 
@@ -32,7 +33,7 @@ geth_container_command:
   - --authrpc.port={{ geth_ports_engine }}
   - --authrpc.vhosts=*
   - --authrpc.jwtsecret=/execution-auth.jwt
-  - --nat=extip:{{ ansible_host }}
+  - --nat=extip:{{ geth_announced_ip }}
   - --metrics
   - --metrics.port={{ geth_ports_metrics }}
   - --metrics.addr=0.0.0.0

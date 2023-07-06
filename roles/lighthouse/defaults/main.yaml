@@ -2,6 +2,7 @@ lighthouse_user: lighthouse
 lighthouse_datadir: /data/lighthouse
 lighthouse_auth_jwt_path: /data/execution-auth.secret
 lighthouse_execution_engine_endpoint: http://geth:8551
+lighthouse_announced_ip: "{{ ansible_host }}"
 
 lighthouse_cleanup: false # when set to "true" it will remove the container(s)
 
@@ -37,7 +38,7 @@ lighthouse_container_command:
   - --datadir=/data
   - --disable-upnp
   - --disable-enr-auto-update
-  - --enr-address={{ ansible_host }}
+  - --enr-address={{ lighthouse_announced_ip }}
   - --enr-tcp-port={{ lighthouse_ports_p2p_tcp }}
   - --enr-udp-port={{ lighthouse_ports_p2p_udp }}
   - --listen-address=0.0.0.0
