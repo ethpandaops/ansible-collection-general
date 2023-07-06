@@ -9,3 +9,4 @@ runs:
     - name: Run setup
       shell: bash
       run: ./setup.sh
+      working-directory: ansible_collections/ethpandaops/general
