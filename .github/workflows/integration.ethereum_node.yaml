@@ -1,4 +1,4 @@
-name: Integration
+name: Integration (ethereum_node)
 on:
   pull_request:
   push:
@@ -22,17 +22,19 @@ jobs:
         id: filter
         with:
           filters: |
-            blockscout: roles/blockscout/**
+            ethereum_node: roles/ethereum_node/**
 
   # Integration test using molecule
   job:
     needs: changes
+    if: ${{ needs.changes.outputs.roles.ethereum_node == 'true' }}
     concurrency:
       group: ${{ github.head_ref }}-${{ matrix.role }}
       cancel-in-progress: true
     strategy:
       matrix:
-        role: ${{ fromJSON(needs.changes.outputs.roles) }}
+        consensus: [lighthouse]
+        execution: [geth, besu]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -42,7 +44,9 @@ jobs:
       - uses: ./ansible_collections/ethpandaops/general/.github/actions/setup
 
       - name: Run molecule
-        working-directory: ansible_collections/ethpandaops/general/roles/${{ matrix.role }}
+        working-directory: ansible_collections/ethpandaops/general/roles/ethereum_node
         run: molecule test
         env:
           PY_COLORS: '1'
+          EXECUTION_CLIENT: ${{ matrix.execution }}
+          CONSENSUS_CLIENT: ${{ matrix.consensus }}
