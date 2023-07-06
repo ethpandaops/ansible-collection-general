@@ -59,4 +59,4 @@
       }}
     user: "{{ teku_user_meta.uid }}"
     pull: "{{ teku_container_pull | bool }}"
-    security_ops: "{{ teku_container_security_opts }}"
+    security_opts: "{{ teku_container_security_opts }}"
