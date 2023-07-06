@@ -33,6 +33,7 @@ jobs:
         ${{ github.head_ref }}-ethereum-node-${{ matrix.consensus }}-${{ matrix.execution }}
       cancel-in-progress: true
     strategy:
+      fail-fast: false
       matrix:
         consensus: [teku, prysm, lighthouse, nimbus, lodestar]
         execution: [geth, nethermind, erigon, besu, ethereumjs]
