@@ -30,6 +30,7 @@ teku_container_ports:
 teku_container_volumes:
   - "{{ teku_datadir }}:/data"
   - "{{ teku_auth_jwt_path }}:/execution-auth.jwt:ro"
+teku_container_security_opts: []
 teku_container_stop_timeout: "300"
 teku_container_networks: []
 teku_container_command:

@@ -21,6 +21,7 @@ geth_container_ports:
 geth_container_volumes:
   - "{{ geth_datadir }}:/data"
   - "{{ geth_auth_jwt_path }}:/execution-auth.jwt:ro"
+geth_container_security_opts: []
 geth_container_stop_timeout: "300"
 geth_container_networks: []
 geth_container_command:

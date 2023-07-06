@@ -30,6 +30,7 @@ lodestar_container_ports:
 lodestar_container_volumes:
   - "{{ lodestar_datadir }}:/data"
   - "{{ lodestar_auth_jwt_path }}:/execution-auth.jwt:ro"
+lodestar_container_security_opts: []
 lodestar_container_stop_timeout: "300"
 lodestar_container_networks: []
 lodestar_container_command:
@@ -63,6 +64,7 @@ lodestar_validator_container_env: {}
 lodestar_validator_container_ports: []
 lodestar_validator_container_volumes:
   - "{{ lodestar_validator_datadir }}:/validator-data"
+lodestar_validator_container_security_opts: []
 lodestar_validator_container_stop_timeout: "300"
 lodestar_validator_container_networks: []
 lodestar_validator_container_command:

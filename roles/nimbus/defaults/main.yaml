@@ -42,6 +42,7 @@ nimbus_container_ports:
 nimbus_container_volumes:
   - "{{ nimbus_datadir }}:/data"
   - "{{ nimbus_auth_jwt_path }}:/execution-auth.jwt:ro"
+nimbus_container_security_opts: []
 nimbus_container_stop_timeout: "300"
 nimbus_container_networks: []
 nimbus_container_command:

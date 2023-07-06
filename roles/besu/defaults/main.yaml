@@ -21,6 +21,7 @@ besu_container_ports:
 besu_container_volumes:
   - "{{ besu_datadir }}:/data"
   - "{{ besu_auth_jwt_path }}:/execution-auth.jwt:ro"
+besu_container_security_opts: []
 besu_container_stop_timeout: "300"
 besu_container_networks: []
 besu_container_command:
