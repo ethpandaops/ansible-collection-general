@@ -23,7 +23,7 @@ driver:
 platforms:
   - name: blockscout
     image: "geerlingguy/docker-debian12-ansible:latest"
-    platform: linux/amd64
+    #platform: linux/amd64
     command: ""
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:rw

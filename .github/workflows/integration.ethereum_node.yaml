@@ -29,7 +29,8 @@ jobs:
     needs: changes
     if: ${{ needs.changes.outputs.roles.ethereum_node == 'true' }}
     concurrency:
-      group: ${{ github.head_ref }}-${{ matrix.role }}
+      group: >-
+        ${{ github.head_ref }}-ethereum-node-${{ matrix.consensus }}-${{ matrix.execution }}
       cancel-in-progress: true
     strategy:
       matrix:
