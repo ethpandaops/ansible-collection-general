@@ -34,8 +34,8 @@ jobs:
       cancel-in-progress: true
     strategy:
       matrix:
-        consensus: [lighthouse]
-        execution: [geth, besu]
+        consensus: [teku, prysm, lighthouse, nimbus, lodestar]
+        execution: [geth, nethermind, erigon, besu, ethereumjs]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
