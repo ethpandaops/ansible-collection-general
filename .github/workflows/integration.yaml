@@ -22,7 +22,7 @@ jobs:
         id: filter
         with:
           filters: |
-            blockscout: roles/blockscout
+            blockscout: roles/blockscout/**
 
   # Integration test using molecule
   job:
