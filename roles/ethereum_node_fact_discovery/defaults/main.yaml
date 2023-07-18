@@ -15,5 +15,11 @@ ethereum_node_fact_discovery_el_enode_cmd:
 
 # How to find the CL data
 ethereum_node_fact_discovery_cl_uri: http://localhost:5052/eth/v1/node/identity
+
+# Retry attempts CL
 ethereum_node_fact_discovery_cl_retries: 25
 ethereum_node_fact_discovery_cl_delay: 5
+
+# Retry attempts EL
+ethereum_node_fact_discovery_el_retries: 10
+ethereum_node_fact_discovery_el_delay: 5
