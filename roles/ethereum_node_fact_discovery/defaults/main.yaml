@@ -21,5 +21,5 @@ ethereum_node_fact_discovery_cl_retries: 25
 ethereum_node_fact_discovery_cl_delay: 5
 
 # Retry attempts EL
-ethereum_node_fact_discovery_el_retries: 10
+ethereum_node_fact_discovery_el_retries: 25
 ethereum_node_fact_discovery_el_delay: 5
