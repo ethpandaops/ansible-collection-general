@@ -53,8 +53,8 @@ ethereum_node_el_engine_endpoint: >-
 ethereum_node_el_engine_snooper_endpoint: >-
   http://{{ ethereum_node_json_rpc_snooper_engine_name }}:{{ ethereum_node_json_rpc_snooper_engine_port }}
 ethereum_node_el_rpc_endpoint: >-
-  http://{{ vars[ethereum_node_el + '_container_name'] | default(efault(ethereum_node_el)) }}:{{ ethereum_node_el_ports_http_rpc }}
+  http://{{ vars[ethereum_node_el + '_container_name'] | default(ethereum_node_el) }}:{{ ethereum_node_el_ports_http_rpc }}
 ethereum_node_el_rpc_snooper_endpoint: >-
   http://{{ ethereum_node_json_rpc_snooper_name }}:{{ ethereum_node_json_rpc_snooper_port }}
 ethereum_node_cl_beacon_endpoint: >-
-  http://{{ vars[ethereum_node_cl + '_container_name'] | default(efault(ethereum_node_cl)) }}:{{ ethereum_node_cl_ports_http_beacon }}
+  http://{{ vars[ethereum_node_cl + '_container_name'] | default(ethereum_node_cl) }}:{{ ethereum_node_cl_ports_http_beacon }}
