@@ -4,6 +4,17 @@
   register: nimbus_user_meta
 
 - name: Create data dir
+  ansible.builtin.command:
+    cmd: "ls -lah {{ nimbus_datadir }}"
+  changed_when: false
+  failed_when: false
+  register: tmp_debug
+
+- name: Create data dir
+  ansible.builtin.debug:
+    var: tmp_debug
+
+- name: Create data dir
   ansible.builtin.file:
     path: "{{ nimbus_datadir }}"
     state: directory
