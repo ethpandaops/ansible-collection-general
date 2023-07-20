@@ -12,9 +12,9 @@
             name: geerlingguy.docker
         - ansible.builtin.import_role:
             name: geerlingguy.pip
-            vars:
-              pip_install_packages:
-                - name: docker
+          vars:
+            pip_install_packages:
+              - name: docker
         - ansible.builtin.import_role:
             name: ethereum_node
       always:
