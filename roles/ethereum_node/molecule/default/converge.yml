@@ -6,9 +6,22 @@
       ansible.builtin.apt:
         update_cache: true
         cache_valid_time: 3600
-  roles:
-    - role: geerlingguy.docker
-    - role: geerlingguy.pip
-      pip_install_packages:
-        - name: docker
-    - role: ethereum_node
+  tasks:
+    - name: Setup
+      block:
+        - ansible.builtin.import_role:
+            name: geerlingguy.docker
+        - ansible.builtin.import_role:
+            name: geerlingguy.pip
+            vars:
+              pip_install_packages:
+                - name: docker
+      - ansible.builtin.import_role:
+          name: ethereum_node
+      always:
+        - name: Show CL client logs
+          ansible.builtin.command:
+            cmd: docker logs {{ vars[ethereum_node_cl + '_container_name'] | default(ethereum_node_cl) }}
+        - name: Show EL client logs
+          ansible.builtin.command:
+            cmd: docker logs {{ vars[ethereum_node_el + '_container_name'] | default(ethereum_node_el) }}
