@@ -7,8 +7,7 @@
         update_cache: true
         cache_valid_time: 3600
   tasks:
-    - name: Setup
-      block:
+    - block:
         - ansible.builtin.import_role:
             name: geerlingguy.docker
         - ansible.builtin.import_role:
@@ -16,8 +15,8 @@
             vars:
               pip_install_packages:
                 - name: docker
-      - ansible.builtin.import_role:
-          name: ethereum_node
+        - ansible.builtin.import_role:
+            name: ethereum_node
       always:
         - name: Show CL client logs
           ansible.builtin.command:
