@@ -104,7 +104,7 @@ ansible-lint
 ansible-test sanity
 ```
 
-Some roles have molecule tests inside. You can check this if a role has a `molecule` directory within. To run molecule ona given role you can do the following:
+Some roles have [molecule](https://ansible.readthedocs.io/projects/molecule/) tests inside. You can check this if a role has a `molecule` directory within. To run molecule ona given role you can do the following:
 
 ```sh
 cd roles/blockscout
