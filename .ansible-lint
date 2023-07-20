@@ -3,3 +3,7 @@ profile: production
 exclude_paths:
   - .github/
   - vendor/
+
+skip_list:
+  - galaxy[no-changelog]
+  - galaxy[no-runtime]
