@@ -1,6 +1,7 @@
 ethereumjs_user: ethereumjs
 ethereumjs_datadir: /data/ethereumjs
 ethereumjs_auth_jwt_path: /data/execution-auth.secret
+ethereumjs_announced_ip: "{{ ansible_host }}"
 
 ethereumjs_cleanup: false # when set to "true" it will remove the container
 
@@ -33,7 +34,7 @@ ethereumjs_container_command:
   - --rpcEngineAddr=0.0.0.0
   - --rpcEnginePort={{ ethereumjs_ports_engine }}
   - --jwt-secret=/execution-auth.jwt
-  - --extIP={{ ansible_host }}
+  - --extIP={{ ethereumjs_announced_ip }}
 ethereumjs_container_command_extra_args: []
 
 # Default image pull policy

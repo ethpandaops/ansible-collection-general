@@ -2,6 +2,7 @@ nimbus_user: nimbus
 nimbus_datadir: /data/nimbus
 nimbus_auth_jwt_path: /data/execution-auth.secret
 nimbus_execution_engine_endpoint: http://geth:8551
+nimbus_announced_ip: "{{ ansible_host }}"
 
 nimbus_cleanup: false # when set to "true" it will remove the container
 
@@ -51,7 +52,7 @@ nimbus_container_command:
   - --listen-address=0.0.0.0
   - --udp-port={{ nimbus_ports_p2p_udp }}
   - --tcp-port={{ nimbus_ports_p2p_tcp }}
-  - --nat=extip:{{ ansible_host }}
+  - --nat=extip:{{ nimbus_announced_ip }}
   - --enr-auto-update=false
   - --rest
   - --rest-port={{ nimbus_ports_http_beacon }}

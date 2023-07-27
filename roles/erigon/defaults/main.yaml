@@ -1,6 +1,7 @@
 erigon_user: erigon
 erigon_datadir: /data/erigon
 erigon_auth_jwt_path: /data/execution-auth.secret
+erigon_announced_ip: "{{ ansible_host }}"
 
 erigon_cleanup: false # when set to "true" it will remove the container
 
@@ -29,7 +30,7 @@ erigon_container_entrypoint:
   - erigon
 erigon_container_command:
   - --datadir=/data
-  - --nat=extip:{{ ansible_host }}
+  - --nat=extip:{{ erigon_announced_ip }}
   - --port={{ erigon_ports_p2p }}
   - --http
   - --http.addr=0.0.0.0

@@ -1,0 +1,22 @@
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Get infos on EL container
+      community.docker.docker_container_info:
+        name: "{{ ethereum_node_el }}"
+      register: result_el
+    - name: Get infos CL container
+      community.docker.docker_container_info:
+        name: "{{ ethereum_node_cl }}"
+      register: result_cl
+    - name: Show infos
+      ansible.builtin.debug:
+        var: "{{ item }}"
+      loop:
+        - result_el
+        - result_cl
+    - name: Assert results
+      ansible.builtin.assert:
+        that:
+          - "result_el.container.State.Running == true"
+          - "result_cl.container.State.Running == true"

@@ -1,3 +1,9 @@
+- name: Install dependencies
+  ansible.builtin.apt:
+    name: xxd
+    state: present
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
 - name: Extract CL ENRs
   ansible.builtin.import_tasks: consensus_layer.yaml
   when: ethereum_node_fact_discovery_cl

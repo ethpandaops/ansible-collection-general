@@ -1,0 +1,46 @@
+scenario:
+  name: default
+  test_sequence:
+    - dependency
+    - cleanup
+    - destroy
+    - syntax
+    - create
+    - prepare
+    - converge
+    - idempotence
+    - side_effect
+    - verify
+    - cleanup
+    - destroy
+dependency:
+  name: galaxy
+  options:
+    role-file: ../../requirements.yaml
+    requirements-file: ../../requirements.yaml
+driver:
+  name: docker
+platforms:
+  - name: ethereum_node
+    image: "geerlingguy/docker-debian12-ansible:latest"
+    command: ""
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    cgroupns_mode: host
+    privileged: true
+    pre_build_image: true
+provisioner:
+  name: ansible
+  inventory:
+    group_vars:
+      all:
+        ethereum_node_skip_cleanup: true
+        ethereum_node_announced_ip: 127.0.0.1
+        docker_daemon_options:
+          storage-driver: "vfs"
+    host_vars:
+      ethereum_node:
+        ethereum_node_cl: ${CONSENSUS_CLIENT:-lighthouse.yml}
+        ethereum_node_el: ${EXECUTION_CLIENT:-geth.yml}
+verifier:
+  name: ansible

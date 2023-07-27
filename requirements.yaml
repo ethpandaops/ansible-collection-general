@@ -1,7 +1,17 @@
 collections:
   - name: community.docker
-    version: ">=3.0.0,<4.0.0"
+    version: ">=3.0.2,<4.0.0"
   - name: ansible.posix
-    version: ">=1.0.0,<2.0.0"
+    version: ">=1.4.0,<2.0.0"
   - name: community.general
     version: ">=6.0.0,<7.0.0"
+
+roles:
+  - name: geerlingguy.docker
+    version: "6.0.3"
+  - src: geerlingguy.pip
+    version: "2.2.0"
+  - src: robertdebock.bootstrap
+    version: 5.2.5 # Don't update this. Newer versions contain a bug.
+  - name: gantsign.oh-my-zsh
+    version: "2.4.0"

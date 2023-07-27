@@ -2,6 +2,7 @@ teku_user: teku
 teku_datadir: /data/teku
 teku_auth_jwt_path: /data/execution-auth.secret
 teku_execution_engine_endpoint: http://geth:8551
+teku_announced_ip: "{{ ansible_host }}"
 
 teku_cleanup: false # when set to "true" it will remove the container
 
@@ -37,7 +38,7 @@ teku_container_command:
   - --log-destination=CONSOLE
   - --p2p-enabled=true
   - --p2p-interface=0.0.0.0
-  - --p2p-advertised-ip={{ ansible_host }}
+  - --p2p-advertised-ip={{ teku_announced_ip }}
   - --p2p-port={{ teku_ports_p2p_tcp }}
   - --p2p-advertised-port={{ teku_ports_p2p_udp }}
   - --rest-api-enabled

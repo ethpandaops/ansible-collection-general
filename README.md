@@ -93,15 +93,28 @@ Clone the repository. Make sure that you follow that directory structure, otherw
 git clone git@github.com:ethpandaops/ansible-collection-general.git ansible_collections/ethpandaops/general
 ```
 
-If you want to test and develop on this ansible collection you'll need some tools. We're using [`asdf`](https://asdf-vm.com/) to commit to certain [versions](.tool-versions) of those tools.
+If you want to test and develop on this ansible collection you'll need some tools. We're using [`asdf`](https://asdf-vm.com/) to commit to certain [versions](.tool-versions) of those tools. Some additional python specific tools are defined in the [`requirements.txt`](requirements.txt).
 
 Make sure you have `asdf` installed and then you can run the `./setup.sh` script which will install all required tools.
 
 For linting and sanity checks you can run the following commands:
 
 ```sh
-ansible-lint --exclude .github --profile production
+ansible-lint
 ansible-test sanity
+```
+
+Some roles have [molecule](https://ansible.readthedocs.io/projects/molecule/) tests inside. You can check this if a role has a `molecule` directory within. To run molecule ona given role you can do the following:
+
+```sh
+cd roles/blockscout
+molecule test
+```
+
+If you want to test the [`ethereum_node`](roles/ethereum_node) role with molecule, you can pass it the specific execution and consensus clients via ENV vars:
+```sh
+cd roles/ethereum_node
+EXECUTION_CLIENT=geth CONSENSUS_CLIENT=lighthouse molecule test
 ```
 
 ## License
