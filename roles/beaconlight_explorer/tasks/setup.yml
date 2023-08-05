@@ -52,6 +52,15 @@
     group: "{{ beaconlight_user }}"
     mode: '0640'
 
+- name: Create custom config files
+  ansible.builtin.copy:
+    content: "{{ item.value }}"
+    dest: "{{ beaconlight_datadir }}/explorer/{{ item.key }}"
+    owner: "{{ beaconlight_user }}"
+    group: "{{ beaconlight_user }}"
+    mode: '0640'
+  loop: "{{ beaconlight_extra_config_files | dict2items }}"
+
 - name: Setup beaconlight
   community.docker.docker_container:
     name: "{{ beaconlight_container_name }}"

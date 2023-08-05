@@ -22,6 +22,12 @@ beaconlight_frontend_ethexplorer: ""
 beaconlight_frontend_validatornames: ""
 beaconlight_frontend_validatornames_inventory: ""
 
+# This can be used to create additional config files for the beaconchain explorer.
+# It's useful when using private testnets and you need to mount a custom network config
+# as the chain config. All files will be available within the explorer containers on the
+# /config directory.
+beaconlight_extra_config_files: {}
+
 # ------------------------------------------------------------------
 
 # beaconlight
