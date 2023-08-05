@@ -1,0 +1,7 @@
+- name: Setup beaconchain-light
+  ansible.builtin.import_tasks: setup.yml
+  when: not beaconlight_cleanup_all
+
+- name: Cleanup everything
+  ansible.builtin.import_tasks: cleanup.yml
+  when: beaconlight_cleanup_all
