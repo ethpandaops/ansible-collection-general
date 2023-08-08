@@ -122,7 +122,7 @@
 
 # Allow installing python packages system wide
 - name: Check system python version
-  ansible.builtin.python_requirements_info:
+  community.general.python_requirements_info:
   register: bootstrap_python_system_version
 
 - name: Enable system wide python package management by removing the 'EXTERNALLY-MANAGED' file
