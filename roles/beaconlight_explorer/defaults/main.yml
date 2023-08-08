@@ -62,7 +62,6 @@ beaconlight_db_container_stop_timeout: "300"
 beaconlight_db_container_pull: false
 beaconlight_db_container_networks: "{{ beaconlight_docker_networks }}"
 
-
 beaconlight_config: |
   # Chain network configuration
   chain:
@@ -84,14 +83,14 @@ beaconlight_config: |
     # Name of the site, displayed in the title tag
     siteName: "{{ beaconlight_frontend_title }}"
     siteSubtitle: "{{ beaconlight_frontend_subtitle }}"
-    
+
     # link to EL Explorer
     ethExplorerLink: "{{ beaconlight_frontend_ethexplorer }}"
 
     # file or inventory url to load validator names from
     validatorNamesYaml: "{{ beaconlight_frontend_validatornames }}"
     validatorNamesInventory: "{{ beaconlight_frontend_validatornames_inventory }}"
-    
+
   beaconapi:
     # CL Client RPC
     endpoint: "{{ beaconlight_beaconapi_endpoint }}"
@@ -120,14 +119,13 @@ beaconlight_config: |
     # number of seconds to wait between each epoch (don't overload CL client)
     syncEpochCooldown: 1
 
-
   readerDatabase:
     host: "beaconlight-database"
     port: 5432
     user: "postgres"
     password: "postgres"
     name: "beaconlight"
-    
+
   writerDatabase:
     host: "beaconlight-database"
     port: 5432

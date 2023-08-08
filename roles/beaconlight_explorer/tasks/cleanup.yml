@@ -13,4 +13,3 @@
   loop:
     - "{{ beaconlight_db_datadir }}"
     - "{{ beaconlight_datadir }}"
-
