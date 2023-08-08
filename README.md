@@ -1,6 +1,8 @@
 # Ansible Collection - ethpandaops.general
 
-[![Ansible CI](https://github.com/ethpandaops/ansible-collection-general/actions/workflows/ansible_lint.yml/badge.svg)](https://github.com/ethpandaops/ansible-collection-general/actions/workflows/ansible_lint.yml)
+[![Lint](https://github.com/ethpandaops/ansible-collection-general/actions/workflows/lint.yaml/badge.svg)](https://github.com/ethpandaops/ansible-collection-general/actions/workflows/lint.yaml)
+[![Integration](https://github.com/ethpandaops/ansible-collection-general/actions/workflows/integration.yaml/badge.svg)](https://github.com/ethpandaops/ansible-collection-general/actions/workflows/integration.yaml)
+[![Integration (ethereum_node)](https://github.com/ethpandaops/ansible-collection-general/actions/workflows/integration.ethereum_node.yaml/badge.svg)](https://github.com/ethpandaops/ansible-collection-general/actions/workflows/integration.ethereum_node.yaml)
 
 A collection of reusable ansible components used by the EthPandaOps team.
 
