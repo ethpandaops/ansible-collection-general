@@ -4,7 +4,7 @@ ethereum_node_images_always_pull: false
 ethereum_node_announced_ip: "{{ ansible_host }}"
 
 # Execution layer client
-ethereum_node_el: ethereumjs # Valid options: besu, geth, erigon, nethermind
+ethereum_node_el: ethereumjs # Valid options: besu, geth, erigon, nethermind, ethereumjs, reth
 ethereum_node_el_enabled: true
 ethereum_node_el_ports_p2p_tcp: 30303
 ethereum_node_el_ports_p2p_udp: 30303

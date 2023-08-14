@@ -1,0 +1,7 @@
+- name: Remove reth containers
+  community.docker.docker_container:
+    name: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ reth_container_name }}"
+    - "{{ reth_container_name }}-init"
