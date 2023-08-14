@@ -15,30 +15,6 @@
   ansible.builtin.command: "chown -R {{ reth_user }}:{{ reth_user }} {{ reth_datadir }}" # noqa no-free-form
   changed_when: false
 
-- name: Init custom network
-  when: reth_init_custom_network
-  block:
-    - name: Check for empty chaindata dir
-      ansible.builtin.stat:
-        path: "{{ reth_datadir }}/reth/chaindata"
-      register: reth_init_custom_network_chaindata_stat
-    - name: Chaindata is empty, run reth init container
-      community.docker.docker_container:
-        name: "{{ reth_container_name }}-init"
-        image: "{{ reth_container_image }}"
-        detach: false
-        auto_remove: "{{ reth_init_autoremove_enabled }}"
-        restart_policy: "no"
-        state: started
-        volumes: "{{ reth_init_custom_network_container_volumes }}"
-        env: "{{ reth_init_custom_network_container_env }}"
-        networks: "{{ reth_container_networks }}"
-        command: "{{ reth_init_custom_network_container_command }}"
-        user: "{{ reth_user_meta.uid }}"
-        pull: "{{ reth_container_pull | bool }}"
-        security_opts: "{{ reth_container_security_opts }}"
-      when: not reth_init_custom_network_chaindata_stat.stat.exists
-
 - name: Run reth container
   community.docker.docker_container:
     name: "{{ reth_container_name }}"
