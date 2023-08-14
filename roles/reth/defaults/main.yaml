@@ -25,7 +25,6 @@ reth_container_security_opts: []
 reth_container_stop_timeout: "300"
 reth_container_networks: []
 reth_container_command:
-  - reth
   - node
   - --datadir=/data
   - --port={{ reth_ports_p2p }}
