@@ -37,7 +37,7 @@ jobs:
       fail-fast: false
       matrix:
         consensus: [teku, prysm, lighthouse, nimbus, lodestar]
-        execution: [geth, nethermind, erigon, besu, ethereumjs]
+        execution: [geth, nethermind, erigon, besu, ethereumjs, reth]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
