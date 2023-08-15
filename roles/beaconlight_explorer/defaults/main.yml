@@ -119,16 +119,11 @@ beaconlight_config: |
     # number of seconds to wait between each epoch (don't overload CL client)
     syncEpochCooldown: 1
 
-  readerDatabase:
-    host: "beaconlight-database"
-    port: 5432
-    user: "postgres"
-    password: "postgres"
-    name: "beaconlight"
-
-  writerDatabase:
-    host: "beaconlight-database"
-    port: 5432
-    user: "postgres"
-    password: "postgres"
-    name: "beaconlight"
+  database:
+    engine: "pgsql"
+    pgsql:
+      host: "beaconlight-database"
+      port: 5432
+      user: "postgres"
+      password: "postgres"
+      name: "beaconlight"
