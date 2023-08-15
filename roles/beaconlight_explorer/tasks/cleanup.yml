@@ -1,0 +1,15 @@
+- name: Stop beaconlight containers
+  community.docker.docker_container:
+    name: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ beaconlight_container_name }}"
+    - "{{ beaconlight_db_container_name }}"
+
+- name: Delete data directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ beaconlight_db_datadir }}"
+    - "{{ beaconlight_datadir }}"
