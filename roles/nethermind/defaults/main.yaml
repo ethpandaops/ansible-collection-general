@@ -24,8 +24,6 @@ nethermind_container_volumes:
 nethermind_container_security_opts: []
 nethermind_container_stop_timeout: "300"
 nethermind_container_networks: []
-nethermind_container_entrypoint:
-  - /nethermind/Nethermind.Runner
 nethermind_container_command:
   - --datadir=/data
   - --KeyStore.KeyStoreDirectory=/data/keystore
