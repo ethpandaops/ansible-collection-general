@@ -56,9 +56,11 @@ lighthouse_container_command:
   - --metrics-port={{ lighthouse_ports_metrics }}
 lighthouse_container_command_extra_args: []
 
-lighthouse_checkpoint_sync_enabled: false
-lighthouse_container_command_checkpoint_args: []
-  # - --checkpoint-sync-url=http://your-other-node
+checkpoint_sync_url: https://beaconstate.ethstaker.cc
+checkpoint_sync_enabled: false
+lighthouse_checkpoint_sync_enabled: "{{ checkpoint_sync_enabled | ternary(checkpoint_sync_enabled, false) }}"
+lighthouse_container_command_checkpoint_args:
+  - --checkpoint-sync-url={{ checkpoint_sync_url }}
 
 ################################################################################
 ##

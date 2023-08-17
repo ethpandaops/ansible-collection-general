@@ -20,12 +20,17 @@ nimbus_validator_datadir: /data/nimbus-validator
 ## Checkpoint sync container configuration
 ##
 ################################################################################
+checkpoint_sync_url: https://beaconstate.ethstaker.cc
+checkpoint_sync_enabled: false
 nimbus_checkpoint_container_name: nimbus_checkpoint
 nimbus_checkpoint_container_command:
   - trustedNodeSync
   - --data-dir=/data
-nimbus_checkpoint_container_command_extra_args: []
-nimbus_checkpoint_sync_enabled: false
+nimbus_checkpoint_container_command_extra_args:
+  - --trusted-node-url={{ checkpoint_sync_url }}
+  - --network=mainnet
+  - --backfill=false
+nimbus_checkpoint_sync_enabled: "{{ checkpoint_sync_enabled | ternary(checkpoint_sync_enabled, false) }}"
 nimbus_checkpoint_autoremove_enabled: false
 ################################################################################
 ##

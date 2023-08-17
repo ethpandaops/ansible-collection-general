@@ -52,9 +52,11 @@ lodestar_container_command:
   - --metrics.port={{ lodestar_ports_metrics }}
 lodestar_container_command_extra_args: []
 
-lodestar_checkpoint_sync_enabled: false
-lodestar_container_command_checkpoint_args: []
-# - --checkpointSyncUrl=http://your-other-node
+checkpoint_sync_url: https://beaconstate.ethstaker.cc
+checkpoint_sync_enabled: false
+lodestar_checkpoint_sync_enabled: "{{ checkpoint_sync_enabled | ternary(checkpoint_sync_enabled, false) }}"
+lodestar_container_command_checkpoint_args:
+  - --checkpointSyncUrl={{ checkpoint_sync_url }}
 
 ################################################################################
 ##
