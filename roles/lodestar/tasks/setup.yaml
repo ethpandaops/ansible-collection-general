@@ -26,7 +26,12 @@
     volumes: "{{ lodestar_container_volumes }}"
     env: "{{ lodestar_container_env }}"
     networks: "{{ lodestar_container_networks }}"
-    command: "{{ lodestar_container_command + lodestar_container_command_extra_args + (lodestar_checkpoint_sync_enabled | ternary(lodestar_container_command_checkpoint_args, [])) }} "
+    command: >-
+      {{ 
+        lodestar_container_command + 
+        lodestar_container_command_extra_args + 
+        (lodestar_checkpoint_sync_enabled | ternary(lodestar_container_command_checkpoint_args, [])) 
+      }}
     user: "{{ lodestar_user_meta.uid }}"
     pull: "{{ lodestar_container_pull | bool }}"
     security_opts: "{{ lodestar_container_security_opts }}"

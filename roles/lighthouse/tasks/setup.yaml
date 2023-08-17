@@ -26,7 +26,12 @@
     volumes: "{{ lighthouse_container_volumes }}"
     env: "{{ lighthouse_container_env }}"
     networks: "{{ lighthouse_container_networks }}"
-    command: "{{ lighthouse_container_command + lighthouse_container_command_extra_args + (lighthouse_checkpoint_sync_enabled | ternary(lighthouse_container_command_checkpoint_args, [])) }} "
+    command: >- 
+      {{ 
+        lighthouse_container_command + 
+        lighthouse_container_command_extra_args + 
+        (lighthouse_checkpoint_sync_enabled | ternary(lighthouse_container_command_checkpoint_args, [])) 
+      }}
     user: "{{ lighthouse_user_meta.uid }}"
     pull: "{{ lighthouse_container_pull | bool }}"
     security_opts: "{{ lighthouse_container_security_opts }}"
