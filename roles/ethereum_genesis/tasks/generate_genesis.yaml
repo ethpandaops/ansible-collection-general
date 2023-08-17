@@ -33,7 +33,7 @@
 
     - name: Run genesis generator
       ansible.builtin.shell: >
-        docker run --rm -t -u $UID --platform linux/amd64
+        docker run --rm -t -u $UID
         -v {{ ethereum_genesis_generator_tmp_output_dir_register.path }}:/data
         -v {{ ethereum_genesis_generator_tmp_config_dir_register.path }}:/config
         {{ ethereum_genesis_generator_container_image }} all
