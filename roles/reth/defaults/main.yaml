@@ -11,7 +11,7 @@ reth_ports_engine: 8551
 reth_ports_metrics: 6060
 
 reth_container_name: reth
-reth_container_image: ethpandaops/reth:main
+reth_container_image: ghcr.io/paradigmxyz/reth
 reth_container_env: {}
 reth_container_ports:
   - "127.0.0.1:{{ reth_ports_http_rpc }}:{{ reth_ports_http_rpc }}"
