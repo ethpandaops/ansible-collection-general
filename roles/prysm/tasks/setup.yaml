@@ -27,7 +27,7 @@
     env: "{{ prysm_container_env }}"
     networks: "{{ prysm_container_networks }}"
     entrypoint: "{{ prysm_container_entrypoint }}"
-    command: >- 
+    command: >-
       {{
         prysm_container_command +
         prysm_container_command_extra_args +
