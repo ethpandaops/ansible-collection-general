@@ -10,17 +10,19 @@ beaconlight_docker_network_name: shared
 beaconlight_docker_networks:
   - name: "{{ beaconlight_docker_network_name }}"
 
+beaconlight_port: 8080
+
 # explorer config
-beaconlight_beaconapi_endpoint: "http://your-cl-node:5052"
-beaconlight_chain_name: sepolia
-beaconlight_chain_displayname: ""
+beaconlight_beaconapi_endpoint: "http://beacon:5052"
+beaconlight_chain_name: "{{ ethereum_network_name | default('sepolia') }}"
+beaconlight_chain_displayname: "{{ ethereum_network_name | default(beaconlight_chain_name) }}"
 beaconlight_chain_config: ""
-beaconlight_chain_genesistime: 0
+beaconlight_chain_genesistime: "{{ default(ethereum_genesis_timestamp + ethereum_genesis_timedelay) }}"
 beaconlight_frontend_title: "Beaconchain Light"
 beaconlight_frontend_subtitle: "Testnet"
 beaconlight_frontend_ethexplorer: ""
 beaconlight_frontend_validatornames: ""
-beaconlight_frontend_validatornames_inventory: ""
+beaconlight_frontend_validatornames_inventory: "https://config.{{ network_subdomain }}/api/v1/nodes/validator-ranges"
 
 # This can be used to create additional config files for the beaconchain explorer.
 # It's useful when using private testnets and you need to mount a custom network config
@@ -35,9 +37,11 @@ beaconlight_enabled: true
 beaconlight_container_name: beaconlight
 beaconlight_container_image: pk910/light-beaconchain-explorer:latest
 beaconlight_container_env: {}
-beaconlight_container_ports: []
+beaconlight_container_ports: 
+  - "127.0.0.1:{{ beaconlight_port }}:{{ beaconlight_port }}"
 beaconlight_container_volumes:
   - "{{ beaconlight_datadir }}/explorer:/config"
+  
 beaconlight_container_stop_timeout: "600"
 beaconlight_container_pull: true
 beaconlight_container_networks: "{{ beaconlight_docker_networks }}"
@@ -73,7 +77,7 @@ beaconlight_config: |
   # HTTP Server configuration
   server:
     host: "0.0.0.0" # Address to listen on
-    port: "8080" # Port to listen on
+    port: "{{ beaconlight_port }}" # Port to listen on
 
   frontend:
     enabled: true # Enable or disable to web frontend
