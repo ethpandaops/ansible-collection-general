@@ -54,9 +54,12 @@ teku_container_command:
 teku_container_command_extra_args:
   - --data-storage-mode=PRUNE
 # - --network=mainnet
-# - --initial-state=http://your-other-node/eth/v2/debug/beacon/states/finalized
 # - --logging=INFO
 # - ---validators-graffiti=hello-world
+
+teku_checkpoint_sync_enabled: false
+teku_container_command_checkpoint_args: []
+# - --initial-state=http://your-other-node/eth/v2/debug/beacon/states/finalized
 
 ################################################################################
 ##

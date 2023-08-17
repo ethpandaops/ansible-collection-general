@@ -51,6 +51,9 @@ prysm_container_command:
   - --monitoring-host=0.0.0.0
   - --monitoring-port={{ prysm_ports_metrics }}
 prysm_container_command_extra_args: []
+
+prysm_checkpoint_sync_enabled: false
+prysm_container_command_checkpoint_args: []
 # - --checkpoint-sync-url=http://your-other-node
 # - --genesis-beacon-api-url=http://your-other-node
 
