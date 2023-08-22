@@ -1,0 +1,7 @@
+- name: Setup reth
+  ansible.builtin.import_tasks: setup.yaml
+  when: not reth_cleanup
+
+- name: Cleanup reth
+  ansible.builtin.import_tasks: cleanup.yaml
+  when: reth_cleanup
