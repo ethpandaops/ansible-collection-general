@@ -1,1 +1,0 @@
-roles/generate_kubernetes_config/files/ingress.config.yaml
