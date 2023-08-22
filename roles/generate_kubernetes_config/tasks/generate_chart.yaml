@@ -61,7 +61,7 @@
 
 - name: Copy ingress config to {{ item.key }}
   ansible.builtin.copy:
-    src: ingress.config.yaml
+    src: ingress.config.yaml.tpl
     dest: "{{ gen_kubernetes_config_default_output_dir }}/{{ item.key }}/templates/ingress.config.yaml"
     mode: "0644"
   when: item.key == 'config'

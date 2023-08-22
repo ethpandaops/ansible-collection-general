@@ -1,4 +1,3 @@
-# yamllint disable-file
 {{- if .Values.config.enabled }}
 {{- $uniqueUpstreams := dict }}
 {{- range .Values.config.files }}
