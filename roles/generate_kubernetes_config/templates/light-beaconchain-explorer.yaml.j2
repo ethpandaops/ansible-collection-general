@@ -26,3 +26,6 @@ light-beaconchain-explorer:
     name: {{ ethereum_network_name }}
     configPath: "https://config.{{ network_subdomain }}/cl/config.yaml"
     validatorNamesInventory: "https://config.{{ network_subdomain }}/api/v1/nodes/validator-ranges"
+
+  postgresql:
+    fullnameOverride: light-beaconchain-explorer-postgresql
