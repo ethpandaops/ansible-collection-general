@@ -1,0 +1,28 @@
+# {{ ansible_managed }}
+
+light-beaconchain-explorer:
+  fullnameOverride: light-beaconchain-explorer
+  image:
+    repository: {{ default_tooling_images.light_beaconchain_explorer.split(':') | first }}
+    tag: {{ default_tooling_images.light_beaconchain_explorer.split(':') | last }}
+  ingress:
+    enabled: true
+    className: ingress-nginx-public
+    hosts:
+      - host: light-beaconchain-explorer.{{ network_subdomain }}
+        paths:
+          - path: /
+            pathType: Prefix
+  endpoints:
+  # Rpc
+  - url: {{ default_cl_endpoint }}
+    name: rpc-{{ gen_kubernetes_config_ethereum_node_name }}
+{% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
+  - url: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.dencun-devnets.node_ingress.combined}>@rpc.{{ hostvars[host]['inventory_hostname'] }}.srv.{{ network_subdomain }}
+    name: {{ hostvars[host]['inventory_hostname'] }}
+{% endfor %}
+
+  config:
+    name: {{ ethereum_network_name }}
+    configPath: "https://config.{{ ethereum_network_name }}.{{ network_subdomain }}/cl/config.yaml"
+    validatorNamesInventory: "https://config.{{ ethereum_network_name }}.{{ network_subdomain }}/api/v1/nodes/validator-ranges"
