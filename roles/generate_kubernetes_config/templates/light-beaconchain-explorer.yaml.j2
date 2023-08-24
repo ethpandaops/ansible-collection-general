@@ -30,7 +30,7 @@ light-beaconchain-explorer:
 {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
   - url: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.dencun-devnets.node_ingress.combined}>@bn.{{ hostvars[host]['inventory_hostname'] }}.srv.{{ network_subdomain }}
     name: {{ hostvars[host]['inventory_hostname'] }}
-{% if groups['ethereum_node'] contains 'lighthouse' %}
+{% if hostvars[host]['inventory_hostname'] contains 'lighthouse' %}
     archive: true
 {% endif %}
 {% endfor %}
