@@ -13,6 +13,14 @@ light-beaconchain-explorer:
         paths:
           - path: /
             pathType: Prefix
+
+  name: {{ ethereum_network_name }}
+  configPath: "https://config.{{ network_subdomain }}/cl/config.yaml"
+  validatorNamesInventory: "https://config.{{ network_subdomain }}/api/v1/nodes/validator-ranges"
+
+  postgresql:
+    fullnameOverride: light-beaconchain-explorer-postgresql
+
   endpoints:
   # Rpc
   - url: {{ default_cl_endpoint }}
@@ -21,11 +29,3 @@ light-beaconchain-explorer:
   - url: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.dencun-devnets.node_ingress.combined}>@bn.{{ hostvars[host]['inventory_hostname'] }}.srv.{{ network_subdomain }}
     name: {{ hostvars[host]['inventory_hostname'] }}
 {% endfor %}
-
-  
-  name: {{ ethereum_network_name }}
-  configPath: "https://config.{{ network_subdomain }}/cl/config.yaml"
-  validatorNamesInventory: "https://config.{{ network_subdomain }}/api/v1/nodes/validator-ranges"
-
-  postgresql:
-    fullnameOverride: light-beaconchain-explorer-postgresql
