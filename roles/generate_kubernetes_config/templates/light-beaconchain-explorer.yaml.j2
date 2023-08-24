@@ -5,6 +5,7 @@ light-beaconchain-explorer:
   image:
     repository: {{ default_tooling_images.light_beaconchain_explorer.split(':') | first }}
     tag: {{ default_tooling_images.light_beaconchain_explorer.split(':') | last }}
+    pullPolicy: Always
   ingress:
     enabled: true
     className: ingress-nginx-public
