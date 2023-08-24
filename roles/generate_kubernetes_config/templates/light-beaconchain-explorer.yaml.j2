@@ -19,10 +19,9 @@ light-beaconchain-explorer:
   validatorNamesInventory: "https://config.{{ network_subdomain }}/api/v1/nodes/validator-ranges"
 
   postgresql:
-{% raw%}
-    name: "{{ include 'light-beaconchain-explorer.fullname' . }}-postgresql"
-    fullnameOverride: "{{ include 'light-beaconchain-explorer.fullname' . }}-postgresql"
-{% endraw %}
+    name: "light-beaconchain-explorer-postgresql"
+    fullnameOverride: "light-beaconchain-explorer-postgresql"
+  
   endpoints:
   # Rpc
   - url: {{ default_cl_endpoint }}
