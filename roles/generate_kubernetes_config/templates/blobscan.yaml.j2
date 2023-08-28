@@ -19,6 +19,13 @@ blobscan:
                 name: blobscan
                 port:
                   number: 3000
+  config:
+    NEXTAUTH_URL: https://blobscan.{{ network_subdomain }}
+    NEXT_PUBLIC_NETWORK_NAME: {{ network_name }}
+    NEXT_PUBLIC_BEACON_BASE_URL: https://light-beaconchain-explorer.{{ network_subdomain }}
+    NEXT_PUBLIC_EXPLORER_BASE_URL: https://explorer.{{ network_subdomain }}
+    BEACON_NODE_ENDPOINT: {{ default_cl_endpoint }}
+    CHAIN_ID: "{{ ethereum_genesis_chain_id }}"
   blobscandb:
     fullnameOverride: blobscan-blobscandb
     persistence:
@@ -31,15 +38,9 @@ blobscan-indexer:
     repository: {{ default_tooling_images.blobscan_indexer.split(':') | first }}
     tag: {{ default_tooling_images.blobscan_indexer.split(':') | last }}
     pullPolicy: Always
-  extraEnv:
-    - name: SECRET_KEY
-      value: "supersecret"
-    - name: BLOBSCAN_API_ENDPOINT
-      value: "http://blobscan-api:3001"
-    - name: EXECUTION_NODE_ENDPOINT
-      value: {{ default_el_endpoint }}
-    - name: BEACON_NODE_ENDPOINT
-      value: {{ default_cl_endpoint }}
+  config:
+    EXECUTION_NODE_ENDPOINT: {{ default_el_endpoint }}
+    BEACON_NODE_ENDPOINT: {{ default_cl_endpoint }}
 
 # Blobscan API
 blobscan-api:
@@ -48,6 +49,9 @@ blobscan-api:
     repository: {{ default_tooling_images.blobscan.split(':') | first }}
     tag: {{ default_tooling_images.blobscan.split(':') | last }}
     pullPolicy: Always
+  config:
+    BEACON_NODE_ENDPOINT: {{ default_cl_endpoint }}
+    CHAIN_ID: "{{ ethereum_genesis_chain_id }}"
   ingress:
     enabled: false
     className: ingress-nginx-public
