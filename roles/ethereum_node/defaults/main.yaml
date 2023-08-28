@@ -19,6 +19,7 @@ ethereum_node_cl_ports_p2p_tcp: 9000
 ethereum_node_cl_ports_p2p_udp: 9000
 ethereum_node_cl_ports_http_beacon: 5052
 ethereum_node_cl_ports_metrics: 5054
+ethereum_node_cl_checkpoint_sync_enabled: false
 
 # Validator
 ethereum_node_cl_validator_enabled: false
