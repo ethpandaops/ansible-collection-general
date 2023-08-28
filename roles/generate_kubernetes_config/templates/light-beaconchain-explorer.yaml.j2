@@ -1,0 +1,39 @@
+# {{ ansible_managed }}
+
+light-beaconchain-explorer:
+  fullnameOverride: light-beaconchain-explorer
+  image:
+    repository: {{ default_tooling_images.light_beaconchain_explorer.split(':') | first }}
+    tag: {{ default_tooling_images.light_beaconchain_explorer.split(':') | last }}
+    pullPolicy: Always
+  ingress:
+    enabled: true
+    className: ingress-nginx-public
+    hosts:
+      - host: light-beaconchain-explorer.{{ network_subdomain }}
+        paths:
+          - path: /
+            pathType: Prefix
+
+  name: {{ ethereum_network_name }}
+  configPath: "https://config.{{ network_subdomain }}/cl/config.yaml"
+  validatorNamesInventory: "https://config.{{ network_subdomain }}/api/v1/nodes/validator-ranges"
+
+  postgresql:
+    name: "light-beaconchain-explorer-postgresql"
+    fullnameOverride: "light-beaconchain-explorer-postgresql"
+  
+  endpoints:
+  # Rpc
+  - url: {{ default_cl_endpoint }}
+    name: rpc-{{ gen_kubernetes_config_ethereum_node_name }}
+    archive: true
+    priority: 1
+{% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
+  - url: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.dencun-devnets.node_ingress.combined}>@bn.{{ hostvars[host]['inventory_hostname'] }}.srv.{{ network_subdomain }}
+    name: {{ hostvars[host]['inventory_hostname'] }}
+    priority: -1
+{% if 'lighthouse' in hostvars[host]['inventory_hostname'] %}
+    archive: true
+{% endif %}
+{% endfor %}
