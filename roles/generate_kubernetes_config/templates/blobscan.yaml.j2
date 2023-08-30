@@ -28,9 +28,10 @@ blobscan:
     CHAIN_ID: "{{ ethereum_genesis_chain_id }}"
   blobscandb:
     fullnameOverride: blobscan-blobscandb
-    persistence:
-      enabled: true
-      size: 100Gi
+    primary:
+      persistence:
+        enabled: true
+        size: 101Gi
 
 blobscan-indexer:
   fullnameOverride: blobscan-indexer
