@@ -50,7 +50,7 @@ blobscan-api:
     BEACON_NODE_ENDPOINT: {{ default_cl_endpoint }}
     CHAIN_ID: "{{ ethereum_genesis_chain_id }}"
   ingress:
-    enabled: false
+    enabled: true
     className: ingress-nginx-public
     hosts:
       - host: blobscan-api.{{ network_subdomain }}
