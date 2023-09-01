@@ -38,7 +38,7 @@ forky:
           spec:
             seconds_per_slot: 12
             slots_per_epoch: 32
-            {# genesis_time: {{ int(ethereum_genesis_timestamp) + int(ethereum_genesis_timedelay) }}
+            {# genesis_time: {{ int(ethereum_genesis_timestamp) + int(ethereum_genesis_timedelay) }} #}
       sources:
 {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
         - name: {{ hostvars[host]['inventory_hostname'] }}
@@ -46,4 +46,4 @@ forky:
           config:
             address: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.dencun-devnets.node_ingress.combined}>@bn.{{ hostvars[host]['inventory_hostname'] }}.srv.{{ network_subdomain }}
             polling_interval: "12s"
-{% endfor %} #}
+{% endfor %}
