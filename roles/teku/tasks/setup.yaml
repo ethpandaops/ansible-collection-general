@@ -41,21 +41,19 @@
     restart_policy: always
     stop_timeout: "{{ teku_container_stop_timeout }}"
     ports: "{{ teku_container_ports }}"
-    volumes: >-
-      {{
-        teku_validator_enabled | ternary(
-          teku_container_volumes + teku_container_validator_volumes,
-          teku_container_volumes
-        )
-      }}
+    volumes: "{{ teku_container_volumes + (teku_validator_enabled | ternary(teku_container_validator_volumes, [])) }}"
     env: "{{ teku_container_env }}"
     networks: "{{ teku_container_networks }}"
     command: >-
       {{
-        teku_validator_enabled | ternary(
-          teku_container_command + teku_container_validator_args + teku_container_command_extra_args,
-          teku_container_command + teku_container_command_extra_args,
-        )
+        teku_container_command +
+        (teku_validator_enabled | ternary(teku_container_validator_args, [])) +
+        (teku_checkpoint_sync_enabled | ternary(
+          teku_container_command_extra_args | replace(
+            "--initial-state=/network-config/genesis.ssz", teku_container_command_checkpoint_args
+          ),
+          teku_container_command_extra_args
+        ))
       }}
     user: "{{ teku_user_meta.uid }}"
     pull: "{{ teku_container_pull | bool }}"
