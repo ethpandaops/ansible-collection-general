@@ -120,6 +120,17 @@
   when: bootstrap_swap_disable
   notify: Disable SWAP
 
+# Allow installing python packages system wide
+- name: Check system python version
+  community.general.python_requirements_info:
+  register: bootstrap_python_system_version
+
+- name: Enable system wide python package management by removing the 'EXTERNALLY-MANAGED' file
+  ansible.builtin.file:
+    path: "{{ item }}/EXTERNALLY-MANAGED"
+    state: absent
+  loop: "{{ bootstrap_python_system_version.python_system_path }}"
+
 # Reboot the machine if required
 - name: Check if reboot required
   ansible.builtin.stat:
