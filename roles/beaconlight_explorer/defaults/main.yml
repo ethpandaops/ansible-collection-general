@@ -1,0 +1,129 @@
+---
+
+# Set this to true if you want to stop everything and wipe the databases
+beaconlight_cleanup_all: false
+
+
+beaconlight_user: beaconlight
+beaconlight_datadir: "/data/beaconlight"
+beaconlight_docker_network_name: shared
+beaconlight_docker_networks:
+  - name: "{{ beaconlight_docker_network_name }}"
+
+# explorer config
+beaconlight_beaconapi_endpoint: "http://your-cl-node:5052"
+beaconlight_chain_name: sepolia
+beaconlight_chain_displayname: ""
+beaconlight_chain_config: ""
+beaconlight_chain_genesistime: 0
+beaconlight_frontend_title: "Beaconchain Light"
+beaconlight_frontend_subtitle: "Testnet"
+beaconlight_frontend_ethexplorer: ""
+beaconlight_frontend_validatornames: ""
+beaconlight_frontend_validatornames_inventory: ""
+
+# This can be used to create additional config files for the beaconchain explorer.
+# It's useful when using private testnets and you need to mount a custom network config
+# as the chain config. All files will be available within the explorer containers on the
+# /config directory.
+beaconlight_extra_config_files: {}
+
+# ------------------------------------------------------------------
+
+# beaconlight
+beaconlight_enabled: true
+beaconlight_container_name: beaconlight
+beaconlight_container_image: pk910/light-beaconchain-explorer:latest
+beaconlight_container_env: {}
+beaconlight_container_ports: []
+beaconlight_container_volumes:
+  - "{{ beaconlight_datadir }}/explorer:/config"
+beaconlight_container_stop_timeout: "600"
+beaconlight_container_pull: true
+beaconlight_container_networks: "{{ beaconlight_docker_networks }}"
+beaconlight_container_command: -config=/config/explorer.yaml
+
+# beaconlight-database
+beaconlight_db_enabled: true
+beaconlight_db_datadir: "{{ beaconlight_datadir }}/database"
+beaconlight_db_container_name: beaconlight-database
+beaconlight_db_container_image: bitnami/postgresql:15
+beaconlight_db_container_env:
+  POSTGRESQL_USERNAME: postgres
+  POSTGRESQL_PASSWORD: postgres
+  POSTGRESQL_DATABASE: beaconlight
+beaconlight_db_custom_postgres_config: |
+  max_connections = 1024
+beaconlight_db_container_ports: []
+beaconlight_db_container_volumes:
+  - "{{ beaconlight_db_datadir }}/db:/bitnami/postgresql"
+  - "{{ beaconlight_db_datadir }}/conf.d://opt/bitnami/postgresql/conf/conf.d:ro"
+beaconlight_db_container_stop_timeout: "300"
+beaconlight_db_container_pull: false
+beaconlight_db_container_networks: "{{ beaconlight_docker_networks }}"
+
+beaconlight_config: |
+  # Chain network configuration
+  chain:
+    name: "{{ beaconlight_chain_name }}"
+    genesisTimestamp: {{ beaconlight_chain_genesistime }}
+    configPath: "{{ beaconlight_chain_config }}"
+    displayName: "{{ beaconlight_chain_displayname }}"
+
+  # HTTP Server configuration
+  server:
+    host: "0.0.0.0" # Address to listen on
+    port: "8080" # Port to listen on
+
+  frontend:
+    enabled: true # Enable or disable to web frontend
+    debug: false
+    minimize: false # minimize html templates
+
+    # Name of the site, displayed in the title tag
+    siteName: "{{ beaconlight_frontend_title }}"
+    siteSubtitle: "{{ beaconlight_frontend_subtitle }}"
+
+    # link to EL Explorer
+    ethExplorerLink: "{{ beaconlight_frontend_ethexplorer }}"
+
+    # file or inventory url to load validator names from
+    validatorNamesYaml: "{{ beaconlight_frontend_validatornames }}"
+    validatorNamesInventory: "{{ beaconlight_frontend_validatornames_inventory }}"
+
+  beaconapi:
+    # CL Client RPC
+    endpoint: "{{ beaconlight_beaconapi_endpoint }}"
+
+    # local cache for page models
+    localCacheSize: 100 # 100MB
+
+    # remote cache for page models
+    redisCacheAddr: ""
+    redisCachePrefix: ""
+
+  # indexer keeps track of the latest epochs in memory.
+  indexer:
+    # number of epochs to load on startup
+    prepopulateEpochs: 2
+
+    # max number of epochs to keep in memory
+    inMemoryEpochs: 10
+
+    # epoch processing delay (should be >= 2)
+    epochProcessingDelay: 2
+
+    # disable synchronizing and everything that writes to the db (indexer just maintains local cache)
+    disableIndexWriter: false
+
+    # number of seconds to wait between each epoch (don't overload CL client)
+    syncEpochCooldown: 1
+
+  database:
+    engine: "pgsql"
+    pgsql:
+      host: "beaconlight-database"
+      port: 5432
+      user: "postgres"
+      password: "postgres"
+      name: "beaconlight"

@@ -1,0 +1,77 @@
+- name: Add beaconlight user
+  ansible.builtin.user:
+    name: "{{ beaconlight_user }}"
+  register: beaconlight_user_meta
+
+- name: Setup docker network
+  ansible.builtin.include_role:
+    name: ethpandaops.general.docker_network
+  vars:
+    docker_network_name: "{{ beaconlight_docker_network_name }}"
+
+- name: Create directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0750"
+    owner: "{{ beaconlight_user }}"
+    group: "{{ beaconlight_user }}"
+  loop:
+    - "{{ beaconlight_datadir }}"
+    - "{{ beaconlight_datadir }}/explorer"
+    - "{{ beaconlight_db_datadir }}/conf.d"
+    - "{{ beaconlight_db_datadir }}/db"
+
+- name: Copy custom postgres config
+  ansible.builtin.copy:
+    content: "{{ beaconlight_db_custom_postgres_config }}"
+    dest: "{{ beaconlight_db_datadir }}/conf.d/custom.conf"
+    owner: "{{ beaconlight_user }}"
+    group: "{{ beaconlight_user }}"
+    mode: '0664'
+
+- name: Setup beaconlight database container
+  community.docker.docker_container:
+    name: "{{ beaconlight_db_container_name }}"
+    image: "{{ beaconlight_db_container_image }}"
+    state: '{{ beaconlight_db_enabled | ternary("started", "absent") }}'
+    restart_policy: always
+    stop_timeout: "{{ beaconlight_db_container_stop_timeout }}"
+    ports: "{{ beaconlight_db_container_ports }}"
+    volumes: "{{ beaconlight_db_container_volumes }}"
+    env: "{{ beaconlight_db_container_env }}"
+    networks: "{{ beaconlight_db_container_networks }}"
+    pull: "{{ beaconlight_db_container_pull | bool }}"
+    user: "{{ beaconlight_user_meta.uid }}"
+
+- name: Create explorer config file
+  ansible.builtin.copy:
+    content: "{{ beaconlight_config }}"
+    dest: "{{ beaconlight_datadir }}/explorer/explorer.yaml"
+    owner: "{{ beaconlight_user }}"
+    group: "{{ beaconlight_user }}"
+    mode: '0640'
+
+- name: Create custom config files
+  ansible.builtin.copy:
+    content: "{{ item.value }}"
+    dest: "{{ beaconlight_datadir }}/explorer/{{ item.key }}"
+    owner: "{{ beaconlight_user }}"
+    group: "{{ beaconlight_user }}"
+    mode: '0640'
+  loop: "{{ beaconlight_extra_config_files | dict2items }}"
+
+- name: Setup beaconlight
+  community.docker.docker_container:
+    name: "{{ beaconlight_container_name }}"
+    image: "{{ beaconlight_container_image }}"
+    state: 'started'
+    restart_policy: always
+    stop_timeout: "{{ beaconlight_container_stop_timeout }}"
+    ports: "{{ beaconlight_container_ports }}"
+    volumes: "{{ beaconlight_container_volumes }}"
+    env: "{{ beaconlight_container_env }}"
+    networks: "{{ beaconlight_container_networks }}"
+    pull: "{{ beaconlight_container_pull | bool }}"
+    user: "{{ beaconlight_user_meta.uid }}"
+    command: "{{ beaconlight_container_command }}"

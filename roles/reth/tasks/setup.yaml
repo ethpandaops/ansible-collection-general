@@ -1,0 +1,32 @@
+- name: Add reth user
+  ansible.builtin.user:
+    name: "{{ reth_user }}"
+  register: reth_user_meta
+
+- name: Create data dir
+  ansible.builtin.file:
+    path: "{{ reth_datadir }}"
+    state: directory
+    mode: "0750"
+    owner: "{{ reth_user }}"
+    group: "{{ reth_user }}"
+
+- name: Set permissions
+  ansible.builtin.command: "chown -R {{ reth_user }}:{{ reth_user }} {{ reth_datadir }}" # noqa no-free-form
+  changed_when: false
+
+- name: Run reth container
+  community.docker.docker_container:
+    name: "{{ reth_container_name }}"
+    image: "{{ reth_container_image }}"
+    state: started
+    restart_policy: always
+    stop_timeout: "{{ reth_container_stop_timeout }}"
+    ports: "{{ reth_container_ports }}"
+    volumes: "{{ reth_container_volumes }}"
+    env: "{{ reth_container_env }}"
+    networks: "{{ reth_container_networks }}"
+    command: "{{ reth_container_command + reth_container_command_extra_args }}"
+    user: "{{ reth_user_meta.uid }}"
+    pull: "{{ reth_container_pull | bool }}"
+    security_opts: "{{ reth_container_security_opts }}"
