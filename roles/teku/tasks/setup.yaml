@@ -34,8 +34,12 @@
   when: teku_validator_enabled
 
 - name: Debug teku_checkpoint_sync_enabled
-  debug:
+  ansible.builtin.debug:
     var: teku_checkpoint_sync_enabled
+
+- name: Debug teku_checkpoint_sync_url
+  ansible.builtin.debug:
+    var: checkpoint_sync_url
 
 - name: Run teku container
   community.docker.docker_container:
