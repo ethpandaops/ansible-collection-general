@@ -33,14 +33,6 @@
   changed_when: false
   when: teku_validator_enabled
 
-- name: Debug teku_checkpoint_sync_enabled
-  ansible.builtin.debug:
-    var: teku_checkpoint_sync_enabled
-
-- name: Debug teku_checkpoint_sync_url
-  ansible.builtin.debug:
-    var: checkpoint_sync_url
-
 - name: Run teku container
   community.docker.docker_container:
     name: "{{ teku_container_name }}"
@@ -57,9 +49,7 @@
         teku_container_command +
         (teku_validator_enabled | ternary(teku_container_validator_args, [])) +
         (teku_checkpoint_sync_enabled | ternary(
-          teku_container_command_extra_args | replace(
-            "--initial-state=/network-config/genesis.ssz", teku_container_command_checkpoint_args
-          ),
+          teku_container_command_extra_args | map('regex_replace',"--initial-state=.*",teku_container_command_checkpoint_args),
           teku_container_command_extra_args
         ))
       }}
