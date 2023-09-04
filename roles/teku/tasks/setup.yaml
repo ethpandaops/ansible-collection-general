@@ -33,6 +33,10 @@
   changed_when: false
   when: teku_validator_enabled
 
+- name: Debug teku_checkpoint_sync_enabled
+  debug:
+    var: teku_checkpoint_sync_enabled
+
 - name: Run teku container
   community.docker.docker_container:
     name: "{{ teku_container_name }}"
