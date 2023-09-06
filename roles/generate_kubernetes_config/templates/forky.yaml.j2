@@ -38,7 +38,7 @@ forky:
           spec:
             seconds_per_slot: 12
             slots_per_epoch: 32
-            genesis_time: {{ ethereum_genesis_timestamp + ethereum_genesis_timedelay }}
+            genesis_time: {{ ethereum_genesis_timestamp | int + ethereum_genesis_timedelay | int }}
       sources:
 {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
         - name: {{ hostvars[host]['inventory_hostname'] }}
