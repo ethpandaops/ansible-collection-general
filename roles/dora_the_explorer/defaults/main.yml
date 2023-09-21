@@ -46,7 +46,7 @@ dora_the_explorer_container_command: -config=/config/explorer.yaml
 # dora_the_explorer-database
 dora_the_explorer_db_enabled: true
 dora_the_explorer_db_datadir: "{{ dora_the_explorer_datadir }}/database"
-dora_the_explorer_db_container_name: dora_the_explorer-database
+dora_the_explorer_db_container_name: dora-the-explorer-database
 dora_the_explorer_db_container_image: bitnami/postgresql:15
 dora_the_explorer_db_container_env:
   POSTGRESQL_USERNAME: postgres
@@ -116,7 +116,7 @@ dora_the_explorer_config: |
   database:
     engine: "pgsql"
     pgsql:
-      host: "dora_the_explorer-database"
+      host: "dora-the-explorer-database"
       port: 5432
       user: "postgres"
       password: "postgres"
