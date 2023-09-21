@@ -1,0 +1,77 @@
+- name: Add dora-the-explorer user
+  ansible.builtin.user:
+    name: "{{ dora_the_explorer_user }}"
+  register: dora_the_explorer_user_meta
+
+- name: Setup docker network
+  ansible.builtin.include_role:
+    name: ethpandaops.general.docker_network
+  vars:
+    docker_network_name: "{{ dora_the_explorer_docker_network_name }}"
+
+- name: Create directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0750"
+    owner: "{{ dora_the_explorer_user }}"
+    group: "{{ dora_the_explorer_user }}"
+  loop:
+    - "{{ dora_the_explorer_datadir }}"
+    - "{{ dora_the_explorer_datadir }}/explorer"
+    - "{{ dora_the_explorer_db_datadir }}/conf.d"
+    - "{{ dora_the_explorer_db_datadir }}/db"
+
+- name: Copy custom postgres config
+  ansible.builtin.copy:
+    content: "{{ dora_the_explorer_db_custom_postgres_config }}"
+    dest: "{{ dora_the_explorer_db_datadir }}/conf.d/custom.conf"
+    owner: "{{ dora_the_explorer_user }}"
+    group: "{{ dora_the_explorer_user }}"
+    mode: '0664'
+
+- name: Setup dora-the-explorer database container
+  community.docker.docker_container:
+    name: "{{ dora_the_explorer_db_container_name }}"
+    image: "{{ dora_the_explorer_db_container_image }}"
+    state: '{{ dora_the_explorer_db_enabled | ternary("started", "absent") }}'
+    restart_policy: always
+    stop_timeout: "{{ dora_the_explorer_db_container_stop_timeout }}"
+    ports: "{{ dora_the_explorer_db_container_ports }}"
+    volumes: "{{ dora_the_explorer_db_container_volumes }}"
+    env: "{{ dora_the_explorer_db_container_env }}"
+    networks: "{{ dora_the_explorer_db_container_networks }}"
+    pull: "{{ dora_the_explorer_db_container_pull | bool }}"
+    user: "{{ dora_the_explorer_user_meta.uid }}"
+
+- name: Create dora-the-explorer config file
+  ansible.builtin.copy:
+    content: "{{ dora_the_explorer_config }}"
+    dest: "{{ dora_the_explorer_datadir }}/explorer/explorer.yaml"
+    owner: "{{ dora_the_explorer_user }}"
+    group: "{{ dora_the_explorer_user }}"
+    mode: '0640'
+
+- name: Create custom config files
+  ansible.builtin.copy:
+    content: "{{ item.value }}"
+    dest: "{{ dora_the_explorer_datadir }}/explorer/{{ item.key }}"
+    owner: "{{ dora_the_explorer_user }}"
+    group: "{{ dora_the_explorer_user }}"
+    mode: '0640'
+  loop: "{{ dora_the_explorer_extra_config_files | dict2items }}"
+
+- name: Setup dora-the-explorer
+  community.docker.docker_container:
+    name: "{{ dora_the_explorer_container_name }}"
+    image: "{{ dora_the_explorer_container_image }}"
+    state: 'started'
+    restart_policy: always
+    stop_timeout: "{{ dora_the_explorer_container_stop_timeout }}"
+    ports: "{{ dora_the_explorer_container_ports }}"
+    volumes: "{{ dora_the_explorer_container_volumes }}"
+    env: "{{ dora_the_explorer_container_env }}"
+    networks: "{{ dora_the_explorer_container_networks }}"
+    pull: "{{ dora_the_explorer_container_pull | bool }}"
+    user: "{{ dora_the_explorer_user_meta.uid }}"
+    command: "{{ dora_the_explorer_container_command }}"
