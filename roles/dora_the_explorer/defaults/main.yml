@@ -16,7 +16,7 @@ dora_the_explorer_chain_name: sepolia
 dora_the_explorer_chain_displayname: ""
 dora_the_explorer_chain_config: ""
 dora_the_explorer_chain_genesistime: 0
-dora_the_explorer_frontend_title: "Beaconchain Light"
+dora_the_explorer_frontend_title: "Dora the Explorer"
 dora_the_explorer_frontend_subtitle: "Testnet"
 dora_the_explorer_frontend_ethexplorer: ""
 dora_the_explorer_frontend_validatornames: ""
