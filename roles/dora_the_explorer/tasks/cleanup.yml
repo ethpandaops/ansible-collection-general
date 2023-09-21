@@ -1,0 +1,15 @@
+- name: Stop dora-the-explorer containers
+  community.docker.docker_container:
+    name: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ dora_the_explorer_container_name }}"
+    - "{{ dora_the_explorer_db_container_name }}"
+
+- name: Delete data directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ dora_the_explorer_db_datadir }}"
+    - "{{ dora_the_explorer_datadir }}"

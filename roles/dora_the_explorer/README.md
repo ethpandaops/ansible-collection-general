@@ -1,6 +1,6 @@
-# ethpandaops.general.beaconlight_explorer
+# ethpandaops.general.dora_the_explorer_explorer
 
-Setup [light-beaconchain-explorer](https://github.com/pk910/light-beaconchain-explorer) and all required dependencies all in one server.
+Setup [dora-the-explorer](https://github.com/pk910/dora-the-explorer) and all required dependencies all in one server.
 
 ## Requirements
 
@@ -27,7 +27,7 @@ roles:
 Your playbook could look like this:
 
 ```yaml
-- hosts: beaconlight
+- hosts: dora
   become: true
   roles:
   # Docker. Required dependency
@@ -37,7 +37,7 @@ Your playbook could look like this:
     pip_install_packages:
     - name: docker
     tags: [docker]
-  # light-beaconchain-explorer
-  - role: beaconlight_explorer
-    tags: [beaconlight]
+  # dora-the-explorer
+  - role: dora_the_explorer
+    tags: [dora]
 ```

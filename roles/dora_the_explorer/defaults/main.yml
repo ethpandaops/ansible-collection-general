@@ -1,0 +1,123 @@
+---
+
+# Set this to true if you want to stop everything and wipe the databases
+dora_the_explorer_cleanup_all: false
+
+
+dora_the_explorer_user: dora_the_explorer
+dora_the_explorer_datadir: "/data/dora_the_explorer"
+dora_the_explorer_docker_network_name: shared
+dora_the_explorer_docker_networks:
+  - name: "{{ dora_the_explorer_docker_network_name }}"
+
+# explorer config
+dora_the_explorer_beaconapi_endpoint: "http://your-cl-node:5052"
+dora_the_explorer_chain_name: sepolia
+dora_the_explorer_chain_displayname: ""
+dora_the_explorer_chain_config: ""
+dora_the_explorer_chain_genesistime: 0
+dora_the_explorer_frontend_title: "Dora the Explorer"
+dora_the_explorer_frontend_subtitle: "Testnet"
+dora_the_explorer_frontend_ethexplorer: ""
+dora_the_explorer_frontend_validatornames: ""
+dora_the_explorer_frontend_validatornames_inventory: ""
+
+# This can be used to create additional config files for the beaconchain explorer.
+# It's useful when using private testnets and you need to mount a custom network config
+# as the chain config. All files will be available within the explorer containers on the
+# /config directory.
+dora_the_explorer_extra_config_files: {}
+
+# ------------------------------------------------------------------
+
+# dora_the_explorer
+dora_the_explorer_enabled: true
+dora_the_explorer_container_name: dora-the-explorer
+dora_the_explorer_container_image: pk910/dora-the-explorer:latest
+dora_the_explorer_container_env: {}
+dora_the_explorer_container_ports: []
+dora_the_explorer_container_volumes:
+  - "{{ dora_the_explorer_datadir }}/explorer:/config"
+dora_the_explorer_container_stop_timeout: "600"
+dora_the_explorer_container_pull: true
+dora_the_explorer_container_networks: "{{ dora_the_explorer_docker_networks }}"
+dora_the_explorer_container_command: -config=/config/explorer.yaml
+
+# dora_the_explorer-database
+dora_the_explorer_db_enabled: true
+dora_the_explorer_db_datadir: "{{ dora_the_explorer_datadir }}/database"
+dora_the_explorer_db_container_name: dora-the-explorer-database
+dora_the_explorer_db_container_image: bitnami/postgresql:15
+dora_the_explorer_db_container_env:
+  POSTGRESQL_USERNAME: postgres
+  POSTGRESQL_PASSWORD: postgres
+  POSTGRESQL_DATABASE: dora_the_explorer
+dora_the_explorer_db_custom_postgres_config: |
+  max_connections = 1024
+dora_the_explorer_db_container_ports: []
+dora_the_explorer_db_container_volumes:
+  - "{{ dora_the_explorer_db_datadir }}/db:/bitnami/postgresql"
+  - "{{ dora_the_explorer_db_datadir }}/conf.d://opt/bitnami/postgresql/conf/conf.d:ro"
+dora_the_explorer_db_container_stop_timeout: "300"
+dora_the_explorer_db_container_pull: false
+dora_the_explorer_db_container_networks: "{{ dora_the_explorer_docker_networks }}"
+
+dora_the_explorer_config: |
+  # Chain network configuration
+  chain:
+    name: "{{ dora_the_explorer_chain_name }}"
+    genesisTimestamp: {{ dora_the_explorer_chain_genesistime }}
+    configPath: "{{ dora_the_explorer_chain_config }}"
+    displayName: "{{ dora_the_explorer_chain_displayname }}"
+
+  # HTTP Server configuration
+  server:
+    host: "0.0.0.0" # Address to listen on
+    port: "8080" # Port to listen on
+
+  frontend:
+    enabled: true # Enable or disable to web frontend
+    debug: false
+    minimize: false # minimize html templates
+
+    # Name of the site, displayed in the title tag
+    siteName: "{{ dora_the_explorer_frontend_title }}"
+    siteSubtitle: "{{ dora_the_explorer_frontend_subtitle }}"
+
+    # link to EL Explorer
+    ethExplorerLink: "{{ dora_the_explorer_frontend_ethexplorer }}"
+
+    # file or inventory url to load validator names from
+    validatorNamesYaml: "{{ dora_the_explorer_frontend_validatornames }}"
+    validatorNamesInventory: "{{ dora_the_explorer_frontend_validatornames_inventory }}"
+
+  beaconapi:
+    # CL Client RPC
+    endpoint: "{{ dora_the_explorer_beaconapi_endpoint }}"
+
+    # local cache for page models
+    localCacheSize: 100 # 100MB
+
+    # remote cache for page models
+    redisCacheAddr: ""
+    redisCachePrefix: ""
+
+  # indexer keeps track of the latest epochs in memory.
+  indexer:
+    # max number of epochs to keep in memory
+    inMemoryEpochs: 10
+
+    # disable synchronizing and everything that writes to the db (indexer just maintains local cache)
+    disableIndexWriter: false
+
+    # number of seconds to wait between each epoch (don't overload CL client)
+    syncEpochCooldown: 1
+
+  database:
+    engine: "pgsql"
+    pgsql:
+      host: "dora-the-explorer-database"
+      port: 5432
+      user: "postgres"
+      password: "postgres"
+      name: "dora_the_explorer"
