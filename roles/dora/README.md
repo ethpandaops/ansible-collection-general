@@ -1,6 +1,6 @@
-# ethpandaops.general.dora_the_explorer_explorer
+# ethpandaops.general.dora
 
-Setup [dora-the-explorer](https://github.com/pk910/dora-the-explorer) and all required dependencies all in one server.
+Setup [dora](https://github.com/pk910/dora) and all required dependencies all in one server.
 
 ## Requirements
 
@@ -37,7 +37,7 @@ Your playbook could look like this:
     pip_install_packages:
     - name: docker
     tags: [docker]
-  # dora-the-explorer
-  - role: dora_the_explorer
+  # dora
+  - role: dora
     tags: [dora]
 ```

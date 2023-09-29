@@ -1,7 +1,0 @@
-- name: Setup dora-the-explorer
-  ansible.builtin.import_tasks: setup.yml
-  when: not dora_the_explorer_cleanup_all
-
-- name: Cleanup dora-the-explorer
-  ansible.builtin.import_tasks: cleanup.yml
-  when: dora_the_explorer_cleanup_all
