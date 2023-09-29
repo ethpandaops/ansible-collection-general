@@ -3,8 +3,8 @@
 dora:
   fullnameOverride: dora
   image:
-    repository: {{ default_tooling_images.light_beaconchain_explorer.split(':') | first }}
-    tag: {{ default_tooling_images.light_beaconchain_explorer.split(':') | last }}
+    repository: {{ default_tooling_images.dora.split(':') | first }}
+    tag: {{ default_tooling_images.dora.split(':') | last }}
     pullPolicy: Always
   ingress:
     enabled: true
