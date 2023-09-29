@@ -30,7 +30,7 @@
     group: "{{ dora_user }}"
     mode: '0664'
 
-- name: Setup dora-the-explorer database container
+- name: Setup dora database container
   community.docker.docker_container:
     name: "{{ dora_db_container_name }}"
     image: "{{ dora_db_container_image }}"
@@ -44,7 +44,7 @@
     pull: "{{ dora_db_container_pull | bool }}"
     user: "{{ dora_user_meta.uid }}"
 
-- name: Create dora-the-explorer config file
+- name: Create dora config file
   ansible.builtin.copy:
     content: "{{ dora_config }}"
     dest: "{{ dora_datadir }}/explorer/explorer.yaml"
@@ -61,7 +61,7 @@
     mode: '0640'
   loop: "{{ dora_extra_config_files | dict2items }}"
 
-- name: Setup dora-the-explorer
+- name: Setup dora
   community.docker.docker_container:
     name: "{{ dora_container_name }}"
     image: "{{ dora_container_image }}"
