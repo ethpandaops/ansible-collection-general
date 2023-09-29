@@ -1,7 +1,7 @@
 # {{ ansible_managed }}
 
-light-beaconchain-explorer:
-  fullnameOverride: light-beaconchain-explorer
+dora:
+  fullnameOverride: dora
   image:
     repository: {{ default_tooling_images.light_beaconchain_explorer.split(':') | first }}
     tag: {{ default_tooling_images.light_beaconchain_explorer.split(':') | last }}
@@ -10,7 +10,7 @@ light-beaconchain-explorer:
     enabled: true
     className: ingress-nginx-public
     hosts:
-      - host: light-beaconchain-explorer.{{ network_subdomain }}
+      - host: dora.{{ network_subdomain }}
         paths:
           - path: /
             pathType: Prefix
@@ -20,8 +20,8 @@ light-beaconchain-explorer:
   validatorNamesInventory: "https://config.{{ network_subdomain }}/api/v1/nodes/validator-ranges"
 
   postgresql:
-    name: "light-beaconchain-explorer-postgresql"
-    fullnameOverride: "light-beaconchain-explorer-postgresql"
+    name: "dora-postgresql"
+    fullnameOverride: "dora-postgresql"
   
   endpoints:
   # Rpc

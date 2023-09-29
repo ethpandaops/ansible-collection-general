@@ -83,10 +83,10 @@ gen_kubernetes_config_helm_charts:
       - name: forkmon
         repository: https://ethpandaops.github.io/ethereum-helm-charts
         version: 0.1.4
-  light-beaconchain-explorer:
-    valuesTemplatePath: templates/light-beaconchain-explorer.yaml.j2
+  dora:
+    valuesTemplatePath: templates/dora.yaml.j2
     dependencies:
-      - name: light-beaconchain-explorer
+      - name: dora
         repository: https://ethpandaops.github.io/ethereum-helm-charts
         version: 0.0.1
   forky:
