@@ -1,0 +1,46 @@
+- name: Converge
+  hosts: all
+  become: true
+  pre_tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+  tasks:
+    - name: Setup
+      block:
+        - name: Install docker
+          ansible.builtin.import_role:
+            name: geerlingguy.docker
+        - name: Install pip and docker pkg
+          ansible.builtin.import_role:
+            name: geerlingguy.pip
+          vars:
+            pip_install_packages:
+              - name: docker
+        - name: Run ethereum node
+          ansible.builtin.import_role:
+            name: ethereum_node
+      always:
+        - name: Get CL client logs
+          ansible.builtin.command:
+            cmd: docker logs {{ vars[ethereum_node_cl + '_container_name'] | default(ethereum_node_cl) }}
+          changed_when: false
+          register: cl_logs
+        - name: Show CL client logs
+          ansible.builtin.debug:
+            var: "{{ item }}"
+          loop:
+            - cl_logs.stdout
+            - cl_logs.stderr
+        - name: Get EL client logs
+          ansible.builtin.command:
+            cmd: docker logs {{ vars[ethereum_node_el + '_container_name'] | default(ethereum_node_el) }}
+          changed_when: false
+          register: el_logs
+        - name: Show EL client logs
+          ansible.builtin.debug:
+            var: "{{ item }}"
+          loop:
+            - el_logs.stdout
+            - el_logs.stderr

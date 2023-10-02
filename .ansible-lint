@@ -1,0 +1,10 @@
+profile: production
+
+exclude_paths:
+  - .github/
+  - vendor/
+  - roles/generate_kubernetes_config/files/ingress.config.yaml
+
+skip_list:
+  - galaxy[no-changelog]
+  - galaxy[no-runtime]

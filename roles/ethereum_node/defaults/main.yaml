@@ -1,9 +1,10 @@
 ethereum_node_docker_network_name: shared
 ethereum_node_skip_cleanup: false
 ethereum_node_images_always_pull: false
+ethereum_node_announced_ip: "{{ ansible_host }}"
 
 # Execution layer client
-ethereum_node_el: ethereumjs # Valid options: besu, geth, erigon, nethermind
+ethereum_node_el: geth # Valid options: besu, geth, erigon, nethermind, ethereumjs, reth
 ethereum_node_el_enabled: true
 ethereum_node_el_ports_p2p_tcp: 30303
 ethereum_node_el_ports_p2p_udp: 30303
@@ -18,6 +19,7 @@ ethereum_node_cl_ports_p2p_tcp: 9000
 ethereum_node_cl_ports_p2p_udp: 9000
 ethereum_node_cl_ports_http_beacon: 5052
 ethereum_node_cl_ports_metrics: 5054
+ethereum_node_cl_checkpoint_sync_enabled: false
 
 # Validator
 ethereum_node_cl_validator_enabled: false
@@ -48,8 +50,13 @@ ethereum_node_metrics_exporter_enabled: false
 ethereum_node_xatu_sentry_enabled: false
 
 # Generated RPC/Engine/Beacon endpoints
-ethereum_node_el_engine_endpoint: "http://{{ ethereum_node_el }}:{{ ethereum_node_el_ports_engine }}"
-ethereum_node_el_engine_snooper_endpoint: "http://{{ ethereum_node_json_rpc_snooper_engine_name }}:{{ ethereum_node_json_rpc_snooper_engine_port }}"
-ethereum_node_el_rpc_endpoint: "http://{{ ethereum_node_el }}:{{ ethereum_node_el_ports_http_rpc }}"
-ethereum_node_el_rpc_snooper_endpoint: "http://{{ ethereum_node_json_rpc_snooper_name }}:{{ ethereum_node_json_rpc_snooper_port }}"
-ethereum_node_cl_beacon_endpoint: "http://{{ ethereum_node_cl }}:{{ ethereum_node_cl_ports_http_beacon }}"
+ethereum_node_el_engine_endpoint: >-
+  http://{{ vars[ethereum_node_el + '_container_name'] | default(ethereum_node_el) }}:{{ ethereum_node_el_ports_engine }}
+ethereum_node_el_engine_snooper_endpoint: >-
+  http://{{ ethereum_node_json_rpc_snooper_engine_name }}:{{ ethereum_node_json_rpc_snooper_engine_port }}
+ethereum_node_el_rpc_endpoint: >-
+  http://{{ vars[ethereum_node_el + '_container_name'] | default(ethereum_node_el) }}:{{ ethereum_node_el_ports_http_rpc }}
+ethereum_node_el_rpc_snooper_endpoint: >-
+  http://{{ ethereum_node_json_rpc_snooper_name }}:{{ ethereum_node_json_rpc_snooper_port }}
+ethereum_node_cl_beacon_endpoint: >-
+  http://{{ vars[ethereum_node_cl + '_container_name'] | default(ethereum_node_cl) }}:{{ ethereum_node_cl_ports_http_beacon }}

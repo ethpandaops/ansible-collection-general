@@ -1,0 +1,64 @@
+# {{ ansible_managed }}
+
+blobscan:
+  fullnameOverride: blobscan
+  image:
+    repository: {{ default_tooling_images.blobscan.split(':') | first }}
+    tag: {{ default_tooling_images.blobscan.split(':') | last }}
+    pullPolicy: Always
+  ingress:
+    enabled: true
+    className: ingress-nginx-public
+    hosts:
+      - host: blobscan.{{ network_subdomain }}
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: blobscan
+                port:
+                  number: 3000
+  config:
+    NEXTAUTH_URL: https://blobscan.{{ network_subdomain }}
+    NEXT_PUBLIC_NETWORK_NAME: {{ ethereum_network_name }}
+    NEXT_PUBLIC_BEACON_BASE_URL: https://dora.{{ network_subdomain }}
+    NEXT_PUBLIC_EXPLORER_BASE_URL: https://explorer.{{ network_subdomain }}
+    BEACON_NODE_ENDPOINT: {{ default_cl_endpoint }}
+    CHAIN_ID: "{{ ethereum_genesis_chain_id }}"
+  blobscandb:
+    fullnameOverride: blobscan-blobscandb
+
+blobscan-indexer:
+  fullnameOverride: blobscan-indexer
+  image:
+    repository: {{ default_tooling_images.blobscan_indexer.split(':') | first }}
+    tag: {{ default_tooling_images.blobscan_indexer.split(':') | last }}
+    pullPolicy: Always
+  config:
+    EXECUTION_NODE_ENDPOINT: {{ default_el_endpoint }}
+    BEACON_NODE_ENDPOINT: {{ default_cl_endpoint }}
+
+# Blobscan API
+blobscan-api:
+  fullnameOverride: blobscan-api
+  image:
+    repository: {{ default_tooling_images.blobscan.split(':') | first }}
+    tag: {{ default_tooling_images.blobscan.split(':') | last }}
+    pullPolicy: Always
+  config:
+    BEACON_NODE_ENDPOINT: {{ default_cl_endpoint }}
+    CHAIN_ID: "{{ ethereum_genesis_chain_id }}"
+  ingress:
+    enabled: true
+    className: ingress-nginx-public
+    hosts:
+      - host: blobscan-api.{{ network_subdomain }}
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: blobscan-api
+                port:
+                  number: 3001

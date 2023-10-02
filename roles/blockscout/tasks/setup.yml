@@ -1,0 +1,118 @@
+- name: Add blockscout user
+  ansible.builtin.user:
+    name: "{{ blockscout_user }}"
+  register: blockscout_user_meta
+
+- name: Setup docker network
+  ansible.builtin.include_role:
+    name: ethpandaops.general.docker_network
+  vars:
+    docker_network_name: "{{ blockscout_docker_network_name }}"
+
+- name: Create directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0750"
+    owner: "{{ blockscout_user }}"
+    group: "{{ blockscout_user }}"
+  loop:
+    - "{{ blockscout_datadir }}"
+    - "{{ blockscout_db_datadir }}/conf.d"
+    - "{{ blockscout_db_datadir }}/db"
+    - "{{ blockscout_cache_datadir }}"
+
+- name: Copy custom postgres config
+  ansible.builtin.copy:
+    content: "{{ blockscout_db_custom_postgres_config }}"
+    dest: "{{ blockscout_db_datadir }}/conf.d/custom.conf"
+    owner: "{{ blockscout_user }}"
+    group: "{{ blockscout_user }}"
+    mode: '0664'
+
+- name: Setup blockscout database container
+  community.docker.docker_container:
+    name: "{{ blockscout_db_container_name }}"
+    image: "{{ blockscout_db_container_image }}"
+    state: '{{ blockscout_db_enabled | ternary("started", "absent") }}'
+    restart_policy: always
+    stop_timeout: "{{ blockscout_db_container_stop_timeout }}"
+    ports: "{{ blockscout_db_container_ports }}"
+    volumes: "{{ blockscout_db_container_volumes }}"
+    env: "{{ blockscout_db_container_env }}"
+    networks: "{{ blockscout_db_container_networks }}"
+    pull: "{{ blockscout_db_container_pull | bool }}"
+    user: "{{ blockscout_user_meta.uid }}"
+
+- name: Setup blockscout cache container
+  community.docker.docker_container:
+    name: "{{ blockscout_cache_container_name }}"
+    image: "{{ blockscout_cache_container_image }}"
+    state: '{{ blockscout_cache_enabled | ternary("started", "absent") }}'
+    restart_policy: always
+    stop_timeout: "{{ blockscout_cache_container_stop_timeout }}"
+    ports: "{{ blockscout_cache_container_ports }}"
+    volumes: "{{ blockscout_cache_container_volumes }}"
+    env: "{{ blockscout_cache_container_env }}"
+    networks: "{{ blockscout_cache_container_networks }}"
+    pull: "{{ blockscout_cache_container_pull | bool }}"
+    user: "{{ blockscout_user_meta.uid }}"
+
+- name: Setup blockscout smart-contract-verifier
+  community.docker.docker_container:
+    name: "{{ blockscout_smart_contract_verifier_container_name }}"
+    image: "{{ blockscout_smart_contract_verifier_container_image }}"
+    state: '{{ blockscout_smart_contract_verifier_enabled | ternary("started", "absent") }}'
+    restart_policy: always
+    stop_timeout: "{{ blockscout_smart_contract_verifier_container_stop_timeout }}"
+    ports: "{{ blockscout_smart_contract_verifier_container_ports }}"
+    volumes: "{{ blockscout_smart_contract_verifier_container_volumes }}"
+    env: "{{ blockscout_smart_contract_verifier_container_env }}"
+    networks: "{{ blockscout_smart_contract_verifier_container_networks }}"
+    pull: "{{ blockscout_smart_contract_verifier_container_pull | bool }}"
+    user: "{{ blockscout_user_meta.uid }}"
+
+- name: Setup blockscout sig-provider
+  community.docker.docker_container:
+    name: "{{ blockscout_sig_provider_container_name }}"
+    image: "{{ blockscout_sig_provider_container_image }}"
+    state: '{{ blockscout_sig_provider_enabled | ternary("started", "absent") }}'
+    restart_policy: always
+    stop_timeout: "{{ blockscout_sig_provider_container_stop_timeout }}"
+    ports: "{{ blockscout_sig_provider_container_ports }}"
+    volumes: "{{ blockscout_sig_provider_container_volumes }}"
+    env: "{{ blockscout_sig_provider_container_env }}"
+    networks: "{{ blockscout_sig_provider_container_networks }}"
+    pull: "{{ blockscout_sig_provider_container_pull | bool }}"
+    user: "{{ blockscout_user_meta.uid }}"
+
+- name: Setup blockscout visualizer
+  community.docker.docker_container:
+    name: "{{ blockscout_visualizer_container_name }}"
+    image: "{{ blockscout_visualizer_container_image }}"
+    state: '{{ blockscout_visualizer_enabled | ternary("started", "absent") }}'
+    restart_policy: always
+    stop_timeout: "{{ blockscout_visualizer_container_stop_timeout }}"
+    ports: "{{ blockscout_visualizer_container_ports }}"
+    volumes: "{{ blockscout_visualizer_container_volumes }}"
+    env: "{{ blockscout_visualizer_container_env }}"
+    networks: "{{ blockscout_visualizer_container_networks }}"
+    pull: "{{ blockscout_visualizer_container_pull | bool }}"
+    user: "{{ blockscout_user_meta.uid }}"
+
+- name: Setup blockscout
+  community.docker.docker_container:
+    name: "{{ blockscout_container_name }}"
+    image: "{{ blockscout_container_image }}"
+    state: 'started'
+    restart_policy: always
+    stop_timeout: "{{ blockscout_container_stop_timeout }}"
+    ports: "{{ blockscout_container_ports }}"
+    volumes: "{{ blockscout_container_volumes }}"
+    env: "{{ blockscout_container_env }}"
+    networks: "{{ blockscout_container_networks }}"
+    pull: "{{ blockscout_container_pull | bool }}"
+    # user: "{{ blockscout_user_meta.uid }}"
+    # commented out because we can't run as "blockscout" user due to:
+    #   ** (File.Error) could not write to file "/app/lib/tzdata-1.1.1/priv/latest_remote_poll.txt": permission denied
+    entrypoint: "{{ blockscout_container_entrypoint }}"

@@ -1,0 +1,12 @@
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Get infos on EL container
+      community.docker.docker_container_info:
+        name: "blockscout"
+      register: result_blockscout
+    - name: Show infos
+      ansible.builtin.debug:
+        var: "{{ item }}"
+      loop:
+        - result_blockscout

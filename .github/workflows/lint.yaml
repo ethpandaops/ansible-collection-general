@@ -1,0 +1,33 @@
+name: Lint
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+env:
+  PY_COLORS: '1'
+
+defaults:
+  run:
+    working-directory: ansible_collections/ethpandaops/general
+
+jobs:
+
+  job:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          path: ansible_collections/ethpandaops/general
+
+      - uses: ./ansible_collections/ethpandaops/general/.github/actions/setup
+
+      - name: Lint roles
+        run: ansible-lint roles
+
+      - name: Lint playbooks
+        run: ansible-lint playbooks
+
+      - name: Sanity test
+        run: ansible-test sanity

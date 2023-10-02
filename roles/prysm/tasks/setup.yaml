@@ -27,9 +27,15 @@
     env: "{{ prysm_container_env }}"
     networks: "{{ prysm_container_networks }}"
     entrypoint: "{{ prysm_container_entrypoint }}"
-    command: "{{ prysm_container_command + prysm_container_command_extra_args }}"
+    command: >-
+      {{
+        prysm_container_command +
+        prysm_container_command_extra_args +
+        (prysm_checkpoint_sync_enabled | ternary(prysm_container_command_checkpoint_args, []))
+      }}
     user: "{{ prysm_user_meta.uid }}"
     pull: "{{ prysm_container_pull | bool }}"
+    security_opts: "{{ prysm_container_security_opts }}"
 
 - name: Create validator data dir
   ansible.builtin.file:
@@ -60,4 +66,5 @@
     command: "{{ prysm_validator_container_command + prysm_validator_container_command_extra_args }}"
     user: "{{ prysm_user_meta.uid }}"
     pull: "{{ prysm_container_pull | bool }}"
+    security_opts: "{{ prysm_validator_container_security_opts }}"
   when: prysm_validator_enabled

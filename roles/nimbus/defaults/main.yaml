@@ -2,6 +2,7 @@ nimbus_user: nimbus
 nimbus_datadir: /data/nimbus
 nimbus_auth_jwt_path: /data/execution-auth.secret
 nimbus_execution_engine_endpoint: http://geth:8551
+nimbus_announced_ip: "{{ ansible_host }}"
 
 nimbus_cleanup: false # when set to "true" it will remove the container
 
@@ -19,11 +20,15 @@ nimbus_validator_datadir: /data/nimbus-validator
 ## Checkpoint sync container configuration
 ##
 ################################################################################
+checkpoint_sync_url: https://beaconstate.ethstaker.cc
 nimbus_checkpoint_container_name: nimbus_checkpoint
 nimbus_checkpoint_container_command:
   - trustedNodeSync
   - --data-dir=/data
-nimbus_checkpoint_container_command_extra_args: []
+nimbus_checkpoint_container_command_extra_args:
+  - --trusted-node-url={{ checkpoint_sync_url }}
+  - --network=mainnet
+  - --backfill=false
 nimbus_checkpoint_sync_enabled: false
 nimbus_checkpoint_autoremove_enabled: false
 ################################################################################
@@ -41,6 +46,7 @@ nimbus_container_ports:
 nimbus_container_volumes:
   - "{{ nimbus_datadir }}:/data"
   - "{{ nimbus_auth_jwt_path }}:/execution-auth.jwt:ro"
+nimbus_container_security_opts: []
 nimbus_container_stop_timeout: "300"
 nimbus_container_networks: []
 nimbus_container_command:
@@ -50,7 +56,7 @@ nimbus_container_command:
   - --listen-address=0.0.0.0
   - --udp-port={{ nimbus_ports_p2p_udp }}
   - --tcp-port={{ nimbus_ports_p2p_tcp }}
-  - --nat=extip:{{ ansible_host }}
+  - --nat=extip:{{ nimbus_announced_ip }}
   - --enr-auto-update=false
   - --rest
   - --rest-port={{ nimbus_ports_http_beacon }}

@@ -1,0 +1,7 @@
+- name: Setup dora
+  ansible.builtin.import_tasks: setup.yml
+  when: not dora_cleanup_all
+
+- name: Cleanup dora
+  ansible.builtin.import_tasks: cleanup.yml
+  when: dora_cleanup_all

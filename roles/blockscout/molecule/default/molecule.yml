@@ -1,0 +1,36 @@
+scenario:
+  name: default
+  test_sequence:
+    - dependency
+    - cleanup
+    - destroy
+    - syntax
+    - create
+    - prepare
+    - converge
+    # - idempotence
+    - side_effect
+    - verify
+    - cleanup
+    - destroy
+dependency:
+  name: galaxy
+  options:
+    role-file: ../../requirements.yaml
+    requirements-file: ../../requirements.yaml
+driver:
+  name: docker
+platforms:
+  - name: blockscout
+    image: "geerlingguy/docker-debian12-ansible:latest"
+    # platform: linux/amd64
+    command: ""
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    cgroupns_mode: host
+    privileged: true
+    pre_build_image: true
+provisioner:
+  name: ansible
+verifier:
+  name: ansible

@@ -1,0 +1,10 @@
+galaxy_info:
+  author: blockscout
+  description: Deploy Blockscout and all required dependencies on a single machine.
+  license: MIT
+  min_ansible_version: "2.1"
+  galaxy_tags: ["ethereum", "blockscout", "block", "explorer"]
+  platforms:
+    - name: GenericLinux
+      versions: ["all"]
+dependencies: []

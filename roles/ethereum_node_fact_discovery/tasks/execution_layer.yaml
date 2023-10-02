@@ -4,6 +4,9 @@
     - name: Get EL node key
       ansible.builtin.shell: "{{ ethereum_node_fact_discovery_el_key_cmd[ethereum_node_el] }}" # noqa command-instead-of-shell
       register: ethereum_node_fact_discovery_el_nodekey
+      until: ethereum_node_fact_discovery_el_nodekey.rc == 0
+      retries: "{{ ethereum_node_fact_discovery_el_retries }}"
+      delay: "{{ ethereum_node_fact_discovery_el_delay }}"
       changed_when: false
       failed_when: (ethereum_node_fact_discovery_el_nodekey.rc != 0) or (ethereum_node_fact_discovery_el_nodekey.stdout == "")
 
@@ -30,6 +33,9 @@
       ansible.builtin.command: "{{ ethereum_node_fact_discovery_el_enode_cmd[ethereum_node_el] }}"
       register: ethereum_node_fact_discovery_el_enode
       changed_when: false
+      until: ethereum_node_fact_discovery_el_enode.rc == 0
+      retries: "{{ ethereum_node_fact_discovery_el_retries }}"
+      delay: "{{ ethereum_node_fact_discovery_el_delay }}"
 
     - name: Store enode var "ethereum_node_fact_el_enode"
       ansible.builtin.set_fact:

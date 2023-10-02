@@ -1,0 +1,55 @@
+name: Integration (ethereum_node)
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+defaults:
+  run:
+    working-directory: ansible_collections/ethpandaops/general
+
+jobs:
+  # Job for change detection
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      ethereum_node: ${{ steps.filter.outputs.ethereum_node }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            ethereum_node: roles/ethereum_node/**
+
+  # Integration test using molecule
+  job:
+    needs: changes
+    if: ${{ needs.changes.outputs.ethereum_node == 'true' }}
+    concurrency:
+      group: >-
+        ${{ github.head_ref }}-ethereum-node-${{ matrix.consensus }}-${{ matrix.execution }}
+      cancel-in-progress: true
+    strategy:
+      fail-fast: false
+      matrix:
+        consensus: [teku, prysm, lighthouse, nimbus, lodestar]
+        execution: [geth, nethermind, erigon, besu, ethereumjs, reth]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          path: ansible_collections/ethpandaops/general
+
+      - uses: ./ansible_collections/ethpandaops/general/.github/actions/setup
+
+      - name: Run molecule
+        working-directory: ansible_collections/ethpandaops/general/roles/ethereum_node
+        run: molecule test
+        env:
+          PY_COLORS: '1'
+          EXECUTION_CLIENT: ${{ matrix.execution }}
+          CONSENSUS_CLIENT: ${{ matrix.consensus }}

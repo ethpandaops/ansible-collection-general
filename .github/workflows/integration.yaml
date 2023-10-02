@@ -1,0 +1,50 @@
+name: Integration
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+defaults:
+  run:
+    working-directory: ansible_collections/ethpandaops/general
+
+jobs:
+  # Job for change detection
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      roles: ${{ steps.filter.outputs.changes }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            blockscout: roles/blockscout/**
+
+  # Integration test using molecule
+  job:
+    needs: changes
+    concurrency:
+      group: ${{ github.head_ref }}-${{ matrix.role }}
+      cancel-in-progress: true
+    if: ${{ needs.changes.outputs.roles != '' && toJson(fromJson(needs.changes.outputs.roles)) != '[]' }}
+    strategy:
+      matrix:
+        role: ${{ fromJSON(needs.changes.outputs.roles) }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          path: ansible_collections/ethpandaops/general
+
+      - uses: ./ansible_collections/ethpandaops/general/.github/actions/setup
+
+      - name: Run molecule
+        working-directory: ansible_collections/ethpandaops/general/roles/${{ matrix.role }}
+        run: molecule test
+        env:
+          PY_COLORS: '1'

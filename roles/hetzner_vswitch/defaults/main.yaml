@@ -1,0 +1,8 @@
+---
+interface_name: enp0s31f6
+vlan_id: 4000
+ip_address: "{{ ansible_host }}"
+netmask: 255.255.255.0
+gateway: 10.0.0.1
+mtu: 1400
+network: 10.0.0.0/16

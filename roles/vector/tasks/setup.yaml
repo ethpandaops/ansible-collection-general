@@ -1,0 +1,41 @@
+- name: Get docker group
+  ansible.builtin.getent:
+    database: group
+    key: docker
+  register: vector_docker_group_meta
+
+- name: Add vector user
+  ansible.builtin.user:
+    name: "{{ vector_user }}"
+    groups: docker
+    append: true
+  register: vector_user_meta
+
+- name: Create required directories
+  ansible.builtin.file:
+    path: "{{ vector_datadir }}"
+    state: directory
+    owner: "{{ vector_user }}"
+    group: "{{ vector_user }}"
+    mode: "0770"
+
+- name: Create vector config
+  ansible.builtin.copy:
+    content: "{{ vector_config }}"
+    dest: "{{ vector_datadir }}/vector.toml"
+    owner: "{{ vector_user }}"
+    group: "{{ vector_user }}"
+    mode: '0664'
+  notify: Restart vector container
+
+- name: Run vector container
+  community.general.docker_container:
+    name: "{{ vector_container_name }}"
+    image: "{{ vector_container_image }}"
+    ports: "{{ vector_container_ports }}"
+    restart_policy: "{{ vector_container_restart_policy }}"
+    networks: "{{ vector_container_networks }}"
+    volumes: "{{ vector_container_volumes }}"
+    env: "{{ vector_container_env }}"
+    user: "{{ vector_user_meta.uid }}"
+    groups: "{{ vector_docker_group_meta.ansible_facts.getent_group.docker[1] }}"

@@ -1,0 +1,12 @@
+name: Install deps
+description: Install deps
+runs:
+  using: composite
+  steps:
+    - name: Install asdf
+      uses: asdf-vm/actions/setup@v2
+
+    - name: Run setup
+      shell: bash
+      run: ./setup.sh
+      working-directory: ansible_collections/ethpandaops/general

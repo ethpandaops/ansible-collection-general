@@ -1,0 +1,17 @@
+- name: Converge
+  hosts: all
+  become: true
+  pre_tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+  roles:
+    - role: geerlingguy.docker
+    - role: geerlingguy.pip
+      pip_install_packages:
+        - name: docker
+    - role: blockscout
+      blockscout_container_env:
+        ETHEREUM_JSONRPC_VARIANT: geth
+        ETHEREUM_JSONRPC_HTTP_URL: http://your-geth-node:8545/

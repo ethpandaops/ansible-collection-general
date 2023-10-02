@@ -1,0 +1,158 @@
+---
+blockscout_cleanup_all: false
+
+blockscout_user: blockscout
+blockscout_datadir: "/data/blockscout"
+blockscout_docker_network_name: shared
+blockscout_docker_networks:
+  - name: "{{ blockscout_docker_network_name }}"
+
+# ------------------------------------------------------------------
+
+# blockscout
+blockscout_enabled: true
+blockscout_container_name: blockscout
+blockscout_container_image: blockscout/blockscout:5.1.5
+blockscout_container_entrypoint:
+  - /bin/sh
+  - -ace
+  - >-
+    bin/blockscout eval "Elixir.Explorer.ReleaseTasks.create_and_migrate()";
+    exec bin/blockscout start;
+blockscout_container_env:
+  # For all env variables, check https://docs.blockscout.com/for-developers/information-and-settings/env-variables
+  ETHEREUM_JSONRPC_VARIANT: geth
+  ETHEREUM_JSONRPC_HTTP_URL: http://geth:8545/
+  # ETHEREUM_JSONRPC_VARIANT: erigon
+  # ETHEREUM_JSONRPC_HTTP_URL: http://erigon:8545/
+  # ETHEREUM_JSONRPC_TRACE_URL: http://erigon:8545/
+  MIX_ENV: prod
+  PORT: '4000'
+  DATABASE_URL: postgresql://postgres:postgres@blockscout-database:5432/blockscout?ssl=false
+  SECRET_KEY_BASE: RMgI4C1HSkxsEjdhtGMfwAHfyT6CKWXOgzCboJflfSm4jeAlic52io05KB6mqzc5
+  ECTO_USE_SSL: "false"
+  NETWORK: Ethereum
+  # SUBNETWORK: Testnet
+  # Branding related
+  LOGO: /images/blockscout_logo.svg
+  FOOTER_LOGO: /images/blockscout_logo.svg
+  # Rate limiting
+  API_RATE_LIMIT_TIME_INTERVAL: 1s
+  API_RATE_LIMIT_BY_IP_TIME_INTERVAL: 5m
+  API_RATE_LIMIT: "50"
+  API_RATE_LIMIT_BY_KEY: "50"
+  API_RATE_LIMIT_BY_WHITELISTED_IP: "50"
+  API_RATE_LIMIT_WHITELISTED_IPS: ""
+  API_RATE_LIMIT_STATIC_API_KEY: ""
+  API_RATE_LIMIT_UI_V2_WITH_TOKEN: "5"
+  API_RATE_LIMIT_BY_IP: "3000"
+  API_RATE_LIMIT_HAMMER_REDIS_URL: redis://blockscout-cache:6379/1
+  API_RATE_LIMIT_UI_V2_TOKEN_TTL_IN_SECONDS: "18000"
+  # Account: https://docs.blockscout.com/for-developers/configuration-options/my-account-settings
+  ACCOUNT_ENABLED: "false"
+  # Smart contract verifier
+  MICROSERVICE_SC_VERIFIER_ENABLED: '"{{ blockscout_smart_contract_verifier_enabled }}"'
+  MICROSERVICE_SC_VERIFIER_URL: "http://{{ blockscout_smart_contract_verifier_container_name }}:8050/"
+  MICROSERVICE_SC_VERIFIER_TYPE: sc_verifier
+  MICROSERVICE_ETH_BYTECODE_DB_INTERVAL_BETWEEN_LOOKUPS: 10m
+  # Visualizer
+  MICROSERVICE_VISUALIZE_SOL2UML_ENABLED: '"{{ blockscout_visualizer_enabled }}"'
+  MICROSERVICE_VISUALIZE_SOL2UML_URL: "http://{{ blockscout_visualizer_container_name }}:8050/"
+  # Signature provider
+  MICROSERVICE_SIG_PROVIDER_ENABLED: '"{{ blockscout_sig_provider_enabled }}"'
+  MICROSERVICE_SIG_PROVIDER_URL: "http://{{ blockscout_sig_provider_container_name }}:8050/"
+  DECODE_NOT_A_CONTRACT_CALLS: "true"
+blockscout_container_ports: []
+blockscout_container_volumes: []
+blockscout_container_stop_timeout: "600"
+blockscout_container_pull: false
+blockscout_container_networks: "{{ blockscout_docker_networks }}"
+
+# blockscout-database
+blockscout_db_enabled: true
+blockscout_db_datadir: "{{ blockscout_datadir }}/blockscout-database"
+blockscout_db_container_name: blockscout-database
+blockscout_db_container_image: bitnami/postgresql:15
+blockscout_db_container_env:
+  POSTGRESQL_USERNAME: postgres
+  POSTGRESQL_PASSWORD: postgres
+  POSTGRESQL_DATABASE: blockscout
+blockscout_db_custom_postgres_config: |
+  max_connections = 1024
+blockscout_db_container_ports: []
+blockscout_db_container_volumes:
+  - "{{ blockscout_db_datadir }}/db:/bitnami/postgresql"
+  - "{{ blockscout_db_datadir }}/conf.d://opt/bitnami/postgresql/conf/conf.d:ro"
+blockscout_db_container_stop_timeout: "300"
+blockscout_db_container_pull: false
+blockscout_db_container_networks: "{{ blockscout_docker_networks }}"
+
+# blockscout-cache
+blockscout_cache_enabled: true
+blockscout_cache_datadir: "{{ blockscout_datadir }}/blockscout-cache"
+blockscout_cache_container_name: blockscout-cache
+blockscout_cache_container_image: bitnami/redis:7.0
+blockscout_cache_container_env:
+  ALLOW_EMPTY_PASSWORD: "yes"
+blockscout_cache_container_ports: []
+blockscout_cache_container_volumes:
+  - "{{ blockscout_cache_datadir }}:/bitnami/redis/data"
+blockscout_cache_container_stop_timeout: "120"
+blockscout_cache_container_pull: false
+blockscout_cache_container_networks: "{{ blockscout_docker_networks }}"
+
+# blockscout-smart-contract-verifier
+blockscout_smart_contract_verifier_enabled: true
+blockscout_smart_contract_verifier_container_name: blockscout-smart-contract-verifier
+blockscout_smart_contract_verifier_container_image: ghcr.io/blockscout/smart-contract-verifier:v1.2.3
+blockscout_smart_contract_verifier_container_env:
+  SMART_CONTRACT_VERIFIER__SERVER__HTTP__ENABLED: "true"
+  SMART_CONTRACT_VERIFIER__SERVER__HTTP__ADDR: 0.0.0.0:8050
+  SMART_CONTRACT_VERIFIER__SERVER__HTTP__MAX_BODY_SIZE: "2097152"
+  SMART_CONTRACT_VERIFIER__SERVER__GRPC__ENABLED: "false"
+  SMART_CONTRACT_VERIFIER__SERVER__GRPC__ADDR: 0.0.0.0:8051
+  SMART_CONTRACT_VERIFIER__SOLIDITY__ENABLED: "true"
+  SMART_CONTRACT_VERIFIER__SOLIDITY__COMPILERS_DIR: /tmp/solidity-compilers
+  SMART_CONTRACT_VERIFIER__SOLIDITY__REFRESH_VERSIONS_SCHEDULE: "0 0 * * * * *"
+  SMART_CONTRACT_VERIFIER__SOLIDITY__FETCHER__LIST__LIST_URL: https://solc-bin.ethereum.org/linux-amd64/list.json
+  SMART_CONTRACT_VERIFIER__VYPER__ENABLED: "true"
+  SMART_CONTRACT_VERIFIER__VYPER__COMPILERS_DIR: /tmp/vyper-compilers
+  SMART_CONTRACT_VERIFIER__VYPER__REFRESH_VERSIONS_SCHEDULE: "0 0 * * * * *"
+  SMART_CONTRACT_VERIFIER__VYPER__FETCHER__LIST__LIST_URL: https://raw.githubusercontent.com/blockscout/solc-bin/main/vyper.list.json
+  SMART_CONTRACT_VERIFIER__SOURCIFY__ENABLED: "true"
+  SMART_CONTRACT_VERIFIER__SOURCIFY__API_URL: https://sourcify.dev/server/
+  SMART_CONTRACT_VERIFIER__SOURCIFY__VERIFICATION_ATTEMPTS: "3"
+  SMART_CONTRACT_VERIFIER__SOURCIFY__REQUEST_TIMEOUT: "10"
+  SMART_CONTRACT_VERIFIER__METRICS__ENABLED: "false"
+  SMART_CONTRACT_VERIFIER__METRICS__ADDR: 0.0.0.0:6060
+  SMART_CONTRACT_VERIFIER__METRICS__ROUTE: /metrics
+  SMART_CONTRACT_VERIFIER__JAEGER__ENABLED: "false"
+  SMART_CONTRACT_VERIFIER__JAEGER__AGENT_ENDPOINT: localhost:6831
+blockscout_smart_contract_verifier_container_ports: []
+blockscout_smart_contract_verifier_container_volumes: []
+blockscout_smart_contract_verifier_container_stop_timeout: "60"
+blockscout_smart_contract_verifier_container_pull: false
+blockscout_smart_contract_verifier_container_networks: "{{ blockscout_docker_networks }}"
+
+# blockscout-sig-provider
+blockscout_sig_provider_enabled: true
+blockscout_sig_provider_container_name: blockscout-sig-provider
+blockscout_sig_provider_container_image: ghcr.io/blockscout/sig-provider:v1.0.0
+blockscout_sig_provider_container_env: {}
+blockscout_sig_provider_container_ports: []
+blockscout_sig_provider_container_volumes: []
+blockscout_sig_provider_container_stop_timeout: "60"
+blockscout_sig_provider_container_pull: false
+blockscout_sig_provider_container_networks: "{{ blockscout_docker_networks }}"
+
+# blockscout-visualizer
+blockscout_visualizer_enabled: true
+blockscout_visualizer_container_name: blockscout-visualizer
+blockscout_visualizer_container_image: ghcr.io/blockscout/visualizer:v0.2.0
+blockscout_visualizer_container_env:
+  VISUALIZER__SERVER__GRPC__ENABLED: "false"
+blockscout_visualizer_container_ports: []
+blockscout_visualizer_container_volumes: []
+blockscout_visualizer_container_stop_timeout: "60"
+blockscout_visualizer_container_pull: false
+blockscout_visualizer_container_networks: "{{ blockscout_docker_networks }}"

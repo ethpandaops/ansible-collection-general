@@ -1,0 +1,10 @@
+---
+- name: Configure network interface
+  ansible.builtin.template:
+    src: interface.j2
+    dest: "/etc/network/interfaces.d/{{ interface_name }}.{{ vlan_id }}"
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - Restart networking

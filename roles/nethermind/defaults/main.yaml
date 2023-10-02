@@ -1,6 +1,7 @@
 nethermind_user: nethermind
 nethermind_datadir: /data/nethermind
 nethermind_auth_jwt_path: /data/execution-auth.secret
+nethermind_announced_ip: "{{ ansible_host }}"
 
 nethermind_cleanup: false # when set to "true" it will remove the container
 
@@ -20,14 +21,15 @@ nethermind_container_ports:
 nethermind_container_volumes:
   - "{{ nethermind_datadir }}:/data"
   - "{{ nethermind_auth_jwt_path }}:/execution-auth.jwt:ro"
+nethermind_container_security_opts: []
 nethermind_container_stop_timeout: "300"
 nethermind_container_networks: []
 nethermind_container_entrypoint:
-  - /nethermind/Nethermind.Runner
+  - /nethermind/nethermind
 nethermind_container_command:
   - --datadir=/data
   - --KeyStore.KeyStoreDirectory=/data/keystore
-  - --Network.ExternalIp={{ ansible_host }}
+  - --Network.ExternalIp={{ nethermind_announced_ip }}
   - --Network.P2PPort={{ nethermind_ports_p2p }}
   - --Network.DiscoveryPort={{ nethermind_ports_p2p }}
   - --JsonRpc.Enabled=true

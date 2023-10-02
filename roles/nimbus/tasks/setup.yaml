@@ -7,7 +7,7 @@
   ansible.builtin.file:
     path: "{{ nimbus_datadir }}"
     state: directory
-    mode: "0750"
+    mode: "0700"
     owner: "{{ nimbus_user }}"
     group: "{{ nimbus_user }}"
 
@@ -48,6 +48,7 @@
     networks: "{{ nimbus_container_networks }}"
     command: "{{ nimbus_checkpoint_container_command + nimbus_checkpoint_container_command_extra_args }}"
     user: "{{ nimbus_user_meta.uid }}"
+    security_opts: "{{ nimbus_container_security_opts }}"
 
 - name: Run nimbus container
   community.docker.docker_container:
@@ -75,3 +76,4 @@
       }}
     user: "{{ nimbus_user_meta.uid }}"
     pull: "{{ nimbus_container_pull | bool }}"
+    security_opts: "{{ nimbus_container_security_opts }}"

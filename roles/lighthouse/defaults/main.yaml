@@ -2,6 +2,7 @@ lighthouse_user: lighthouse
 lighthouse_datadir: /data/lighthouse
 lighthouse_auth_jwt_path: /data/execution-auth.secret
 lighthouse_execution_engine_endpoint: http://geth:8551
+lighthouse_announced_ip: "{{ ansible_host }}"
 
 lighthouse_cleanup: false # when set to "true" it will remove the container(s)
 
@@ -29,6 +30,7 @@ lighthouse_container_ports:
 lighthouse_container_volumes:
   - "{{ lighthouse_datadir }}:/data"
   - "{{ lighthouse_auth_jwt_path }}:/execution-auth.jwt:ro"
+lighthouse_container_security_opts: []
 lighthouse_container_stop_timeout: "300"
 lighthouse_container_networks: []
 lighthouse_container_command:
@@ -37,7 +39,7 @@ lighthouse_container_command:
   - --datadir=/data
   - --disable-upnp
   - --disable-enr-auto-update
-  - --enr-address={{ ansible_host }}
+  - --enr-address={{ lighthouse_announced_ip }}
   - --enr-tcp-port={{ lighthouse_ports_p2p_tcp }}
   - --enr-udp-port={{ lighthouse_ports_p2p_udp }}
   - --listen-address=0.0.0.0
@@ -53,7 +55,11 @@ lighthouse_container_command:
   - --metrics-allow-origin=*
   - --metrics-port={{ lighthouse_ports_metrics }}
 lighthouse_container_command_extra_args: []
-  # - --checkpoint-sync-url=http://your-other-node
+
+checkpoint_sync_url: https://beaconstate.ethstaker.cc
+lighthouse_checkpoint_sync_enabled: false
+lighthouse_container_command_checkpoint_args:
+  - --checkpoint-sync-url={{ checkpoint_sync_url }}
 
 ################################################################################
 ##
@@ -66,6 +72,7 @@ lighthouse_validator_container_env: {}
 lighthouse_validator_container_ports: []
 lighthouse_validator_container_volumes:
   - "{{ lighthouse_validator_datadir }}:/validator-data"
+lighthouse_validator_container_security_opts: []
 lighthouse_validator_container_stop_timeout: "300"
 lighthouse_validator_container_networks: []
 lighthouse_validator_container_command:
