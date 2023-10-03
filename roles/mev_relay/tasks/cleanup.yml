@@ -8,7 +8,6 @@
     - "{{ mev_relay_housekeeper_container_name }}"
     - "{{ mev_relay_website_container_name }}"
     - "{{ mev_relay_redis_container_name }}"
-    - "{{ mev_builder_container_name }}"
 
 - name: Delete data directories
   ansible.builtin.file:
@@ -20,4 +19,3 @@
     - "{{ mev_relay_housekeeper_datadir }}"
     - "{{ mev_relay_db_datadir }}"
     - "{{ mev_relay_redis_datadir }}"
-    - "{{ mev_builder_datadir }}"

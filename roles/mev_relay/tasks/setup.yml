@@ -21,7 +21,6 @@
     - "{{ mev_relay_website_datadir }}"
     - "{{ mev_relay_housekeeper_datadir }}"
     - "{{ mev_relay_db_datadir }}"
-    - "{{ mev_builder_datadir }}"
 
 - name: Setup mev_relay database container
   community.docker.docker_container:
@@ -90,17 +89,3 @@
     networks: "{{ mev_relay_website_container_networks }}"
     pull: "{{ mev_relay_website_container_pull | bool }}"
     command: "{{ mev_relay_website_container_command + mev_relay_website_container_command_extra_args }} "
-
-- name: Setup mev_builder container
-  community.docker.docker_container:
-    name: "{{ mev_builder_container_name }}"
-    image: "{{ mev_builder_container_image }}"
-    state: '{{ mev_builder_enabled | ternary("started", "absent") }}'
-    restart_policy: always
-    stop_timeout: "{{ mev_builder_container_stop_timeout }}"
-    ports: "{{ mev_builder_container_ports }}"
-    volumes: "{{ mev_builder_container_volumes }}"
-    env: "{{ mev_builder_container_env }}"
-    networks: "{{ mev_builder_container_networks }}"
-    pull: "{{ mev_builder_container_pull | bool }}"
-    command: "{{ mev_builder_container_command + mev_builder_container_command_extra_args }} "
