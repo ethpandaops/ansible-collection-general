@@ -96,3 +96,19 @@ mev_relay_website_container_networks: "{{ mev_relay_docker_networks }}"
 mev_relay_website_container_command:
   - website
 mev_relay_website_container_command_extra_args: []
+
+# ------------------------------------------------------------------
+# mev-builder
+mev_builder_enabled: true
+mev_builder_datadir: "{{ mev_relay_datadir }}/mev-builder"
+mev_builder_container_name: mev-builder
+mev_builder_container_image: flashbots/builder:latest
+mev_builder_container_env: []
+mev_builder_container_ports: []
+mev_builder_container_volumes: []
+mev_builder_container_stop_timeout: "300"
+mev_builder_container_pull: false
+mev_builder_container_networks: "{{ mev_relay_docker_networks }}"
+mev_builder_container_command:
+  - --builder
+mev_builder_container_command_extra_args: []
