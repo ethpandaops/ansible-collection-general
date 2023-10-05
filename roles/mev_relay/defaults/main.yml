@@ -96,4 +96,3 @@ mev_relay_website_container_networks: "{{ mev_relay_docker_networks }}"
 mev_relay_website_container_command:
   - website
 mev_relay_website_container_command_extra_args: []
-
