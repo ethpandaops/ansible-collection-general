@@ -3,6 +3,12 @@
     name: "{{ mev_boost_user }}"
   register: mev_boost_user_meta
 
+- name: Setup docker network
+  ansible.builtin.include_role:
+    name: ethpandaops.general.docker_network
+  vars:
+    docker_network_name: "{{ mev_boost_docker_network_name }}"
+
 - name: Run mev_boost container
   community.docker.docker_container:
     name: "{{ mev_boost_container_name }}"
