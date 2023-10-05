@@ -8,7 +8,6 @@ mev_flood_docker_network_name: shared
 mev_flood_docker_networks:
   - name: "{{ mev_flood_docker_network_name }}"
 
-
 ################################################################################
 ##
 ## mev_flood container configuration
@@ -20,8 +19,7 @@ mev_flood_container_image: flashbots/mev-flood:latest
 mev_flood_container_env: {}
 mev_flood_container_ports: []
 mev_flood_container_stop_timeout: "300"
-mev_flood_container_networks:
-  - "{{ mev_flood_docker_networks }}"
+mev_flood_container_networks: "{{ mev_flood_docker_networks }}"
 mev_flood_container_volumes:
   - "{{ mev_flood_datadir }}:/data"
 mev_flood_container_command:
@@ -41,8 +39,7 @@ mev_flood_spam_container_image: flashbots/mev-flood:latest
 mev_flood_spam_container_env: {}
 mev_flood_spam_container_ports: []
 mev_flood_spam_container_stop_timeout: "300"
-mev_flood_spam_container_networks:
-  - "{{ mev_flood_docker_networks }}"
+mev_flood_spam_container_networks: "{{ mev_flood_docker_networks }}"
 mev_flood_spam_container_volumes:
   - "{{ mev_flood_datadir }}:/data"
 mev_flood_spam_container_command:

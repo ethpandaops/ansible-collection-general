@@ -16,8 +16,7 @@ mev_boost_server_port: 18550
 mev_boost_container_ports:
   - "127.0.0.1:{{ mev_boost_server_port }}:{{ mev_boost_server_port }}"
 mev_boost_container_stop_timeout: "300"
-mev_boost_container_networks:
-  - "{{ mev_boost_docker_networks }}"
+mev_boost_container_networks: "{{ mev_boost_docker_networks }}"
 mev_boost_container_volumes: []
 mev_boost_container_command:
   - -relay-check
