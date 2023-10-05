@@ -1,7 +1,7 @@
 mev_boost_user: mev_boost
 
 mev_boost_cleanup: false # when set to "true" it will remove the container(s)
-mev_boost_docker_network_name: shared
+
 ################################################################################
 ##
 ## mev_boost container configuration
@@ -14,11 +14,9 @@ mev_boost_server_port: 18550
 mev_boost_container_ports:
   - "127.0.0.1:{{ mev_boost_server_port }}:{{ mev_boost_server_port }}"
 mev_boost_container_stop_timeout: "300"
-mev_boost_container_networks: "{{ mev_boost_docker_network_name }}"
+mev_boost_container_networks: "{{ ethereum_node_docker_networks }}"
 mev_boost_container_volumes: []
 mev_boost_container_command:
-  - mev-boost
-  - --addr=0.0.0.0:{{ mev_boost_server_port }}
   - -relay-check
 
 mev_boost_container_command_extra_args: []
