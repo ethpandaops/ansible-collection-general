@@ -19,6 +19,10 @@
   loop:
     - "{{ mev_flood_datadir }}"
 
+- name: Set permissions
+  ansible.builtin.command: "chown -R {{ mev_flood_user }}:{{ mev_flood_user }} {{ mev_flood_datadir }}" # noqa no-free-form
+  changed_when: false
+
 - name: Run mev_flood container
   community.docker.docker_container:
     name: "{{ mev_flood_container_name }}"
