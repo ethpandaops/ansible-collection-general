@@ -37,7 +37,7 @@ mev_flood_spam_container_image: flashbots/mev-flood:latest
 mev_flood_spam_container_env: {}
 mev_flood_spam_container_ports: []
 mev_flood_spam_container_stop_timeout: "300"
-mev_flood_spam_container_networks: "{{ ethereum_node_docker_networks }}"
+mev_flood_spam_container_networks: []
 mev_flood_spam_container_volumes: 
   - "{{ mev_flood_datadir }}:/data"
 mev_flood_spam_container_command:
