@@ -13,7 +13,7 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    mode: "0777"
+    mode: "0750"
     owner: "{{ mev_relay_user }}"
     group: "{{ mev_relay_user }}"
   loop:
