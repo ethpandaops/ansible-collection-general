@@ -3,6 +3,22 @@
     name: "{{ mev_flood_user }}"
   register: mev_flood_user_meta
 
+- name: Setup docker network
+  ansible.builtin.include_role:
+    name: ethpandaops.general.docker_network
+  vars:
+    docker_network_name: "{{ mev_flood_docker_network_name }}"
+
+- name: Create directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0777"
+    owner: "{{ mev_flood_user }}"
+    group: "{{ mev_flood_user }}"
+  loop:
+    - "{{ mev_flood_datadir }}"
+
 - name: Run mev_flood container
   community.docker.docker_container:
     name: "{{ mev_flood_container_name }}"
