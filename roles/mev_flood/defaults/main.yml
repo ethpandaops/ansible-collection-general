@@ -1,5 +1,4 @@
 mev_flood_user: mev_flood
-mev_flood_spam_user: mev_flood
 mev_flood_cleanup: false # when set to "true" it will remove the container(s)
 
 mev_flood_datadir: "/data/mev_flood"

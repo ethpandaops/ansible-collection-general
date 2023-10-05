@@ -45,4 +45,4 @@
     networks: "{{ mev_flood_spam_container_networks }}"
     ports: "{{ mev_flood_spam_container_ports }}"
     command: "{{ mev_flood_spam_container_command + mev_flood_spam_container_command_extra_args }} "
-    user: "{{ mev_flood_spam_user_meta.uid }}"
+    user: "{{ mev_flood_user_meta.uid }}"
