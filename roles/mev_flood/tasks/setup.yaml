@@ -16,3 +16,17 @@
     ports: "{{ mev_flood_container_ports }}"
     command: "{{ mev_flood_container_command + mev_flood_container_command_extra_args }} "
     user: "{{ mev_flood_user_meta.uid }}"
+
+- name: Run mev_flood_spam container
+  community.docker.docker_container:
+    name: "{{ mev_flood_spam_container_name }}"
+    image: "{{ mev_flood_spam_container_image }}"
+    state: started
+    restart_policy: always
+    stop_timeout: "{{ mev_flood_spam_container_stop_timeout }}"
+    volumes: "{{ mev_flood_spam_container_volumes }}"
+    env: "{{ mev_flood_spam_container_env }}"
+    networks: "{{ mev_flood_spam_container_networks }}"
+    ports: "{{ mev_flood_spam_container_ports }}"
+    command: "{{ mev_flood_spam_container_command + mev_flood_spam_container_command_extra_args }} "
+    user: "{{ mev_flood_spam_user_meta.uid }}"
