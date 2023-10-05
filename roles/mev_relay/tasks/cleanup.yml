@@ -19,3 +19,4 @@
     - "{{ mev_relay_housekeeper_datadir }}"
     - "{{ mev_relay_db_datadir }}"
     - "{{ mev_relay_redis_datadir }}"
+    - "{{ mev_relay_datadir }}"
