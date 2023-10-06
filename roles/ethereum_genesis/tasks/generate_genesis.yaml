@@ -45,6 +45,10 @@
       command: xattr -c "{{ ethereum_genesis_generator_tmp_output_dir_register.path }}/custom_config_data/config.yaml"
       when: ansible_os_family == "Darwin"
 
+    - name: Ensure config.yaml has the right permissions post attribute change
+      command: chmod 644 "{{ ethereum_genesis_generator_tmp_output_dir_register.path }}/custom_config_data/config.yaml"
+      when: ansible_os_family == "Darwin"
+
     - name: Create final output directory
       ansible.builtin.file:
         path: "{{ ethereum_genesis_generator_output_dir }}"
