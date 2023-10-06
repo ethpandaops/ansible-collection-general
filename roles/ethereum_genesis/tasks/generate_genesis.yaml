@@ -41,12 +41,12 @@
       changed_when: false
       failed_when: (ethereum_genesis_generator_cmd.rc != 0) or (ethereum_genesis_generator_cmd.stdout == "")
 
-    - name: For some reason, we're seeing extended attributes set on the config.yaml file which breaks reading on linux. Removing extended permissions for the file.
-      command: xattr -c "{{ ethereum_genesis_generator_tmp_output_dir_register.path }}/custom_config_data/config.yaml"
+    - name: Removes extended attr from config.yaml, breaks on linux due to perms if present
+      ansible.builtin.shell: xattr -c "{{ ethereum_genesis_generator_tmp_output_dir_register.path }}/custom_config_data/config.yaml"
       when: ansible_os_family == "Darwin"
 
-    - name: Ensure config.yaml has the right permissions post attribute change
-      command: chmod 644 "{{ ethereum_genesis_generator_tmp_output_dir_register.path }}/custom_config_data/config.yaml"
+    - name: Set config.yaml to the right permissions post attribute change
+      ansible.builtin.shell: chmod 644 "{{ ethereum_genesis_generator_tmp_output_dir_register.path }}/custom_config_data/config.yaml"
       when: ansible_os_family == "Darwin"
 
     - name: Create final output directory
