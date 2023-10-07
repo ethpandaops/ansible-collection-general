@@ -34,6 +34,7 @@
     env: "{{ mev_relay_db_container_env }}"
     networks: "{{ mev_relay_db_container_networks }}"
     pull: "{{ mev_relay_db_container_pull | bool }}"
+    user: "{{ mev_relay_user_meta.uid }}"
 
 - name: Setup mev_relay redis container
   community.docker.docker_container:
@@ -47,6 +48,7 @@
     env: "{{ mev_relay_redis_container_env }}"
     networks: "{{ mev_relay_redis_container_networks }}"
     pull: "{{ mev_relay_redis_container_pull | bool }}"
+    user: "{{ mev_relay_user_meta.uid }}"
 
 - name: Setup mev_relay_housekeeper container
   community.docker.docker_container:
@@ -61,6 +63,7 @@
     networks: "{{ mev_relay_housekeeper_container_networks }}"
     pull: "{{ mev_relay_housekeeper_container_pull | bool }}"
     command: "{{ mev_relay_housekeeper_container_command + mev_relay_housekeeper_container_command_extra_args }} "
+    user: "{{ mev_relay_user_meta.uid }}"
 
 - name: Setup mev_relay_api container
   community.docker.docker_container:
@@ -75,6 +78,7 @@
     networks: "{{ mev_relay_api_container_networks }}"
     pull: "{{ mev_relay_api_container_pull | bool }}"
     command: "{{ mev_relay_api_container_command + mev_relay_api_container_command_extra_args }} "
+    user: "{{ mev_relay_user_meta.uid }}"
 
 - name: Setup mev_relay_website container
   community.docker.docker_container:
@@ -89,3 +93,4 @@
     networks: "{{ mev_relay_website_container_networks }}"
     pull: "{{ mev_relay_website_container_pull | bool }}"
     command: "{{ mev_relay_website_container_command + mev_relay_website_container_command_extra_args }} "
+    user: "{{ mev_relay_user_meta.uid }}"
