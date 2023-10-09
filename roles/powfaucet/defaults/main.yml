@@ -15,6 +15,7 @@ powfaucet_title: "PoW Faucet"
 powfaucet_privkey: "feedbeef12340000feedbeef12340000feedbeef12340000feedbeef12340000"
 powfaucet_rpcurl: "http://your-el-node:8545"
 powfaucet_explorer_link: "https://your-el-block-explorer.com/tx/{txid}"
+powfaucet_home_html: ""
 
 powfaucet_min_drop_wei: 1000000000000000000 # 1 ETH
 powfaucet_max_drop_wei: 50000000000000000000 # 50 ETH
@@ -118,24 +119,7 @@ powfaucet_config: |
 
   # some additional html to show on the startpage
   faucetHomeHtml: |
-    <div class='pow-info'>
-      <h5>What is a PoW Faucet?</h5>
-      This is an Ethereum Faucet running on a Ethereum Testnet.<br>
-      To prevent malicious actors from exhausting all available funds or
-      accumulating enough Ether to mount long running spam attacks,
-      this faucet requires some mining work to be done in exchange for
-      free testnet funds.
-    </div>
-    <div class='pow-info'>
-      <h5>How does this work?</h5>
-      Just enter your ETH Address and start mining.
-      When you've collected enough ETH, stop mining and claim your rewards.
-    </div>
-    <div class='pow-info'>
-      <h5>How to help the faucet?</h5>
-      Replenish the faucet by sending funds you don't need anymore to:<br>
-      {faucetWallet}
-    </div>
+    {{ powfaucet_home_html | indent(width=4, indentfirst=False ) }}
 
   # random secret string that is used by the faucet to "sign" session data.
   # use a random string and do not share / reuse it anywhere.
