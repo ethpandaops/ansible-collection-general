@@ -119,7 +119,7 @@ powfaucet_config: |
 
   # some additional html to show on the startpage
   faucetHomeHtml: |
-    {{ powfaucet_home_html | indent(width=4, indentfirst=False ) }}
+    {{ powfaucet_home_html | indent(width=4) }}
 
   # random secret string that is used by the faucet to "sign" session data.
   # use a random string and do not share / reuse it anywhere.
