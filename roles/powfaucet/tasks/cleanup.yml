@@ -1,0 +1,13 @@
+- name: Stop powfaucet containers
+  community.docker.docker_container:
+    name: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ powfaucet_container_name }}"
+
+- name: Delete powfaucet data directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ powfaucet_datadir }}"

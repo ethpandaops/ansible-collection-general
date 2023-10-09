@@ -1,0 +1,43 @@
+- name: Add powfaucet user
+  ansible.builtin.user:
+    name: "{{ powfaucet_user }}"
+  register: powfaucet_user_meta
+
+- name: Setup docker network
+  ansible.builtin.include_role:
+    name: ethpandaops.general.docker_network
+  vars:
+    docker_network_name: "{{ powfaucet_docker_network_name }}"
+
+- name: Create directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0750"
+    owner: "{{ powfaucet_user }}"
+    group: "{{ powfaucet_user }}"
+  loop:
+    - "{{ powfaucet_datadir }}"
+
+- name: Create powfaucet config file
+  ansible.builtin.copy:
+    content: "{{ powfaucet_config }}"
+    dest: "{{ powfaucet_datadir }}/faucet-config.yaml"
+    owner: "{{ powfaucet_user }}"
+    group: "{{ powfaucet_user }}"
+    mode: '0640'
+
+- name: Setup powfaucet
+  community.docker.docker_container:
+    name: "{{ powfaucet_container_name }}"
+    image: "{{ powfaucet_container_image }}"
+    state: 'started'
+    restart_policy: always
+    stop_timeout: "{{ powfaucet_container_stop_timeout }}"
+    ports: "{{ powfaucet_container_ports }}"
+    volumes: "{{ powfaucet_container_volumes }}"
+    env: "{{ powfaucet_container_env }}"
+    networks: "{{ powfaucet_container_networks }}"
+    pull: "{{ powfaucet_container_pull | bool }}"
+    user: "{{ powfaucet_user_meta.uid }}"
+    command: "{{ powfaucet_container_command }}"
