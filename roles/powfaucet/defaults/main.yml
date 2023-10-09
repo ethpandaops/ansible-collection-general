@@ -16,7 +16,7 @@ powfaucet_privkey: "feedbeef12340000feedbeef12340000feedbeef12340000feedbeef1234
 powfaucet_rpcurl: "http://your-el-node:8545"
 powfaucet_explorer_link: "https://your-el-block-explorer.com/tx/{txid}"
 
-powfaucet_min_drop_wei:  1000000000000000000 # 1 ETH
+powfaucet_min_drop_wei: 1000000000000000000 # 1 ETH
 powfaucet_max_drop_wei: 50000000000000000000 # 50 ETH
 
 # captcha module (require captcha check)
@@ -121,14 +121,14 @@ powfaucet_config: |
     <div class='pow-info'>
       <h5>What is a PoW Faucet?</h5>
       This is an Ethereum Faucet running on a Ethereum Testnet.<br>
-      To prevent malicious actors from exhausting all available funds or 
-      accumulating enough Ether to mount long running spam attacks, 
-      this faucet requires some mining work to be done in exchange for 
+      To prevent malicious actors from exhausting all available funds or
+      accumulating enough Ether to mount long running spam attacks,
+      this faucet requires some mining work to be done in exchange for
       free testnet funds.
     </div>
     <div class='pow-info'>
       <h5>How does this work?</h5>
-      Just enter your ETH Address and start mining. 
+      Just enter your ETH Address and start mining.
       When you've collected enough ETH, stop mining and claim your rewards.
     </div>
     <div class='pow-info'>
@@ -137,8 +137,8 @@ powfaucet_config: |
       {faucetWallet}
     </div>
 
-  # random secret string that is used by the faucet to "sign" session data, so sessions can be restored automatically by clients when faucet is restarted / crashed
-  # use a random string and do not share / reuse it anywhere. Everyone knowing this secret is theoretically able to claim rewards from the faucet without mining.
+  # random secret string that is used by the faucet to "sign" session data.
+  # use a random string and do not share / reuse it anywhere.
   faucetSecret: "{{ powfaucet_privkey }}-secret"
 
   # ETH execution layer RPC host
@@ -224,14 +224,14 @@ powfaucet_config: |
 
       # require captcha to start claim payout (default: false)
       checkBalanceClaim: false
-    
+
     ## ENS Name
     ensname:
       enabled: {{ powfaucet_ens_enabled }}
 
       # RPC Host for ENS name resolver (mainnet)
       rpcHost: "{{ powfaucet_ens_rpcurl }}"
-      
+
       # require ENS name
       required: {{ powfaucet_ens_required }}
 
@@ -273,7 +273,7 @@ powfaucet_config: |
 
       # deny sessions for contract addresses
       denyContract: {{ powfaucet_ethinfo_deny_contract }}
-    
+
     ## Faucet Outflow module
     faucet-outflow:
       # enable / disable faucet outflow protection
@@ -325,7 +325,7 @@ powfaucet_config: |
 
       # require minimum number of transactions from mainnet wallet (nonce count)
       minTxCount: {{ powfaucet_mainnet_min_tx_count }}
-    
+
     ## Recurring Limits module
     recurring-limits:
       # enable / disable recurring limits protection
@@ -334,12 +334,12 @@ powfaucet_config: |
       limits: # array of individual limits, which all need to be passed
         - limitAmount: {{ powfaucet_recurring_limits_amount_wei }}
           duration: {{ powfaucet_recurring_limits_duration }}
-          
+
     ## Concurrency Limit module
     concurrency-limit:
       # enable / disable concurrency limit
       enabled: true
-      
+
       concurrencyLimit: 1 # only allow 1 concurrent session (sessions in 'running' state at the same time for the same ip / target addr)
       byAddrOnly: false # only check concurrency by target address
       byIPOnly: false # only check concurrency by IP address
@@ -422,7 +422,8 @@ powfaucet_config: |
   resultSharing:
     preHtml: |
       <div class="sh-opt">
-        Did you like the faucet? Give that project a 
-        <iframe src="https://ghbtns.com/github-btn.html?user=pk910&repo=PoWFaucet&type=star&count=true" frameborder="0" scrolling="0" width="150" height="20" title="GitHub"></iframe>
+        Did you like the faucet? Give that project a
+        <iframe src="https://ghbtns.com/github-btn.html?user=pk910&repo=PoWFaucet&type=star&count=true"
+         frameborder="0" scrolling="0" width="150" height="20" title="GitHub"></iframe>
       </div>
     caption: ""
