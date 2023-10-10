@@ -10,15 +10,16 @@ goomy_container_volumes: []
 goomy_container_stop_timeout: "300"
 goomy_container_networks: []
 
-goomy_container_command:
-  - combined
-  - -p "{{ goomy_private_key }}"
-  - -h {{ goomy_rpc_url | join(' -h ') }}
-  - {{ goomy_scenario }}
-  - {{ goomy_extra_args }}
+goomy_command:
+  - ./blob-spammer
+  - -p
+  - "{{ goomy_private_key }}"
+  - "{{ goomy_scenario }}"
+goomy_rpc_args: "{{ ['-h '] | product(goomy_rpc_urls) | map('join') | join(' ') | split(' ') }}"
+goomy_container_command: "{{ goomy_command + goomy_rpc_args + goomy_extra_args }}"
 
 goomy_rpc_urls:
   - your-execution-node:8545
 goomy_private_key: ""
 goomy_scenario: "combined"
-goomy_extra_args: "-b 2 -t 2 --max-pending 3"
+goomy_extra_args: ["-b", "2", "-t", "2", "--max-pending", "3"]
