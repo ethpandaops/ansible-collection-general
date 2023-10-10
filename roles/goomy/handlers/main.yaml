@@ -1,0 +1,5 @@
+- name: Restart goomy sentry container
+  community.docker.docker_container:
+    name: "{{ goomy_container_name }}"
+    state: started
+    restart: true

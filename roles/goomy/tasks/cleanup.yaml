@@ -1,0 +1,5 @@
+- name: Remove goomy container
+  community.docker.docker_container:
+    name: "{{ goomy_container_name }}"
+    state: absent
+  when: goomy_cleanup

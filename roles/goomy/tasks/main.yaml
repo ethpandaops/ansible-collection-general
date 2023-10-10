@@ -1,0 +1,7 @@
+- name: Setup goomy
+  ansible.builtin.import_tasks: setup.yaml
+  when: not goomy_cleanup
+
+- name: Cleanup goomy
+  ansible.builtin.import_tasks: cleanup.yaml
+  when: goomy_cleanup
