@@ -17,9 +17,10 @@ A collection of reusable ansible components used by the EthPandaOps team.
 - [ethereum_genesis](roles/ethereum_genesis)
 - [ethereum_metrics_exporter](roles/ethereum_metrics_exporter)
 - [ethstats](roles/ethstats)
-- [xatu_sentry](roles/xatu_sentry)
-- [mev_boost](roles/mev_boost)
 - [goomy](roles/goomy)
+- [mev_boost](roles/mev_boost)
+- [powfaucet](roles/powfaucet)
+- [xatu_sentry](roles/xatu_sentry)
 
 ### Ethereum client pair
 - [ethereum_node](roles/ethereum_node)
