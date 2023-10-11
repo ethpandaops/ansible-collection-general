@@ -1,0 +1,25 @@
+- name: Add goomy user
+  ansible.builtin.user:
+    name: "{{ goomy_user }}"
+    shell: /bin/nologin
+
+- name: Get goomy uid
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ goomy_user }}"
+  register: goomy_user_getent
+
+- name: Run goomy container
+  community.docker.docker_container:
+    name: "{{ goomy_container_name }}"
+    image: "{{ goomy_container_image }}"
+    user: "{{ goomy_user_getent.ansible_facts.getent_passwd[goomy_user][1] }}"
+    state: started
+    restart_policy: always
+    stop_timeout: "{{ goomy_container_stop_timeout }}"
+    ports: "{{ goomy_container_ports }}"
+    volumes: "{{ goomy_container_volumes }}"
+    env: "{{ goomy_container_env }}"
+    pull: "{{ goomy_container_pull | bool }}"
+    networks: "{{ goomy_container_networks }}"
+    command: "{{ goomy_container_command }}"
