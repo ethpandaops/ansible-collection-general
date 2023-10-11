@@ -19,6 +19,7 @@ A collection of reusable ansible components used by the EthPandaOps team.
 - [ethstats](roles/ethstats)
 - [xatu_sentry](roles/xatu_sentry)
 - [mev_boost](roles/mev_boost)
+- [goomy](roles/goomy)
 
 ### Ethereum client pair
 - [ethereum_node](roles/ethereum_node)
@@ -47,6 +48,7 @@ A collection of reusable ansible components used by the EthPandaOps team.
 - [json_rpc_snooper](roles/json_rpc_snooper)
 - [k3s](roles/k3s)
 - [litestream](roles/litestream)
+- [logsprout](roles/logsprout)
 - [oh_my_zsh](roles/oh_my_zsh)
 - [prometheus](roles/prometheus)
 - [s3_cron_backup](roles/s3_cron_backup)
