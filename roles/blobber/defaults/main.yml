@@ -24,7 +24,9 @@ blobber_container_networks: []
 
 # Storage configs
 blobber_datadir: /data/blobber
+blobber_validator_key_file_local: "{{ ansible_inventory_sources[0] | dirname }}/files/validator_keys/{{ inventory_hostname }}/pubkeys.json"
 blobber_validator_key_file: /data/pubkeys.json
+
 blobber_container_volumes:
   - "{{ blobber_datadir }}:/data"
 
@@ -35,7 +37,7 @@ blobber_slot_action_frequency: 1
 
 blobber_container_command:
   - "./blobber"
-  - "--cl={{blobber_beacon_api}}"
+  - "--cl={{ blobber_beacon_api }}"
 
 blobber_container_command_extra_args: []
 

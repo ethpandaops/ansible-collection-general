@@ -3,6 +3,19 @@
     name: "{{ blobber_user }}"
   register: blobber_user_meta
 
+- name: Create blobber dirs
+  ansible.builtin.file:
+    path: "{{ blobber_datadir }}"
+    state: directory
+    mode: '0777'
+    owner: "{{ blobber_user }}"
+    group: "{{ blobber_user }}"
+
+- name: Copy validator pubkey file
+  ansible.posix.synchronize:
+    src: "{{ blobber_validator_key_file_local }}"
+    dest: "{{ blobber_validator_key_file }}"
+
 - name: Run blobber container
   community.docker.docker_container:
     name: "{{ blobber_container_name }}"
