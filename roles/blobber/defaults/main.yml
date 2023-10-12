@@ -1,0 +1,43 @@
+blobber_user: blobber
+
+blobber_cleanup: false # when set to "true" it will remove the container(s)
+
+################################################################################
+##
+## blobber container configuration
+##
+################################################################################
+blobber_container_name: blobber
+blobber_container_image: parithoshj/blobber:v0.0.1
+blobber_container_env: {}
+blobber_log_level: info
+
+# Network configs
+blobber_p2p_port: 20000
+blobber_announced_ip: "{{ ansible_host }}"
+blobber_api_listen_port: 20001
+blobber_container_ports:
+  - "{{ blobber_p2p_port }}:{{ blobber_p2p_port }}"
+  - "{{ blobber_p2p_port }}:{{ blobber_p2p_port }}/udp"
+  - "127.0.0.1:{{ blobber_api_listen_port }}:{{ blobber_api_listen_port }}"
+blobber_container_networks: []
+
+# Storage configs
+blobber_datadir: /data/blobber
+blobber_validator_key_file: /data/pubkeys.json
+blobber_container_volumes:
+  - "{{ blobber_datadir }}:/data"
+
+# Blobber specific configs
+blobber_beacon_api: http://beacon:5052
+blobber_slot_actions: []
+blobber_slot_action_frequency: 1
+
+blobber_container_command:
+  - "./blobber"
+  - "--cl={{blobber_beacon_api}}"
+
+blobber_container_command_extra_args: []
+
+# Default image pull policy
+blobber_container_pull: false

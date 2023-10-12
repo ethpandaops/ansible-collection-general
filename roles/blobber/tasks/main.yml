@@ -1,0 +1,8 @@
+---
+# tasks file for blobber
+- name: Setup blobber
+  ansible.builtin.import_tasks: setup.yaml
+  when: not blobber_cleanup
+
+- name: Cleanup blobber
+  ansible.builtin.import_tasks: cleanup.yaml

@@ -1,0 +1,18 @@
+- name: Add blobber user
+  ansible.builtin.user:
+    name: "{{ blobber_user }}"
+  register: blobber_user_meta
+
+- name: Run blobber container
+  community.docker.docker_container:
+    name: "{{ blobber_container_name }}"
+    image: "{{ blobber_container_image }}"
+    state: started
+    restart_policy: always
+    volumes: "{{ blobber_container_volumes }}"
+    env: "{{ blobber_container_env }}"
+    networks: "{{ blobber_container_networks }}"
+    ports: "{{ blobber_container_ports }}"
+    command: "{{ blobber_container_command + blobber_container_command_extra_args }} "
+    user: "{{ blobber_user_meta.uid }}"
+    pull: "{{ blobber_container_pull | bool }}"
