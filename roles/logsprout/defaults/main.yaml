@@ -1,0 +1,18 @@
+logsprout_cleanup: false
+
+logsprout_container_name: "logsprout"
+logsprout_container_image: "gliderlabs/logspout:v3.2.14"
+logsprout_container_env: {}
+logsprout_container_ports: []
+logsprout_container_volumes:
+  - /var/run/docker.sock:/var/run/docker.sock
+  # The syslog adapter will look for the file /etc/host_hostname
+  # and, if the file exists and it is not empty, will configure
+  # the hostname field with the content of this file.
+  - /etc/hostname:/etc/host_hostname:ro
+
+logsprout_container_stop_timeout: "120"
+logsprout_container_networks: []
+
+logsprout_container_command:
+  - syslog://localhost:514

@@ -1,0 +1,26 @@
+goomy_user: "goomy"
+goomy_cleanup: false # when set to "true" it will remove the container
+
+goomy_container_name: "goomy"
+goomy_container_image: "ethpandaops/goomy-blob:master"
+goomy_container_pull: false
+goomy_container_env: {}
+goomy_container_ports: []
+goomy_container_volumes: []
+
+goomy_container_stop_timeout: "300"
+goomy_container_networks: []
+
+goomy_command:
+  - ./blob-spammer
+  - --privkey
+  - "{{ goomy_private_key }}"
+  - "{{ goomy_scenario }}"
+goomy_rpc_args: "{{ ['--rpchost '] | product(goomy_rpc_urls) | map('join') | join(' ') | split(' ') }}"
+goomy_container_command: "{{ goomy_command + goomy_rpc_args + goomy_extra_args }}"
+
+goomy_rpc_urls:
+  - your-execution-node:8545
+goomy_private_key: ""
+goomy_scenario: "combined"
+goomy_extra_args: ["--sidecars", "2", "--throughput", "2", "--max-pending", "3"]

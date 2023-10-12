@@ -1,0 +1,7 @@
+- name: Setup powfaucet
+  ansible.builtin.import_tasks: setup.yml
+  when: not powfaucet_cleanup_all
+
+- name: Cleanup powfaucet
+  ansible.builtin.import_tasks: cleanup.yml
+  when: powfaucet_cleanup_all

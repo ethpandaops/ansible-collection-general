@@ -1,0 +1,12 @@
+- name: Run logsprout container
+  community.docker.docker_container:
+    name: "{{ logsprout_container_name }}"
+    image: "{{ logsprout_container_image }}"
+    state: started
+    restart_policy: always
+    stop_timeout: "{{ logsprout_container_stop_timeout }}"
+    ports: "{{ logsprout_container_ports }}"
+    volumes: "{{ logsprout_container_volumes }}"
+    env: "{{ logsprout_container_env }}"
+    networks: "{{ logsprout_container_networks }}"
+    command: "{{ logsprout_container_command }}"

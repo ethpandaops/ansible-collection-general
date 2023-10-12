@@ -1,0 +1,7 @@
+- name: Setup logsprout
+  ansible.builtin.import_tasks: setup.yaml
+  when: not logsprout_cleanup
+
+- name: Cleanup logsprout
+  ansible.builtin.import_tasks: cleanup.yaml
+  when: logsprout_cleanup
