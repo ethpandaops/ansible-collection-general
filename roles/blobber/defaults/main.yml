@@ -23,8 +23,10 @@ blobber_container_ports:
 blobber_container_networks: []
 
 # Storage configs
+# Set blobber_pubkeys to "{{ ansible_inventory_sources[0] | dirname }}/files/validator_keys/{{ inventory_hostname }}/pubkeys.json" for devnets
+blobber_validator_pubkeys: |
+  ["0xpubkey","0xpubkey2"]
 blobber_datadir: /data/blobber
-blobber_validator_key_file_local: "{{ ansible_inventory_sources[0] | dirname }}/files/validator_keys/{{ inventory_hostname }}/pubkeys.json"
 blobber_validator_key_file: /data/pubkeys.json
 
 blobber_container_volumes:

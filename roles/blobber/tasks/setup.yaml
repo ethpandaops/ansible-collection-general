@@ -12,9 +12,12 @@
     group: "{{ blobber_user }}"
 
 - name: Copy validator pubkey file
-  ansible.posix.synchronize:
-    src: "{{ blobber_validator_key_file_local }}"
+  ansible.builtin.copy:
+    content: "{{ blobber_validator_pubkeys }}"
     dest: "{{ blobber_validator_key_file }}"
+    owner: "{{ blobber_user }}"
+    group: "{{ blobber_user }}"
+    mode: '0644'
 
 - name: Run blobber container
   community.docker.docker_container:
