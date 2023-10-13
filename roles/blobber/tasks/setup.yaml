@@ -19,18 +19,18 @@
     group: "{{ blobber_user }}"
     mode: '0777'
 
-- name: Process private_keys
+- name: Process blobber_private_keys
   ansible.builtin.set_fact:
     processed_keys: >
       {{ processed_keys | default([]) + [lookup('file', item) | b64decode] }}
   when: item | regex_search('.*/secrets/.*')
-  loop: "{{ private_keys }}"
+  loop: "{{ blobber_private_keys }}"
   loop_control:
     label: "{{ item }}"
 
 - name: Set processed_keys to private_keys if not from secrets directory
   ansible.builtin.set_fact:
-    processed_keys: "{{ private_keys }}"
+    processed_keys: "{{ blobber_private_keys }}"
   when: processed_keys is not defined
 
 
@@ -48,7 +48,7 @@
 - name: Assemble all keys into a single file
   ansible.builtin.assemble:
     src: "{{ temp_key_dir }}/"
-    dest: "{{ blobber_datadir }}/pubkeys.json"
+    dest: "{{ blobber_datadir }}/privkeys.json"
     owner: "{{ blobber_user }}"
     group: "{{ blobber_user }}"
     mode: '0600'
