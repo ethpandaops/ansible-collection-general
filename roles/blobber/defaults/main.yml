@@ -28,6 +28,7 @@ blobber_private_keys: []
 
 blobber_datadir: /data/blobber
 blobber_validator_key_file: /data/privkeys.json
+temp_key_dir: /tmp/temp_keys
 
 blobber_container_volumes:
   - "{{ blobber_datadir }}:/data"
