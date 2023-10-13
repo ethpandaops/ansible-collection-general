@@ -22,7 +22,7 @@
 - name: Process blobber_private_keys
   ansible.builtin.set_fact:
     processed_keys: >
-      {{ processed_keys | default([]) + [lookup('file', item) | b64decode] }}
+      {{ processed_keys | default([]) + [lookup('file', item, wantlist=True) | b64decode] }}
   when: item | regex_search('.*/secrets/.*')
   loop: "{{ blobber_private_keys }}"
   loop_control:
