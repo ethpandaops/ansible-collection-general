@@ -39,6 +39,8 @@ blobber_slot_action_frequency: 1
 
 blobber_container_command:
   - "./blobber"
+  - "--log-level={{ blobber_log_level }}"
+  - "--host-ip={{ blobber_announced_ip }}"
   - "--cl={{ blobber_beacon_api }}"
 
 blobber_container_command_extra_args: []
