@@ -14,7 +14,7 @@
 - name: Copy validator pubkey file
   ansible.builtin.copy:
     content: "{{ blobber_validator_pubkeys }}"
-    dest: "{{ blobber_validator_key_file }}"
+    dest: "{{ blobber_datadir }}/pubkeys.json"
     owner: "{{ blobber_user }}"
     group: "{{ blobber_user }}"
     mode: '0644'
