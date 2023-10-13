@@ -11,13 +11,52 @@
     owner: "{{ blobber_user }}"
     group: "{{ blobber_user }}"
 
-- name: Copy validator pubkey file
+- name: Ensure temporary directory exists
+  ansible.builtin.file:
+    path: "{{ temp_key_dir }}"
+    state: directory
+    owner: "{{ blobber_user }}"
+    group: "{{ blobber_user }}"
+    mode: '0777'
+
+- name: Process private_keys
+  ansible.builtin.set_fact:
+    processed_keys: >
+      {{ processed_keys | default([]) + [lookup('file', item) | b64decode] }}
+  when: item | regex_search('.*/secrets/.*')
+  loop: "{{ private_keys }}"
+  loop_control:
+    label: "{{ item }}"
+
+- name: Set processed_keys to private_keys if not from secrets directory
+  ansible.builtin.set_fact:
+    processed_keys: "{{ private_keys }}"
+  when: processed_keys is not defined
+
+
+- name: Write each private key to a temporary file
   ansible.builtin.copy:
-    content: "{{ blobber_validator_pubkeys }}"
+    content: "{{ item }}"
+    dest: "{{ temp_key_dir }}/private_key_part_{{ loop.index }}"
+    owner: "{{ blobber_user }}"
+    group: "{{ blobber_user }}"
+    mode: '0600'
+  loop: "{{ processed_keys }}"
+  loop_control:
+    index_var: loop.index
+
+- name: Assemble all keys into a single file
+  ansible.builtin.assemble:
+    src: "{{ temp_key_dir }}/"
     dest: "{{ blobber_datadir }}/pubkeys.json"
     owner: "{{ blobber_user }}"
     group: "{{ blobber_user }}"
-    mode: '0644'
+    mode: '0600'
+
+- name: Clean up temporary files
+  ansible.builtin.file:
+    path: "{{ temp_key_dir }}"
+    state: absent
 
 - name: Run blobber container
   community.docker.docker_container:
