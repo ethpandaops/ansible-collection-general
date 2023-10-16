@@ -41,8 +41,12 @@ blobber_slot_action_frequency: 1
 blobber_container_command:
   - "./blobber"
   - "--log-level={{ blobber_log_level }}"
-  - "--host-ip={{ blobber_announced_ip }}"
+  - "--external-ip={{ blobber_announced_ip }}"
   - "--cl={{ blobber_beacon_api }}"
+  - "--validator-proxy-port-start={{ blobber_api_listen_port }}"
+  - "--slot-action={{ blobber_slot_actions | to_json }}"
+  - "--slot-action-frequency={{ blobber_slot_action_frequency }}"
+  - "--validator-key-folder=/data/validators"
 
 blobber_container_command_extra_args: []
 
