@@ -26,12 +26,12 @@
 - name: Copy keys
   ansible.posix.synchronize:
     src: "{{ blobber_validator_local_key_folder }}/keys"
-    dest: "{{ blobber_validator_remote_key_folder }}/keys"
+    dest: "{{ blobber_validator_remote_key_folder }}"
 
 - name: Copy keys
   ansible.posix.synchronize:
     src: "{{ blobber_validator_local_key_folder }}/secrets"
-    dest: "{{ blobber_validator_remote_key_folder }}/secrets"
+    dest: "{{ blobber_validator_remote_key_folder }}"
 
 - name: Set permissions for blobber director
   ansible.builtin.command: "chown -R {{ blobber_user }}:{{ blobber_user }} {{ blobber_validator_remote_key_folder }}" # noqa no-free-form
