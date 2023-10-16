@@ -11,52 +11,31 @@
     owner: "{{ blobber_user }}"
     group: "{{ blobber_user }}"
 
-- name: Ensure temporary directory exists
+- name: Create validator keys data dir
   ansible.builtin.file:
-    path: "{{ temp_key_dir }}"
+    path: "{{ item }}"
     state: directory
+    mode: "0750"
     owner: "{{ blobber_user }}"
     group: "{{ blobber_user }}"
-    mode: '0777'
+  loop:
+    - "{{ blobber_validator_remote_key_folder }}"
+    - "{{ blobber_validator_remote_key_folder }}/keys"
+    - "{{ blobber_validator_remote_key_folder }}/secrets"
 
-- name: Process blobber_private_keys
-  ansible.builtin.set_fact:
-    processed_keys: >
-      {{ processed_keys | default([]) + [lookup('file', item, wantlist=True) | b64decode] }}
-  when: item | regex_search('.*/secrets/.*')
-  loop: "{{ blobber_private_keys }}"
-  loop_control:
-    label: "{{ item }}"
+- name: Copy keys
+  ansible.posix.synchronize:
+    src: "{{ blobber_validator_local_key_folder }}/keys"
+    dest: "{{ blobber_validator_remote_key_folder }}/keys"
 
-- name: Set processed_keys to private_keys if not from secrets directory
-  ansible.builtin.set_fact:
-    processed_keys: "{{ blobber_private_keys }}"
-  when: processed_keys is not defined
+- name: Copy keys
+  ansible.posix.synchronize:
+    src: "{{ blobber_validator_local_key_folder }}/secrets"
+    dest: "{{ blobber_validator_remote_key_folder }}/secrets"
 
-
-- name: Write each private key to a temporary file
-  ansible.builtin.copy:
-    content: "{{ item }}"
-    dest: "{{ temp_key_dir }}/private_key_part_{{ loop.index }}"
-    owner: "{{ blobber_user }}"
-    group: "{{ blobber_user }}"
-    mode: '0600'
-  loop: "{{ processed_keys }}"
-  loop_control:
-    index_var: loop.index
-
-- name: Assemble all keys into a single file
-  ansible.builtin.assemble:
-    src: "{{ temp_key_dir }}/"
-    dest: "{{ blobber_datadir }}/privkeys.json"
-    owner: "{{ blobber_user }}"
-    group: "{{ blobber_user }}"
-    mode: '0600'
-
-- name: Clean up temporary files
-  ansible.builtin.file:
-    path: "{{ temp_key_dir }}"
-    state: absent
+- name: Set permissions for blobber director
+  ansible.builtin.command: "chown -R {{ blobber_user }}:{{ blobber_user }} {{ blobber_validator_remote_key_folder }}" # noqa no-free-form
+  changed_when: false
 
 - name: Run blobber container
   community.docker.docker_container:
