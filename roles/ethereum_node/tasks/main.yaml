@@ -57,3 +57,6 @@
 
 - name: Configure xatu sentry
   ansible.builtin.import_tasks: addons/xatu_sentry.yaml
+
+- name: Configure blobber
+  ansible.builtin.import_tasks: addons/blobber.yaml

@@ -13,3 +13,8 @@
     success_msg: "{{ ethereum_node_cl }} is a supported client"
     fail_msg: >
       ethereum_node_el = '{{ ethereum_node_cl }}' is invalid. You can choose between: '{{ ethereum_node_supported_cl }}'
+
+- name: Check if consensus client supports blobber configuration
+  ansible.builtin.fail:
+    msg: "Error: The blobber tool currently doesn't support nimbus or teku"
+  when: ethereum_node_blobber_enabled and (ethereum_node_cl == 'nimbus' or ethereum_node_cl == 'teku')

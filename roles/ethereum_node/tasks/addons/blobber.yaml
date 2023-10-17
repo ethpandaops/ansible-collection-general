@@ -1,0 +1,14 @@
+- name: Setup blobber
+  ansible.builtin.include_role:
+    name: ethpandaops.general.blobber
+  vars:
+    blobber_beacon_api: "{{ ethereum_node_cl_beacon_endpoint }}"
+    blobber_container_networks: "{{ ethereum_node_docker_networks }}"
+  when: ethereum_node_blobber_enabled
+
+- name: Cleanup blobber
+  ansible.builtin.include_role:
+    name: ethpandaops.general.blobber
+  vars:
+    blobber_cleanup: true
+  when: not ethereum_node_blobber_enabled

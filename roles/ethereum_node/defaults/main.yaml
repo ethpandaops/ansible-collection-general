@@ -37,6 +37,11 @@ ethereum_node_json_rpc_snooper_engine_enabled: false
 ethereum_node_json_rpc_snooper_engine_port: 8561
 ethereum_node_json_rpc_snooper_engine_name: "snooper-engine"
 
+# Blobber MITM tool
+ethereum_node_blobber_enabled: false
+ethereum_node_blobber_name: blobber
+ethereum_node_blobber_port: 20001
+
 # Mev boost
 ethereum_node_mev_boost_enabled: false
 
@@ -60,3 +65,5 @@ ethereum_node_el_rpc_snooper_endpoint: >-
   http://{{ ethereum_node_json_rpc_snooper_name }}:{{ ethereum_node_json_rpc_snooper_port }}
 ethereum_node_cl_beacon_endpoint: >-
   http://{{ vars[ethereum_node_cl + '_container_name'] | default(ethereum_node_cl) }}:{{ ethereum_node_cl_ports_http_beacon }}
+ethereum_node_cl_beacon_blobber_endpoint: >-
+  http://{{ ethereum_node_blobber_name }}:{{ ethereum_node_blobber_port }}
