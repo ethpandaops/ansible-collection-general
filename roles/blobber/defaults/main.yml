@@ -34,15 +34,16 @@ blobber_container_volumes:
   - "{{ blobber_datadir }}:/data"
 
 # Blobber specific configs
-blobber_beacon_api: http://beacon:5052
+blobber_beacon_api: beacon:5052
 blobber_slot_actions: []
 blobber_slot_action_frequency: 1
 
 blobber_container_command:
   - "./blobber"
+  - "--cl={{ blobber_beacon_api | replace('http://', '') }}"
+  - "--beacon-port-start={{ blobber_p2p_port }}"
   - "--log-level={{ blobber_log_level }}"
   - "--external-ip={{ blobber_announced_ip }}"
-  - "--cl={{ blobber_beacon_api }}"
   - "--validator-proxy-port-start={{ blobber_api_listen_port }}"
   - "--slot-action={{ blobber_slot_actions | to_json }}"
   - "--slot-action-frequency={{ blobber_slot_action_frequency }}"
