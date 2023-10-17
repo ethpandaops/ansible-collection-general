@@ -19,6 +19,7 @@ A collection of reusable ansible components used by the EthPandaOps team.
 - [ethstats](roles/ethstats)
 - [goomy](roles/goomy)
 - [mev_boost](roles/mev_boost)
+- [mev_relay](roles/mev_relay)
 - [powfaucet](roles/powfaucet)
 - [xatu_sentry](roles/xatu_sentry)
 

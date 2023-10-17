@@ -1,0 +1,11 @@
+- name: Remove mev_flood container
+  community.docker.docker_container:
+    name: "{{ mev_flood_container_name }}"
+    state: absent
+  when: mev_flood_cleanup
+
+- name: Remove mev_flood_spam container
+  community.docker.docker_container:
+    name: "{{ mev_flood_spam_container_name }}"
+    state: absent
+  when: mev_flood_cleanup

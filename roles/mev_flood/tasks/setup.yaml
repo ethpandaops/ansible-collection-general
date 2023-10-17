@@ -1,0 +1,52 @@
+- name: Add mev_flood user
+  ansible.builtin.user:
+    name: "{{ mev_flood_user }}"
+  register: mev_flood_user_meta
+
+- name: Setup docker network
+  ansible.builtin.include_role:
+    name: ethpandaops.general.docker_network
+  vars:
+    docker_network_name: "{{ mev_flood_docker_network_name }}"
+
+- name: Create directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0750"
+    owner: "{{ mev_flood_user }}"
+    group: "{{ mev_flood_user }}"
+  loop:
+    - "{{ mev_flood_datadir }}"
+
+- name: Set permissions
+  ansible.builtin.command: "chown -R {{ mev_flood_user }}:{{ mev_flood_user }} {{ mev_flood_datadir }}" # noqa no-free-form
+  changed_when: false
+
+- name: Run mev_flood container
+  community.docker.docker_container:
+    name: "{{ mev_flood_container_name }}"
+    image: "{{ mev_flood_container_image }}"
+    state: started
+    restart_policy: always
+    stop_timeout: "{{ mev_flood_container_stop_timeout }}"
+    volumes: "{{ mev_flood_container_volumes }}"
+    env: "{{ mev_flood_container_env }}"
+    networks: "{{ mev_flood_container_networks }}"
+    ports: "{{ mev_flood_container_ports }}"
+    command: "{{ mev_flood_container_command + mev_flood_container_command_extra_args }} "
+    user: "{{ mev_flood_user_meta.uid }}"
+
+- name: Run mev_flood_spam container
+  community.docker.docker_container:
+    name: "{{ mev_flood_spam_container_name }}"
+    image: "{{ mev_flood_spam_container_image }}"
+    state: started
+    restart_policy: always
+    stop_timeout: "{{ mev_flood_spam_container_stop_timeout }}"
+    volumes: "{{ mev_flood_spam_container_volumes }}"
+    env: "{{ mev_flood_spam_container_env }}"
+    networks: "{{ mev_flood_spam_container_networks }}"
+    ports: "{{ mev_flood_spam_container_ports }}"
+    command: "{{ mev_flood_spam_container_command + mev_flood_spam_container_command_extra_args }} "
+    user: "{{ mev_flood_user_meta.uid }}"

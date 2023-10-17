@@ -1,0 +1,10 @@
+galaxy_info:
+  author: flashbots_mev_relay
+  description: Deploy Flashbots MEV Relay and all required dependencies on a single machine.
+  license: MIT
+  min_ansible_version: "2.1"
+  galaxy_tags: ["ethereum", "mevrelay", "flashbots", "mev"]
+  platforms:
+    - name: GenericLinux
+      versions: ["all"]
+dependencies: []

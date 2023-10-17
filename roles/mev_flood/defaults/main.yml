@@ -1,0 +1,51 @@
+mev_flood_user: mev_flood
+mev_flood_cleanup: false # when set to "true" it will remove the container(s)
+
+mev_flood_datadir: "/data/mev_flood"
+
+mev_flood_docker_network_name: shared
+mev_flood_docker_networks:
+  - name: "{{ mev_flood_docker_network_name }}"
+
+################################################################################
+##
+## mev_flood container configuration
+## Deploy smart contracts and provision liquidity on UniV2 pairs.
+##
+################################################################################
+mev_flood_container_name: mev-flood
+mev_flood_container_image: flashbots/mev-flood:latest
+mev_flood_container_env: {}
+mev_flood_container_ports: []
+mev_flood_container_stop_timeout: "300"
+mev_flood_container_networks: "{{ mev_flood_docker_networks }}"
+mev_flood_container_volumes:
+  - "{{ mev_flood_datadir }}:/app/cli/deployments"
+  - /etc/passwd:/etc/passwd:ro
+mev_flood_container_command:
+  - init
+  - --saveFile=local.json
+
+mev_flood_container_command_extra_args: []
+################################################################################
+##
+## mev_flood container configuration
+## Send a constant stream of UniV2 swaps.
+##
+################################################################################
+
+mev_flood_spam_container_name: mev-flood-spam
+mev_flood_spam_container_image: flashbots/mev-flood:latest
+mev_flood_spam_container_env: {}
+mev_flood_spam_container_ports: []
+mev_flood_spam_container_stop_timeout: "300"
+mev_flood_spam_container_networks: "{{ mev_flood_docker_networks }}"
+mev_flood_spam_container_volumes:
+  - "{{ mev_flood_datadir }}:/app/cli/deployments"
+  - /etc/passwd:/etc/passwd:ro
+mev_flood_spam_container_command:
+  - spam
+  - --loadFile=local.json
+  - --secondsPerBundle=15
+
+mev_flood_spam_container_command_extra_args: []

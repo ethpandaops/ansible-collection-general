@@ -1,0 +1,22 @@
+- name: Stop mev_relay containers
+  community.docker.docker_container:
+    name: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ mev_relay_api_container_name }}"
+    - "{{ mev_relay_db_container_name }}"
+    - "{{ mev_relay_housekeeper_container_name }}"
+    - "{{ mev_relay_website_container_name }}"
+    - "{{ mev_relay_redis_container_name }}"
+
+- name: Delete data directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ mev_relay_api_datadir }}"
+    - "{{ mev_relay_website_datadir }}"
+    - "{{ mev_relay_housekeeper_datadir }}"
+    - "{{ mev_relay_db_datadir }}"
+    - "{{ mev_relay_redis_datadir }}"
+    - "{{ mev_relay_datadir }}"
