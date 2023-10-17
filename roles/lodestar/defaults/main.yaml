@@ -2,6 +2,8 @@ lodestar_user: lodestar
 lodestar_datadir: /data/lodestar
 lodestar_auth_jwt_path: /data/execution-auth.secret
 lodestar_execution_engine_endpoint: http://geth:8551
+lodestar_beacon_endpoint: "http://{{ lodestar_container_name }}:{{ lodestar_ports_http_beacon }}"
+
 lodestar_announced_ip: "{{ ansible_host }}"
 
 lodestar_cleanup: false # when set to "true" it will remove the container(s)
@@ -76,7 +78,7 @@ lodestar_validator_container_command:
   - --dataDir=/validator-data
   - --keystoresDir=/validator-data/keys
   - --secretsDir=/validator-data/secrets
-  - --beaconNodes=http://{{ lodestar_container_name }}:{{ lodestar_ports_http_beacon }}
+  - --beaconNodes={{ lodestar_beacon_endpoint }}
   - --suggestedFeeRecipient={{ lodestar_validator_fee_recipient }}
 
 lodestar_validator_container_command_extra_args: []

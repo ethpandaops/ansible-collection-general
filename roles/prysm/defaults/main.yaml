@@ -2,6 +2,7 @@ prysm_user: prysm
 prysm_datadir: /data/prysm
 prysm_auth_jwt_path: /data/execution-auth.secret
 prysm_execution_engine_endpoint: http://geth:8551
+prysm_beacon_endpoint: "{{ prysm_container_name }}:{{ prysm_ports_grpc }}"
 prysm_announced_ip: "{{ ansible_host }}"
 
 prysm_cleanup: false # when set to "true" it will remove the container(s)
@@ -79,7 +80,7 @@ prysm_validator_container_command:
   - --datadir=/validator-data
   - --wallet-dir=/validator-data/wallet
   - --wallet-password-file=/validator-data/wallet_pass.txt
-  - --beacon-rpc-provider={{ prysm_container_name }}:{{ prysm_ports_grpc }}
+  - --beacon-rpc-provider={{ prysm_beacon_endpoint }}
   - --suggested-fee-recipient={{ prysm_validator_fee_recipient }}
   - --monitoring-host=0.0.0.0
   - --monitoring-port={{ prysm_ports_metrics }}

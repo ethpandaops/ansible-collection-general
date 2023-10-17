@@ -18,3 +18,6 @@ ethereum_node_docker_networks:
 
 ethereum_node_execution_engine_endpoint: >-
   {{ ethereum_node_json_rpc_snooper_engine_enabled | ternary(ethereum_node_el_engine_snooper_endpoint, ethereum_node_el_engine_endpoint) }}
+
+ethereum_node_beacon_endpoint: >-
+  {{ ethereum_node_blobber_enabled | ternary(ethereum_node_cl_beacon_blobber_endpoint, ethereum_node_cl_beacon_endpoint) }}
