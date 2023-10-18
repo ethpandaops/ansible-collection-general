@@ -41,7 +41,7 @@ ethereum_node_json_rpc_snooper_engine_name: "snooper-engine"
 # Blobber MITM tool
 ethereum_node_blobber_enabled: false
 ethereum_node_blobber_name: blobber
-ethereum_node_blobber_port: 20001
+ethereum_node_blobber_port: 20000
 
 # Mev boost
 ethereum_node_mev_boost_enabled: false
