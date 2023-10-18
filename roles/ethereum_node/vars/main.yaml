@@ -21,3 +21,6 @@ ethereum_node_execution_engine_endpoint: >-
 
 ethereum_node_beacon_endpoint: >-
   {{ ethereum_node_blobber_enabled | ternary(ethereum_node_cl_beacon_blobber_endpoint, ethereum_node_cl_beacon_endpoint) }}
+
+ethereum_node_beacon_grpc_endpoint: >-
+  {{ ethereum_node_blobber_enabled | ternary(ethereum_node_cl_beacon_blobber_endpoint, ethereum_node_cl_beacon_grpc_endpoint) }}

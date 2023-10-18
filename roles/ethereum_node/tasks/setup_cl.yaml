@@ -46,7 +46,7 @@
     prysm_container_networks: "{{ ethereum_node_docker_networks }}"
     prysm_container_pull: "{{ ethereum_node_images_always_pull }}"
     prysm_execution_engine_endpoint: "{{ ethereum_node_execution_engine_endpoint }}"
-    prysm_beacon_endpoint: "{{ ethereum_node_beacon_endpoint }}"
+    prysm_beacon_endpoint: "{{ ethereum_node_beacon_grpc_endpoint }}"
     prysm_validator_enabled: "{{ ethereum_node_cl_validator_enabled }}"
     prysm_validator_container_networks: "{{ ethereum_node_docker_networks }}"
     prysm_validator_fee_recipient: "{{ ethereum_node_cl_validator_fee_recipient }}"
