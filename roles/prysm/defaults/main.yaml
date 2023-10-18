@@ -80,7 +80,7 @@ prysm_validator_container_command:
   - --datadir=/validator-data
   - --wallet-dir=/validator-data/wallet
   - --wallet-password-file=/validator-data/wallet_pass.txt
-  - --beacon-rpc-provider={{ prysm_beacon_endpoint }}
+  - --beacon-rpc-provider={{ prysm_beacon_endpoint | replace('http://', '')}}
   - --suggested-fee-recipient={{ prysm_validator_fee_recipient }}
   - --monitoring-host=0.0.0.0
   - --monitoring-port={{ prysm_ports_metrics }}
