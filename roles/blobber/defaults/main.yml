@@ -13,9 +13,9 @@ blobber_container_env: {}
 blobber_log_level: info
 
 # Network configs
-blobber_p2p_port: 20000
+blobber_p2p_port: 20001
 blobber_announced_ip: "{{ ansible_host }}"
-blobber_api_listen_port: 20001
+blobber_api_listen_port: 20000
 blobber_container_ports:
   - "{{ blobber_p2p_port }}:{{ blobber_p2p_port }}"
   - "{{ blobber_p2p_port }}:{{ blobber_p2p_port }}/udp"
