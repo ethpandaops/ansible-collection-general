@@ -18,6 +18,7 @@ ethereum_node_cl_enabled: true
 ethereum_node_cl_ports_p2p_tcp: 9000
 ethereum_node_cl_ports_p2p_udp: 9000
 ethereum_node_cl_ports_http_beacon: 5052
+ethereum_node_cl_ports_grpc_beacon: 4000
 ethereum_node_cl_ports_metrics: 5054
 ethereum_node_cl_checkpoint_sync_enabled: false
 
@@ -65,5 +66,7 @@ ethereum_node_el_rpc_snooper_endpoint: >-
   http://{{ ethereum_node_json_rpc_snooper_name }}:{{ ethereum_node_json_rpc_snooper_port }}
 ethereum_node_cl_beacon_endpoint: >-
   http://{{ vars[ethereum_node_cl + '_container_name'] | default(ethereum_node_cl) }}:{{ ethereum_node_cl_ports_http_beacon }}
+ethereum_node_cl_beacon_grpc_endpoint: >-
+  http://{{ vars[ethereum_node_cl + '_container_name'] | default(ethereum_node_cl) }}:{{ ethereum_node_cl_ports_grpc_beacon }}
 ethereum_node_cl_beacon_blobber_endpoint: >-
   http://{{ ethereum_node_blobber_name }}:{{ ethereum_node_blobber_port }}
