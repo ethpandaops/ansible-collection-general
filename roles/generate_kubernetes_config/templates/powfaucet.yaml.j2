@@ -1,0 +1,36 @@
+# {{ ansible_managed }}
+
+powfaucet:
+  fullnameOverride: powfaucet
+
+  image:
+    repository: {{ default_tooling_images.powfaucet.split(':') | first }}
+    tag: {{ default_tooling_images.powfaucet.split(':') | last}}
+  ingress:
+    enabled: true
+
+    className: ingress-nginx-public
+
+    hosts:
+      - host: faucet.{{ network_subdomain }}
+        paths:
+          - path: /
+            pathType: Prefix
+
+  faucetTitle: "{{ ethereum_network_name }} PoW Faucet"
+  faucetPrivkey: "<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.dencun-devnets.faucet_private_key}>"
+  faucetRpcUrl: "{{ default_el_endpoint }}"
+  faucetExplorerLink: "https://explorer.{{ network_subdomain }}/tx/{txid}"
+
+  faucetMaxDropWei: 100000000000000000000 # 100 ETH
+
+  faucetCaptchaEnabled: true
+  faucetCaptchaSitekey: "<path:/secrets/services/services.enc.yaml#hcaptcha | jsonPath {.site_key}>"
+  faucetCaptchaSecret: "<path:/secrets/services/services.enc.yaml#hcaptcha | jsonPath {.secret_key}>"
+  
+  faucetRecurringLimitsEnabled: true
+  faucetRecurringLimitsAmountWei: 500000000000000000000 # 500 ETH
+  faucetRecurringLimitsDuration: 86400 # 1 day
+
+  faucetPowEnabled: true
+  faucetPowRewardPerHash: 1000000000000000000 # 1 ETH
