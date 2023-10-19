@@ -6,6 +6,7 @@ powfaucet:
   image:
     repository: {{ default_tooling_images.powfaucet.split(':') | first }}
     tag: {{ default_tooling_images.powfaucet.split(':') | last}}
+    pullPolicy: Always
 
   resources:
     requests:
