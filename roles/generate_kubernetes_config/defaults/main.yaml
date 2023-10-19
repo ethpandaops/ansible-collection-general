@@ -66,11 +66,11 @@ gen_kubernetes_config_helm_charts:
         repository: https://ethpandaops.github.io/ethereum-helm-charts
         version: 0.1.4
   faucet:
-    valuesTemplatePath: templates/fauceth.yaml.j2
+    valuesTemplatePath: templates/powfaucet.yaml.j2
     dependencies:
-      - name: fauceth
+      - name: powfaucet
         repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 0.2.3
+        version: 0.0.1
   faucet-2:
     valuesTemplatePath: templates/eth-faucet.yaml.j2
     dependencies:
