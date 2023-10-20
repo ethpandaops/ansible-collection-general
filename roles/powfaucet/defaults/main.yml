@@ -9,6 +9,7 @@ powfaucet_datadir: "/data/powfaucet"
 powfaucet_docker_network_name: shared
 powfaucet_docker_networks:
   - name: "{{ powfaucet_docker_network_name }}"
+powfaucet_proxy_count: 1
 
 # powfaucet config
 powfaucet_title: "PoW Faucet"
@@ -110,6 +111,9 @@ powfaucet_config: |
 
   # faucet http/ws server port
   serverPort: 8080
+
+  # number of http proxies in front of this faucet
+  httpProxyCount: {{ powfaucet_proxy_count }}
 
   # title of the faucet
   faucetTitle: "{{ powfaucet_title }}"

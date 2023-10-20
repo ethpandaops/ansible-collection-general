@@ -6,6 +6,7 @@ powfaucet:
   image:
     repository: {{ default_tooling_images.powfaucet.split(':') | first }}
     tag: {{ default_tooling_images.powfaucet.split(':') | last}}
+    pullPolicy: Always
 
   resources:
     requests:
@@ -25,6 +26,7 @@ powfaucet:
         paths:
           - path: /
             pathType: Prefix
+  httpProxyCount: 2
 
   faucetTitle: "{{ ethereum_network_name }} PoW Faucet"
   faucetPrivkey: "<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.dencun-devnets.faucet_private_key}>"
