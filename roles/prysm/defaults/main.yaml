@@ -101,5 +101,5 @@ prysm_mev_boost_enabled: false
 prysm_mev_boost_beacon_command:
   - --http-mev-relay={{ prysm_mev_boost_endpoint }}
 
-prsym_mev_boost_validator_command:
+prysm_mev_boost_validator_command:
   - --enable-builder
