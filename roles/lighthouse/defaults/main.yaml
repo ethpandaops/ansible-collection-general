@@ -105,6 +105,6 @@ lighthouse_container_pull: false
 ################################################################################
 lighthouse_mev_boost_enabled: false
 lighthouse_mev_boost_beacon_command:
-  - --builder {{ lighthouse_mev_boost_endpoint }}
+  - --builder={{ lighthouse_mev_boost_endpoint }}
 lighthouse_mev_boost_validator_command:
   - --builder-proposals
