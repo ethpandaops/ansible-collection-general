@@ -3,6 +3,7 @@ teku_datadir: /data/teku
 teku_auth_jwt_path: /data/execution-auth.secret
 teku_execution_engine_endpoint: http://geth:8551
 teku_announced_ip: "{{ ansible_host }}"
+teku_mev_boost_endpoint: "http://mev-boost:18550"
 
 teku_cleanup: false # when set to "true" it will remove the container
 
@@ -75,3 +76,13 @@ teku_container_validator_volumes:
 
 # Default image pull policy
 teku_container_pull: false
+
+################################################################################
+##
+## MEV Boost configuration
+##
+################################################################################
+teku_mev_boost_enabled: false
+teku_mev_boost_beacon_command:
+  - --validators-builder-registration-default-enabled=true
+  - --builder-endpoint={{ teku_mev_boost_endpoint }}

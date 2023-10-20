@@ -4,6 +4,7 @@ prysm_auth_jwt_path: /data/execution-auth.secret
 prysm_execution_engine_endpoint: http://geth:8551
 prysm_beacon_endpoint: "{{ prysm_container_name }}:{{ prysm_ports_grpc }}"
 prysm_announced_ip: "{{ ansible_host }}"
+prysm_mev_boost_endpoint: "http://mev-boost:18550"
 
 prysm_cleanup: false # when set to "true" it will remove the container(s)
 
@@ -90,3 +91,15 @@ prysm_validator_container_command_extra_args: []
 
 # Default image pull policy
 prysm_container_pull: false
+
+################################################################################
+##
+## MEV Boost configuration
+##
+################################################################################
+prysm_mev_boost_enabled: false
+prysm_mev_boost_beacon_command:
+  - --http-mev-relay={{ prysm_mev_boost_endpoint }}
+
+prsym_mev_boost_validator_command:
+  - --enable-builder

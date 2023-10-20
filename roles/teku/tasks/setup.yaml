@@ -47,7 +47,9 @@
     command: >-
       {{
         teku_container_command +
-        (teku_validator_enabled | ternary(teku_container_validator_args, [])) +
+        (teku_validator_enabled | ternary(teku_container_validator_args +
+          (teku_mev_boost_enabled | ternary(teku_mev_boost_beacon_command,[])),
+        [])) +
         (teku_checkpoint_sync_enabled | ternary(
           teku_container_command_extra_args | map('regex_replace',"--initial-state=.*",teku_container_command_checkpoint_args),
           teku_container_command_extra_args

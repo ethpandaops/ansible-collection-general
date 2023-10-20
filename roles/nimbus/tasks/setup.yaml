@@ -70,7 +70,8 @@
     command: >-
       {{
         nimbus_validator_enabled | ternary(
-          nimbus_container_command + nimbus_container_validator_args + nimbus_container_command_extra_args,
+          nimbus_container_command + nimbus_container_validator_args + nimbus_container_command_extra_args +
+          (nimbus_mev_boost_enabled | ternary(nimbus_mev_boost_beacon_command, [])),
           nimbus_container_command + nimbus_container_command_extra_args,
         )
       }}

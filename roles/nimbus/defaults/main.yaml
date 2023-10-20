@@ -3,6 +3,7 @@ nimbus_datadir: /data/nimbus
 nimbus_auth_jwt_path: /data/execution-auth.secret
 nimbus_execution_engine_endpoint: http://geth:8551
 nimbus_announced_ip: "{{ ansible_host }}"
+nimbus_mev_boost_endpoint: "http://mev-boost:18550"
 
 nimbus_cleanup: false # when set to "true" it will remove the container
 
@@ -84,3 +85,15 @@ nimbus_container_validator_volumes:
 
 # Default image pull policy
 nimbus_container_pull: false
+
+################################################################################
+##
+## MEV Boost configuration
+##
+################################################################################
+nimbus_mev_boost_enabled: false
+nimbus_mev_boost_beacon_command:
+  - --payload-builder=true
+  - --payload-builder-url={{ nimbus_mev_boost_endpoint }}
+
+nimbus_mev_boost_validator_command: []

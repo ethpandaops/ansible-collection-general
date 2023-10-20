@@ -3,6 +3,7 @@ lodestar_datadir: /data/lodestar
 lodestar_auth_jwt_path: /data/execution-auth.secret
 lodestar_execution_engine_endpoint: http://geth:8551
 lodestar_beacon_endpoint: "http://{{ lodestar_container_name }}:{{ lodestar_ports_http_beacon }}"
+lodestar_mev_boost_endpoint: "http://mev-boost:18550"
 
 lodestar_announced_ip: "{{ ansible_host }}"
 
@@ -87,3 +88,14 @@ lodestar_validator_container_command_extra_args: []
 
 # Default image pull policy
 lodestar_container_pull: false
+
+################################################################################
+##
+## MEV Boost configuration
+##
+################################################################################
+lodestar_mev_boost_enabled: false
+lodestar_mev_boost_beacon_command:
+  - --builder
+  - --builder.urls={{ lodestar_mev_boost_endpoint }}
+lodestar_mev_boost_validator_command: []
