@@ -15,6 +15,7 @@
     lighthouse_validator_enabled: "{{ ethereum_node_cl_validator_enabled }}"
     lighthouse_validator_container_networks: "{{ ethereum_node_docker_networks }}"
     lighthouse_validator_fee_recipient: "{{ ethereum_node_cl_validator_fee_recipient }}"
+    lighthouse_mev_boost_enabled: "{{ ethereum_node_cl_mev_boost_enabled }}"
 
 - name: "Consensus client: teku"
   when: ethereum_node_cl == "teku"
@@ -32,6 +33,7 @@
     teku_validator_enabled: "{{ ethereum_node_cl_validator_enabled }}"
     teku_validator_container_networks: "{{ ethereum_node_docker_networks }}"
     teku_validator_fee_recipient: "{{ ethereum_node_cl_validator_fee_recipient }}"
+    teku_mev_boost_enabled: "{{ ethereum_node_cl_mev_boost_enabled }}"
 
 - name: "Consensus client: prysm"
   when: ethereum_node_cl == "prysm"
@@ -50,6 +52,7 @@
     prysm_validator_enabled: "{{ ethereum_node_cl_validator_enabled }}"
     prysm_validator_container_networks: "{{ ethereum_node_docker_networks }}"
     prysm_validator_fee_recipient: "{{ ethereum_node_cl_validator_fee_recipient }}"
+    prysm_mev_boost_enabled: "{{ ethereum_node_cl_mev_boost_enabled }}"
 
 - name: "Consensus client: lodestar"
   when: ethereum_node_cl == "lodestar"
@@ -68,6 +71,7 @@
     lodestar_validator_enabled: "{{ ethereum_node_cl_validator_enabled }}"
     lodestar_validator_container_networks: "{{ ethereum_node_docker_networks }}"
     lodestar_validator_fee_recipient: "{{ ethereum_node_cl_validator_fee_recipient }}"
+    lodestar_mev_boost_enabled: "{{ ethereum_node_cl_mev_boost_enabled }}"
 
 - name: "Consensus client: nimbus"
   when: ethereum_node_cl == "nimbus"
@@ -85,3 +89,4 @@
     nimbus_validator_enabled: "{{ ethereum_node_cl_validator_enabled }}"
     nimbus_validator_container_networks: "{{ ethereum_node_docker_networks }}"
     nimbus_validator_fee_recipient: "{{ ethereum_node_cl_validator_fee_recipient }}"
+    nimbus_mev_boost_enabled: "{{ ethereum_node_cl_mev_boost_enabled }}"
