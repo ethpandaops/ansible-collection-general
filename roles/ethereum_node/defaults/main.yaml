@@ -21,6 +21,7 @@ ethereum_node_cl_ports_http_beacon: 5052
 ethereum_node_cl_ports_grpc_beacon: 4000
 ethereum_node_cl_ports_metrics: 5054
 ethereum_node_cl_checkpoint_sync_enabled: false
+ethereum_node_cl_mev_boost_enabled: false
 
 # Validator
 ethereum_node_cl_validator_enabled: false
