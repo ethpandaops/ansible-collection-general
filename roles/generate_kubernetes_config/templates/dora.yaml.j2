@@ -6,6 +6,13 @@ dora:
     repository: {{ default_tooling_images.dora.split(':') | first }}
     tag: {{ default_tooling_images.dora.split(':') | last }}
     pullPolicy: Always
+  resources:
+    requests:
+      cpu: 1000m
+      memory: 2Gi
+    limits:
+      cpu: 3000m
+      memory: 8Gi
   ingress:
     enabled: true
     className: ingress-nginx-public
