@@ -8,11 +8,11 @@ dora:
     pullPolicy: Always
   resources:
     requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
       cpu: 1000m
       memory: 2Gi
-    limits:
-      cpu: 3000m
-      memory: 8Gi
   ingress:
     enabled: true
     className: ingress-nginx-public
