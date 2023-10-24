@@ -22,6 +22,10 @@ dora_frontend_ethexplorer: ""
 dora_frontend_validatornames: ""
 dora_frontend_validatornames_inventory: ""
 
+dora_proxy_count: 1
+dora_callrate_limit: 2
+dora_callrate_burst: 10
+
 # This can be used to create additional config files for the beaconchain explorer.
 # It's useful when using private testnets and you need to mount a custom network config
 # as the chain config. All files will be available within the explorer containers on the
@@ -90,6 +94,12 @@ dora_config: |
     # file or inventory url to load validator names from
     validatorNamesYaml: "{{ dora_frontend_validatornames }}"
     validatorNamesInventory: "{{ dora_frontend_validatornames_inventory }}"
+
+  rateLimit:
+    enabled: true
+    proxyCount: {{ dora_proxy_count }}
+    rate: {{ dora_callrate_limit }}
+    burst: {{ dora_callrate_burst }}
 
   beaconapi:
     # CL Client RPC
