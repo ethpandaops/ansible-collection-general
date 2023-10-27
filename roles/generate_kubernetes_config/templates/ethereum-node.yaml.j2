@@ -42,6 +42,7 @@
               {%- else +%}
               - {{ arg | replace('/network-config', '/data/network-config') }}
               {%- endif +%}
+              - --rpc.allow-unprotected-txs
             {%- endfor +%}
             erigon:
             {%- for arg in erigon_container_command_extra_args | default ([]) +%}
