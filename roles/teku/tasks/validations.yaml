@@ -1,0 +1,4 @@
+- name: Check if consensus client supports blobber configuration
+  ansible.builtin.fail:
+    msg: "Error: Teku cannot run checkpoint sync if the initial-state flag is already defined"
+  when: "teku_checkpoint_sync_enabled and (teku_container_command_extra_args | default('') | regex_search('initial-state') != None)"

@@ -1,3 +1,6 @@
+- name: Validate inputs
+  ansible.builtin.import_tasks: validations.yaml
+
 - name: Setup teku
   ansible.builtin.import_tasks: setup.yaml
   when: not teku_cleanup
