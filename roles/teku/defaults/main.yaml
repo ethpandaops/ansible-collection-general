@@ -60,7 +60,8 @@ teku_container_command_extra_args:
 
 checkpoint_sync_url: https://beaconstate.ethstaker.cc
 teku_checkpoint_sync_enabled: false
-teku_container_command_checkpoint_args: --initial-state={{ checkpoint_sync_url }}/eth/v2/debug/beacon/states/finalized
+teku_container_command_checkpoint_args:
+  - --initial-state={{ checkpoint_sync_url }}/eth/v2/debug/beacon/states/finalized
 
 ################################################################################
 ##
