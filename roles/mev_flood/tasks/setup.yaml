@@ -27,7 +27,6 @@
   community.docker.docker_container:
     name: "{{ mev_flood_container_name }}"
     image: "{{ mev_flood_container_image }}"
-    state: started
     restart_policy: always
     stop_timeout: "{{ mev_flood_container_stop_timeout }}"
     volumes: "{{ mev_flood_container_volumes }}"
