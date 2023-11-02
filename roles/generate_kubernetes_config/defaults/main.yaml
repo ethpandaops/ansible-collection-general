@@ -59,6 +59,12 @@ gen_kubernetes_config_helm_charts:
       - name: checkpointz
         repository: https://ethpandaops.github.io/ethereum-helm-charts
         version: 0.1.3
+  dugtrio:
+    valuesTemplatePath: templates/dugtrio.yaml.j2
+    dependencies:
+      - name: dugtrio
+        repository: file:///home/pk910/github/ethpandaops/ethereum-helm-charts/charts/dugtrio
+        version: 0.0.1
   ethstats:
     valuesTemplatePath: templates/ethstats.yaml.j2
     dependencies:
