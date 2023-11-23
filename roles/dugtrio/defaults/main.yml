@@ -56,18 +56,18 @@ dugtrio_config: |
 
   # Beacon Node Endpoints
   endpoints:
-    {{- range dugtrio_endpoints }}
-    - url: {{ .url | quote }}
-      {{- if .name }}
-      name: {{ .name | quote }}
-      {{- end }}
-      {{- if .headers }}
+    {%- for endpoint in dugtrio_endpoints %}
+    - url: {{ endpoint.url | quote }}
+      {%- if endpoint.name %}
+      name: {{ endpoint.name | quote }}
+      {%- endif %}
+      {%- if 'headers' in endpoint %}
       headers:
-      {{- range $key, $value := .headers }}
-        {{ $key | quote | default "" }}: {{ $value | quote | default ""}}
-      {{- end }}
-      {{- end }}
-    {{- end }}
+      {%- for header in endpoint.headers %}
+        {{ header | quote }}: {{ endpoint.headers[header] | quote }}
+      {%- endfor %}
+      {%- endif %}
+    {%- endfor %}
 
   # Pool configuration
   pool:
@@ -95,14 +95,14 @@ dugtrio_config: |
     # call rate burst limit
     callRateBurst: {{ dugtrio_proxy_call_rate_burst }}
 
-    {{- if dugtrio_proxy_blocked_paths }}
+    {%- if dugtrio_proxy_blocked_paths %}
     # blocked api paths (regex patterns)
     blockedPaths:
-      {{- range $i, $value := dugtrio_proxy_blocked_paths }}
-      - {{ $value | quote }}
-      {{- end }}
-    {{- end }}
-
+      {%- for blocked_path in dugtrio_proxy_blocked_paths %}
+      - {{ blocked_path | quote }}
+      {%- endfor %}
+    {%- endif %}
+  
   # Frontend configuration
   frontend:
     # Enable or disable to web frontend
