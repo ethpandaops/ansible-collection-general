@@ -4,6 +4,8 @@ beacon-metrics-gazer:
   image:
     repository: {{ default_tooling_images.beacon_metrics_gazer.split(':') | first }}
     tag: {{ default_tooling_images.beacon_metrics_gazer.split(':') | last }}
+    pullPolicy: {% if default_tooling_images.beacon_metrics_gazer.split(':') | last == 'latest' %}Always{% else %}IfNotPresent{% endif %}
+
   fullnameOverride: beacon-metrics-gazer
   resources:
     requests:

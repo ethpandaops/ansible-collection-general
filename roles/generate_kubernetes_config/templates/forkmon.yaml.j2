@@ -5,6 +5,8 @@ forkmon:
   image:
     repository: {{ default_tooling_images.forkmon.split(':') | first }}
     tag: {{ default_tooling_images.forkmon.split(':') | last }}
+    pullPolicy: {% if default_tooling_images.forkmon.split(':') | last == 'latest' %}Always{% else %}IfNotPresent{% endif %}
+
   ingress:
     enabled: true
     className: ingress-nginx-public

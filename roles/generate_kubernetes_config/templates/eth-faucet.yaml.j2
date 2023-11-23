@@ -6,6 +6,8 @@ eth-faucet:
   image:
     repository: {{ default_tooling_images.eth_fauceth.split(':') | first }}
     tag: {{ default_tooling_images.eth_fauceth.split(':') | last}}
+    pullPolicy: {% if default_tooling_images.eth_fauceth.split(':') | last == 'latest' %}Always{% else %}IfNotPresent{% endif %}
+
   ingress:
     enabled: true
 

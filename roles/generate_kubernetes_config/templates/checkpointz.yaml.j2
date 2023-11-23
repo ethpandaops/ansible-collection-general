@@ -7,6 +7,7 @@ checkpointz:
   image:
     repository: {{ default_tooling_images.checkpointz.split(':') | first }}
     tag: {{ default_tooling_images.checkpointz.split(':') | last }}
+    pullPolicy: {% if default_tooling_images.checkpointz.split(':') | last == 'latest' %}Always{% else %}IfNotPresent{% endif %}
 
   resources:
     requests:
