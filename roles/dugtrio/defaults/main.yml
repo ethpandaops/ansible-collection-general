@@ -11,7 +11,7 @@ dugtrio_docker_networks:
   - name: "{{ dugtrio_docker_network_name }}"
 
 # dugtrio config
-dugtrio_endpoints: 
+dugtrio_endpoints:
   - name: "default"
     url: "http://your-cl-node:5052"
 dugtrio_pool_scheduler: "rr"
