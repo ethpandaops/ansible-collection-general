@@ -1,6 +1,6 @@
 # {{ ansible_managed }}
 
-network: {{ ethereum_network_name | replace(devnet_name, '') }}
+network: {{ ethereum_network_name | replace(devnet_name + "-", '') }}
 chainId: {{ ethereum_genesis_chain_id }}
 
 domain: {{ network_subdomain }}
