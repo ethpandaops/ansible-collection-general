@@ -13,6 +13,7 @@ A collection of reusable ansible components used by the EthPandaOps team.
 - [blockscout](roles/blockscout)
 - [cl_bootnode](roles/cl_bootnode)
 - [dshackle](roles/dshackle)
+- [dugtrio](roles/dugtrio)
 - [ethereum_auth_jwt](roles/ethereum_auth_jwt)
 - [ethereum_genesis](roles/ethereum_genesis)
 - [ethereum_metrics_exporter](roles/ethereum_metrics_exporter)
