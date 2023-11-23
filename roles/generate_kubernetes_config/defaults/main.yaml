@@ -1,4 +1,6 @@
-gen_kubernetes_config_default_output_dir: ../kubernetes/{{ ethereum_network_name | replace('dencun-', '') }}
+devnet-name: 'template-'
+
+gen_kubernetes_config_default_output_dir: ../kubernetes/{{ ethereum_network_name | replace(devnet-name, '') }}
 
 default_cl_endpoint: >-
   http://{{ gen_kubernetes_config_ethereum_node.cl + '-' + gen_kubernetes_config_ethereum_node.el + '-' +
