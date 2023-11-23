@@ -44,6 +44,7 @@ dugtrio_container_networks: "{{ dugtrio_docker_networks }}"
 dugtrio_container_command: -config=/config/dugtrio.yaml
 
 dugtrio_config: |
+  #jinja2: trim_blocks:False
   logging:
     #outputLevel: "debug"
     #filePath: "dugtrio.log"
@@ -56,18 +57,18 @@ dugtrio_config: |
 
   # Beacon Node Endpoints
   endpoints:
-    {%- for endpoint in dugtrio_endpoints %}
+    {% for endpoint in dugtrio_endpoints %}
     - url: {{ endpoint.url | quote }}
-      {%- if endpoint.name %}
+      {% if endpoint.name -%}
       name: {{ endpoint.name | quote }}
       {%- endif %}
-      {%- if 'headers' in endpoint %}
+      {% if 'headers' in endpoint -%}
       headers:
       {%- for header in endpoint.headers %}
         {{ header | quote }}: {{ endpoint.headers[header] | quote }}
       {%- endfor %}
       {%- endif %}
-    {%- endfor %}
+    {% endfor %}
 
   # Pool configuration
   pool:
@@ -95,13 +96,13 @@ dugtrio_config: |
     # call rate burst limit
     callRateBurst: {{ dugtrio_proxy_call_rate_burst }}
 
-    {%- if dugtrio_proxy_blocked_paths %}
+    {% if dugtrio_proxy_blocked_paths %}
     # blocked api paths (regex patterns)
     blockedPaths:
-      {%- for blocked_path in dugtrio_proxy_blocked_paths %}
+      {% for blocked_path in dugtrio_proxy_blocked_paths %}
       - {{ blocked_path | quote }}
-      {%- endfor %}
-    {%- endif %}
+      {% endfor %}
+    {% endif %}
   
   # Frontend configuration
   frontend:
