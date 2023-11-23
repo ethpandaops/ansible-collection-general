@@ -29,7 +29,7 @@ powfaucet:
   httpProxyCount: 2
 
   faucetTitle: "{{ ethereum_network_name }} PoW Faucet"
-  faucetPrivkey: "<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet-name }}-devnets.faucet_private_key}>"
+  faucetPrivkey: "<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.faucet_private_key}>"
   faucetRpcUrl: "{{ default_el_endpoint }}"
   faucetExplorerLink: "https://explorer.{{ network_subdomain }}/tx/{txid}"
 

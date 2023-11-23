@@ -29,10 +29,10 @@ testnet-homepage:
     https://notes.ethereum.org/@ethpandaops/{{ ethereum_network_name }}
 
     ## Ansible setup
-    https://github.com/ethpandaops/{{ devnet-name }}-testnet
+    https://github.com/ethpandaops/{{ devnet_name }}-testnet
 
     ## Client versions
-    https://github.com/ethpandaops/{{ devnet-name }}-testnet/blob/master/ansible/inventories/{{ ethereum_network_name  | replace('{{ devnet-name }}-', '')}}/group_vars/all/images.yaml
+    https://github.com/ethpandaops/{{ devnet_name }}-testnet/blob/master/ansible/inventories/{{ ethereum_network_name  | replace('{{ devnet_name }}-', '')}}/group_vars/all/images.yaml
 
     ## Validator ranges
     - https://config.{{ network_subdomain }}/api/v1/nodes/validator-ranges
@@ -102,7 +102,7 @@ testnet-homepage:
         ethstatsUrl: https://ethstats.{{ network_subdomain }}
         chainName: "{{ ethereum_network_name }}"
         chainId: "{{ ethereum_genesis_chain_id }}"
-        github: https://github.com/ethpandaops/{{ devnet-name }}-testnet/tree/master/network-configs/{{ ethereum_network_name  | replace('{{ devnet-name }}-', '')}}
+        github: https://github.com/ethpandaops/{{ devnet_name }}-testnet/tree/master/network-configs/{{ ethereum_network_name  | replace('{{ devnet_name }}-', '')}}
       metamask:
         enabled: true
       logo:
