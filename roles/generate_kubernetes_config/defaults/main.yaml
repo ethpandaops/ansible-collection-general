@@ -1,6 +1,6 @@
-devnet_name: 'template-'
+devnet_name: 'template'
 
-gen_kubernetes_config_default_output_dir: ../kubernetes/{{ ethereum_network_name | replace(devnet_name, '') }}
+gen_kubernetes_config_default_output_dir: ../kubernetes/{{ ethereum_network_name | replace(devnet_name + "-", '') }}
 
 default_cl_endpoint: >-
   http://{{ gen_kubernetes_config_ethereum_node.cl + '-' + gen_kubernetes_config_ethereum_node.el + '-' +
@@ -104,9 +104,9 @@ gen_kubernetes_config_helm_charts:
         repository: https://ethpandaops.github.io/ethereum-helm-charts
         version: 0.1.1
   homepage:
-    valuesTemplatePath: templates/testnet-homepage.yaml.j2
+    valuesTemplatePath: templates/devnet-homepage.yaml.j2
     dependencies:
-      - name: testnet-homepage
+      - name: devnet-homepage
         repository: https://ethpandaops.github.io/ethereum-helm-charts
         version: 0.2.2
   rpc:

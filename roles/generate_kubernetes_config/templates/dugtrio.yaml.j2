@@ -5,6 +5,7 @@ dugtrio:
   image:
     repository: {{ default_tooling_images.dugtrio.split(':') | first }}
     tag: {{ default_tooling_images.dugtrio.split(':') | last }}
+    pullPolicy: Always
   resources:
     requests:
       cpu: 100m
