@@ -32,7 +32,7 @@ devnets-homepage:
     https://github.com/ethpandaops/{{ devnet_name }}-devnets
 
     ## Client versions
-    https://github.com/ethpandaops/{{ devnet_name }}-devnets/blob/master/ansible/inventories/{{ ethereum_network_name  | replace('{{ devnet_name }}-', '')}}/group_vars/all/images.yaml
+    https://github.com/ethpandaops/{{ devnet_name }}-devnets/blob/master/ansible/inventories/{{ ethereum_network_name  | replace(devnet_name + "-", '')}}/group_vars/all/images.yaml
 
     ## Validator ranges
     - https://config.{{ network_subdomain }}/api/v1/nodes/validator-ranges
