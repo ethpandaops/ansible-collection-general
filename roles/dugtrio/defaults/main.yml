@@ -103,7 +103,7 @@ dugtrio_config: |
       - {{ blocked_path | quote }}
       {% endfor %}
     {% endif %}
-  
+
   # Frontend configuration
   frontend:
     # Enable or disable to web frontend
