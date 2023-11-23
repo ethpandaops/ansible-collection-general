@@ -64,7 +64,7 @@ gen_kubernetes_config_helm_charts:
     dependencies:
       - name: dugtrio
         repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 0.0.1
+        version: 0.0.3
   ethstats:
     valuesTemplatePath: templates/ethstats.yaml.j2
     dependencies:
