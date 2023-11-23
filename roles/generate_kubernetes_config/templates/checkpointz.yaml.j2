@@ -7,6 +7,7 @@ checkpointz:
   image:
     repository: {{ default_tooling_images.checkpointz.split(':') | first }}
     tag: {{ default_tooling_images.checkpointz.split(':') | last }}
+    pullPolicy: {% if default_tooling_images.checkpointz.split(':') | last == 'latest' %}Always{% else %}IfNotPresent{% endif %}
 
   resources:
     requests:
@@ -50,6 +51,6 @@ checkpointz:
         dataProvider: true
 {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
       - name: {{ hostvars[host]['inventory_hostname'] }}
-        address: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.dencun-devnets.node_ingress.combined}>@bn.{{ hostvars[host]['inventory_hostname'] }}.{{ network_subdomain }}
+        address: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@bn.{{ hostvars[host]['inventory_hostname'] }}.{{ network_subdomain }}
         dataProvider: true
 {% endfor %}

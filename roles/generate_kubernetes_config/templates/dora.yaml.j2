@@ -5,7 +5,8 @@ dora:
   image:
     repository: {{ default_tooling_images.dora.split(':') | first }}
     tag: {{ default_tooling_images.dora.split(':') | last }}
-    pullPolicy: Always
+    pullPolicy: {% if default_tooling_images.dora.split(':') | last == 'latest' %}Always{% else %}IfNotPresent{% endif %}
+
   resources:
     requests:
       cpu: 500m
@@ -38,7 +39,7 @@ dora:
     archive: true
     priority: 1
 {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
-  - url: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.dencun-devnets.node_ingress.combined}>@bn.{{ hostvars[host]['inventory_hostname'] }}.{{ network_subdomain }}
+  - url: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@bn.{{ hostvars[host]['inventory_hostname'] }}.{{ network_subdomain }}
     name: {{ hostvars[host]['inventory_hostname'] }}
     priority: -1
 {% if 'lighthouse' in hostvars[host]['inventory_hostname'] %}

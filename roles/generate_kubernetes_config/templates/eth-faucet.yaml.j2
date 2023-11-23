@@ -6,6 +6,8 @@ eth-faucet:
   image:
     repository: {{ default_tooling_images.eth_fauceth.split(':') | first }}
     tag: {{ default_tooling_images.eth_fauceth.split(':') | last}}
+    pullPolicy: {% if default_tooling_images.eth_fauceth.split(':') | last == 'latest' %}Always{% else %}IfNotPresent{% endif %}
+
   ingress:
     enabled: true
 
@@ -18,7 +20,7 @@ eth-faucet:
             pathType: Prefix
 
   secretEnv:
-    PRIVATE_KEY: "<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.dencun-devnets.faucet_2_private_key}>"
+    PRIVATE_KEY: "<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.faucet_2_private_key}>"
 
   extraEnv:
     - name: WEB3_PROVIDER
