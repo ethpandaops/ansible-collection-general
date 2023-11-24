@@ -104,7 +104,7 @@ gen_kubernetes_config_helm_charts:
         repository: https://ethpandaops.github.io/ethereum-helm-charts
         version: 0.1.1
   homepage:
-    valuesTemplatePath: templates/devnet-homepage.yaml.j2
+    valuesTemplatePath: templates/testnet-homepage.yaml.j2
     dependencies:
       - name: testnet-homepage
         repository: https://ethpandaops.github.io/ethereum-helm-charts
