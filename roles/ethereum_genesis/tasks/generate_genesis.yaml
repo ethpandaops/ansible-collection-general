@@ -40,6 +40,18 @@
       register: ethereum_genesis_generator_cmd
       changed_when: false
       failed_when: (ethereum_genesis_generator_cmd.rc != 0) or (ethereum_genesis_generator_cmd.stdout == "")
+      when: ansible_os_family != "Debian"
+    
+    - name: Run genesis generator (Debian)
+      ansible.builtin.shell: >
+        docker run --rm -t
+        -v {{ ethereum_genesis_generator_tmp_output_dir_register.path }}:/data
+        -v {{ ethereum_genesis_generator_tmp_config_dir_register.path }}:/config
+        {{ ethereum_genesis_generator_container_image }} all
+      register: ethereum_genesis_generator_cmd
+      changed_when: false
+      failed_when: (ethereum_genesis_generator_cmd.rc != 0) or (ethereum_genesis_generator_cmd.stdout == "")
+      when: ansible_os_family == "Debian"
 
     - name: Removes extended attr from config.yaml, breaks on linux due to perms if present
       ansible.builtin.command: xattr -c "{{ ethereum_genesis_generator_tmp_output_dir_register.path }}/custom_config_data/config.yaml"
