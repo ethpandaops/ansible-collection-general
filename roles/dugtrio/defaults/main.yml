@@ -39,7 +39,7 @@ dugtrio_container_ports: []
 dugtrio_container_volumes:
   - "{{ dugtrio_datadir }}:/config"
 dugtrio_container_stop_timeout: "600"
-dugtrio_container_pull: true
+dugtrio_container_pull: false
 dugtrio_container_networks: "{{ dugtrio_docker_networks }}"
 dugtrio_container_command: -config=/config/dugtrio.yaml
 
