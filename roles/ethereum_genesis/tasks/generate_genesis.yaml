@@ -41,7 +41,7 @@
       changed_when: false
       failed_when: (ethereum_genesis_generator_cmd.rc != 0) or (ethereum_genesis_generator_cmd.stdout == "")
       when: ansible_os_family != "Debian"
-    
+
     - name: Run genesis generator (Debian)
       ansible.builtin.shell: >
         docker run --rm -t
