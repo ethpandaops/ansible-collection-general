@@ -61,13 +61,13 @@ dugtrio_config: |
     - url: {{ endpoint.url | quote }}
       {% if endpoint.name -%}
       name: {{ endpoint.name | quote }}
-      {%- endif %}
+  {%- endif %}
       {% if 'headers' in endpoint -%}
       headers:
-      {%- for header in endpoint.headers %}
+  {%- for header in endpoint.headers %}
         {{ header | quote }}: {{ endpoint.headers[header] | quote }}
-      {%- endfor %}
-      {%- endif %}
+  {%- endfor %}
+  {%- endif %}
     {% endfor %}
 
   # Pool configuration
