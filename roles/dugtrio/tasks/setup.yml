@@ -1,0 +1,43 @@
+- name: Add dugtrio user
+  ansible.builtin.user:
+    name: "{{ dugtrio_user }}"
+  register: dugtrio_user_meta
+
+- name: Setup docker network
+  ansible.builtin.include_role:
+    name: ethpandaops.general.docker_network
+  vars:
+    docker_network_name: "{{ dugtrio_docker_network_name }}"
+
+- name: Create directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0750"
+    owner: "{{ dugtrio_user }}"
+    group: "{{ dugtrio_user }}"
+  loop:
+    - "{{ dugtrio_datadir }}"
+
+- name: Create dugtrio config file
+  ansible.builtin.copy:
+    content: "{{ dugtrio_config }}"
+    dest: "{{ dugtrio_datadir }}/dugtrio.yaml"
+    owner: "{{ dugtrio_user }}"
+    group: "{{ dugtrio_user }}"
+    mode: '0640'
+
+- name: Setup dugtrio
+  community.docker.docker_container:
+    name: "{{ dugtrio_container_name }}"
+    image: "{{ dugtrio_container_image }}"
+    state: 'started'
+    restart_policy: always
+    stop_timeout: "{{ dugtrio_container_stop_timeout }}"
+    ports: "{{ dugtrio_container_ports }}"
+    volumes: "{{ dugtrio_container_volumes }}"
+    env: "{{ dugtrio_container_env }}"
+    networks: "{{ dugtrio_container_networks }}"
+    pull: "{{ dugtrio_container_pull | bool }}"
+    user: "{{ dugtrio_user_meta.uid }}"
+    command: "{{ dugtrio_container_command }}"

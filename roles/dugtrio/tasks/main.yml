@@ -1,0 +1,7 @@
+- name: Setup dugtrio
+  ansible.builtin.import_tasks: setup.yml
+  when: not dugtrio_cleanup_all
+
+- name: Cleanup dugtrio
+  ansible.builtin.import_tasks: cleanup.yml
+  when: dugtrio_cleanup_all

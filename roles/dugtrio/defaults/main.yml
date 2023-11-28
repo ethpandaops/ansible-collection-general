@@ -1,0 +1,115 @@
+---
+
+# Set this to true if you want to stop everything and wipe the databases
+dugtrio_cleanup_all: false
+
+
+dugtrio_user: dugtrio
+dugtrio_datadir: "/data/dugtrio"
+dugtrio_docker_network_name: shared
+dugtrio_docker_networks:
+  - name: "{{ dugtrio_docker_network_name }}"
+
+# dugtrio config
+dugtrio_endpoints:
+  - name: "default"
+    url: "http://your-cl-node:5052"
+dugtrio_pool_scheduler: "rr"
+dugtrio_pool_follow_distance: 10
+dugtrio_pool_max_head_distance: 2
+dugtrio_proxy_count: 1
+dugtrio_proxy_call_timeout: "55s"
+dugtrio_proxy_session_timeout: "10m"
+dugtrio_proxy_sticky_endpoint: true
+dugtrio_proxy_call_rate_limit: 100
+dugtrio_proxy_call_rate_burst: 1000
+dugtrio_proxy_blocked_paths: []
+dugtrio_frontend_enabled: true
+dugtrio_frontend_title: "Dugtrio"
+dugtrio_metrics_enabled: true
+
+# ------------------------------------------------------------------
+
+# dugtrio
+dugtrio_enabled: true
+dugtrio_container_name: dugtrio
+dugtrio_container_image: ethpandaops/dugtrio:1.0.0
+dugtrio_container_env: {}
+dugtrio_container_ports: []
+dugtrio_container_volumes:
+  - "{{ dugtrio_datadir }}:/config"
+dugtrio_container_stop_timeout: "600"
+dugtrio_container_pull: false
+dugtrio_container_networks: "{{ dugtrio_docker_networks }}"
+dugtrio_container_command: -config=/config/dugtrio.yaml
+
+dugtrio_config: |
+  #jinja2: trim_blocks:False
+  logging:
+    #outputLevel: "debug"
+    #filePath: "dugtrio.log"
+    #fileLevel: "warn"
+
+  # HTTP Server configuration
+  server:
+    host: "0.0.0.0"
+    port: "8080"
+
+  # Beacon Node Endpoints
+  endpoints:
+    {% for endpoint in dugtrio_endpoints %}
+    - url: {{ endpoint.url | quote }}
+      {% if endpoint.name -%}
+      name: {{ endpoint.name | quote }}
+  {%- endif %}
+      {% if 'headers' in endpoint -%}
+      headers:
+  {%- for header in endpoint.headers %}
+        {{ header | quote }}: {{ endpoint.headers[header] | quote }}
+  {%- endfor %}
+  {%- endif %}
+    {% endfor %}
+
+  # Pool configuration
+  pool:
+    schedulerMode: "{{ dugtrio_pool_scheduler }}"
+    followDistance: {{ dugtrio_pool_follow_distance }}
+    maxHeadDistance: {{ dugtrio_pool_max_head_distance }}
+
+  # Proxy configuration
+  proxy:
+    # number of proxies in front of dugtrio
+    proxyCount: {{ dugtrio_proxy_count }}
+
+    # proxy call timeout
+    callTimeout: {{ dugtrio_proxy_call_timeout }}
+
+    # proxy session timeout
+    sessionTimeout: {{ dugtrio_proxy_session_timeout }}
+
+    # reuse the same endpoint when possible
+    stickyEndpoint: {{ dugtrio_proxy_sticky_endpoint }}
+
+    # call rate limit (calls per second)
+    callRateLimit: {{ dugtrio_proxy_call_rate_limit }}
+
+    # call rate burst limit
+    callRateBurst: {{ dugtrio_proxy_call_rate_burst }}
+
+    {% if dugtrio_proxy_blocked_paths %}
+    # blocked api paths (regex patterns)
+    blockedPaths:
+      {% for blocked_path in dugtrio_proxy_blocked_paths %}
+      - {{ blocked_path | quote }}
+      {% endfor %}
+    {% endif %}
+
+  # Frontend configuration
+  frontend:
+    # Enable or disable to web frontend
+    enabled: {{ dugtrio_frontend_enabled }}
+    minify: true
+    siteName: "{{ dugtrio_frontend_title }}"
+
+  metrics:
+    enabled: {{ dugtrio_metrics_enabled }}
