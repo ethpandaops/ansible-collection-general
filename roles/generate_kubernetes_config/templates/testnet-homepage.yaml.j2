@@ -91,8 +91,8 @@ testnet-homepage:
       defaultTheme: dark
       ethereum:
         faucetUrl: https://faucet.{{ network_subdomain }}
-        faucet2Url: https://faucet-2.{{ network_subdomain }}
         rpcUrl: https://rpc.{{ network_subdomain }}
+        beaconRpcUrl: https://beacon.{{ network_subdomain }}
         explorerUrl: https://explorer.{{ network_subdomain }}
         forkmonUrl: https://forkmon.{{ network_subdomain }}
         beaconexplorerUrl: "https://{{ ethereum_network_name }}.beaconcha.in"
@@ -121,11 +121,13 @@ testnet-homepage:
         dataLookup: github
       - name: "JSON RPC"
         dataLookup: rpcUrl
+      - name: "Beacon RPC"
+        dataLookup: beaconRpcUrl
       - name: "Explorer"
         dataLookup: explorerUrl
       - name: "Dora the Explorer"
         dataLookup: doraUrl
-      - name: "Beaconchain explorer (not working)"
+      - name: "Beaconchain explorer"
         dataLookup: "beaconexplorerUrl"
       - name: "Blobscan"
         dataLookup: blobscanUrl
@@ -133,10 +135,8 @@ testnet-homepage:
         dataLookup: blobscanethpandaUrl
       - name: "Checkpoint Sync"
         dataLookup: checkpointSyncUrl
-      - name: "Faucet 1"
+      - name: "Faucet"
         dataLookup: faucetUrl
-      - name: "Faucet 2"
-        dataLookup: faucet2Url
       - name: "Forkmon"
         dataLookup: forkmonUrl
       - name: "Ethstats"
