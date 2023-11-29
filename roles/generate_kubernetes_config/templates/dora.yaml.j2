@@ -5,7 +5,7 @@ dora:
   image:
     repository: {{ default_tooling_images.dora.split(':') | first }}
     tag: {{ default_tooling_images.dora.split(':') | last }}
-    pullPolicy: {% if default_tooling_images.dora.split(':') | last == 'latest' %}Always{% else %}IfNotPresent{% endif %}
+    pullPolicy: {% if "latest" in (default_tooling_images.dora.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
 
   resources:
     requests:
