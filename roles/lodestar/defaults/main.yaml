@@ -98,4 +98,5 @@ lodestar_mev_boost_enabled: false
 lodestar_mev_boost_beacon_command:
   - --builder
   - --builder.urls={{ lodestar_mev_boost_endpoint }}
-lodestar_mev_boost_validator_command: []
+lodestar_mev_boost_validator_command:
+  - --builder
