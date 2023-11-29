@@ -27,7 +27,7 @@ reth_container_networks: []
 reth_container_command:
   - node
   - --datadir=/data
-  - --log.directory=/data/logs
+  - --log.file.directory=/data/logs
   - --port={{ reth_ports_p2p }}
   - --http
   - --http.addr=0.0.0.0
