@@ -78,7 +78,7 @@ gen_kubernetes_config_helm_charts:
     dependencies:
       - name: powfaucet
         repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 0.0.3
+        version: 0.0.4
   forkmon:
     valuesTemplatePath: templates/forkmon.yaml.j2
     dependencies:
