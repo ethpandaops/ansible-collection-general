@@ -1,0 +1,5 @@
+---
+- name: Restart firewall
+  ansible.builtin.service:
+    name: firewall
+    state: restarted

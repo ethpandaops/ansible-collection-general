@@ -27,12 +27,14 @@ A collection of reusable ansible components used by the EthPandaOps team.
 ### Ethereum client pair
 - [ethereum_node](roles/ethereum_node)
 - [ethereum_node_fact_discovery](roles/ethereum_node_fact_discovery)
+
 ### Ethereum execution clients
 - [besu](roles/besu)
 - [erigon](roles/erigon)
 - [ethereumjs](roles/ethereumjs)
 - [geth](roles/geth)
 - [nethermind](roles/nethermind)
+
 ### Ethereum consensus clients
 - [lighthouse](roles/lighthouse)
 - [lodestar](roles/lodestar)
@@ -48,6 +50,7 @@ A collection of reusable ansible components used by the EthPandaOps team.
 - [docker_cleanup](roles/docker_cleanup)
 - [docker_network](roles/docker_network)
 - [docker_nginx_proxy](roles/docker_nginx_proxy)
+- [firewall](roles/firewall)
 - [json_rpc_snooper](roles/json_rpc_snooper)
 - [k3s](roles/k3s)
 - [litestream](roles/litestream)
