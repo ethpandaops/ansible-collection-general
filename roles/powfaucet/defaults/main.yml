@@ -21,6 +21,10 @@ powfaucet_home_html: ""
 powfaucet_min_drop_wei: 1000000000000000000 # 1 ETH
 powfaucet_max_drop_wei: 50000000000000000000 # 50 ETH
 
+powfaucet_tx_gaslimit: 21000
+powfaucet_tx_maxfee: 100000000000
+powfaucet_tx_maxpriofee: 2000000000
+
 # captcha module (require captcha check)
 powfaucet_captcha_enabled: false
 powfaucet_captcha_provider: "hcaptcha"
@@ -148,7 +152,7 @@ powfaucet_config: |
 
   # transaction gas limit
   # use 21000 to prevent transactions to contracts
-  ethTxGasLimit: 21000
+  ethTxGasLimit: {{ powfaucet_tx_gaslimit }}
 
   # use legacy (non-eip1559) transaction type
   # true: Type 0 (Legacy Transactions), false: Type 2 (EIP1559 Transactions)
@@ -156,10 +160,10 @@ powfaucet_config: |
 
   # max transaction gas fee (in wei)
   # used as limit for legacy transactions (faucet won't build transactions with higher gas price)
-  ethTxMaxFee: 100000000000  # 100 gwei
+  ethTxMaxFee: {{ powfaucet_tx_maxfee }}
 
   # max transaction priority fee (in wei)
-  ethTxPrioFee: 2000000000  # 2 gwei
+  ethTxPrioFee: {{ powfaucet_tx_maxpriofee }}
 
   # max number of unconfirmed transactions to create simultaneously
   ethMaxPending: 12
