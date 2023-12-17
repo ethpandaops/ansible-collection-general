@@ -18,6 +18,7 @@ erigon_container_image: thorax/erigon:stable
 erigon_container_env: {}
 erigon_container_ports:
   - "127.0.0.1:{{ erigon_ports_engine }}:{{ erigon_ports_engine }}"
+  - "127.0.0.1:{{erigon_ports_http_rpc }}:{{ erigon_ports_http_rpc }}"
   - "{{ erigon_ports_p2p }}:{{ erigon_ports_p2p }}"
   - "{{ erigon_ports_p2p }}:{{ erigon_ports_p2p }}/udp"
 erigon_container_volumes:
