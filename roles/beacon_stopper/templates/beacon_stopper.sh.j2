@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash -eu
 
 # Define the URL from a Jinja2 variable
 URL="{{ beacon_url }}"
@@ -9,7 +9,7 @@ while true; do
     SLOT_VALUE=$(curl -s $URL | jq -r '.data[].header.message.slot')
 
     # Check if the slot value has reached "{{ slot_to_stop_at }}"
-    if [[ $SLOT_VALUE == "{{ slot_to_stop_at }}" ]]; then
+    if [[ $SLOT_VALUE -ge "{{ slot_to_stop_at }}" ]]; then
         echo "Slot value has reached $SLOT_VALUE !"
 
         echo "Stopping snooper engine and beacon..."
@@ -23,5 +23,5 @@ while true; do
     fi
 
     # Wait for a while before polling again
-    sleep 5
+    sleep 2
 done
