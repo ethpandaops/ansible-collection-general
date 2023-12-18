@@ -1,0 +1,32 @@
+- name: Gather package facts
+  become: true
+  ansible.builtin.package_facts:
+    manager: apt
+
+- name: Install debconf-utils if graphite-carbon is absent
+  become: true
+  ansible.builtin.apt:
+    name: screen
+    state: present
+  when: '"screen" not in ansible_facts.packages'
+
+- name: Create required directories
+  become: true
+  ansible.builtin.file:
+    path: "{{ beacon_stopper_datadir }}"
+    state: directory
+    recurse: true
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0755"
+
+- name: Copy over template script
+  ansible.builtin.template:
+    src: beacon_stopper.sh.j2
+    dest: "{{ beacon_stopper_datadir }}/beacon_stopper.sh"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0755'
+
+- name: Run the script in the background  # noqa no-changed-when
+  ansible.builtin.shell: "screen -dmS script_session bash -c {{ beacon_stopper_datadir }}/beacon_stopper.sh" # noqa command-instead-of-shell
