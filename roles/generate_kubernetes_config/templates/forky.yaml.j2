@@ -43,9 +43,11 @@ forky:
             genesis_time: {{ ethereum_genesis_timestamp | int + ethereum_genesis_timedelay | int }}
       sources:
 {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
+{% if ((hostvars[host]['inventory_hostname'] | string)[-2:]) == "-1" %}
         - name: {{ hostvars[host]['inventory_hostname'] }}
           type: "beacon_node"
           config:
             address: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@bn.{{ hostvars[host]['inventory_hostname'] }}.{{ network_subdomain }}
             polling_interval: "12s"
+{% endif %}
 {% endfor %}
