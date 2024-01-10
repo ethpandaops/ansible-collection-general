@@ -5,6 +5,10 @@ firewall_allowed_tcp_ports:
   - "80"
   - "443"
 firewall_allowed_udp_ports: []
+firewall_allowed_lan_ranges:
+  - "10.0.0.0/8"
+  - "172.16.0.0/12"
+  - "192.168.0.0/16"
 firewall_forwarded_tcp_ports: []
 firewall_forwarded_udp_ports: []
 firewall_additional_rules: []

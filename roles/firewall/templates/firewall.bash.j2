@@ -44,6 +44,13 @@ iptables -A INPUT -p tcp -m tcp --dport {{ port }} -j ACCEPT
 iptables -A INPUT -p udp -m udp --dport {{ port }} -j ACCEPT
 {% endfor %}
 
+# Open traffic from LAN ranges
+{% for rangeX in firewall_allowed_lan_ranges %}
+{% for rangeY in firewall_allowed_lan_ranges %}
+iptables -A INPUT -d {{ rangeX }} -s {{ rangeY }} -j ACCEPT
+{% endfor %}
+{% endfor %}
+
 # Accept icmp ping requests.
 iptables -A INPUT -p icmp -j ACCEPT
 
