@@ -27,7 +27,10 @@ dora:
   configPath: "https://config.{{ network_subdomain }}/cl/config.yaml"
   validatorNamesInventory: "https://config.{{ network_subdomain }}/api/v1/nodes/validator-ranges"
   proxyCount: 2
-
+  extraEnv:
+   name: FRONTEND_PPROF
+   value: "true"
+   
   postgresql:
     name: "dora-postgresql"
     fullnameOverride: "dora-postgresql"
