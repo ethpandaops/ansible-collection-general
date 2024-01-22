@@ -54,7 +54,7 @@ gen_kubernetes_config_helm_charts:
     dependencies:
       - name: blockscout
         repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 0.2.0
+        version: 0.2.1
   checkpointz:
     valuesTemplatePath: templates/checkpointz.yaml.j2
     dependencies:
