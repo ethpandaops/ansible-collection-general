@@ -163,7 +163,11 @@
           - >
             if ! [ -f /data/genesis_init_done ];
             then
+{%- if gen_kubernetes_config_ethereum_node.el in ['geth'] +%}
+              {{ gen_kubernetes_config_ethereum_node.el }} init --state.scheme=path --datadir /data /data/network-config/genesis.json;
+{%- else +%}
               {{ gen_kubernetes_config_ethereum_node.el }} init --datadir /data /data/network-config/genesis.json;
+{%- endif +%}
               touch /data/genesis_init_done;
               echo "genesis init done";
             else
