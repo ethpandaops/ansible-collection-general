@@ -43,6 +43,7 @@ nethermind_container_command:
   - --Metrics.Enabled=true
   - --Metrics.NodeName={{ inventory_hostname_short }}
   - --Metrics.ExposePort={{ nethermind_ports_metrics }}
+  - --Metrics.ExposeHost=0.0.0.0
 nethermind_container_command_extra_args: []
 
 # Default image pull policy
