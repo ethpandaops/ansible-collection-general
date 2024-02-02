@@ -130,7 +130,6 @@
             GENESIS_URI=https://config.{{ network_subdomain }}/el/genesis.json;
             BESU_GENESIS_URI=https://config.{{ network_subdomain }}/el/besu.json;
             BOOTNODES_URI=https://config.{{ network_subdomain }}/el/bootnodes.txt;
-            TRUSTED_SETUP_URI=https://config.{{ network_subdomain }}/trusted_setup.txt;
             mkdir -p /data/network-config;
             if ! [ -f /data/network_config_init_done ];
             then
@@ -139,7 +138,6 @@
               wget -O /data/network-config/genesis.json $GENESIS_URI;
               wget -O /data/network-config/besu.json $BESU_GENESIS_URI;
               wget -O /data/network-config/bootnodes.txt $BOOTNODES_URI;
-              wget -O /data/network-config/trusted_setup.txt $TRUSTED_SETUP_URI;
               cat /data/network-config/genesis.json | jq -r '.config.chainId' > /data/network-config/chainid.txt;
               touch /data/network_config_init_done;
               echo "network config init done";
@@ -225,7 +223,6 @@
           GENESIS_SSZ_URI=https://config.{{ network_subdomain }}/cl/genesis.ssz;
           mkdir -p /data/network-config;
           curl -s https://config.{{ network_subdomain }}/api/v1/nodes/inventory | jq -r '.ethereum_pairs[] | .consensus.enr' > /data/network-config/bootnodes.txt;
-          TRUSTED_SETUP_URI=https://config.{{ network_subdomain }}/trusted_setup.txt;
           if ! [ -f /data/network-config/genesis.ssz ];
           then
             wget -O /data/network-config/deposit_contract.txt $DEPOSIT_CONTRACT_URI;
@@ -233,7 +230,6 @@
             wget -O /data/network-config/deploy_block.txt $DEPLOY_BLOCK_URI;
             wget -O /data/network-config/config.yaml $GENESIS_CONFIG_URI;
             wget -O /data/network-config/genesis.ssz $GENESIS_SSZ_URI;
-            wget -O /data/network-config/trusted_setup.txt $TRUSTED_SETUP_URI;
             echo "genesis init done";
           else
             echo "genesis exists. skipping...";
