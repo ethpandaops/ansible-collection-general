@@ -43,6 +43,7 @@
   community.general.docker_container:
     name: "{{ eth_inventory_web_container_name }}"
     image: "{{ eth_inventory_web_container_image }}"
+    image_name_mismatch: recreate
     published_ports: "{{ eth_inventory_web_container_published_ports }}"
     restart_policy: "{{ eth_inventory_web_container_restart_policy }}"
     networks: "{{ eth_inventory_web_container_networks }}"

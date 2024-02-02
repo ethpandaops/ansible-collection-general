@@ -7,6 +7,7 @@
   community.docker.docker_container:
     name: "{{ json_rpc_snooper_container_name }}"
     image: "{{ json_rpc_snooper_container_image }}"
+    image_name_mismatch: recreate
     state: started
     restart_policy: always
     volumes: "{{ json_rpc_snooper_container_volumes }}"

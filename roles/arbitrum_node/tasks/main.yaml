@@ -14,6 +14,7 @@
   community.docker.docker_container:
     name: "{{ arbitrum_node_container_name }}"
     image: "{{ arbitrum_node_container_image }}"
+    image_name_mismatch: recreate
     state: started
     restart_policy: always
     stop_timeout: "{{ arbitrum_node_container_stop_timeout }}"

@@ -26,6 +26,7 @@
       community.docker.docker_container:
         name: "{{ erigon_container_name }}-init"
         image: "{{ erigon_container_image }}"
+        image_name_mismatch: recreate
         detach: false
         auto_remove: true
         restart_policy: "no"
@@ -45,6 +46,7 @@
   community.docker.docker_container:
     name: "{{ erigon_container_name }}"
     image: "{{ erigon_container_image }}"
+    image_name_mismatch: recreate
     state: started
     restart_policy: always
     stop_timeout: "{{ erigon_container_stop_timeout }}"

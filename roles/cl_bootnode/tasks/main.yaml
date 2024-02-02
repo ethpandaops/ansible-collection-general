@@ -2,6 +2,7 @@
   community.docker.docker_container:
     name: "{{ cl_bootnode_container_name }}"
     image: "{{ cl_bootnode_container_image }}"
+    image_name_mismatch: recreate
     state: started
     restart_policy: always
     stop_timeout: "{{ cl_bootnode_container_stop_timeout }}"

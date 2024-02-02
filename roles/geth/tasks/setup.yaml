@@ -26,6 +26,7 @@
       community.docker.docker_container:
         name: "{{ geth_container_name }}-init"
         image: "{{ geth_container_image }}"
+        image_name_mismatch: recreate
         detach: false
         auto_remove: "{{ geth_init_autoremove_enabled }}"
         restart_policy: "no"
@@ -43,6 +44,7 @@
   community.docker.docker_container:
     name: "{{ geth_container_name }}"
     image: "{{ geth_container_image }}"
+    image_name_mismatch: recreate
     state: started
     restart_policy: always
     stop_timeout: "{{ geth_container_stop_timeout }}"

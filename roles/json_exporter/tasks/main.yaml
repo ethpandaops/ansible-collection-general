@@ -25,6 +25,7 @@
   community.general.docker_container:
     name: "{{ json_exporter_container_name }}"
     image: "{{ json_exporter_container_image }}"
+    image_name_mismatch: recreate
     ports: "{{ json_exporter_container_ports }}"
     restart_policy: "{{ json_exporter_container_restart_policy }}"
     networks: "{{ json_exporter_container_networks }}"

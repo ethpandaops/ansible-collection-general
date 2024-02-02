@@ -26,6 +26,7 @@
   community.docker.docker_container:
     name: "{{ mev_relay_db_container_name }}"
     image: "{{ mev_relay_db_container_image }}"
+    image_name_mismatch: recreate
     state: '{{ mev_relay_db_enabled | ternary("started", "absent") }}'
     restart_policy: always
     stop_timeout: "{{ mev_relay_db_container_stop_timeout }}"
@@ -40,6 +41,7 @@
   community.docker.docker_container:
     name: "{{ mev_relay_redis_container_name }}"
     image: "{{ mev_relay_redis_container_image }}"
+    image_name_mismatch: recreate
     state: '{{ mev_relay_redis_enabled | ternary("started", "absent") }}'
     restart_policy: always
     stop_timeout: "{{ mev_relay_redis_container_stop_timeout }}"
@@ -54,6 +56,7 @@
   community.docker.docker_container:
     name: "{{ mev_relay_housekeeper_container_name }}"
     image: "{{ mev_relay_housekeeper_container_image }}"
+    image_name_mismatch: recreate
     state: '{{ mev_relay_housekeeper_enabled | ternary("started", "absent") }}'
     restart_policy: always
     stop_timeout: "{{ mev_relay_housekeeper_container_stop_timeout }}"
@@ -69,6 +72,7 @@
   community.docker.docker_container:
     name: "{{ mev_relay_api_container_name }}"
     image: "{{ mev_relay_api_container_image }}"
+    image_name_mismatch: recreate
     state: '{{ mev_relay_api_enabled | ternary("started", "absent") }}'
     restart_policy: always
     stop_timeout: "{{ mev_relay_api_container_stop_timeout }}"
@@ -84,6 +88,7 @@
   community.docker.docker_container:
     name: "{{ mev_relay_website_container_name }}"
     image: "{{ mev_relay_website_container_image }}"
+    image_name_mismatch: recreate
     state: '{{ mev_relay_website_enabled | ternary("started", "absent") }}'
     restart_policy: always
     stop_timeout: "{{ mev_relay_website_container_stop_timeout }}"

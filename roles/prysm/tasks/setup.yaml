@@ -19,6 +19,7 @@
   community.docker.docker_container:
     name: "{{ prysm_container_name }}"
     image: "{{ prysm_container_image }}"
+    image_name_mismatch: recreate
     state: started
     restart_policy: always
     stop_timeout: "{{ prysm_container_stop_timeout }}"
@@ -56,6 +57,7 @@
   community.docker.docker_container:
     name: "{{ prysm_validator_container_name }}"
     image: "{{ prysm_validator_container_image }}"
+    image_name_mismatch: recreate
     state: started
     restart_policy: always
     stop_timeout: "{{ prysm_validator_container_stop_timeout }}"

@@ -24,6 +24,7 @@
   community.general.docker_container:
     name: "{{ dshackle_container_name }}"
     image: "{{ dshackle_container_image }}"
+    image_name_mismatch: recreate
     published_ports: "{{ dshackle_container_published_ports }}"
     restart_policy: "{{ dshackle_container_restart_policy }}"
     networks: "{{ dshackle_container_networks }}"

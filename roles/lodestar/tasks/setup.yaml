@@ -19,6 +19,7 @@
   community.docker.docker_container:
     name: "{{ lodestar_container_name }}"
     image: "{{ lodestar_container_image }}"
+    image_name_mismatch: recreate
     state: started
     restart_policy: always
     stop_timeout: "{{ lodestar_container_stop_timeout }}"
@@ -59,6 +60,7 @@
   community.docker.docker_container:
     name: "{{ lodestar_validator_container_name }}"
     image: "{{ lodestar_validator_container_image }}"
+    image_name_mismatch: recreate
     state: started
     restart_policy: always
     stop_timeout: "{{ lodestar_validator_container_stop_timeout }}"

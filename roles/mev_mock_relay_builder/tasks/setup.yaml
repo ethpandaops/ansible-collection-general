@@ -7,6 +7,7 @@
   community.docker.docker_container:
     name: "{{ mev_mock_relay_builder_container_name }}"
     image: "{{ mev_mock_relay_builder_container_image }}"
+    image_name_mismatch: recreate
     state: started
     restart_policy: always
     stop_timeout: "{{ mev_mock_relay_builder_container_stop_timeout }}"

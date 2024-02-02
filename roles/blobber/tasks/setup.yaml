@@ -41,6 +41,7 @@
   community.docker.docker_container:
     name: "{{ blobber_container_name }}"
     image: "{{ blobber_container_image }}"
+    image_name_mismatch: recreate
     state: started
     restart_policy: always
     volumes: "{{ blobber_container_volumes }}"

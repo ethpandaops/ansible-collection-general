@@ -25,6 +25,7 @@
   community.general.docker_container:
     name: "{{ cloudwatch_exporter_container_name }}"
     image: "{{ cloudwatch_exporter_container_image }}"
+    image_name_mismatch: recreate
     ports: "{{ cloudwatch_exporter_container_ports }}"
     restart_policy: "{{ cloudwatch_exporter_container_restart_policy }}"
     networks: "{{ cloudwatch_exporter_container_networks }}"

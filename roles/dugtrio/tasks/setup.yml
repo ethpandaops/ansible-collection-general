@@ -31,6 +31,7 @@
   community.docker.docker_container:
     name: "{{ dugtrio_container_name }}"
     image: "{{ dugtrio_container_image }}"
+    image_name_mismatch: recreate
     state: 'started'
     restart_policy: always
     stop_timeout: "{{ dugtrio_container_stop_timeout }}"

@@ -13,6 +13,7 @@
   community.general.docker_container:
     name: "{{ ethstats_container_name }}"
     image: "{{ ethstats_container_image }}"
+    image_name_mismatch: recreate
     published_ports: "{{ ethstats_container_published_ports }}"
     restart_policy: "{{ ethstats_container_restart_policy }}"
     networks: "{{ ethstats_container_networks }}"

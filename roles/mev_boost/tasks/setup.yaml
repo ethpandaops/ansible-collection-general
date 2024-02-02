@@ -13,6 +13,7 @@
   community.docker.docker_container:
     name: "{{ mev_boost_container_name }}"
     image: "{{ mev_boost_container_image }}"
+    image_name_mismatch: recreate
     state: started
     restart_policy: always
     stop_timeout: "{{ mev_boost_container_stop_timeout }}"
