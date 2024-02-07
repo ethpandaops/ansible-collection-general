@@ -2,6 +2,7 @@
   community.docker.docker_container:
     name: "{{ logsprout_container_name }}"
     image: "{{ logsprout_container_image }}"
+    image_name_mismatch: recreate
     state: started
     restart_policy: always
     stop_timeout: "{{ logsprout_container_stop_timeout }}"

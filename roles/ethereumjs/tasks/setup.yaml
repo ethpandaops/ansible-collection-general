@@ -19,6 +19,7 @@
   community.docker.docker_container:
     name: "{{ ethereumjs_container_name }}"
     image: "{{ ethereumjs_container_image }}"
+    image_name_mismatch: recreate
     state: started
     restart_policy: always
     stop_timeout: "{{ ethereumjs_container_stop_timeout }}"

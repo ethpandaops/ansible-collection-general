@@ -33,6 +33,7 @@
   community.docker.docker_container:
     name: "{{ prometheus_container_name }}"
     image: "{{ prometheus_container_image }}"
+    image_name_mismatch: recreate
     user: "{{ prometheus_user_getent.ansible_facts.getent_passwd[prometheus_user][1] }}"
     state: started
     restart_policy: always

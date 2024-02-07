@@ -22,6 +22,7 @@
   community.docker.docker_container:
     name: "{{ nethermind_container_name }}"
     image: "{{ nethermind_container_image }}"
+    image_name_mismatch: recreate
     state: started
     restart_policy: always
     stop_timeout: "{{ nethermind_container_stop_timeout }}"

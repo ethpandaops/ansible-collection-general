@@ -19,6 +19,7 @@
   community.docker.docker_container:
     name: "{{ lighthouse_container_name }}"
     image: "{{ lighthouse_container_image }}"
+    image_name_mismatch: recreate
     state: started
     restart_policy: always
     stop_timeout: "{{ lighthouse_container_stop_timeout }}"
@@ -59,6 +60,7 @@
   community.docker.docker_container:
     name: "{{ lighthouse_validator_container_name }}"
     image: "{{ lighthouse_validator_container_image }}"
+    image_name_mismatch: recreate
     state: started
     restart_policy: always
     stop_timeout: "{{ lighthouse_validator_container_stop_timeout }}"

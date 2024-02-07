@@ -31,6 +31,7 @@
   community.docker.docker_container:
     name: "{{ powfaucet_container_name }}"
     image: "{{ powfaucet_container_image }}"
+    image_name_mismatch: recreate
     state: 'started'
     restart_policy: always
     stop_timeout: "{{ powfaucet_container_stop_timeout }}"

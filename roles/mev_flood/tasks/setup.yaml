@@ -27,6 +27,7 @@
   community.docker.docker_container:
     name: "{{ mev_flood_container_name }}"
     image: "{{ mev_flood_container_image }}"
+    image_name_mismatch: recreate
     restart_policy: always
     stop_timeout: "{{ mev_flood_container_stop_timeout }}"
     volumes: "{{ mev_flood_container_volumes }}"
@@ -40,6 +41,7 @@
   community.docker.docker_container:
     name: "{{ mev_flood_spam_container_name }}"
     image: "{{ mev_flood_spam_container_image }}"
+    image_name_mismatch: recreate
     state: started
     restart_policy: always
     stop_timeout: "{{ mev_flood_spam_container_stop_timeout }}"

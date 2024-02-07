@@ -14,6 +14,7 @@
   community.docker.docker_container:
     name: "{{ tx_fuzz_container_name }}"
     image: "{{ tx_fuzz_container_image }}"
+    image_name_mismatch: recreate
     user: "{{ tx_fuzz_user_getent.ansible_facts.getent_passwd[tx_fuzz_user][1] }}"
     state: started
     restart_policy: always

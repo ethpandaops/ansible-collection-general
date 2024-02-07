@@ -2,6 +2,7 @@
   community.docker.docker_container:
     name: "{{ s3_cron_backup_container_name }}"
     image: "{{ s3_cron_backup_container_image }}"
+    image_name_mismatch: recreate
     state: started
     restart_policy: always
     stop_timeout: "{{ s3_cron_backup_container_stop_timeout }}"

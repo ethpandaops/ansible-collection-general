@@ -19,6 +19,7 @@
   community.docker.docker_container:
     name: "{{ besu_container_name }}"
     image: "{{ besu_container_image }}"
+    image_name_mismatch: recreate
     state: started
     restart_policy: always
     stop_timeout: "{{ besu_container_stop_timeout }}"
