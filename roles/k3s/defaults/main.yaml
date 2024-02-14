@@ -20,3 +20,10 @@ k3s_agent_extra_args: >-
 k3s_cleanup: false
 # Enable this if you also want to remove the persisten volumes created by the "local-path" storage class
 k3s_cleanup_localpath_persisten_volumes: false
+# Enable this if you want to install calico
+# https://docs.tigera.io/calico/latest/getting-started/kubernetes/k3s/multi-node-install#install-calico
+# NOTE: enabling this will add the following args to the k3s server node:
+#   --flannel-backend=none
+#   --disable-network-policy
+k3s_calico: false
+k3s_calico_version: "v3.27.0"
