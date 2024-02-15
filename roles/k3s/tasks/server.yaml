@@ -78,25 +78,39 @@
 
 - name: Install Calico for k3s
   block:
+    - name: Create calico directory
+      ansible.builtin.file:
+        path: "{{ k3s_server_location }}/server/calico"
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
     - name: Download tigera-operator.yaml
       ansible.builtin.get_url:
         url: "https://raw.githubusercontent.com/projectcalico/calico/{{ k3s_calico_version }}/manifests/tigera-operator.yaml"
         dest: "{{ k3s_server_location }}/server/calico/tigera-operator.yaml"
+        owner: root
+        group: root
+        mode: "0755"
       register: download_tigera_operator
 
     - name: Apply tigera-operator.yaml
       ansible.builtin.command:
-        cmd: "k3s kubectl apply -f {{ k3s_server_location }}/server/calico/tigera-operator.yaml"
+        cmd: "k3s kubectl apply --server-side -f {{ k3s_server_location }}/server/calico/tigera-operator.yaml"
       when: download_tigera_operator is changed
 
     - name: Download custom-resources.yaml
       ansible.builtin.get_url:
         url: "https://raw.githubusercontent.com/projectcalico/calico/{{ k3s_calico_version }}/manifests/custom-resources.yaml"
         dest: "{{ k3s_server_location }}/server/calico/custom-resources.yaml"
+        owner: root
+        group: root
+        mode: "0755"
       register: download_custom_resources
 
     - name: Apply custom-resources.yaml
       ansible.builtin.command:
-        cmd: "k3s kubectl apply -f {{ k3s_server_location }}/server/calico/custom-resources.yaml"
+        cmd: "k3s kubectl apply --server-side -f {{ k3s_server_location }}/server/calico/custom-resources.yaml"
       when: download_custom_resources is changed
   when: k3s_calico
