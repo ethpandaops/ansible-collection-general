@@ -78,6 +78,10 @@
 
 - name: Install Calico for k3s
   block:
+    - name: Check if custom Calico resources are defined
+      set_fact:
+        custom_resources_defined: "{{ k3s_calico_custom_resources is defined and k3s_calico_custom_resources | trim | length > 0 }}"
+
     - name: Create calico directory
       ansible.builtin.file:
         path: "{{ k3s_server_location }}/server/calico"
@@ -100,7 +104,15 @@
         cmd: "k3s kubectl apply --server-side -f {{ k3s_server_location }}/server/calico/tigera-operator.yaml"
       when: download_tigera_operator is changed
 
-    - name: Download custom-resources.yaml
+    - name: Write custom resources to file
+      ansible.builtin.copy:
+        dest: "{{ k3s_server_location }}/server/calico/custom-resources.yaml"
+        content: "{{ k3s_calico_custom_resources }}"
+        mode: '0644'
+      register: custom_resources_written
+      when: custom_resources_defined
+
+    - name: Download default custom-resources.yaml
       ansible.builtin.get_url:
         url: "https://raw.githubusercontent.com/projectcalico/calico/{{ k3s_calico_version }}/manifests/custom-resources.yaml"
         dest: "{{ k3s_server_location }}/server/calico/custom-resources.yaml"
@@ -108,9 +120,10 @@
         group: root
         mode: "0755"
       register: download_custom_resources
+      when: not custom_resources_defined
 
     - name: Apply custom-resources.yaml
       ansible.builtin.command:
         cmd: "k3s kubectl apply --server-side -f {{ k3s_server_location }}/server/calico/custom-resources.yaml"
-      when: download_custom_resources is changed
+      when: (custom_resources_written | default({})).get('changed', False) or (download_custom_resources | default({})).get('changed', False)
   when: k3s_calico

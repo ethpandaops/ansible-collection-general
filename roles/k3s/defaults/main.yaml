@@ -27,3 +27,27 @@ k3s_cleanup_localpath_persisten_volumes: false
 #   --disable-network-policy
 k3s_calico: false
 k3s_calico_version: "v3.27.0"
+# Change this if you want to use a different version of calico custom resources.
+# The default calico custom resources will be used when this is omitted.
+# https://docs.tigera.io/calico/latest/getting-started/kubernetes/k3s/multi-node-install#install-calico
+# k3s_calico_custom_resources: |
+#   apiVersion: operator.tigera.io/v1
+#   kind: Installation
+#   metadata:
+#     name: default
+#   spec:
+#     # Configures Calico networking.
+#     calicoNetwork:
+#       # Note: The ipPools section cannot be modified post-install.
+#       ipPools:
+#       - blockSize: 26
+#         cidr: 192.168.0.0/16
+#         encapsulation: IPIP
+#         natOutgoing: Enabled
+#         nodeSelector: all()
+#   ---
+#   apiVersion: operator.tigera.io/v1
+#   kind: APIServer
+#   metadata:
+#     name: default
+#   spec: {}
