@@ -20,6 +20,7 @@ bootstrap_default_common_packages:
       - screen
       - chrony # enabled by default on Debian
       - bat
+      - cron
 
 bootstrap_harden_sshd_config: true
 bootstrap_rpcbind_disable: false
