@@ -11,9 +11,7 @@ lighthouse_announced_ipv6: "{{ ansible_default_ipv6.address }}"
 lighthouse_cleanup: false # when set to "true" it will remove the container(s)
 
 lighthouse_ports_p2p_tcp: 9000
-lighthouse_ports_p2p_tcp_ipv6: 9002
 lighthouse_ports_p2p_udp: 9000
-lighthouse_ports_p2p_udp_ipv6: 9002
 lighthouse_ports_http_beacon: 5052
 lighthouse_ports_metrics: 5054
 lighthouse_ports_quic: 9001
@@ -34,12 +32,13 @@ lighthouse_container_image: sigp/lighthouse:latest
 lighthouse_container_env: {}
 lighthouse_container_ports:
   - "127.0.0.1:{{ lighthouse_ports_http_beacon }}:{{ lighthouse_ports_http_beacon }}"
-  - "{{ lighthouse_ports_p2p_tcp }}:{{ lighthouse_ports_p2p_tcp }}"
-  - "{{ lighthouse_ports_p2p_udp }}:{{ lighthouse_ports_p2p_udp }}/udp"
+  - "0.0.0.0:{{ lighthouse_ports_p2p_tcp }}:{{ lighthouse_ports_p2p_tcp }}"
+  - "0.0.0.0:{{ lighthouse_ports_p2p_udp }}:{{ lighthouse_ports_p2p_udp }}/udp"
+  - "[::]:{{ lighthouse_ports_p2p_tcp }}:{{ lighthouse_ports_p2p_tcp }}"
+  - "[::]:{{ lighthouse_ports_p2p_udp }}:{{ lighthouse_ports_p2p_udp }}/udp"
   - "{{ lighthouse_ports_quic }}:{{ lighthouse_ports_quic }}"
   - "{{ lighthouse_ports_quic }}:{{ lighthouse_ports_quic }}/udp"
-  - "[::]:{{ lighthouse_ports_p2p_tcp_ipv6 }}:{{ lighthouse_ports_p2p_udp_ipv6 }}"
-  - "[::]:{{ lighthouse_ports_p2p_udp_ipv6 }}:{{ lighthouse_ports_p2p_udp_ipv6 }}/udp"
+
 lighthouse_container_volumes:
   - "{{ lighthouse_datadir }}:/data"
   - "{{ lighthouse_auth_jwt_path }}:/execution-auth.jwt:ro"
@@ -54,15 +53,15 @@ lighthouse_container_command:
   - --disable-enr-auto-update
   - --enr-address={{ lighthouse_announced_ip }}
   - --enr-address={{ lighthouse_announced_ipv6 }}
-  - --enr-tcp6-port={{ lighthouse_ports_p2p_tcp_ipv6 }}
+  - --enr-tcp6-port={{ lighthouse_ports_p2p_tcp }}
   - --enr-tcp-port={{ lighthouse_ports_p2p_tcp }}
   - --enr-udp-port={{ lighthouse_ports_p2p_udp }}
-  - --enr-udp6-port={{ lighthouse_ports_p2p_udp_ipv6 }}
+  - --enr-udp6-port={{ lighthouse_ports_p2p_udp }}
   - --listen-address=0.0.0.0
   - --port={{ lighthouse_ports_p2p_tcp }}
-  - --port6={{ lighthouse_ports_p2p_tcp_ipv6 }}
+  - --port6={{ lighthouse_ports_p2p_tcp }}
   - --discovery-port={{ lighthouse_ports_p2p_udp }}
-  - --discovery-port6={{ lighthouse_ports_p2p_udp_ipv6 }}
+  - --discovery-port6={{ lighthouse_ports_p2p_udp }}
   - --http
   - --http-address=0.0.0.0
   - --http-port={{ lighthouse_ports_http_beacon }}
