@@ -2,6 +2,7 @@ erigon_user: erigon
 erigon_datadir: /data/erigon
 erigon_auth_jwt_path: /data/execution-auth.secret
 erigon_announced_ip: "{{ ansible_host }}"
+erigon_announced_ipv6: "{{ ansible_default_ipv6.address }}"
 
 erigon_cleanup: false # when set to "true" it will remove the container
 
@@ -19,8 +20,11 @@ erigon_container_env: {}
 erigon_container_ports:
   - "127.0.0.1:{{ erigon_ports_engine }}:{{ erigon_ports_engine }}"
   - "127.0.0.1:{{ erigon_ports_http_rpc }}:{{ erigon_ports_http_rpc }}"
-  - "{{ erigon_ports_p2p }}:{{ erigon_ports_p2p }}"
-  - "{{ erigon_ports_p2p }}:{{ erigon_ports_p2p }}/udp"
+  - "0.0.0.0:{{ erigon_ports_p2p }}:{{ erigon_ports_p2p }}"
+  - "0.0.0.0:{{ erigon_ports_p2p }}:{{ erigon_ports_p2p }}/udp"
+  - "[::]:{{ erigon_ports_p2p }}:{{ erigon_ports_p2p }}"
+  - "[::]:{{ erigon_ports_p2p }}:{{ erigon_ports_p2p }}/udp"
+
 erigon_container_volumes:
   - "{{ erigon_datadir }}:/data"
   - "{{ erigon_auth_jwt_path }}:/execution-auth.jwt:ro"
@@ -32,6 +36,7 @@ erigon_container_entrypoint:
 erigon_container_command:
   - --datadir=/data
   - --nat=extip:{{ erigon_announced_ip }}
+  - --nat=extip:{{ erigon_announced_ipv6 }}
   - --port={{ erigon_ports_p2p }}
   - --http
   - --http.addr=0.0.0.0

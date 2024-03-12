@@ -2,6 +2,7 @@ besu_user: besu
 besu_datadir: /data/besu
 besu_auth_jwt_path: /data/execution-auth.secret
 besu_announced_ip: "{{ ansible_host }}"
+besu_announced_ipv6: "{{ ansible_default_ipv6.address }}"
 
 besu_cleanup: false # when set to "true" it will remove the container
 
@@ -16,8 +17,11 @@ besu_container_env: {}
 besu_container_ports:
   - "127.0.0.1:{{ besu_ports_http_rpc }}:{{ besu_ports_http_rpc }}"
   - "127.0.0.1:{{ besu_ports_engine }}:{{ besu_ports_engine }}"
-  - "{{ besu_ports_p2p }}:{{ besu_ports_p2p }}"
-  - "{{ besu_ports_p2p }}:{{ besu_ports_p2p }}/udp"
+  - "0.0.0.0:{{ besu_ports_p2p }}:{{ besu_ports_p2p }}"
+  - "0.0.0.0:{{ besu_ports_p2p }}:{{ besu_ports_p2p }}/udp"
+  - "[::]:{{ besu_ports_p2p }}:{{ besu_ports_p2p }}"
+  - "[::]:{{ besu_ports_p2p }}:{{ besu_ports_p2p }}/udp"
+
 besu_container_volumes:
   - "{{ besu_datadir }}:/data"
   - "{{ besu_auth_jwt_path }}:/execution-auth.jwt:ro"
@@ -28,6 +32,7 @@ besu_container_command:
   - --data-path=/data
   - --nat-method=NONE
   - --p2p-host={{ besu_announced_ip }}
+  #- --p2p-host={{ besu_announced_ipv6 }} # not supported
   - --p2p-port={{ besu_ports_p2p }}
   - --rpc-http-enabled
   - --rpc-http-host=0.0.0.0
