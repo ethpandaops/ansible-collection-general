@@ -6,6 +6,7 @@ lighthouse_beacon_endpoint: "http://{{ lighthouse_container_name }}:{{ lighthous
 lighthouse_mev_boost_endpoint: "http://mev-boost:18550"
 
 lighthouse_announced_ip: "{{ ansible_host }}"
+lighthouse_announced_ipv6: "{{ ansible_default_ipv6.address }}"
 
 lighthouse_cleanup: false # when set to "true" it will remove the container(s)
 
@@ -13,6 +14,9 @@ lighthouse_ports_p2p_tcp: 9000
 lighthouse_ports_p2p_udp: 9000
 lighthouse_ports_http_beacon: 5052
 lighthouse_ports_metrics: 5054
+lighthouse_ports_quic: 9001
+lighthouse_ports_p2p_tcp_ipv6: 9000
+lighthouse_ports_p2p_udp_ipv6: 9000
 
 lighthouse_validator_enabled: false
 lighthouse_validator_fee_recipient: "0xF29Ff96aaEa6C9A1fBa851f74737f3c069d4f1a9" # theprotocolguild.eth
@@ -30,6 +34,10 @@ lighthouse_container_ports:
   - "127.0.0.1:{{ lighthouse_ports_http_beacon }}:{{ lighthouse_ports_http_beacon }}"
   - "{{ lighthouse_ports_p2p_tcp }}:{{ lighthouse_ports_p2p_tcp }}"
   - "{{ lighthouse_ports_p2p_udp }}:{{ lighthouse_ports_p2p_udp }}/udp"
+  - "{{ lighthouse_ports_quic }}:{{ lighthouse_ports_quic }}"
+  - "{{ lighthouse_ports_quic }}:{{ lighthouse_ports_quic }}/udp"
+  - "[::1]:{{ lighthouse_ports_p2p_tcp_ipv6 }}:{{ lighthouse_ports_p2p_tcp }}"
+  - "[::1]:{{ lighthouse_ports_p2p_udp_ipv6 }}:{{ lighthouse_ports_p2p_udp }}"
 lighthouse_container_volumes:
   - "{{ lighthouse_datadir }}:/data"
   - "{{ lighthouse_auth_jwt_path }}:/execution-auth.jwt:ro"
@@ -57,6 +65,11 @@ lighthouse_container_command:
   - --metrics-address=0.0.0.0
   - --metrics-allow-origin=*
   - --metrics-port={{ lighthouse_ports_metrics }}
+  - --enr-address={{ lighthouse_announced_ipv6 }}
+  - --enr-udp6-port={{ lighthouse_ports_p2p_udp_ipv6 }}
+  - --enr-tcp6-port={{ lighthouse_ports_p2p_tcp_ipv6 }}
+  - --port6={{ lighthouse_ports_p2p_tcp_ipv6 }}
+
 lighthouse_container_command_extra_args: []
 
 checkpoint_sync_url: https://beaconstate.ethstaker.cc
