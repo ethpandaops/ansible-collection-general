@@ -11,9 +11,9 @@ lighthouse_announced_ipv6: "{{ ansible_default_ipv6.address }}"
 lighthouse_cleanup: false # when set to "true" it will remove the container(s)
 
 lighthouse_ports_p2p_tcp: 9000
-lighthouse_ports_p2p_tcp_ipv6: 9000
+lighthouse_ports_p2p_tcp_ipv6: 9002
 lighthouse_ports_p2p_udp: 9000
-lighthouse_ports_p2p_udp_ipv6: 9000
+lighthouse_ports_p2p_udp_ipv6: 9002
 lighthouse_ports_http_beacon: 5052
 lighthouse_ports_metrics: 5054
 lighthouse_ports_quic: 9001
