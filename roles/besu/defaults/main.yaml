@@ -32,7 +32,7 @@ besu_container_command:
   - --data-path=/data
   - --nat-method=NONE
   - --p2p-host={{ besu_announced_ip }}
-  # - --p2p-host={{ besu_announced_ipv6 }} # not supported
+  - --p2p-host={{ besu_announced_ipv6 }}
   - --p2p-port={{ besu_ports_p2p }}
   - --rpc-http-enabled
   - --rpc-http-host=0.0.0.0
