@@ -3,6 +3,7 @@ nimbus_datadir: /data/nimbus
 nimbus_auth_jwt_path: /data/execution-auth.secret
 nimbus_execution_engine_endpoint: http://geth:8551
 nimbus_announced_ip: "{{ ansible_host }}"
+nimbus_announced_ipv6: "{{ ansible_default_ipv6.address }}"
 nimbus_mev_boost_endpoint: "http://mev-boost:18550"
 
 nimbus_cleanup: false # when set to "true" it will remove the container
@@ -42,8 +43,10 @@ nimbus_container_image: statusim/nimbus-eth2:amd64-latest
 nimbus_container_env: {}
 nimbus_container_ports:
   - "127.0.0.1:{{ nimbus_ports_http_beacon }}:{{ nimbus_ports_http_beacon }}"
-  - "{{ nimbus_ports_p2p_tcp }}:{{ nimbus_ports_p2p_tcp }}"
-  - "{{ nimbus_ports_p2p_udp }}:{{ nimbus_ports_p2p_udp }}/udp"
+  - "0.0.0.0:{{ nimbus_ports_p2p_tcp }}:{{ nimbus_ports_p2p_tcp }}"
+  - "0.0.0.0:{{ nimbus_ports_p2p_udp }}:{{ nimbus_ports_p2p_udp }}/udp"
+  - "[::]:{{ nimbus_ports_p2p_tcp }}:{{ nimbus_ports_p2p_tcp }}"
+  - "[::]:{{ nimbus_ports_p2p_udp }}:{{ nimbus_ports_p2p_udp }}/udp"
 nimbus_container_volumes:
   - "{{ nimbus_datadir }}:/data"
   - "{{ nimbus_auth_jwt_path }}:/execution-auth.jwt:ro"
@@ -58,6 +61,7 @@ nimbus_container_command:
   - --udp-port={{ nimbus_ports_p2p_udp }}
   - --tcp-port={{ nimbus_ports_p2p_tcp }}
   - --nat=extip:{{ nimbus_announced_ip }}
+  #- --nat=extip:{{ nimbus_announced_ipv6 }} # not supported
   - --enr-auto-update=false
   - --rest
   - --rest-port={{ nimbus_ports_http_beacon }}

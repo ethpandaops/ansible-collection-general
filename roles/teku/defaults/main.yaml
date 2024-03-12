@@ -3,6 +3,7 @@ teku_datadir: /data/teku
 teku_auth_jwt_path: /data/execution-auth.secret
 teku_execution_engine_endpoint: http://geth:8551
 teku_announced_ip: "{{ ansible_host }}"
+teku_announced_ipv6: "{{ ansible_default_ipv6.address }}"
 teku_mev_boost_endpoint: "http://mev-boost:18550"
 
 teku_cleanup: false # when set to "true" it will remove the container
@@ -26,8 +27,10 @@ teku_container_image: consensys/teku:latest
 teku_container_env: {}
 teku_container_ports:
   - "127.0.0.1:{{ teku_ports_http_beacon }}:{{ teku_ports_http_beacon }}"
-  - "{{ teku_ports_p2p_tcp }}:{{ teku_ports_p2p_tcp }}"
-  - "{{ teku_ports_p2p_udp }}:{{ teku_ports_p2p_udp }}/udp"
+  - "0.0.0.0:{{ teku_ports_p2p_tcp }}:{{ teku_ports_p2p_tcp }}"
+  - "0.0.0.0:{{ teku_ports_p2p_udp }}:{{ teku_ports_p2p_udp }}/udp"
+  - "[::]:{{ teku_ports_p2p_tcp }}:{{ teku_ports_p2p_tcp }}"
+  - "[::]:{{ teku_ports_p2p_udp }}:{{ teku_ports_p2p_udp }}/udp"
 teku_container_volumes:
   - "{{ teku_datadir }}:/data"
   - "{{ teku_auth_jwt_path }}:/execution-auth.jwt:ro"
@@ -40,6 +43,7 @@ teku_container_command:
   - --p2p-enabled=true
   - --p2p-interface=0.0.0.0
   - --p2p-advertised-ip={{ teku_announced_ip }}
+  #- --p2p-advertised-ipv6={{ teku_announced_ipv6 }} # not supported
   - --p2p-port={{ teku_ports_p2p_tcp }}
   - --p2p-advertised-port={{ teku_ports_p2p_udp }}
   - --rest-api-enabled
