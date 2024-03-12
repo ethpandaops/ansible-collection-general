@@ -2,4 +2,3 @@
   community.docker.docker_network:
     name: "{{ docker_network_name }}"
     enable_ipv6: true
-    
