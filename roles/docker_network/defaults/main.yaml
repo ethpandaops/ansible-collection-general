@@ -1,1 +1,3 @@
 docker_network_name: "shared"
+digitalocean_v6_subnet: "124"
+hetzner_v6_subnet: "64"
