@@ -45,7 +45,7 @@ prysm_container_command:
   - --accept-terms-of-use=true
   - --datadir=/data
   - --p2p-host-ip={{ prysm_announced_ip }}
-  #- --p2p-host-ipv6={{ prysm_announced_ipv6 }} # not supported
+  # - --p2p-host-ipv6={{ prysm_announced_ipv6 }} # not supported
   - --p2p-tcp-port={{ prysm_ports_p2p_tcp }}
   - --p2p-udp-port={{ prysm_ports_p2p_udp }}
   - --rpc-host=0.0.0.0

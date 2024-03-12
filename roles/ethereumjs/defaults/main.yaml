@@ -39,7 +39,7 @@ ethereumjs_container_command:
   - --rpcEnginePort={{ ethereumjs_ports_engine }}
   - --jwt-secret=/execution-auth.jwt
   - --extIP={{ ethereumjs_announced_ip }}
-  #- --extIP={{ ethereumjs_announced_ipv6 }} # not supported
+  # - --extIP={{ ethereumjs_announced_ipv6 }} # not supported
 ethereumjs_container_command_extra_args: []
 
 # Default image pull policy

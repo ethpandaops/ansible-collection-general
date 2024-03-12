@@ -43,7 +43,7 @@ teku_container_command:
   - --p2p-enabled=true
   - --p2p-interface=0.0.0.0
   - --p2p-advertised-ip={{ teku_announced_ip }}
-  #- --p2p-advertised-ipv6={{ teku_announced_ipv6 }} # not supported
+  # - --p2p-advertised-ipv6={{ teku_announced_ipv6 }} # not supported
   - --p2p-port={{ teku_ports_p2p_tcp }}
   - --p2p-advertised-port={{ teku_ports_p2p_udp }}
   - --rest-api-enabled

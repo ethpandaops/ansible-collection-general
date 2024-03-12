@@ -39,7 +39,7 @@ reth_container_command:
   - --authrpc.port={{ reth_ports_engine }}
   - --authrpc.jwtsecret=/execution-auth.jwt
   - --nat=extip:{{ reth_announced_ip }}
-  #- --nat=extip:{{ reth_announced_ipv6 }} # not supported
+  # - --nat=extip:{{ reth_announced_ipv6 }} # not supported
   - --metrics=0.0.0.0:{{ reth_ports_metrics }}
 reth_container_command_extra_args: []
 #  - --http.api=eth,net,web3

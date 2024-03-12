@@ -34,7 +34,7 @@ nethermind_container_command:
   - --datadir=/data
   - --KeyStore.KeyStoreDirectory=/data/keystore
   - --Network.ExternalIp={{ nethermind_announced_ip }}
-  #- --Network.ExternalIp={{ nethermind_announced_ipv6 }} # not supported
+  # - --Network.ExternalIp={{ nethermind_announced_ipv6 }} # not supported
   - --Network.P2PPort={{ nethermind_ports_p2p }}
   - --Network.DiscoveryPort={{ nethermind_ports_p2p }}
   - --JsonRpc.Enabled=true

@@ -61,7 +61,7 @@ nimbus_container_command:
   - --udp-port={{ nimbus_ports_p2p_udp }}
   - --tcp-port={{ nimbus_ports_p2p_tcp }}
   - --nat=extip:{{ nimbus_announced_ip }}
-  #- --nat=extip:{{ nimbus_announced_ipv6 }} # not supported
+  # - --nat=extip:{{ nimbus_announced_ipv6 }} # not supported
   - --enr-auto-update=false
   - --rest
   - --rest-port={{ nimbus_ports_http_beacon }}
