@@ -20,7 +20,7 @@ geth_container_ports:
   - "127.0.0.1:{{ geth_ports_engine }}:{{ geth_ports_engine }}"
   - "{{ geth_ports_p2p }}:{{ geth_ports_p2p }}"
   - "{{ geth_ports_p2p }}:{{ geth_ports_p2p }}/udp"
-  - "[::1]:{{ geth_ports_p2p_ipv6 }}:{{ geth_ports_p2p_ipv6 }}"
+  - "[::]:{{ geth_ports_p2p_ipv6 }}:{{ geth_ports_p2p_ipv6 }}"
 geth_container_volumes:
   - "{{ geth_datadir }}:/data"
   - "{{ geth_auth_jwt_path }}:/execution-auth.jwt:ro"

@@ -38,8 +38,8 @@ lighthouse_container_ports:
   - "{{ lighthouse_ports_p2p_udp }}:{{ lighthouse_ports_p2p_udp }}/udp"
   - "{{ lighthouse_ports_quic }}:{{ lighthouse_ports_quic }}"
   - "{{ lighthouse_ports_quic }}:{{ lighthouse_ports_quic }}/udp"
-  - "[::1]:{{ lighthouse_ports_p2p_tcp_ipv6 }}:{{ lighthouse_ports_p2p_udp_ipv6 }}"
-  - "[::1]:{{ lighthouse_ports_p2p_udp_ipv6 }}:{{ lighthouse_ports_p2p_udp_ipv6 }}/udp"
+  - "[::]:{{ lighthouse_ports_p2p_tcp_ipv6 }}:{{ lighthouse_ports_p2p_udp_ipv6 }}"
+  - "[::]:{{ lighthouse_ports_p2p_udp_ipv6 }}:{{ lighthouse_ports_p2p_udp_ipv6 }}/udp"
 lighthouse_container_volumes:
   - "{{ lighthouse_datadir }}:/data"
   - "{{ lighthouse_auth_jwt_path }}:/execution-auth.jwt:ro"
