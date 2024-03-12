@@ -11,7 +11,9 @@ lodestar_announced_ipv6: "{{ ansible_default_ipv6.address }}"
 lodestar_cleanup: false # when set to "true" it will remove the container(s)
 
 lodestar_ports_p2p_tcp: 9000
+lodestar_ports_p2p_tcp_ipv6: 9002
 lodestar_ports_p2p_udp: 9000
+lodestar_ports_p2p_udp_ipv6: 9002
 lodestar_ports_http_beacon: 9596
 lodestar_ports_metrics: 8008
 
@@ -31,8 +33,8 @@ lodestar_container_ports:
   - "127.0.0.1:{{ lodestar_ports_http_beacon }}:{{ lodestar_ports_http_beacon }}"
   - "0.0.0.0:{{ lodestar_ports_p2p_tcp }}:{{ lodestar_ports_p2p_tcp }}"
   - "0.0.0.0:{{ lodestar_ports_p2p_udp }}:{{ lodestar_ports_p2p_udp }}/udp"
-  - "[::]:{{ lodestar_ports_p2p_tcp }}:{{ lodestar_ports_p2p_tcp }}"
-  - "[::]:{{ lodestar_ports_p2p_udp }}:{{ lodestar_ports_p2p_udp }}/udp"
+  - "[::]:{{ lodestar_ports_p2p_tcp_ipv6 }}:{{ lodestar_ports_p2p_tcp_ipv6 }}"
+  - "[::]:{{ lodestar_ports_p2p_udp_ipv6 }}:{{ lodestar_ports_p2p_udp_ipv6 }}/udp"
 lodestar_container_volumes:
   - "{{ lodestar_datadir }}:/data"
   - "{{ lodestar_auth_jwt_path }}:/execution-auth.jwt:ro"
@@ -46,14 +48,14 @@ lodestar_container_command:
   - --listenAddress=0.0.0.0
   - --listenAddress6=::0
   - --port={{ lodestar_ports_p2p_tcp }}
-  - --port6={{ lodestar_ports_p2p_tcp }}
+  - --port6={{ lodestar_ports_p2p_tcp_ipv6 }}
   - --enr.ip={{ lodestar_announced_ip }}
   - --enr.ip6={{ lodestar_announced_ipv6 }}
   - --enr.tcp={{ lodestar_ports_p2p_tcp }}
-  - --enr.tcp6={{ lodestar_ports_p2p_tcp }}
+  - --enr.tcp6={{ lodestar_ports_p2p_tcp_ipv6 }}
   - --enr.udp={{ lodestar_ports_p2p_udp }}
-  - --enr.udp6={{ lodestar_ports_p2p_udp }}
-  - --discoveryPort6={{ lodestar_ports_p2p_udp }}
+  - --enr.udp6={{ lodestar_ports_p2p_udp_ipv6 }}
+  - --discoveryPort6={{ lodestar_ports_p2p_udp_ipv6 }}
   - --rest
   - --rest.address=0.0.0.0
   - --rest.port={{ lodestar_ports_http_beacon }}
