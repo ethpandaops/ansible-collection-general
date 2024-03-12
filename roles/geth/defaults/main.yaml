@@ -7,10 +7,10 @@ geth_announced_ipv6: "{{ ansible_default_ipv6.address }}"
 geth_cleanup: false # when set to "true" it will remove the container
 
 geth_ports_p2p: 30303
+geth_ports_p2p_ipv6: 30304
 geth_ports_http_rpc: 8545
 geth_ports_engine: 8551
 geth_ports_metrics: 6060
-geth_ports_p2p_ipv6: 30303
 
 geth_container_name: geth
 geth_container_image: ethereum/client-go:stable
