@@ -1,7 +1,7 @@
 # ethpandaops.general.ethereum_genesis
 
 This role will generate a Ethereum genesis network configuration and required validator keys.
-It uses the []`ethereum-genesis-generator`](https://github.com/ethpandaops/ethereum-genesis-generator)
+It uses the [`ethereum-genesis-generator`](https://github.com/ethpandaops/ethereum-genesis-generator)
 
 ## Requirements
 
