@@ -40,6 +40,7 @@ provisioner:
         ethereum_node_announced_ip: 127.0.0.1
         docker_daemon_options:
           storage-driver: "vfs"
+    children:
       lighthouse: 
         lighthouse_container_command_extra_args:
           - --allow-insecure-genesis-sync
