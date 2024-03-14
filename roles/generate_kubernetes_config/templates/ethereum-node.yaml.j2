@@ -8,7 +8,7 @@
       rpcEndpoint: {{ default_el_endpoint }}
       beaconEndpoint: {{ default_cl_endpoint }}
     checkpointSync:
-      enabled: {{ checkpoint_sync_enabled | lower }}
+      enabled: {{ ethereum_node_cl_checkpoint_sync_enabled | lower }}
       addresses:
         {{ ethereum_network_name }}: {{ checkpoint_sync_url_kube }}
     clientArgs:
