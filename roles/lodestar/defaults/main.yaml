@@ -11,11 +11,13 @@ lodestar_announced_ipv6: "{{ ansible_default_ipv6.address }}"
 lodestar_cleanup: false # when set to "true" it will remove the container(s)
 
 lodestar_ports_p2p_tcp: 9000
-lodestar_ports_p2p_tcp_ipv6: 9002
 lodestar_ports_p2p_udp: 9000
-lodestar_ports_p2p_udp_ipv6: 9002
+lodestar_ports_p2p_udp_ipv6: 9002 # temporary until we have a fix for https://github.com/ChainSafe/lodestar/issues/6531#issuecomment-1995707028
+lodestar_ports_p2p_tcp_ipv6: 9002
 lodestar_ports_http_beacon: 9596
 lodestar_ports_metrics: 8008
+
+lodestar_ipv6_enabled: false
 
 lodestar_validator_enabled: false
 lodestar_validator_fee_recipient: "0xF29Ff96aaEa6C9A1fBa851f74737f3c069d4f1a9" # theprotocolguild.eth
@@ -29,32 +31,33 @@ lodestar_validator_datadir: /data/lodestar-validator
 lodestar_container_name: lodestar
 lodestar_container_image: chainsafe/lodestar:latest
 lodestar_container_env: {}
-lodestar_container_ports:
+lodestar_container_ports_ipv4:
   - "127.0.0.1:{{ lodestar_ports_http_beacon }}:{{ lodestar_ports_http_beacon }}"
   - "0.0.0.0:{{ lodestar_ports_p2p_tcp }}:{{ lodestar_ports_p2p_tcp }}"
   - "0.0.0.0:{{ lodestar_ports_p2p_udp }}:{{ lodestar_ports_p2p_udp }}/udp"
+
+lodestar_container_ports_ipv6:
   - "[::]:{{ lodestar_ports_p2p_tcp_ipv6 }}:{{ lodestar_ports_p2p_tcp_ipv6 }}"
   - "[::]:{{ lodestar_ports_p2p_udp_ipv6 }}:{{ lodestar_ports_p2p_udp_ipv6 }}/udp"
+
+lodestar_container_ports: >-
+  {{ lodestar_container_ports_ipv4 + lodestar_container_ports_ipv6 if lodestar_ipv6_enabled else [] }}
+
 lodestar_container_volumes:
   - "{{ lodestar_datadir }}:/data"
   - "{{ lodestar_auth_jwt_path }}:/execution-auth.jwt:ro"
 lodestar_container_security_opts: []
 lodestar_container_stop_timeout: "300"
 lodestar_container_networks: []
-lodestar_container_command:
+lodestar_container_command_default:
   - beacon
   - --dataDir=/data
   - --discv5
   - --listenAddress=0.0.0.0
-  - --listenAddress6=::0
   - --port={{ lodestar_ports_p2p_tcp }}
-  - --port6={{ lodestar_ports_p2p_tcp_ipv6 }}
   - --enr.ip={{ lodestar_announced_ip }}
-  - --enr.ip6={{ lodestar_announced_ipv6 }}
   - --enr.tcp={{ lodestar_ports_p2p_tcp }}
-  - --enr.tcp6={{ lodestar_ports_p2p_tcp_ipv6 }}
   - --enr.udp={{ lodestar_ports_p2p_udp }}
-  - --enr.udp6={{ lodestar_ports_p2p_udp_ipv6 }}
   - --discoveryPort6={{ lodestar_ports_p2p_udp_ipv6 }}
   - --rest
   - --rest.address=0.0.0.0
@@ -64,6 +67,17 @@ lodestar_container_command:
   - --metrics
   - --metrics.address=0.0.0.0
   - --metrics.port={{ lodestar_ports_metrics }}
+
+lodestar_container_command_v6:
+  - --listenAddress6=::0
+  - --port6={{ lodestar_ports_p2p_tcp_ipv6 }}
+  - --enr.ip6={{ lodestar_announced_ipv6 }}
+  - --enr.tcp6={{ lodestar_ports_p2p_tcp_ipv6 }}
+  - --enr.udp6={{ lodestar_ports_p2p_udp_ipv6 }}
+
+lodestar_container_command: >-
+  {{ lodestar_container_command_default + lodestar_container_command_v6 if lodestar_ipv6_enabled else [] }}
+
 lodestar_container_command_extra_args: []
 
 checkpoint_sync_url: https://beaconstate.ethstaker.cc

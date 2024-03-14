@@ -11,19 +11,23 @@ erigon_ports_http_rpc: 8545
 erigon_ports_engine: 8551
 erigon_ports_metrics: 6060
 
-##
-## Main container
-##
+erigon_ipv6_enabled: false
+
 erigon_container_name: erigon
 erigon_container_image: thorax/erigon:stable
 erigon_container_env: {}
-erigon_container_ports:
+erigon_container_ports_ipv4:
   - "127.0.0.1:{{ erigon_ports_engine }}:{{ erigon_ports_engine }}"
   - "127.0.0.1:{{ erigon_ports_http_rpc }}:{{ erigon_ports_http_rpc }}"
   - "0.0.0.0:{{ erigon_ports_p2p }}:{{ erigon_ports_p2p }}"
   - "0.0.0.0:{{ erigon_ports_p2p }}:{{ erigon_ports_p2p }}/udp"
+
+erigon_container_ports_ipv6:
   - "[::]:{{ erigon_ports_p2p }}:{{ erigon_ports_p2p }}"
   - "[::]:{{ erigon_ports_p2p }}:{{ erigon_ports_p2p }}/udp"
+
+erigon_container_ports: >-
+  {{ erigon_container_ports_ipv4 + erigon_container_ports_ipv6 if erigon_ipv6_enabled else [] }}
 
 erigon_container_volumes:
   - "{{ erigon_datadir }}:/data"
@@ -33,10 +37,9 @@ erigon_container_stop_timeout: "300"
 erigon_container_networks: []
 erigon_container_entrypoint:
   - erigon
-erigon_container_command:
+erigon_container_command_default:
   - --datadir=/data
   - --nat=extip:{{ erigon_announced_ip }}
-  - --nat=extip:{{ erigon_announced_ipv6 }}
   - --port={{ erigon_ports_p2p }}
   - --http
   - --http.addr=0.0.0.0
@@ -48,6 +51,13 @@ erigon_container_command:
   - --metrics
   - --metrics.addr=0.0.0.0
   - --metrics.port={{ erigon_ports_metrics }}
+
+erigon_container_command_v6:
+  - --nat=extip:{{ erigon_announced_ipv6 }}
+
+erigon_container_command: >-
+  {{ erigon_container_command_default + erigon_container_command_v6 if erigon_ipv6_enabled else [] }}
+
 erigon_container_command_extra_args: []
 #  - --prune=htc
 

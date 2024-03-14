@@ -13,6 +13,8 @@ nimbus_ports_p2p_udp: 9000
 nimbus_ports_http_beacon: 5051
 nimbus_ports_metrics: 8008
 
+nimbus_ipv6_enabled: false
+
 nimbus_validator_enabled: false
 nimbus_validator_fee_recipient: "0xF29Ff96aaEa6C9A1fBa851f74737f3c069d4f1a9" # theprotocolguild.eth
 nimbus_validator_datadir: /data/nimbus-validator
@@ -41,19 +43,25 @@ nimbus_checkpoint_autoremove_enabled: false
 nimbus_container_name: nimbus
 nimbus_container_image: statusim/nimbus-eth2:amd64-latest
 nimbus_container_env: {}
-nimbus_container_ports:
+nimbus_container_ports_ipv4:
   - "127.0.0.1:{{ nimbus_ports_http_beacon }}:{{ nimbus_ports_http_beacon }}"
   - "0.0.0.0:{{ nimbus_ports_p2p_tcp }}:{{ nimbus_ports_p2p_tcp }}"
   - "0.0.0.0:{{ nimbus_ports_p2p_udp }}:{{ nimbus_ports_p2p_udp }}/udp"
+
+nimbus_container_ports_ipv6:
   - "[::]:{{ nimbus_ports_p2p_tcp }}:{{ nimbus_ports_p2p_tcp }}"
   - "[::]:{{ nimbus_ports_p2p_udp }}:{{ nimbus_ports_p2p_udp }}/udp"
+
+nimbus_container_ports: >-
+  {{ nimbus_container_ports_ipv4 + nimbus_container_ports_ipv6 if nimbus_ipv6_enabled else [] }}
+
 nimbus_container_volumes:
   - "{{ nimbus_datadir }}:/data"
   - "{{ nimbus_auth_jwt_path }}:/execution-auth.jwt:ro"
 nimbus_container_security_opts: []
 nimbus_container_stop_timeout: "300"
 nimbus_container_networks: []
-nimbus_container_command:
+nimbus_container_command_default:
   - --non-interactive=true
   - --data-dir=/data
   - --log-level=INFO
@@ -61,7 +69,6 @@ nimbus_container_command:
   - --udp-port={{ nimbus_ports_p2p_udp }}
   - --tcp-port={{ nimbus_ports_p2p_tcp }}
   - --nat=extip:{{ nimbus_announced_ip }}
-  # - --nat=extip:{{ nimbus_announced_ipv6 }} # not supported
   - --enr-auto-update=false
   - --rest
   - --rest-port={{ nimbus_ports_http_beacon }}
@@ -72,6 +79,13 @@ nimbus_container_command:
   - --metrics
   - --metrics-port={{ nimbus_ports_metrics }}
   - --metrics-address=0.0.0.0
+
+nimbus_container_command_v6: []
+  # - --nat=extip:{{ nimbus_announced_ipv6 }} # not supported yet
+
+nimbus_container_command: >-
+  {{ nimbus_container_command_default + nimbus_container_command_v6 if nimbus_ipv6_enabled else [] }}
+
 nimbus_container_command_extra_args: []
   # - --graffiti=hello-world
 
