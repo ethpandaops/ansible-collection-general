@@ -61,7 +61,7 @@
   ansible.builtin.command: >-
     k3s kubectl config set-cluster default
       --server=https://{{ k3s_server_ip }}:6443
-      --kubeconfig ~{{ ansible_user }}/.kube/config
+      --kubeconfig ~/{{ ansible_user }}/.kube/config
   changed_when: true
 
 - name: Create kubectl symlink
