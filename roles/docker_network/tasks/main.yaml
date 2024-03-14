@@ -4,7 +4,7 @@
     enable_ipv6: true
     ipam_config:
       - subnet: "{{ ansible_default_ipv6.address | ansible.utils.ipsubnet(digitalocean_v6_subnet) }}"
-  when: cloud == "digitalocean"
+  when: cloud == "digitalocean" and ansible_default_ipv6.address is defined
 
 - name: Create docker network for hetzner
   community.docker.docker_network:
@@ -12,9 +12,9 @@
     enable_ipv6: true
     ipam_config:
       - subnet: "{{ ansible_default_ipv6.address | ansible.utils.ipsubnet(hetzner_v6_subnet) }}"
-  when: cloud == "hetzner"
+  when: cloud == "hetzner" and ansible_default_ipv6.address is defined
 
 - name: Create docker network
   community.docker.docker_network:
     name: "{{ docker_network_name }}"
-  when: cloud is not defined
+  when: cloud is not defined or ansible_default_ipv6.address is not defined

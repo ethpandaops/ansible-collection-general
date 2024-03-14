@@ -10,6 +10,7 @@
     besu_ports_metrics: "{{ ethereum_node_el_ports_metrics }}"
     besu_container_networks: "{{ ethereum_node_docker_networks }}"
     besu_container_pull: "{{ ethereum_node_images_always_pull }}"
+    besu_ipv6_enabled: "{{ ethereum_node_ipv6_enabled }}"
 
 - name: "Execution client: geth"
   when: ethereum_node_el == "geth"
@@ -23,6 +24,7 @@
     geth_ports_metrics: "{{ ethereum_node_el_ports_metrics }}"
     geth_container_networks: "{{ ethereum_node_docker_networks }}"
     geth_container_pull: "{{ ethereum_node_images_always_pull }}"
+    geth_ipv6_enabled: "{{ ethereum_node_ipv6_enabled }}"
 
 - name: "Execution client: erigon"
   when: ethereum_node_el == "erigon"
@@ -36,6 +38,7 @@
     erigon_ports_metrics: "{{ ethereum_node_el_ports_metrics }}"
     erigon_container_networks: "{{ ethereum_node_docker_networks }}"
     erigon_container_pull: "{{ ethereum_node_images_always_pull }}"
+    erigon_ipv6_enabled: "{{ ethereum_node_ipv6_enabled }}"
 
 - name: "Execution client: nethermind"
   when: ethereum_node_el == "nethermind"
@@ -49,6 +52,7 @@
     nethermind_ports_metrics: "{{ ethereum_node_el_ports_metrics }}"
     nethermind_container_networks: "{{ ethereum_node_docker_networks }}"
     nethermind_container_pull: "{{ ethereum_node_images_always_pull }}"
+    nethermind_ipv6_enabled: "{{ ethereum_node_ipv6_enabled }}"
 
 - name: "Execution client: ethereumjs"
   when: ethereum_node_el == "ethereumjs"
@@ -61,6 +65,7 @@
     ethereumjs_ports_engine: "{{ ethereum_node_el_ports_engine }}"
     ethereumjs_container_networks: "{{ ethereum_node_docker_networks }}"
     ethereumjs_container_pull: "{{ ethereum_node_images_always_pull }}"
+    ethereumjs_ipv6_enabled: "{{ ethereum_node_ipv6_enabled }}"
 
 - name: "Execution client: reth"
   when: ethereum_node_el == "reth"
@@ -73,3 +78,4 @@
     reth_ports_engine: "{{ ethereum_node_el_ports_engine }}"
     reth_container_networks: "{{ ethereum_node_docker_networks }}"
     reth_container_pull: "{{ ethereum_node_images_always_pull }}"
+    reth_ipv6_enabled: "{{ ethereum_node_ipv6_enabled }}"
