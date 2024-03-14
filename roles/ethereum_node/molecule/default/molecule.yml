@@ -31,6 +31,7 @@ platforms:
     pre_build_image: true
 provisioner:
   name: ansible
+  log: debug
   inventory:
     group_vars:
       all:
