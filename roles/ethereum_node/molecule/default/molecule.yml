@@ -40,6 +40,12 @@ provisioner:
         ethereum_node_announced_ip: 127.0.0.1
         docker_daemon_options:
           storage-driver: "vfs"
+      lighthouse: 
+        lighthouse_container_command_extra_args:
+          - --allow-insecure-genesis-sync
+      teku:
+        teku_container_command_extra_args:
+          - --ignore-weak-subjectivity-period-enabled
     host_vars:
       ethereum_node:
         ethereum_node_cl: ${CONSENSUS_CLIENT:-lighthouse.yml}
