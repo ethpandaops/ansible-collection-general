@@ -77,7 +77,7 @@ teku_container_command_extra_args:
 # - ---validators-graffiti=hello-world
 
 checkpoint_sync_url: https://beaconstate.ethstaker.cc
-teku_checkpoint_sync_enabled: false
+teku_checkpoint_sync_enabled: true
 teku_container_command_checkpoint_args:
   - --checkpoint-sync-url={{ checkpoint_sync_url }}
 
