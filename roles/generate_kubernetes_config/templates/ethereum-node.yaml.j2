@@ -63,11 +63,8 @@
             {%- endfor +%}
             teku:
             {%- for arg in teku_container_command_extra_args | default ([]) +%}
-                {%- if arg.startswith('--data-storage-mode=PRUNE') +%}
+              {%- if arg.startswith('--data-storage-mode=PRUNE') +%}
               - --data-storage-mode=ARCHIVE
-                {%- else +%}
-              - {{ arg | replace('/network-config', '/data/network-config') }}
-                {%- endif +%}
               {%- endif +%}
             {%- endfor +%}
               - --Xepochs-store-blobs=max # Keep the blobs forever

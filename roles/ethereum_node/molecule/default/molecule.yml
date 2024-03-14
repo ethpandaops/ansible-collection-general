@@ -41,7 +41,7 @@ provisioner:
         docker_daemon_options:
           storage-driver: "vfs"
     children:
-      lighthouse: 
+      lighthouse:
         lighthouse_container_command_extra_args:
           - --allow-insecure-genesis-sync
       teku:
