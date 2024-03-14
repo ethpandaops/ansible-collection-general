@@ -2,7 +2,7 @@ reth_user: reth
 reth_datadir: /data/reth
 reth_auth_jwt_path: /data/execution-auth.secret
 reth_announced_ip: "{{ ansible_host }}"
-reth_announced_ipv6: "{{ ansible_default_ipv6.address }}"
+reth_announced_ipv6: "{{ ansible_default_ipv6.address if reth_ipv6_enabled else '' }}"
 
 reth_cleanup: false # when set to "true" it will remove the container
 

@@ -2,7 +2,7 @@ nethermind_user: nethermind
 nethermind_datadir: /data/nethermind
 nethermind_auth_jwt_path: /data/execution-auth.secret
 nethermind_announced_ip: "{{ ansible_host }}"
-nethermind_announced_ipv6: "{{ ansible_default_ipv6.address }}"
+nethermind_announced_ipv6: "{{ ansible_default_ipv6.address if nethermind_ipv6_enabled else '' }}"
 
 nethermind_cleanup: false # when set to "true" it will remove the container
 

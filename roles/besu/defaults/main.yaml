@@ -2,7 +2,7 @@ besu_user: besu
 besu_datadir: /data/besu
 besu_auth_jwt_path: /data/execution-auth.secret
 besu_announced_ip: "{{ ansible_host }}"
-besu_announced_ipv6: "{{ ansible_default_ipv6.address }}"
+besu_announced_ipv6: "{{ ansible_default_ipv6.address if besu_ipv6_enabled else '' }}"
 
 besu_cleanup: false # when set to "true" it will remove the container
 

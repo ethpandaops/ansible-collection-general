@@ -6,7 +6,7 @@ lighthouse_beacon_endpoint: "http://{{ lighthouse_container_name }}:{{ lighthous
 lighthouse_mev_boost_endpoint: "http://mev-boost:18550"
 
 lighthouse_announced_ip: "{{ ansible_host }}"
-lighthouse_announced_ipv6: "{{ ansible_default_ipv6.address }}"
+lighthouse_announced_ipv6: "{{ ansible_default_ipv6.address if lighthouse_ipv6_enabled else '' }}"
 
 lighthouse_cleanup: false # when set to "true" it will remove the container(s)
 

@@ -2,7 +2,7 @@ geth_user: geth
 geth_datadir: /data/geth
 geth_auth_jwt_path: /data/execution-auth.secret
 geth_announced_ip: "{{ ansible_host }}"
-geth_announced_ipv6: "{{ ansible_default_ipv6.address }}"
+geth_announced_ipv6: "{{ ansible_default_ipv6.address if geth_ipv6_enabled else '' }}"
 
 geth_cleanup: false # when set to "true" it will remove the container
 

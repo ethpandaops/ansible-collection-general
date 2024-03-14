@@ -6,7 +6,7 @@ lodestar_beacon_endpoint: "http://{{ lodestar_container_name }}:{{ lodestar_port
 lodestar_mev_boost_endpoint: "http://mev-boost:18550"
 
 lodestar_announced_ip: "{{ ansible_host }}"
-lodestar_announced_ipv6: "{{ ansible_default_ipv6.address }}"
+lodestar_announced_ipv6: "{{ ansible_default_ipv6.address if lodestar_ipv6_enabled else '' }}"
 
 lodestar_cleanup: false # when set to "true" it will remove the container(s)
 
