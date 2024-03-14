@@ -23,6 +23,20 @@ bootstrap_default_common_packages:
       - cron
       - nfs-common
 
+_bootstrap_packages:
+      Alpine: python3 sudo
+      Archlinux: python sudo
+      Debian: python3 sudo gnupg python3-apt
+      Gentoo: python sudo gentoolkit
+      RedHat: &redhat_packages python3 sudo
+      Rocky: *redhat_packages
+      Suse: python3 python3-xml sudo
+      Amazon: python sudo
+      CentOS_7: python sudo
+      Debian_8: python sudo gnupg
+      Debian_9: python sudo gnupg
+      RedHat_7: python sudo
+
 bootstrap_harden_sshd_config: true
 bootstrap_rpcbind_disable: false
 bootstrap_swap_disable: true

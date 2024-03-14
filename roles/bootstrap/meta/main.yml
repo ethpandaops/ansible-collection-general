@@ -9,3 +9,5 @@ galaxy_info:
       versions: ["all"]
 dependencies:
   - role: robertdebock.bootstrap
+    vars:
+      _bootstrap_packages: {{  _bootstrap_packages }}
