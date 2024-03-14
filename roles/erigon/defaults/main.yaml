@@ -14,7 +14,7 @@ erigon_ports_metrics: 6060
 erigon_ipv6_enabled: false
 
 erigon_container_name: erigon
-erigon_container_image: thorax/erigon:stable
+erigon_container_image: thorax/erigon:devel
 erigon_container_env: {}
 erigon_container_ports_ipv4:
   - "127.0.0.1:{{ erigon_ports_engine }}:{{ erigon_ports_engine }}"
