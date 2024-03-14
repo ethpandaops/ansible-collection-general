@@ -6,7 +6,7 @@ lodestar_beacon_endpoint: "http://{{ lodestar_container_name }}:{{ lodestar_port
 lodestar_mev_boost_endpoint: "http://mev-boost:18550"
 
 lodestar_announced_ip: "{{ ansible_host }}"
-lodestar_announced_ipv6: "{{ ansible_default_ipv6.address if lodestar_ipv6_enabled else '' }}"
+lodestar_announced_ipv6: "{{ ansible_default_ipv6.address if lodestar_ipv6_enabled and ansible_default_ipv6.address is defined else '' }}"
 
 lodestar_cleanup: false # when set to "true" it will remove the container(s)
 
@@ -41,7 +41,7 @@ lodestar_container_ports_ipv6:
   - "[::]:{{ lodestar_ports_p2p_udp_ipv6 }}:{{ lodestar_ports_p2p_udp_ipv6 }}/udp"
 
 lodestar_container_ports: >-
-  {{ lodestar_container_ports_ipv4 + lodestar_container_ports_ipv6 if lodestar_ipv6_enabled else [] }}
+  {{ lodestar_container_ports_ipv4 + (lodestar_container_ports_ipv6 if lodestar_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
 
 lodestar_container_volumes:
   - "{{ lodestar_datadir }}:/data"
@@ -76,7 +76,7 @@ lodestar_container_command_v6:
   - --enr.udp6={{ lodestar_ports_p2p_udp_ipv6 }}
 
 lodestar_container_command: >-
-  {{ lodestar_container_command_default + lodestar_container_command_v6 if lodestar_ipv6_enabled else [] }}
+  {{ lodestar_container_command_default + (lodestar_container_command_v6 if lodestar_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
 
 lodestar_container_command_extra_args: []
 

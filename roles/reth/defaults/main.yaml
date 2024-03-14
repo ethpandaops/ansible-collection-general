@@ -2,7 +2,7 @@ reth_user: reth
 reth_datadir: /data/reth
 reth_auth_jwt_path: /data/execution-auth.secret
 reth_announced_ip: "{{ ansible_host }}"
-reth_announced_ipv6: "{{ ansible_default_ipv6.address if reth_ipv6_enabled else '' }}"
+reth_announced_ipv6: "{{ ansible_default_ipv6.address if reth_ipv6_enabled and ansible_default_ipv6.address is defined else '' }}"
 
 reth_cleanup: false # when set to "true" it will remove the container
 
@@ -27,7 +27,7 @@ reth_container_ports_ipv6:
   - "[::]:{{ reth_ports_p2p }}:{{ reth_ports_p2p }}/udp"
 
 reth_container_ports: >-
-  {{ reth_container_ports_ipv4 + reth_container_ports_ipv6 if ret_ipv6_enabled else [] }}
+  {{ reth_container_ports_ipv4 + (reth_container_ports_ipv6 if ret_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
 
 reth_container_volumes:
   - "{{ reth_datadir }}:/data"
@@ -53,7 +53,7 @@ reth_container_command_v6: []
   # - --nat=extip:{{ reth_announced_ipv6 }} # not supported
 
 reth_container_command: >-
-  {{ reth_container_command_default + reth_container_command_v6 if ret_ipv6_enabled else [] }}
+  {{ reth_container_command_default + (reth_container_command_v6 if ret_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
 
 reth_container_command_extra_args: []
 #  - --http.api=eth,net,web3

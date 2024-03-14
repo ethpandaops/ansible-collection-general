@@ -2,7 +2,7 @@ ethereumjs_user: ethereumjs
 ethereumjs_datadir: /data/ethereumjs
 ethereumjs_auth_jwt_path: /data/execution-auth.secret
 ethereumjs_announced_ip: "{{ ansible_host }}"
-ethereumjs_announced_ipv6: "{{ ansible_default_ipv6.address if ethereumjs_ipv6_enabled else '' }}"
+ethereumjs_announced_ipv6: "{{ ansible_default_ipv6.address if ethereumjs_ipv6_enabled and ansible_default_ipv6.address is defined else '' }}"
 
 ethereumjs_cleanup: false # when set to "true" it will remove the container
 
@@ -26,7 +26,7 @@ ethereumjs_container_ports_ipv6:
   - "[::]:{{ ethereumjs_ports_p2p }}:{{ ethereumjs_ports_p2p }}/udp"
 
 ethereumjs_container_ports: >-
-  {{ ethereumjs_container_ports_ipv4 + ethereumjs_container_ports_ipv6 if ethereumjs_ipv6_enabled else [] }}
+  {{ ethereumjs_container_ports_ipv4 + (ethereumjs_container_ports_ipv6 if ethereumjs_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
 
 ethereumjs_container_volumes:
   - "{{ ethereumjs_datadir }}:/data"
@@ -51,7 +51,7 @@ ethereumjs_container_command_v6: []
   # - --extIP={{ ethereumjs_announced_ipv6 }} # not supported
 
 ethereumjs_container_command: >-
-  {{ ethereumjs_container_command_default + ethereumjs_container_command_v6 if ethereumjs_ipv6_enabled else [] }}
+  {{ ethereumjs_container_command_default + (ethereumjs_container_command_v6 if ethereumjs_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
 
 ethereumjs_container_command_extra_args: []
 

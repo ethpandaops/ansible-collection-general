@@ -2,7 +2,7 @@ besu_user: besu
 besu_datadir: /data/besu
 besu_auth_jwt_path: /data/execution-auth.secret
 besu_announced_ip: "{{ ansible_host }}"
-besu_announced_ipv6: "{{ ansible_default_ipv6.get('address', '') if besu_ipv6_enabled else '' }}"
+besu_announced_ipv6: "{{ ansible_default_ipv6.address if besu_ipv6_enabled and ansible_default_ipv6.address is defined else '' }}"
 
 besu_cleanup: false # when set to "true" it will remove the container
 
@@ -27,7 +27,7 @@ besu_container_ports_ipv6:
   - "[::]:{{ besu_ports_p2p }}:{{ besu_ports_p2p }}/udp"
 
 besu_container_ports: >-
-  {{ besu_container_ports_ipv4 + besu_container_ports_ipv6 if besu_ipv6_enabled else [] }}
+  {{ besu_container_ports_ipv4 + (besu_container_ports_ipv6 if besu_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
 
 besu_container_volumes:
   - "{{ besu_datadir }}:/data"
@@ -56,7 +56,7 @@ besu_container_command_v6:
   - --p2p-host-ipv6={{ besu_announced_ipv6 }}
 
 besu_container_command: >-
-  {{ besu_container_command_default + besu_container_command_v6 if besu_ipv6_enabled else [] }}
+  {{ besu_container_command_default + (besu_container_command_v6 if besu_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
 
 besu_container_command_extra_args: []
 

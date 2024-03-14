@@ -3,7 +3,7 @@ teku_datadir: /data/teku
 teku_auth_jwt_path: /data/execution-auth.secret
 teku_execution_engine_endpoint: http://geth:8551
 teku_announced_ip: "{{ ansible_host }}"
-teku_announced_ipv6: "{{ ansible_default_ipv6.address if teku_ipv6_enabled else '' }}"
+teku_announced_ipv6: "{{ ansible_default_ipv6.address if teku_ipv6_enabled and ansible_default_ipv6.address is defined else '' }}"
 teku_mev_boost_endpoint: "http://mev-boost:18550"
 
 teku_cleanup: false # when set to "true" it will remove the container
@@ -37,7 +37,7 @@ teku_container_ports_ipv6:
   - "[::]:{{ teku_ports_p2p_udp }}:{{ teku_ports_p2p_udp }}/udp"
 
 teku_container_ports: >-
-  {{ teku_container_ports_ipv4 + teku_container_ports_ipv6 if teku_ipv6_enabled else [] }}
+  {{ teku_container_ports_ipv4 + (teku_container_ports_ipv6 if teku_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
 
 teku_container_volumes:
   - "{{ teku_datadir }}:/data"
@@ -68,7 +68,7 @@ teku_container_command_v6: []
 # - --p2p-advertised-ipv6={{ teku_announced_ipv6 }} # not supported yet
 
 teku_container_command: >-
-  {{ teku_container_command_default + teku_container_command_v6 if teku_ipv6_enabled else [] }}
+  {{ teku_container_command_default + (teku_container_command_v6 if teku_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
 
 teku_container_command_extra_args:
   - --data-storage-mode=PRUNE

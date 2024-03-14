@@ -3,7 +3,7 @@ nimbus_datadir: /data/nimbus
 nimbus_auth_jwt_path: /data/execution-auth.secret
 nimbus_execution_engine_endpoint: http://geth:8551
 nimbus_announced_ip: "{{ ansible_host }}"
-nimbus_announced_ipv6: "{{ ansible_default_ipv6.address if nimbus_ipv6_enabled else '' }}"
+nimbus_announced_ipv6: "{{ ansible_default_ipv6.address if nimbus_ipv6_enabled and ansible_default_ipv6.address is defined else '' }}"
 nimbus_mev_boost_endpoint: "http://mev-boost:18550"
 
 nimbus_cleanup: false # when set to "true" it will remove the container
@@ -53,7 +53,7 @@ nimbus_container_ports_ipv6:
   - "[::]:{{ nimbus_ports_p2p_udp }}:{{ nimbus_ports_p2p_udp }}/udp"
 
 nimbus_container_ports: >-
-  {{ nimbus_container_ports_ipv4 + nimbus_container_ports_ipv6 if nimbus_ipv6_enabled else [] }}
+  {{ nimbus_container_ports_ipv4 + (nimbus_container_ports_ipv6 if nimbus_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
 
 nimbus_container_volumes:
   - "{{ nimbus_datadir }}:/data"
@@ -84,7 +84,7 @@ nimbus_container_command_v6: []
   # - --nat=extip:{{ nimbus_announced_ipv6 }} # not supported yet
 
 nimbus_container_command: >-
-  {{ nimbus_container_command_default + nimbus_container_command_v6 if nimbus_ipv6_enabled else [] }}
+  {{ nimbus_container_command_default + (nimbus_container_command_v6 if nimbus_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
 
 nimbus_container_command_extra_args: []
   # - --graffiti=hello-world

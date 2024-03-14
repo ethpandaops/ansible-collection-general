@@ -6,7 +6,7 @@ lighthouse_beacon_endpoint: "http://{{ lighthouse_container_name }}:{{ lighthous
 lighthouse_mev_boost_endpoint: "http://mev-boost:18550"
 
 lighthouse_announced_ip: "{{ ansible_host }}"
-lighthouse_announced_ipv6: "{{ ansible_default_ipv6.address if lighthouse_ipv6_enabled else '' }}"
+lighthouse_announced_ipv6: "{{ ansible_default_ipv6.address if lighthouse_ipv6_enabled and ansible_default_ipv6.address is defined else '' }}"
 
 lighthouse_cleanup: false # when set to "true" it will remove the container(s)
 
@@ -44,7 +44,7 @@ lighthouse_container_ports_ipv6:
   - "[::]:{{ lighthouse_ports_quic }}:{{ lighthouse_ports_quic }}/udp"
 
 lighthouse_container_ports: >-
-  {{ lighthouse_container_ports_ipv4 + lighthouse_container_ports_ipv6 if lighthouse_ipv6_enabled else [] }}
+  {{ lighthouse_container_ports_ipv4 + (lighthouse_container_ports_ipv6 if lighthouse_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
 
 lighthouse_container_volumes:
   - "{{ lighthouse_datadir }}:/data"
@@ -86,7 +86,7 @@ lighthouse_container_command_v6:
   - --enr-quic6-port={{ lighthouse_ports_quic }}
 
 lighthouse_container_command: >-
-  {{ lighthouse_container_command_default + lighthouse_container_command_v6 if lighthouse_ipv6_enabled else [] }}
+  {{ lighthouse_container_command_default + (lighthouse_container_command_v6 if lighthouse_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
 
 lighthouse_container_command_extra_args: []
 
