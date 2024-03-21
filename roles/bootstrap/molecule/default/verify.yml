@@ -5,5 +5,5 @@
       ansible.builtin.ping:
     - name: Check package
       ansible.builtin.package:
-        name: gzip
+        name: jq
         state: present
