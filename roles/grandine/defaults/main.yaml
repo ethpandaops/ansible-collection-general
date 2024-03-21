@@ -81,7 +81,7 @@ grandine_container_command_v6:
 grandine_container_command: >-
   {{ grandine_container_command_default + (grandine_container_command_v6 if grandine_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
 
-grandine_container_command_extra_args:
+grandine_container_command_extra_args: []
 # - --network=mainnet
 # - --graffiti=hello-world
 
@@ -113,5 +113,4 @@ grandine_container_pull: false
 ################################################################################
 grandine_mev_boost_enabled: false
 grandine_mev_boost_beacon_command:
-  - --validators-builder-registration-default-enabled=true
-  - --builder-endpoint={{ grandine_mev_boost_endpoint }}
+  - --builder-url={{ grandine_mev_boost_endpoint }}
