@@ -1,10 +1,9 @@
 - name: Verify
   hosts: all
   tasks:
-    - name: test connection
+    - name: Test connection
       ansible.builtin.ping:
-
-    - name: try the package module
+    - name: Check package
       ansible.builtin.package:
         name: gzip
         state: present
