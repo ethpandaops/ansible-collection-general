@@ -1,7 +1,7 @@
 _bootstrap_packages:
   Alpine: python3 sudo
   Archlinux: python sudo
-  Debian: python3 sudo gnupg python3-apt
+  Debian: python3 sudo gnupg python3-apt python3-distutils python3-setuptools python3-pkg-resources python-apt-common
   Gentoo: python sudo gentoolkit
   RedHat: &redhat_packages python3 sudo
   Rocky: *redhat_packages
