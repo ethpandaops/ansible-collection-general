@@ -1,0 +1,47 @@
+- name: Try connection
+  block:
+    - name: Test connection
+      ansible.builtin.wait_for_connection:
+        timeout: "{{ bootstrap_timeout }}"
+      register: bootstrap_connect
+      changed_when: false
+  rescue:
+    - name: Gather facts about the system
+      ansible.builtin.include_tasks:
+        file: gather_facts.yml
+    - name: Install minmal bootstrap packages
+      ansible.builtin.raw: "{{ bootstrap_install.raw }}"
+      register: bootstrap_install_packages
+      changed_when:
+        - (bootstrap_install.stdout_regex in bootstrap_install_packages.stdout and
+           bootstrap_os_family in [ "Alpine", "Archlinux", "Gentoo" ]) or
+          (bootstrap_install.stdout_regex not in bootstrap_install_packages.stdout and
+           bootstrap_os_family in [ "Debian", "RedHat", "Rocky", "Suse" ])
+      vars:
+        ansible_user: "{{ bootstrap_user }}"
+  always:
+    - name: Set bootstrap_ansible_user connected
+      ansible.builtin.set_fact:
+        bootstrap_ansible_user: "{{ ansible_user }}"
+      when:
+        - bootstrap_connect is succeeded
+        - ansible_user is defined
+
+    - name: Set bootstrap_ansible_user not connected
+      ansible.builtin.set_fact:
+        bootstrap_ansible_user: "{{ bootstrap_user }}"
+      when:
+        - bootstrap_connect is failed
+
+- name: Ensure system is prepared
+  vars:
+    ansible_user: "{{ bootstrap_ansible_user | default(omit) }}"
+  block:
+    - name: Gather ansible facts
+      ansible.builtin.setup:
+
+    - name: Install bootstrap packages
+      ansible.builtin.package:
+        name: "{{ item }}"
+        state: present
+      loop: "{{ bootstrap_facts_packages.split() }}"

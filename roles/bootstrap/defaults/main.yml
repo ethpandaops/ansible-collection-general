@@ -1,6 +1,14 @@
+# The bootstrap user to use for an initial connection.
+# This is useful when a machine is new and the "{{ ansible_user }}" hasn't been created yet.
 bootstrap_user: root
+# The number of seconds you want to wait during connection test before failing.
 bootstrap_timeout: 3
+# Do you want to wait for the host to be available?
+bootstrap_wait_for_host: false
 
+# The default bootstrap user to create. This is the user that will also be used
+# to connect to the machine after the first boostrap run.
+# In normal cases the `bootstrap_default_user` is equal to the `ansible_user` var.
 bootstrap_default_user_create: true
 bootstrap_default_user: devops
 bootstrap_default_user_authorized_keys_github: []
