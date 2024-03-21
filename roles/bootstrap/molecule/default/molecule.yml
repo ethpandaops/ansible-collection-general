@@ -8,7 +8,7 @@ scenario:
     - create
     - prepare
     - converge
-    # - idempotence
+    - idempotence
     - side_effect
     - verify
     - cleanup
@@ -32,11 +32,15 @@ platforms:
     pre_build_image: true
 provisioner:
   name: ansible
-  #env:
+  # env:
   #  ANSIBLE_VERBOSITY: 3
   inventory:
     group_vars:
       all:
         ansible_user: devops
+        # Fix: due to "Failed to connect to bus: No such file or directory" when using hostnamectl in docker
+        bootstrap_hostname_set: false
+        # Fix: due to SSH server not being installed
+        bootstrap_harden_sshd_config: false
 verifier:
   name: ansible

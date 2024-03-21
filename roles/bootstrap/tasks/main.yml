@@ -43,12 +43,15 @@
 - name: Set hostname
   ansible.builtin.hostname:
     name: "{{ inventory_hostname }}"
+    use: debian
   register: bootstrap_hostname
+  when: bootstrap_hostname_set
 
 - name: Add self to /etc/hosts
   ansible.builtin.lineinfile:
     dest: /etc/hosts
     line: '{{ ansible_host }} {{ inventory_hostname }}'
+  when: bootstrap_hostname_set
 
 # Keep SSH_AUTH_SOCK when using sudo
 - name: Add self to /etc/hosts
@@ -119,7 +122,12 @@
 - name: Set reboot required
   ansible.builtin.set_fact:
     bootstrap_reboot_required: true
-  when: (bootstrap_reboot_required_file.stat.exists or bootstrap_hostname.changed) and bootstrap_reboot_if_required
+  when: >-
+    bootstrap_reboot_if_required and
+    (
+      bootstrap_reboot_required_file.stat.exists
+      or ( (bootstrap_hostname is defined) and bootstrap_hostname.changed)
+    )
 
 - name: Handle reboot
   when: bootstrap_reboot_required|default(false)

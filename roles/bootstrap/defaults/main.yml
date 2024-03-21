@@ -31,6 +31,7 @@ bootstrap_default_common_packages:
       - cron
       - nfs-common
 
+bootstrap_hostname_set: true
 bootstrap_harden_sshd_config: true
 bootstrap_rpcbind_disable: false
 bootstrap_swap_disable: true
