@@ -26,7 +26,7 @@ grandine_validator_datadir: /data/grandine-validator
 ##
 ################################################################################
 grandine_container_name: grandine
-grandine_container_image: consensys/grandine:latest
+grandine_container_image: ethpandaops/grandine:develop
 grandine_container_env: {}
 grandine_container_ports_ipv4:
   - "127.0.0.1:{{ grandine_ports_http_beacon }}:{{ grandine_ports_http_beacon }}"
