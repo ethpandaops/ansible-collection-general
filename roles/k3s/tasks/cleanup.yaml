@@ -33,7 +33,7 @@
     - /usr/local/bin/kubectl
     - /usr/local/bin/crictl
     - /etc/rancher
-    - "~{{ ansible_user }}/.kube"
+    - "~/{{ ansible_user }}/.kube"
     - "{{ k3s_server_location }}/data"
     - "{{ k3s_server_location }}/agent"
     - "{{ k3s_server_location }}/server"
