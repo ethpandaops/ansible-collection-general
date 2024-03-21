@@ -2,6 +2,7 @@ reth_user: reth
 reth_datadir: /data/reth
 reth_auth_jwt_path: /data/execution-auth.secret
 reth_announced_ip: "{{ ansible_host }}"
+reth_announced_ipv6: "{{ ansible_default_ipv6.address if reth_ipv6_enabled and ansible_default_ipv6.address is defined else '' }}"
 
 reth_cleanup: false # when set to "true" it will remove the container
 
@@ -10,21 +11,31 @@ reth_ports_http_rpc: 8545
 reth_ports_engine: 8551
 reth_ports_metrics: 6060
 
+ret_ipv6_enabled: false
+
 reth_container_name: reth
 reth_container_image: ghcr.io/paradigmxyz/reth
 reth_container_env: {}
-reth_container_ports:
+reth_container_ports_ipv4:
   - "127.0.0.1:{{ reth_ports_http_rpc }}:{{ reth_ports_http_rpc }}"
   - "127.0.0.1:{{ reth_ports_engine }}:{{ reth_ports_engine }}"
-  - "{{ reth_ports_p2p }}:{{ reth_ports_p2p }}"
-  - "{{ reth_ports_p2p }}:{{ reth_ports_p2p }}/udp"
+  - "0.0.0.0:{{ reth_ports_p2p }}:{{ reth_ports_p2p }}"
+  - "0.0.0.0:{{ reth_ports_p2p }}:{{ reth_ports_p2p }}/udp"
+
+reth_container_ports_ipv6:
+  - "[::]:{{ reth_ports_p2p }}:{{ reth_ports_p2p }}"
+  - "[::]:{{ reth_ports_p2p }}:{{ reth_ports_p2p }}/udp"
+
+reth_container_ports: >-
+  {{ reth_container_ports_ipv4 + (reth_container_ports_ipv6 if ret_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
+
 reth_container_volumes:
   - "{{ reth_datadir }}:/data"
   - "{{ reth_auth_jwt_path }}:/execution-auth.jwt:ro"
 reth_container_security_opts: []
 reth_container_stop_timeout: "300"
 reth_container_networks: []
-reth_container_command:
+reth_container_command_default:
   - node
   - --datadir=/data
   - --log.file.directory=/data/logs
@@ -37,6 +48,13 @@ reth_container_command:
   - --authrpc.jwtsecret=/execution-auth.jwt
   - --nat=extip:{{ reth_announced_ip }}
   - --metrics=0.0.0.0:{{ reth_ports_metrics }}
+
+reth_container_command_v6: []
+  # - --nat=extip:{{ reth_announced_ipv6 }} # not supported
+
+reth_container_command: >-
+  {{ reth_container_command_default + (reth_container_command_v6 if ret_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
+
 reth_container_command_extra_args: []
 #  - --http.api=eth,net,web3
 #  - --http.vhosts=*

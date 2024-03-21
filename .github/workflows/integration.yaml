@@ -18,8 +18,8 @@ jobs:
     outputs:
       roles: ${{ steps.filter.outputs.changes }}
     steps:
-      - uses: actions/checkout@v3
-      - uses: dorny/paths-filter@v2
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
         id: filter
         with:
           filters: |
@@ -37,7 +37,7 @@ jobs:
         role: ${{ fromJSON(needs.changes.outputs.roles) }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           path: ansible_collections/ethpandaops/general
 

@@ -2,6 +2,7 @@ geth_user: geth
 geth_datadir: /data/geth
 geth_auth_jwt_path: /data/execution-auth.secret
 geth_announced_ip: "{{ ansible_host }}"
+geth_announced_ipv6: "{{ ansible_default_ipv6.address if geth_ipv6_enabled and ansible_default_ipv6.address is defined else '' }}"
 
 geth_cleanup: false # when set to "true" it will remove the container
 
@@ -10,21 +11,31 @@ geth_ports_http_rpc: 8545
 geth_ports_engine: 8551
 geth_ports_metrics: 6060
 
+geth_ipv6_enabled: false
+
 geth_container_name: geth
 geth_container_image: ethereum/client-go:stable
 geth_container_env: {}
-geth_container_ports:
+geth_container_ports_ipv4:
   - "127.0.0.1:{{ geth_ports_http_rpc }}:{{ geth_ports_http_rpc }}"
   - "127.0.0.1:{{ geth_ports_engine }}:{{ geth_ports_engine }}"
-  - "{{ geth_ports_p2p }}:{{ geth_ports_p2p }}"
-  - "{{ geth_ports_p2p }}:{{ geth_ports_p2p }}/udp"
+  - "0.0.0.0:{{ geth_ports_p2p }}:{{ geth_ports_p2p }}"
+  - "0.0.0.0:{{ geth_ports_p2p }}:{{ geth_ports_p2p }}/udp"
+
+geth_container_ports_ipv6:
+  - "[::]:{{ geth_ports_p2p }}:{{ geth_ports_p2p }}"
+  - "[::]:{{ geth_ports_p2p }}:{{ geth_ports_p2p }}/udp"
+
+geth_container_ports: >-
+  {{ geth_container_ports_ipv4 + (geth_container_ports_ipv6 if geth_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
+
 geth_container_volumes:
   - "{{ geth_datadir }}:/data"
   - "{{ geth_auth_jwt_path }}:/execution-auth.jwt:ro"
 geth_container_security_opts: []
 geth_container_stop_timeout: "300"
 geth_container_networks: []
-geth_container_command:
+geth_container_command_default:
   - --datadir=/data
   - --port={{ geth_ports_p2p }}
   - --http
@@ -38,6 +49,14 @@ geth_container_command:
   - --metrics
   - --metrics.port={{ geth_ports_metrics }}
   - --metrics.addr=0.0.0.0
+  - --discovery.v5
+
+geth_container_command_v6:
+  - --nat=extip:{{ geth_announced_ipv6 }}
+
+geth_container_command: >-
+  {{ geth_container_command_default + (geth_container_command_v6 if geth_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
+
 geth_container_command_extra_args: []
 #  - --http.api=eth,net,web3
 #  - --http.vhosts=*
