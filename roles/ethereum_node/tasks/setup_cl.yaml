@@ -8,6 +8,7 @@
     lighthouse_ports_p2p_udp: "{{ ethereum_node_cl_ports_p2p_udp }}"
     lighthouse_ports_http_beacon: "{{ ethereum_node_cl_ports_http_beacon }}"
     lighthouse_ports_metrics: "{{ ethereum_node_cl_ports_metrics }}"
+    lighthouse_ports_quic: "{{ ethereum_node_cl_ports_quic }}"
     lighthouse_container_networks: "{{ ethereum_node_docker_networks }}"
     lighthouse_container_pull: "{{ ethereum_node_images_always_pull }}"
     lighthouse_execution_engine_endpoint: "{{ ethereum_node_execution_engine_endpoint }}"
@@ -100,3 +101,23 @@
     nimbus_mev_boost_enabled: "{{ ethereum_node_mev_boost_enabled }}"
     nimbus_checkpoint_sync_enabled: "{{ ethereum_node_cl_checkpoint_sync_enabled }}"
     nimbus_ipv6_enabled: "{{ ethereum_node_ipv6_enabled }}"
+
+- name: "Consensus client: grandine"
+  when: ethereum_node_cl == "grandine"
+  ansible.builtin.include_role:
+    name: ethpandaops.general.grandine
+  vars:
+    grandine_announced_ip: "{{ ethereum_node_announced_ip }}"
+    grandine_ports_p2p_tcp: "{{ ethereum_node_cl_ports_p2p_tcp }}"
+    grandine_ports_p2p_udp: "{{ ethereum_node_cl_ports_p2p_udp }}"
+    grandine_ports_http_beacon: "{{ ethereum_node_cl_ports_http_beacon }}"
+    grandine_ports_metrics: "{{ ethereum_node_cl_ports_metrics }}"
+    grandine_ports_quic: "{{ ethereum_node_cl_ports_quic }}"
+    grandine_container_networks: "{{ ethereum_node_docker_networks }}"
+    grandine_container_pull: "{{ ethereum_node_images_always_pull }}"
+    grandine_execution_engine_endpoint: "{{ ethereum_node_execution_engine_endpoint }}"
+    grandine_validator_enabled: "{{ ethereum_node_cl_validator_enabled }}"
+    grandine_validator_fee_recipient: "{{ ethereum_node_cl_validator_fee_recipient }}"
+    grandine_mev_boost_enabled: "{{ ethereum_node_mev_boost_enabled }}"
+    grandine_checkpoint_sync_enabled: "{{ ethereum_node_cl_checkpoint_sync_enabled }}"
+    grandine_ipv6_enabled: "{{ ethereum_node_ipv6_enabled }}"
