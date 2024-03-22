@@ -18,7 +18,7 @@
             besu:
             {%- for arg in besu_container_command_extra_args | default ([]) +%}
               {%- if arg.startswith('--ethstats=') +%}
-              - --ethstats=k8s-{{ item.key }}:<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.ethstats_secret}>@ethstats.{{ ethereum_network_name }}.ethpandaops.io:443
+              - --ethstats=k8s-{{ item.key }}:<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.ethstats_secret}>@ethstats.{{ ethereum_network_name }}.{{ gen_kubernetes_domain }}:443
               {%- else +%}
               - {{ arg | replace('/network-config', '/data/network-config') }}
               {%- endif +%}
@@ -38,7 +38,7 @@
             geth:
             {%- for arg in geth_container_command_extra_args | default ([]) +%}
               {%- if arg.startswith('--ethstats=') +%}
-              - --ethstats=k8s-{{ item.key }}:<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.ethstats_secret}>@ethstats.{{ ethereum_network_name }}.ethpandaops.io
+              - --ethstats=k8s-{{ item.key }}:<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.ethstats_secret}>@ethstats.{{ ethereum_network_name }}.{{ gen_kubernetes_domain }}
               {%- else +%}
               - {{ arg | replace('/network-config', '/data/network-config') }}
               {%- endif +%}
@@ -47,7 +47,7 @@
             erigon:
             {%- for arg in erigon_container_command_extra_args | default ([]) +%}
               {%- if arg.startswith('--ethstats=') +%}
-              - --ethstats=k8s-{{ item.key }}:<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.ethstats_secret}>@ethstats.{{ ethereum_network_name }}.ethpandaops.io
+              - --ethstats=k8s-{{ item.key }}:<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.ethstats_secret}>@ethstats.{{ ethereum_network_name }}.{{ gen_kubernetes_domain }}
               {%- else +%}
               - {{ arg | replace('/network-config', '/data/network-config') }}
               {%- endif +%}
