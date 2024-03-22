@@ -1,3 +1,5 @@
 - name: Create docker network
   community.docker.docker_network:
     name: "{{ docker_network_name }}"
+    enable_ipv6: "{{  docker_network_enable_ipv6 }}"
+    ipam_config: "{{ docker_network_ipam_config }}"

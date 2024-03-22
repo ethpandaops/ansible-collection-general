@@ -4,7 +4,7 @@ runs:
   using: composite
   steps:
     - name: Install asdf
-      uses: asdf-vm/actions/setup@v2
+      uses: asdf-vm/actions/setup@v3
 
     - name: Run setup
       shell: bash
