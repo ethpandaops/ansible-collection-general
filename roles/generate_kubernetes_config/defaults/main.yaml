@@ -20,6 +20,8 @@ gen_kubernetes_config_ethereum_node:
   cl: teku
   value: "001"
 
+gen_kubernetes_domain: "{{ domain | default('ethpandaops.io') }}"
+
 gen_kubernetes_config_helm_repositories:
   - name: ethereum-helm-charts
     url: https://ethpandaops.github.io/ethereum-helm-charts
