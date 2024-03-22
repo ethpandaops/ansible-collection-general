@@ -8,7 +8,7 @@
       rpcEndpoint: {{ default_el_endpoint }}
       beaconEndpoint: {{ default_cl_endpoint }}
     checkpointSync:
-      enabled: {{ checkpoint_sync_enabled | lower }}
+      enabled: {{ ethereum_node_cl_checkpoint_sync_enabled | lower }}
       addresses:
         {{ ethereum_network_name }}: {{ checkpoint_sync_url_kube }}
     clientArgs:
@@ -63,14 +63,8 @@
             {%- endfor +%}
             teku:
             {%- for arg in teku_container_command_extra_args | default ([]) +%}
-              {%- if checkpoint_sync_enabled | bool and arg.startswith('--initial-state=') +%}
-                {# Skip arguments that start with "--initial-state" if checkpointSync is enabled #}
-              {%- else +%}
-                {%- if arg.startswith('--data-storage-mode=PRUNE') +%}
+              {%- if arg.startswith('--data-storage-mode=PRUNE') +%}
               - --data-storage-mode=ARCHIVE
-                {%- else +%}
-              - {{ arg | replace('/network-config', '/data/network-config') }}
-                {%- endif +%}
               {%- endif +%}
             {%- endfor +%}
               - --Xepochs-store-blobs=max # Keep the blobs forever

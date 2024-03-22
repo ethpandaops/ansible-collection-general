@@ -2,6 +2,7 @@ nethermind_user: nethermind
 nethermind_datadir: /data/nethermind
 nethermind_auth_jwt_path: /data/execution-auth.secret
 nethermind_announced_ip: "{{ ansible_host }}"
+nethermind_announced_ipv6: "{{ ansible_default_ipv6.address if nethermind_ipv6_enabled and ansible_default_ipv6.address is defined else '' }}"
 
 nethermind_cleanup: false # when set to "true" it will remove the container
 
@@ -10,14 +11,24 @@ nethermind_ports_http_rpc: 8545
 nethermind_ports_engine: 8551
 nethermind_ports_metrics: 6060
 
+nethermind_ipv6_enabled: false
+
 nethermind_container_name: nethermind
 nethermind_container_image: nethermind/nethermind:latest
 nethermind_container_env: {}
-nethermind_container_ports:
+nethermind_container_ports_ipv4:
   - "127.0.0.1:{{ nethermind_ports_http_rpc }}:{{ nethermind_ports_http_rpc }}"
   - "127.0.0.1:{{ nethermind_ports_engine }}:{{ nethermind_ports_engine }}"
-  - "{{ nethermind_ports_p2p }}:{{ nethermind_ports_p2p }}"
-  - "{{ nethermind_ports_p2p }}:{{ nethermind_ports_p2p }}/udp"
+  - "0.0.0.0:{{ nethermind_ports_p2p }}:{{ nethermind_ports_p2p }}"
+  - "0.0.0.0:{{ nethermind_ports_p2p }}:{{ nethermind_ports_p2p }}/udp"
+
+nethermind_container_ports_ipv6:
+  - "[::]:{{ nethermind_ports_p2p }}:{{ nethermind_ports_p2p }}"
+  - "[::]:{{ nethermind_ports_p2p }}:{{ nethermind_ports_p2p }}/udp"
+
+nethermind_container_ports: >-
+  {{ nethermind_container_ports_ipv4 + (nethermind_container_ports_ipv6 if nethermind_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
+
 nethermind_container_volumes:
   - "{{ nethermind_datadir }}:/data"
   - "{{ nethermind_auth_jwt_path }}:/execution-auth.jwt:ro"
@@ -26,7 +37,7 @@ nethermind_container_stop_timeout: "300"
 nethermind_container_networks: []
 nethermind_container_entrypoint:
   - /nethermind/nethermind
-nethermind_container_command:
+nethermind_container_command_default:
   - --datadir=/data
   - --KeyStore.KeyStoreDirectory=/data/keystore
   - --Network.ExternalIp={{ nethermind_announced_ip }}
@@ -44,6 +55,13 @@ nethermind_container_command:
   - --Metrics.NodeName={{ inventory_hostname_short }}
   - --Metrics.ExposePort={{ nethermind_ports_metrics }}
   - --Metrics.ExposeHost=0.0.0.0
+
+nethermind_container_command_v6: []
+  # - --Network.ExternalIp={{ nethermind_announced_ipv6 }} # not yet supported https://github.com/NethermindEth/nethermind/issues/6822#issuecomment-1993851323
+
+nethermind_container_command: >-
+  {{ nethermind_container_command_default + (nethermind_container_command_v6 if nethermind_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
+
 nethermind_container_command_extra_args: []
 
 # Default image pull policy

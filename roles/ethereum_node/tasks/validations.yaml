@@ -16,5 +16,5 @@
 
 - name: Check if consensus client supports blobber configuration
   ansible.builtin.fail:
-    msg: "Error: The blobber tool currently doesn't support nimbus or teku"
-  when: ethereum_node_blobber_enabled and (ethereum_node_cl == 'nimbus' or ethereum_node_cl == 'teku')
+    msg: "Error: The blobber tool currently doesn't support nimbus, teku or grandine"
+  when: ethereum_node_blobber_enabled and (ethereum_node_cl == 'nimbus' or ethereum_node_cl == 'teku' or ethereum_node_cl == 'grandine')

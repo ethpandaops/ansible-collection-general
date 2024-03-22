@@ -1,0 +1,5 @@
+- name: Remove grandine container
+  community.docker.docker_container:
+    name: "{{ grandine_container_name }}"
+    state: absent
+  when: grandine_cleanup

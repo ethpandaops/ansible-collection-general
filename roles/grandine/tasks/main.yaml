@@ -1,0 +1,7 @@
+- name: Setup grandine
+  ansible.builtin.import_tasks: setup.yaml
+  when: not grandine_cleanup
+
+- name: Cleanup grandine
+  ansible.builtin.import_tasks: cleanup.yaml
+  when: grandine_cleanup

@@ -6,3 +6,5 @@ tests/output/
 
 # Build artifacts from ansible-galaxy
 ethpandaops-general-*.tar.gz
+
+.DS_Store
