@@ -22,6 +22,7 @@ A collection of reusable ansible components used by the EthPandaOps team.
 - [mev_boost](roles/mev_boost)
 - [mev_relay](roles/mev_relay)
 - [powfaucet](roles/powfaucet)
+- [snapshotter](roles/snapshotter)
 - [xatu_sentry](roles/xatu_sentry)
 
 ### Ethereum client pair
