@@ -45,3 +45,17 @@
         name: "{{ item }}"
         state: present
       loop: "{{ bootstrap_facts_packages.split() }}"
+
+    - name: Get my IP address
+      ansible.builtin.set_fact:
+        _bootstrap_my_ip: "{{ lookup('ansible.builtin.url', 'https://ifconfig.me/ip', split_lines=False) }}"
+
+    - name: Cleanup failed SSH attempts from auth log to avoid getting banned by systems like fail2ban
+      ansible.builtin.replace:
+        path: /var/log/auth.log
+        regexp: "{{ item }}"
+        replace: ''
+        backup: no
+      loop:
+        - .* Invalid user .* {{ _bootstrap_my_ip | replace('.','\.') }} .*
+        - .* Connection closed by invalid user .* {{ _bootstrap_my_ip | replace('.','\.') }} .*
