@@ -49,13 +49,29 @@
     - name: Get my IP address
       ansible.builtin.set_fact:
         _bootstrap_my_ip: "{{ lookup('ansible.builtin.url', 'https://ifconfig.me/ip', split_lines=False) }}"
+      when: bootstrap_connect is failed
 
-    - name: Cleanup failed SSH attempts from auth log to avoid getting banned by systems like fail2ban
+    - name: Check if auth log exists
+      ansible.builtin.stat:
+        path: /var/log/auth.log
+      register: _bootstrap_auth_log_reg
+      when: bootstrap_connect is failed
+
+    - name: Auth log - Cleanup failed SSH attempts from auth log to avoid getting banned by systems like fail2ban
       ansible.builtin.replace:
         path: /var/log/auth.log
         regexp: "{{ item }}"
         replace: ''
-        backup: no
+      when: bootstrap_connect is failed and _bootstrap_auth_log_reg.stat.exists
       loop:
-        - .* Invalid user .* {{ _bootstrap_my_ip | replace('.','\.') }} .*
-        - .* Connection closed by invalid user .* {{ _bootstrap_my_ip | replace('.','\.') }} .*
+        - .* Invalid user .* {{ _bootstrap_my_ip | replace('.', '\.') }} .*
+        - .* Connection closed by invalid user .* {{ _bootstrap_my_ip | replace('.', '\.') }} .*
+
+    - name: No auth log - Probably we need to clean journalctl. Not ideal, but this should be just called once per bootstrap
+      ansible.builtin.command: "{{ item }}"
+      failed_when: false
+      changed_when: true
+      loop:
+        - journalctl --rotate
+        - journalctl --vacuum-time=1s
+      when: bootstrap_connect is failed and not _bootstrap_auth_log_reg.stat.exists
