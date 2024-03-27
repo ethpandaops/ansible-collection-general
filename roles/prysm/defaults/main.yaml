@@ -4,6 +4,7 @@ prysm_auth_jwt_path: /data/execution-auth.secret
 prysm_execution_engine_endpoint: http://geth:8551
 prysm_beacon_endpoint: "{{ prysm_container_name }}:{{ prysm_ports_grpc }}"
 prysm_announced_ip: "{{ ansible_host }}"
+prysm_announced_ipv6: "{{ ansible_default_ipv6.address if prysm_ipv6_enabled and ansible_default_ipv6.address is defined else '' }}"
 prysm_mev_boost_endpoint: "http://mev-boost:18550"
 
 prysm_cleanup: false # when set to "true" it will remove the container(s)
@@ -13,6 +14,8 @@ prysm_ports_p2p_udp: 12000
 prysm_ports_http_beacon: 3500
 prysm_ports_metrics: 8080
 prysm_ports_grpc: 4000
+
+prysm_ipv6_enabled: false
 
 prysm_validator_enabled: false
 prysm_validator_fee_recipient: "0xF29Ff96aaEa6C9A1fBa851f74737f3c069d4f1a9" # theprotocolguild.eth
@@ -26,10 +29,18 @@ prysm_validator_datadir: /data/prysm-validator
 prysm_container_name: prysm
 prysm_container_image: gcr.io/prysmaticlabs/prysm/beacon-chain:stable
 prysm_container_env: {}
-prysm_container_ports:
+prysm_container_ports_ipv4:
   - "127.0.0.1:{{ prysm_ports_http_beacon }}:{{ prysm_ports_http_beacon }}"
-  - "{{ prysm_ports_p2p_tcp }}:{{ prysm_ports_p2p_tcp }}"
-  - "{{ prysm_ports_p2p_udp }}:{{ prysm_ports_p2p_udp }}/udp"
+  - "0.0.0.0:{{ prysm_ports_p2p_tcp }}:{{ prysm_ports_p2p_tcp }}"
+  - "0.0.0.0:{{ prysm_ports_p2p_udp }}:{{ prysm_ports_p2p_udp }}/udp"
+
+prysm_container_ports_ipv6:
+  - "[::]:{{ prysm_ports_p2p_tcp }}:{{ prysm_ports_p2p_tcp }}"
+  - "[::]:{{ prysm_ports_p2p_udp }}:{{ prysm_ports_p2p_udp }}/udp"
+
+prysm_container_ports: >-
+  {{ prysm_container_ports_ipv4 + (prysm_container_ports_ipv6 if prysm_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
+
 prysm_container_volumes:
   - "{{ prysm_datadir }}:/data"
   - "{{ prysm_auth_jwt_path }}:/execution-auth.jwt:ro"
@@ -38,7 +49,7 @@ prysm_container_stop_timeout: "300"
 prysm_container_networks: []
 prysm_container_entrypoint:
   - /app/cmd/beacon-chain/beacon-chain
-prysm_container_command:
+prysm_container_command_default:
   - --accept-terms-of-use=true
   - --datadir=/data
   - --p2p-host-ip={{ prysm_announced_ip }}
@@ -52,10 +63,17 @@ prysm_container_command:
   - --grpc-gateway-port={{ prysm_ports_http_beacon }}
   - --monitoring-host=0.0.0.0
   - --monitoring-port={{ prysm_ports_metrics }}
+
+prysm_container_command_v6: []
+  # - --p2p-host-ipv6={{ prysm_announced_ipv6 }} # not supported yet
+
+prysm_container_command: >-
+  {{ prysm_container_command_default + (prysm_container_command_v6 if prysm_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
+
 prysm_container_command_extra_args: []
 
 checkpoint_sync_url: https://beaconstate.ethstaker.cc
-prysm_checkpoint_sync_enabled: false
+prysm_checkpoint_sync_enabled: true
 prysm_container_command_checkpoint_args:
   - --checkpoint-sync-url={{ checkpoint_sync_url }}
   - --genesis-beacon-api-url={{ checkpoint_sync_url }}
