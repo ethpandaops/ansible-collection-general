@@ -25,7 +25,7 @@ _bootstrap_install:
     raw: "LANG=C pacman -Sy --noconfirm {{ bootstrap_packages }}"
     stdout_regex: ' installing python'
   Debian:
-    raw: "LANG=C apt-get update && apt-get install -y {{ bootstrap_packages }}"
+    raw: "LANG=C apt-get update && NEEDRESTART_MODE=a apt-get install -y {{ bootstrap_packages }}"
     stdout_regex: ' 0 newly installed'
   Gentoo:
     raw: "LANG=C equery l {{ bootstrap_packages }} ||
