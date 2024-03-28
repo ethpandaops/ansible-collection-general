@@ -1,6 +1,6 @@
 - name: Restart sshd
   ansible.builtin.service:
-    name: sshd
+    name: ssh
     state: restarted
 
 - name: Disable SWAP

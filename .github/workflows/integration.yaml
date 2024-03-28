@@ -24,6 +24,7 @@ jobs:
         with:
           filters: |
             blockscout: roles/blockscout/**
+            bootstrap: roles/bootstrap/**
 
   # Integration test using molecule
   job:
