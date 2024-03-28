@@ -1,0 +1,93 @@
+snapshotter_user: snapshotter
+snapshotter_datadir: /data/snapshotter
+
+snapshotter_cleanup: false # when set to "true" it will remove the container(s)
+
+snapshotter_container_image: skylenet/snapshotter:latest
+snapshotter_container_name: snapshotter
+snapshotter_container_ports: []
+snapshotter_container_restart_policy: always
+snapshotter_container_networks: []
+snapshotter_container_volumes_from: []
+snapshotter_container_volumes:
+  - "{{ snapshotter_datadir }}/config.yaml:/etc/snapshotter/config.yaml:ro"
+  - "/var/run/docker.sock:/var/run/docker.sock:ro"
+snapshotter_container_env: {}
+snapshotter_container_command:
+  - --config
+  - /etc/snapshotter/config.yaml
+
+# Will be mounted within the container at:
+# - /etc/snapshotter/.ssh/id_rsa.passphrase
+snapshotter_ssh_privkey: ""
+
+# Will be mounted within the container at:
+# - /etc/snapshotter/.ssh/known_hosts
+# Tip: You can use `ssh-keyscan -H <HOST1> ... <HOSTN>` to generate the content of this file.
+#      Double check that the fingerprints match the expected target hosts.
+snapshotter_ssh_known_hosts: ""
+
+# Will be mounted within the container at:
+# - /etc/snapshotter/config.yaml
+snapshotter_config: |
+  global:
+    logging: warn
+    chainID: "0x4268" # Holesky
+    ssh:
+      private_key_path: /etc/snapshotter/.ssh/id_rsa
+      private_key_passphrase_path: "/etc/snapshotter/.ssh/id_rsa.passphrase"
+      known_hosts_path: /etc/snapshotter/.ssh/known_hosts
+      ignore_host_key: false
+      use_agent: false
+    snapshots:
+      check_interval_seconds: 1
+      block_interval: 100000
+      run_once: false
+      rclone:
+        version: "1.65.2"
+        env:
+          RCLONE_CONFIG_MYS3_TYPE: s3
+          RCLONE_CONFIG_MYS3_PROVIDER: DigitalOcean
+          RCLONE_CONFIG_MYS3_ACL: public-read
+          RCLONE_CONFIG_MYS3_ENDPOINT: $S3_ENDPOINT_URL
+          RCLONE_CONFIG_MYS3_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+          RCLONE_CONFIG_MYS3_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+        entrypoint: /bin/sh
+        cmd_template: >-
+          -ac "
+          apk add --no-cache tar zstd &&
+          cd {{ .DataDir }} &&
+          tar -I zstd -cvf - .
+          --exclude=./nodekey
+          --exclude=./key
+          --exclude=./discovery-secret
+          | rclone rcat --s3-chunk-size 150M mys3:/{{ .UploadPathPrefix }}/snapshot.tar.zst &&
+          rclone copy {{ .DataDir }}/_snapshot_eth_getBlockByNumber.json mys3:/{{ .UploadPathPrefix }} &&
+          rclone copy {{ .DataDir }}/_snapshot_web3_clientVersion.json mys3:/{{ .UploadPathPrefix }}
+          "
+  targets:
+    ssh:
+      - alias: "geth"
+        host: "192.168.10.100"
+        user: "devops"
+        port: 22
+        data_dir: /data/geth/geth
+        upload_prefix: ethereum-node-snapshots/demo/geth/latest
+        docker_containers:
+          engine_snooper: snooper-engine
+          execution: execution
+        endpoints:
+          beacon: http://localhost:5052
+          execution: http://localhost:8545
+      - alias: "nethermind"
+        host: "192.168.10.101"
+        user: "devops"
+        port: 22
+        data_dir: /data/nethermind/nethermind_db
+        upload_prefix: ethereum-node-snapshots/demo/nethermind/latest
+        docker_containers:
+          engine_snooper: snooper-engine
+          execution: execution
+        endpoints:
+          beacon: http://localhost:5052
+          execution: http://localhost:8545

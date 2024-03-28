@@ -1,0 +1,5 @@
+- name: Restart snapshotter container
+  community.docker.docker_container:
+    name: "{{ snapshotter_container_name }}"
+    state: started
+    restart: true

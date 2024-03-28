@@ -1,0 +1,5 @@
+- name: Remove snapshotter container
+  community.docker.docker_container:
+    name: "{{ snapshotter_container_name }}"
+    state: absent
+  when: snapshotter_cleanup

@@ -1,0 +1,68 @@
+- name: Get docker group
+  ansible.builtin.getent:
+    database: group
+    key: docker
+  register: snapshotter_docker_group_meta
+
+- name: Add snapshotter user
+  ansible.builtin.user:
+    name: "{{ snapshotter_user }}"
+    groups: docker
+    append: true
+  register: snapshotter_user_meta
+
+- name: Create required directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ snapshotter_user }}"
+    group: "{{ snapshotter_user }}"
+    mode: "0770"
+  loop:
+    - "{{ snapshotter_datadir }}"
+    - "{{ snapshotter_datadir }}/.ssh"
+
+- name: Create snapshotter config
+  ansible.builtin.copy:
+    content: "{{ snapshotter_config }}"
+    dest: "{{ snapshotter_datadir }}/config.yaml"
+    owner: "{{ snapshotter_user }}"
+    group: "{{ snapshotter_user }}"
+    mode: '0664'
+  no_log: true
+  notify: Restart snapshotter container
+
+- name: Add snapshotter SSH private key
+  ansible.builtin.copy:
+    content: "{{ snapshotter_ssh_privkey }}"
+    dest: "{{ snapshotter_datadir }}/.ssh/id_rsa"
+    owner: "{{ snapshotter_user }}"
+    group: "{{ snapshotter_user }}"
+    mode: '0664'
+  no_log: true
+  notify: Restart snapshotter container
+
+- name: Add snapshotter SSH known hosts
+  ansible.builtin.copy:
+    content: "{{ snapshotter_ssh_known_hosts }}"
+    dest: "{{ snapshotter_datadir }}/.ssh/known_hosts"
+    owner: "{{ snapshotter_user }}"
+    group: "{{ snapshotter_user }}"
+    mode: '0664'
+  no_log: true
+  notify: Restart snapshotter container
+
+- name: Run snapshotter container
+  community.general.docker_container:
+    name: "{{ snapshotter_container_name }}"
+    image: "{{ snapshotter_container_image }}"
+    image_name_mismatch: recreate
+    ports: "{{ snapshotter_container_ports }}"
+    restart_policy: "{{ snapshotter_container_restart_policy }}"
+    networks: "{{ snapshotter_container_networks }}"
+    volumes: "{{ snapshotter_container_volumes }}"
+    env: "{{ snapshotter_container_env }}"
+    user: "{{ snapshotter_user_meta.uid }}"
+    groups: "{{ snapshotter_docker_group_meta.ansible_facts.getent_group.docker[1] }}"
+    command: "{{ snapshotter_container_command }}"
+  no_log: true
