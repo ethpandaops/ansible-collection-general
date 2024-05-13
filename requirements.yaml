@@ -11,7 +11,5 @@ roles:
     version: "6.0.3"
   - src: geerlingguy.pip
     version: "2.2.0"
-  - src: robertdebock.bootstrap
-    version: 5.2.5 # Don't update this. Newer versions contain a bug.
   - name: gantsign.oh-my-zsh
     version: "2.4.0"

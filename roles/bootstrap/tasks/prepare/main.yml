@@ -1,0 +1,77 @@
+- name: Try connection
+  block:
+    - name: Test connection
+      ansible.builtin.wait_for_connection:
+        timeout: "{{ bootstrap_timeout }}"
+      register: bootstrap_connect
+      changed_when: false
+  rescue:
+    - name: Gather facts about the system
+      ansible.builtin.include_tasks:
+        file: gather_facts.yml
+    - name: Install minmal bootstrap packages
+      ansible.builtin.raw: "{{ bootstrap_install.raw }}"
+      register: bootstrap_install_packages
+      changed_when:
+        - (bootstrap_install.stdout_regex in bootstrap_install_packages.stdout and
+           bootstrap_os_family in [ "Alpine", "Archlinux", "Gentoo" ]) or
+          (bootstrap_install.stdout_regex not in bootstrap_install_packages.stdout and
+           bootstrap_os_family in [ "Debian", "RedHat", "Rocky", "Suse" ])
+      vars:
+        ansible_user: "{{ bootstrap_user }}"
+  always:
+    - name: Set bootstrap_ansible_user connected
+      ansible.builtin.set_fact:
+        bootstrap_ansible_user: "{{ ansible_user }}"
+      when:
+        - bootstrap_connect is succeeded
+        - ansible_user is defined
+
+    - name: Set bootstrap_ansible_user not connected
+      ansible.builtin.set_fact:
+        bootstrap_ansible_user: "{{ bootstrap_user }}"
+      when:
+        - bootstrap_connect is failed
+
+- name: Ensure system is prepared
+  vars:
+    ansible_user: "{{ bootstrap_ansible_user | default(omit) }}"
+  block:
+    - name: Gather ansible facts
+      ansible.builtin.setup:
+
+    - name: Install bootstrap packages
+      ansible.builtin.package:
+        name: "{{ item }}"
+        state: present
+      loop: "{{ bootstrap_facts_packages.split() }}"
+
+    - name: Get my IP address
+      ansible.builtin.set_fact:
+        _bootstrap_my_ip: "{{ lookup('ansible.builtin.url', 'https://ifconfig.me/ip', split_lines=False) }}"
+      when: bootstrap_connect is failed
+
+    - name: Check if auth log exists
+      ansible.builtin.stat:
+        path: /var/log/auth.log
+      register: _bootstrap_auth_log_reg
+      when: bootstrap_connect is failed
+
+    - name: Auth log - Cleanup failed SSH attempts from auth log to avoid getting banned by systems like fail2ban
+      ansible.builtin.replace:
+        path: /var/log/auth.log
+        regexp: "{{ item }}"
+        replace: ''
+      when: bootstrap_connect is failed and _bootstrap_auth_log_reg.stat.exists
+      loop:
+        - .* Invalid user .* {{ _bootstrap_my_ip | replace('.', '\.') }} .*
+        - .* Connection closed by invalid user .* {{ _bootstrap_my_ip | replace('.', '\.') }} .*
+
+    - name: No auth log - Probably we need to clean journalctl. Not ideal, but this should be just called once per bootstrap
+      ansible.builtin.command: "{{ item }}"
+      failed_when: false
+      changed_when: true
+      loop:
+        - journalctl --rotate
+        - journalctl --vacuum-time=1s
+      when: bootstrap_connect is failed and not _bootstrap_auth_log_reg.stat.exists

@@ -7,5 +7,4 @@ galaxy_info:
   platforms:
     - name: GenericLinux
       versions: ["all"]
-dependencies:
-  - role: robertdebock.bootstrap
+dependencies: []

@@ -1,27 +1,6 @@
-- name: Try connection
-  block:
-    - name: Test connection
-      ansible.builtin.wait_for_connection:
-        timeout: "3"
-      register: bootstrap_connect
-      changed_when: false
-  rescue:
-    - name: Conenction message
-      ansible.builtin.debug:
-        msg: Failed to connect, will try to use bootstrap_ansible_user
-  always:
-    - name: Set bootstrap_ansible_user connected
-      ansible.builtin.set_fact:
-        bootstrap_ansible_user: "{{ ansible_user }}"
-      when:
-        - bootstrap_connect is succeeded
-        - ansible_user is defined
-
-    - name: Set bootstrap_ansible_user not connected
-      ansible.builtin.set_fact:
-        bootstrap_ansible_user: "{{ bootstrap_user }}"
-      when:
-        - bootstrap_connect is failed
+- name: Prepare system to be used by ansible
+  ansible.builtin.include_tasks:
+    file: prepare/main.yml
 
 # Create default user
 - name: Ensure default user exists
@@ -65,11 +44,13 @@
   ansible.builtin.hostname:
     name: "{{ inventory_hostname }}"
   register: bootstrap_hostname
+  when: bootstrap_hostname_set
 
 - name: Add self to /etc/hosts
   ansible.builtin.lineinfile:
     dest: /etc/hosts
     line: '{{ ansible_host }} {{ inventory_hostname }}'
+  when: bootstrap_hostname_set
 
 # Keep SSH_AUTH_SOCK when using sudo
 - name: Add self to /etc/hosts
@@ -140,7 +121,12 @@
 - name: Set reboot required
   ansible.builtin.set_fact:
     bootstrap_reboot_required: true
-  when: (bootstrap_reboot_required_file.stat.exists or bootstrap_hostname.changed) and bootstrap_reboot_if_required
+  when: >-
+    bootstrap_reboot_if_required and
+    (
+      bootstrap_reboot_required_file.stat.exists
+      or ( (bootstrap_hostname is defined) and bootstrap_hostname.changed)
+    )
 
 - name: Handle reboot
   when: bootstrap_reboot_required|default(false)
