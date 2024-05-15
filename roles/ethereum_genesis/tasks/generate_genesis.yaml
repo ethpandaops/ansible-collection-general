@@ -48,9 +48,9 @@
         -v {{ ethereum_genesis_generator_tmp_output_dir_register.path }}:/data
         -v {{ ethereum_genesis_generator_tmp_config_dir_register.path }}:/config
         {{ ethereum_genesis_generator_container_image }} all
-      register: ethereum_genesis_generator_cmd
+      register: ethereum_genesis_generator_cmd_debian
       changed_when: false
-      failed_when: (ethereum_genesis_generator_cmd.rc != 0) or (ethereum_genesis_generator_cmd.stdout == "")
+      failed_when: (ethereum_genesis_generator_cmd_debian.rc != 0) or (ethereum_genesis_generator_cmd_debian.stdout == "")
       when: ansible_os_family == "Debian"
 
     - name: Removes extended attr from config.yaml, breaks on linux due to perms if present
@@ -93,4 +93,6 @@
           Something went wrong. Some useful information that can be used to debug the problem:
           - Temp config dir: {{ ethereum_genesis_generator_tmp_config_dir_register.path }}
           - Temp output dir: {{ ethereum_genesis_generator_tmp_output_dir_register.path }}
-      when: (ethereum_genesis_generator_cmd.rc != 0) or (ethereum_genesis_generator_cmd.stdout == "")
+      when: >-
+        (ethereum_genesis_generator_cmd.rc | default('')  != 0) or
+        (ethereum_genesis_generator_cmd_debian.rc | default('')  != 0)
