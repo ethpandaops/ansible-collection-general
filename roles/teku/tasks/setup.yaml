@@ -45,6 +45,7 @@
     volumes: "{{ teku_container_volumes + (teku_validator_enabled | ternary(teku_container_validator_volumes, [])) }}"
     env: "{{ teku_container_env }}"
     networks: "{{ teku_container_networks }}"
+    entrypoint: "{{ teku_container_entrypoint | default(omit) }}"
     command: >-
       {{
         teku_container_command +

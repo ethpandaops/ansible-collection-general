@@ -27,6 +27,7 @@
     volumes: "{{ reth_container_volumes }}"
     env: "{{ reth_container_env }}"
     networks: "{{ reth_container_networks }}"
+    entrypoint: "{{ reth_container_entrypoint | default(omit) }}"
     command: "{{ reth_container_command + reth_container_command_extra_args }}"
     user: "{{ reth_user_meta.uid }}"
     pull: "{{ reth_container_pull | bool }}"

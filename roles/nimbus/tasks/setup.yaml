@@ -69,6 +69,7 @@
       }}
     env: "{{ nimbus_container_env }}"
     networks: "{{ nimbus_container_networks }}"
+    entrypoint: "{{ nimbus_container_entrypoint | default(omit) }}"
     command: >-
       {{
         nimbus_validator_enabled | ternary(
