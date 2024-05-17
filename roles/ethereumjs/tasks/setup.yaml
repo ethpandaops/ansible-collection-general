@@ -27,6 +27,7 @@
     volumes: "{{ ethereumjs_container_volumes }}"
     env: "{{ ethereumjs_container_env }}"
     networks: "{{ ethereumjs_container_networks }}"
+    entrypoint: "{{ ethereumjs_container_entrypoint | default(omit) }}"
     command: "{{ ethereumjs_container_command + ethereumjs_container_command_extra_args }}"
     user: "{{ ethereumjs_user_meta.uid }}"
     pull: "{{ ethereumjs_container_pull | bool }}"

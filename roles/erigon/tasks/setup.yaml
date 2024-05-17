@@ -54,7 +54,7 @@
     volumes: "{{ erigon_container_volumes }}"
     env: "{{ erigon_container_env }}"
     networks: "{{ erigon_container_networks }}"
-    entrypoint: "{{ erigon_container_entrypoint }}"
+    entrypoint: "{{ erigon_container_entrypoint | default(omit) }}"
     command: "{{ erigon_container_command + erigon_container_command_extra_args }}"
     user: "{{ erigon_user_meta.uid }}"
     pull: "{{ erigon_container_pull | bool }}"
