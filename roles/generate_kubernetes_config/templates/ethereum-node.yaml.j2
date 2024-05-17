@@ -63,11 +63,11 @@
             {%- endfor +%}
             teku:
             {%- for arg in teku_container_command_extra_args | default ([]) +%}
-              {%- if arg.startswith('--data-storage-mode=PRUNE') +%}
-              - --data-storage-mode=ARCHIVE
+              {%- if arg.startswith('--validators') +%}
+              {%- else +%}
+              - {{ arg | replace('/network-config', '/data/network-config') }}
               {%- endif +%}
             {%- endfor +%}
-              - --Xepochs-store-blobs=max # Keep the blobs forever
             prysm:
             {%- for arg in prysm_container_command_extra_args | default ([]) +%}
               - {{ arg | replace('/network-config', '/data/network-config') }}
@@ -78,7 +78,10 @@
             {%- endfor +%}
             nimbus:
             {%- for arg in nimbus_container_command_extra_args | default ([]) +%}
+              {%- if arg.startswith('--graffiti') +%}
+              {%- else +%}
               - {{ arg | replace('/network-config', '/data/network-config') }}
+              {%- endif +%}
             {%- endfor +%}
 
 
