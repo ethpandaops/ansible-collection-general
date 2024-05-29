@@ -54,13 +54,13 @@
       when: ansible_os_family == "Debian"
 
     - name: Removes extended attr from config.yaml, breaks on linux due to perms if present
-      ansible.builtin.command: xattr -c "{{ ethereum_genesis_generator_tmp_output_dir_register.path }}/custom_config_data/config.yaml"
+      ansible.builtin.command: xattr -c "{{ ethereum_genesis_generator_tmp_output_dir_register.path }}/metadata/config.yaml"
       changed_when: true
       when: ansible_os_family == "Darwin"
 
     - name: Set config.yaml to the right permissions post attribute change
       ansible.builtin.file:
-        path: "{{ ethereum_genesis_generator_tmp_output_dir_register.path }}/custom_config_data/config.yaml"
+        path: "{{ ethereum_genesis_generator_tmp_output_dir_register.path }}/metadata/config.yaml"
         mode: '0644'
       when: ansible_os_family == "Darwin"
 
@@ -72,7 +72,7 @@
 
     - name: Move tmp output to final output dir
       ansible.builtin.shell: >
-        mv {{ ethereum_genesis_generator_tmp_output_dir_register.path }}/custom_config_data/* {{ ethereum_genesis_generator_output_dir }}
+        mv {{ ethereum_genesis_generator_tmp_output_dir_register.path }}/metadata/* {{ ethereum_genesis_generator_output_dir }}
       changed_when: true
 
     - name: Cleanup tmp dirs
