@@ -19,17 +19,17 @@ dora_beaconapi_endpoints:
     priority: 0
     headers: {}
 
-dora_executionapi_endpoints:
-  - name: default
-    url: "http://execution-node:5052"
-    archive: false
-    priority: 0
-    headers: {}
+dora_executionapi_endpoints: []
+  #- name: default
+  #  url: "http://execution-node:5052"
+  #  archive: false
+  #  priority: 0
+  #  headers: {}
 
-dora_mev_relays:
-  - index: 0
-    name: "Relay 1"
-    url: "http://mev-relay/"
+dora_mev_relays: []
+  #- index: 0
+  #  name: "Relay 1"
+  #  url: "http://mev-relay/"
 
 dora_chain_name: sepolia
 dora_chain_displayname: ""
