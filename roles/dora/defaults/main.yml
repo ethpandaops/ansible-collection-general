@@ -140,6 +140,7 @@ dora_config: |
     {% for endpoint in dora_executionapi_endpoints %}
     - {{ endpoint | to_json }}
     {% endfor %}
+    
     depositLogBatchSize: 10000
 
   # indexer keeps track of the latest epochs in memory.
