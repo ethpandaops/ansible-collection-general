@@ -137,7 +137,7 @@ dora_config: |
   executionapi:
     # EL Client RPC
     endpoints: {% if not dora_executionapi_endpoints %}[]{% endif %}
-    {%- for endpoint in dora_executionapi_endpoints %}
+    {% for endpoint in dora_executionapi_endpoints %}
     - {{ endpoint | to_json }}
     {% endfor %}
     depositLogBatchSize: 10000
@@ -156,7 +156,7 @@ dora_config: |
   mevIndexer:
     # list of mev relays to crawl mev blocks from
     relays: {% if not dora_mev_relays %}[]{% endif %}
-    {%- for relay in dora_mev_relays %}
+    {% for relay in dora_mev_relays %}
     - {{ relay | to_json }}
     {% endfor %}
     refreshInterval: 5m
