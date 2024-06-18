@@ -11,7 +11,26 @@ dora_docker_networks:
   - name: "{{ dora_docker_network_name }}"
 
 # explorer config
-dora_beaconapi_endpoint: "http://your-cl-node:5052"
+dora_beaconapi_endpoint: "" # deprecated, http://beacon-node:5052
+dora_beaconapi_endpoints:
+  - name: default
+    url: "{{ dora_beaconapi_endpoint }}"
+    archive: false
+    priority: 0
+    headers: {}
+
+dora_executionapi_endpoints:
+  - name: default
+    url: "http://execution-node:5052"
+    archive: false
+    priority: 0
+    headers: {}
+
+dora_mev_relays:
+  - index: 0
+    name: "Relay 1"
+    url: "http://mev-relay/"
+
 dora_chain_name: sepolia
 dora_chain_displayname: ""
 dora_chain_config: ""
@@ -103,7 +122,10 @@ dora_config: |
 
   beaconapi:
     # CL Client RPC
-    endpoint: "{{ dora_beaconapi_endpoint }}"
+    endpoints:
+    {%- for endpoint in dora_beaconapi_endpoints %}
+    - {{ endpoint | to_json }}
+    {%- endfor %}
 
     # local cache for page models
     localCacheSize: 100 # 100MB
@@ -111,6 +133,14 @@ dora_config: |
     # remote cache for page models
     redisCacheAddr: ""
     redisCachePrefix: ""
+
+  executionapi:
+    # EL Client RPC
+    endpoints: {% if not dora_executionapi_endpoints %}[]{% endif %}
+    {%- for endpoint in dora_executionapi_endpoints %}
+    - {{ endpoint | to_json }}
+    {% endfor %}
+    depositLogBatchSize: 10000
 
   # indexer keeps track of the latest epochs in memory.
   indexer:
@@ -122,6 +152,14 @@ dora_config: |
 
     # number of seconds to wait between each epoch (don't overload CL client)
     syncEpochCooldown: 1
+
+  mevIndexer:
+    # list of mev relays to crawl mev blocks from
+    relays: {% if not dora_mev_relays %}[]{% endif %}
+    {%- for relay in dora_mev_relays %}
+    - {{ relay | to_json }}
+    {% endfor %}
+    refreshInterval: 5m
 
   database:
     engine: "pgsql"
