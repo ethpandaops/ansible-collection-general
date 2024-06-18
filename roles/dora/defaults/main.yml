@@ -20,16 +20,16 @@ dora_beaconapi_endpoints:
     headers: {}
 
 dora_executionapi_endpoints: []
-  #- name: default
-  #  url: "http://execution-node:5052"
-  #  archive: false
-  #  priority: 0
-  #  headers: {}
+# - name: default
+#   url: "http://execution-node:5052"
+#   archive: false
+#   priority: 0
+#   headers: {}
 
 dora_mev_relays: []
-  #- index: 0
-  #  name: "Relay 1"
-  #  url: "http://mev-relay/"
+# - index: 0
+#   name: "Relay 1"
+#   url: "http://mev-relay/"
 
 dora_chain_name: sepolia
 dora_chain_displayname: ""
@@ -142,7 +142,7 @@ dora_config: |
     {% for endpoint in dora_executionapi_endpoints %}
     - {{ endpoint | to_json }}
     {% endfor %}
-    
+
     depositLogBatchSize: 10000
 
   # indexer keeps track of the latest epochs in memory.
