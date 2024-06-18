@@ -11,7 +11,7 @@ dora_docker_networks:
   - name: "{{ dora_docker_network_name }}"
 
 # explorer config
-dora_beaconapi_endpoint: "" # deprecated, http://beacon-node:5052
+dora_beaconapi_endpoint: "http://your-cl-node:5052" # deprecated
 dora_beaconapi_endpoints:
   - name: default
     url: "{{ dora_beaconapi_endpoint }}"
