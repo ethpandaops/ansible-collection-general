@@ -17,6 +17,7 @@ jobs:
       pull-requests: read
     outputs:
       ethereum_node: ${{ steps.filter.outputs.ethereum_node }}
+      dependencies: ${{ steps.filter.outputs.dependencies }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -24,11 +25,14 @@ jobs:
         with:
           filters: |
             ethereum_node: roles/ethereum_node/**
+            dependencies: requirements.*
 
   # Integration test using molecule
   job:
     needs: changes
-    if: ${{ needs.changes.outputs.ethereum_node == 'true' }}
+    if: >-
+      ${{ needs.changes.outputs.ethereum_node == 'true' }} ||
+      ${{ needs.changes.outputs.dependencies == 'true' }} ||
     concurrency:
       group: >-
         ${{ github.head_ref }}-ethereum-node-${{ matrix.consensus }}-${{ matrix.execution }}
