@@ -11,7 +11,7 @@ reth_ports_http_rpc: 8545
 reth_ports_engine: 8551
 reth_ports_metrics: 6060
 
-ret_ipv6_enabled: false
+reth_ipv6_enabled: false
 
 reth_container_name: reth
 reth_container_image: ghcr.io/paradigmxyz/reth
@@ -27,7 +27,7 @@ reth_container_ports_ipv6:
   - "[::]:{{ reth_ports_p2p }}:{{ reth_ports_p2p }}/udp"
 
 reth_container_ports: >-
-  {{ reth_container_ports_ipv4 + (reth_container_ports_ipv6 if ret_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
+  {{ reth_container_ports_ipv4 + (reth_container_ports_ipv6 if reth_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
 
 reth_container_volumes:
   - "{{ reth_datadir }}:/data"
@@ -53,7 +53,7 @@ reth_container_command_v6: []
   # - --nat=extip:{{ reth_announced_ipv6 }} # not supported
 
 reth_container_command: >-
-  {{ reth_container_command_default + (reth_container_command_v6 if ret_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
+  {{ reth_container_command_default + (reth_container_command_v6 if reth_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
 
 reth_container_command_extra_args: []
 #  - --http.api=eth,net,web3
