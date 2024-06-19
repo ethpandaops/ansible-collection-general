@@ -32,7 +32,7 @@ jobs:
     needs: changes
     if: >-
       ${{ needs.changes.outputs.ethereum_node == 'true' }} ||
-      ${{ needs.changes.outputs.dependencies == 'true' }} ||
+      ${{ needs.changes.outputs.dependencies == 'true' }}
     concurrency:
       group: >-
         ${{ github.head_ref }}-ethereum-node-${{ matrix.consensus }}-${{ matrix.execution }}
