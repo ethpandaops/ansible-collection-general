@@ -84,7 +84,7 @@ beaconchain_explorer_aio_cmd_frontend:
   - /app/explorer
   - -config=/config.yml
 
-beaconchain_frontend_config: |
+beaconchain_frontend_config: | # noqa var-naming[no-role-prefix]
   # All config options can be found in here: https://github.com/gobitfly/eth2-beaconchain-explorer/blob/master/types/config.go
   chain:
     name: sepolia

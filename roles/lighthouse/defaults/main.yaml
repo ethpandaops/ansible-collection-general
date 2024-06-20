@@ -90,7 +90,7 @@ lighthouse_container_command: >-
 
 lighthouse_container_command_extra_args: []
 
-checkpoint_sync_url: https://beaconstate.ethstaker.cc
+checkpoint_sync_url: https://beaconstate.ethstaker.cc # noqa var-naming[no-role-prefix]
 lighthouse_checkpoint_sync_enabled: true
 lighthouse_container_command_checkpoint_args:
   - --checkpoint-sync-url={{ checkpoint_sync_url }}

@@ -1,8 +1,8 @@
 ---
-interface_name: enp0s31f6
-vlan_id: 4000
-ip_address: "{{ ansible_host }}"
-netmask: 255.255.255.0
-gateway: 10.0.0.1
-mtu: 1400
-network: 10.0.0.0/16
+interface_name: enp0s31f6 # noqa var-naming[no-role-prefix]
+vlan_id: 4000 # noqa var-naming[no-role-prefix]
+ip_address: "{{ ansible_host }}" # noqa var-naming[no-role-prefix]
+netmask: 255.255.255.0 # noqa var-naming[no-role-prefix]
+gateway: 10.0.0.1 # noqa var-naming[no-role-prefix]
+mtu: 1400 # noqa var-naming[no-role-prefix]
+network: 10.0.0.0/16 # noqa var-naming[no-role-prefix]

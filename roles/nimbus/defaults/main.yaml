@@ -24,7 +24,7 @@ nimbus_validator_datadir: /data/nimbus-validator
 ## Checkpoint sync container configuration
 ##
 ################################################################################
-checkpoint_sync_url: https://beaconstate.ethstaker.cc
+checkpoint_sync_url: https://beaconstate.ethstaker.cc # noqa var-naming[no-role-prefix]
 nimbus_checkpoint_container_name: nimbus_checkpoint
 nimbus_checkpoint_container_command:
   - trustedNodeSync
