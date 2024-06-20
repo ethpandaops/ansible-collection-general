@@ -4,14 +4,17 @@ on:
   schedule:
     - cron: '0 7 * * *'
 
+concurrency:
+  group: >-
+    ethereum-node-scheduled-${{ matrix.consensus }}-${{ matrix.execution }}
+  cancel-in-progress: true
+
 defaults:
   run:
     working-directory: ansible_collections/ethpandaops/general
+
+jobs:
   test:
-    concurrency:
-      group: >-
-        ethereum-node-scheduled-${{ matrix.consensus }}-${{ matrix.execution }}
-      cancel-in-progress: true
     strategy:
       fail-fast: false
       matrix:
