@@ -6,8 +6,7 @@ on:
 
 concurrency:
   group: >-
-    ethereum-node-scheduled-${{ matrix.consensus }}-${{ matrix.execution }}
-  cancel-in-progress: true
+    ethereum-node-scheduled
 
 defaults:
   run:
