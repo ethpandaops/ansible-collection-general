@@ -62,9 +62,9 @@
       loop: "{{ ethereum_genesis_validator_keyranges | dict2items }}"
       vars:
         genesis_validator_root: >-
-          {{ (lookup('file', ethereum_genesis_generator_output_dir + '/parsedBeaconState.json') | from_json).genesis_validators_root }}
+          {{ (lookup('file', ethereum_genesis_generator_output_dir + '/parsed/parsedConsensusGenesis.json') | from_json).genesis_validators_root }}
         fork_version: >-
-          {{ '%#x' % (lookup('file', ethereum_genesis_generator_output_dir + '/config.yaml') | from_yaml).GENESIS_FORK_VERSION }}
+          {{ '%#x' % (lookup('file', ethereum_genesis_generator_output_dir + '/metadata/config.yaml') | from_yaml).GENESIS_FORK_VERSION }}
       ansible.builtin.shell: >
         docker run --rm -t -u $UID
         --entrypoint eth2-val-tools
@@ -90,9 +90,9 @@
       loop: "{{ ethereum_genesis_validator_keyranges | dict2items }}"
       vars:
         genesis_validator_root: >-
-          {{ (lookup('file', ethereum_genesis_generator_output_dir + '/parsedBeaconState.json') | from_json).genesis_validators_root }}
+          {{ (lookup('file', ethereum_genesis_generator_output_dir + '/parsed/parsedConsensusGenesis.json') | from_json).genesis_validators_root }}
         fork_version: >-
-          {{ '%#x' % (lookup('file', ethereum_genesis_generator_output_dir + '/config.yaml') | from_yaml).GENESIS_FORK_VERSION }}
+          {{ '%#x' % (lookup('file', ethereum_genesis_generator_output_dir + '/metadata/config.yaml') | from_yaml).GENESIS_FORK_VERSION }}
       ansible.builtin.shell: >
         docker run --rm -t -u $UID
         --entrypoint eth2-val-tools
