@@ -1,4 +1,4 @@
-eth_testnet_config_dir: /data/ethereum-network-config # noqa var-naming[no-role-prefix]
+eth_testnet_config_dir: /data/ethereum-network-config/metadata # noqa var-naming[no-role-prefix]
 
 eth_testnet_config_git_enabled: false # noqa var-naming[no-role-prefix]
 eth_testnet_config_git_repo: https://github.com/Inphi/eip4844-testnet # noqa var-naming[no-role-prefix]
@@ -6,4 +6,4 @@ eth_testnet_config_git_version: devnet-4 # noqa var-naming[no-role-prefix]
 eth_testnet_config_git_update: false # noqa var-naming[no-role-prefix] - Once it's cloned, it wont update anymore, unless this var is changed
 
 eth_testnet_config_local_dir_enabled: false # noqa var-naming[no-role-prefix]
-eth_testnet_config_local_dir_src: "files/ethereum-network-config" # noqa var-naming[no-role-prefix]
+eth_testnet_config_local_dir_src: "files/ethereum-network-config/metadata" # noqa var-naming[no-role-prefix]
