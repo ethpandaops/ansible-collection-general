@@ -61,14 +61,15 @@ testnet-homepage:
     ## Genesis configuration
     ### Execution layer clients
     - https://config.{{ network_subdomain }}/el/genesis.json
+    - https://config.{{ network_subdomain }}/el/besu.json
     - https://config.{{ network_subdomain }}/el/chainspec.json
 
     ### Consensus layer clients
     - https://config.{{ network_subdomain }}/cl/config.yaml
     - https://config.{{ network_subdomain }}/cl/genesis.ssz
-    - https://config.{{ network_subdomain }}/cl/deploy_block.txt
     - https://config.{{ network_subdomain }}/cl/deposit_contract.txt
     - https://config.{{ network_subdomain }}/cl/deposit_contract_block.txt
+    - https://config.{{ network_subdomain }}/cl/deposit_contract_block_hash.txt
 
 
   customArgs:
