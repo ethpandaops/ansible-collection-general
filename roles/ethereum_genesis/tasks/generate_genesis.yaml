@@ -84,12 +84,12 @@
 
     - name: Move tmp output to final output dir
       ansible.builtin.shell: >
-        mv {{ ethereum_genesis_generator_tmp_output_dir_register.path }}/metadata/* {{ ethereum_genesis_generator_output_dir }}/
+        mv {{ ethereum_genesis_generator_tmp_output_dir_register.path }}/metadata/* {{ ethereum_genesis_generator_output_dir }}/metadata/
       changed_when: true
 
     - name: Move tmp output to final output dir
       ansible.builtin.shell: >
-        mv {{ ethereum_genesis_generator_tmp_output_dir_register.path }}/parsed/* {{ ethereum_genesis_generator_output_dir }}/
+        mv {{ ethereum_genesis_generator_tmp_output_dir_register.path }}/parsed/* {{ ethereum_genesis_generator_output_dir }}/parsed/
       changed_when: true
 
     - name: Cleanup tmp dirs
