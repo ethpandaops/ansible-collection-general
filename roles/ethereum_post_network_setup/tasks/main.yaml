@@ -7,7 +7,12 @@
   block:
     - name: Make sure output dir exists
       ansible.builtin.file:
-        path: "{{ ethereum_genesis_generator_output_dir }}"
+        path: "{{ ethereum_genesis_generator_output_dir }}/metadata"
+        state: directory
+        recurse: true
+    - name: Generate parsed dir exists
+      ansible.builtin.file:
+        path: "{{ ethereum_genesis_generator_output_dir }}/parsed"
         state: directory
         recurse: true
     # Generate missing network config files
