@@ -45,5 +45,5 @@
           - {{ hostvars[host]['ethereum_node_fact_cl_enr'] }}
           {% endif %}
           {% endfor %}
-        dest: "{{ ethereum_genesis_generator_output_dir }}/bootstrap_nodes.yaml"
+        dest: "{{ ethereum_genesis_generator_output_dir }}/metadata/bootstrap_nodes.yaml"
         mode: "0644"
