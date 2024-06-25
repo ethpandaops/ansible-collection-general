@@ -45,6 +45,7 @@
     volumes: "{{ grandine_container_volumes + (grandine_validator_enabled | ternary(grandine_container_validator_volumes, [])) }}"
     env: "{{ grandine_container_env }}"
     networks: "{{ grandine_container_networks }}"
+    entrypoint: "{{ grandine_container_entrypoint | default(omit) }}"
     command: >-
       {{
         grandine_container_command +

@@ -27,6 +27,7 @@
     volumes: "{{ lodestar_container_volumes }}"
     env: "{{ lodestar_container_env }}"
     networks: "{{ lodestar_container_networks }}"
+    entrypoint: "{{ lodestar_container_entrypoint | default(omit) }}"
     command: >-
       {{
         lodestar_container_command +
@@ -68,6 +69,7 @@
     volumes: "{{ lodestar_validator_container_volumes }}"
     env: "{{ lodestar_validator_container_env }}"
     networks: "{{ lodestar_validator_container_networks }}"
+    entrypoint: "{{ lodestar_validator_container_entrypoint | default(omit) }}"
     command: >-
       {{
         lodestar_validator_container_command +

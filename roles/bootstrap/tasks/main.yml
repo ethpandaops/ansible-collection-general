@@ -32,12 +32,14 @@
         user: "{{ bootstrap_default_user }}"
         state: present
         key: "{{ item }}"
+      tags: ['bootstrap_ssh_keys']
 
     - name: Add SSH keys from github users
       loop: "{{ bootstrap_default_user_authorized_keys_github }}"
       loop_control:
         loop_var: outer_item
       ansible.builtin.include_tasks: add_github_ssh_key.yml
+      tags: ['bootstrap_ssh_keys']
 
 # Set hostname to inventory hostname by default
 - name: Set hostname

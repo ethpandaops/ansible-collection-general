@@ -1,16 +1,16 @@
 # Basic auth
-gen_basic_auth_nginx_paths:
+gen_basic_auth_nginx_paths: # noqa var-naming[no-role-prefix]
   - "{{ docker_nginx_proxy_datadir }}/htpasswd/{{ ethereum_node_rcp_hostname }}"
   - "{{ docker_nginx_proxy_datadir }}/htpasswd/{{ ethereum_node_beacon_hostname }}"
-gen_basic_auth_nginx_name: "some-user"
-gen_basic_auth_nginx_password: "some-password"
+gen_basic_auth_nginx_name: "some-user" # noqa var-naming[no-role-prefix]
+gen_basic_auth_nginx_password: "some-password" # noqa var-naming[no-role-prefix]
 
 # CORS
-gen_cors_nginx_paths:
+gen_cors_nginx_paths: # noqa var-naming[no-role-prefix]
   - "{{ docker_nginx_proxy_datadir }}/vhost/{{ ethereum_node_rcp_hostname }}_location"
   - "{{ docker_nginx_proxy_datadir }}/vhost/{{ ethereum_node_beacon_hostname }}_location"
 
-gen_cors_nginx_config: |
+gen_cors_nginx_config: | # noqa var-naming[no-role-prefix]
   proxy_hide_header 'Access-Control-Allow-Credentials';
   proxy_hide_header 'Access-Control-Allow-Origin';
   proxy_hide_header 'Access-Control-Allow-Methods';

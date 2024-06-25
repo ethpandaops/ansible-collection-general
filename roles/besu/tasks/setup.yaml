@@ -27,6 +27,7 @@
     volumes: "{{ besu_container_volumes }}"
     env: "{{ besu_container_env }}"
     networks: "{{ besu_container_networks }}"
+    entrypoint: "{{ besu_container_entrypoint | default(omit) }}"
     command: "{{ besu_container_command + besu_container_command_extra_args }}"
     user: "{{ besu_user_meta.uid }}"
     pull: "{{ besu_container_pull | bool }}"

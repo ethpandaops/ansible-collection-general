@@ -49,3 +49,15 @@ dora:
     archive: true
 {% endif %}
 {% endfor %}
+  executionEndpoints:
+  # Rpc
+  - url: {{ default_el_endpoint }}
+    name: rpc-{{ gen_kubernetes_config_ethereum_node_name }}
+    archive: true
+    priority: 1
+{% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
+  - url: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@rpc.{{ hostvars[host]['inventory_hostname'] }}.{{ network_subdomain }}
+    name: {{ hostvars[host]['inventory_hostname'] }}
+    priority: -1
+    archive: false
+{% endfor %}

@@ -27,6 +27,7 @@
     volumes: "{{ lighthouse_container_volumes }}"
     env: "{{ lighthouse_container_env }}"
     networks: "{{ lighthouse_container_networks }}"
+    entrypoint: "{{ lighthouse_container_entrypoint | default(omit) }}"
     command: >-
       {{
         lighthouse_container_command +
@@ -68,6 +69,7 @@
     volumes: "{{ lighthouse_validator_container_volumes }}"
     env: "{{ lighthouse_validator_container_env }}"
     networks: "{{ lighthouse_validator_container_networks }}"
+    entrypoint: "{{ lighthouse_validator_container_entrypoint | default(omit) }}"
     command: >-
       {{
         lighthouse_validator_container_command +

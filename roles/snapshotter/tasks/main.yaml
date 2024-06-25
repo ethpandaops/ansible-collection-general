@@ -1,0 +1,7 @@
+- name: Setup snapshotter
+  ansible.builtin.import_tasks: setup.yaml
+  when: not snapshotter_cleanup
+
+- name: Cleanup snapshotter
+  ansible.builtin.import_tasks: cleanup.yaml
+  when: snapshotter_cleanup

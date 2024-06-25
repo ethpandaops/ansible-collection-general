@@ -1,36 +1,37 @@
-devnet_name: 'template'
+devnet_name: 'template' # noqa var-naming[no-role-prefix]
 
-gen_kubernetes_config_default_output_dir: ../kubernetes/{{ ethereum_network_name | replace(devnet_name + "-", '') }}
+gen_kubernetes_config_default_output_dir: ../kubernetes/{{ ethereum_network_name | replace(devnet_name + "-", '') }} # noqa var-naming[no-role-prefix]
 
-default_cl_endpoint: >-
+default_cl_endpoint: >- # noqa var-naming[no-role-prefix]
   http://{{ gen_kubernetes_config_ethereum_node.cl + '-' + gen_kubernetes_config_ethereum_node.el + '-' +
   gen_kubernetes_config_ethereum_node.value + ':' + ethereum_node_cl_ports_http_beacon | string }}
-default_el_endpoint: >-
+default_el_endpoint: >- # noqa var-naming[no-role-prefix]
   http://{{ gen_kubernetes_config_ethereum_node.el + '-' + gen_kubernetes_config_ethereum_node.cl + '-' +
   gen_kubernetes_config_ethereum_node.value + ':' + ethereum_node_el_ports_http_rpc | string }}
-default_el_ws_endpoint: >-
+default_el_ws_endpoint: >- # noqa var-naming[no-role-prefix]
   ws://{{ gen_kubernetes_config_ethereum_node.el + '-' + gen_kubernetes_config_ethereum_node.cl + '-' +
   gen_kubernetes_config_ethereum_node.value + ':' + ethereum_node_el_ports_ws_rpc | string }}
-default_el_auth_endpoint: >-
+default_el_auth_endpoint: >- # noqa var-naming[no-role-prefix]
   http://{{ gen_kubernetes_config_ethereum_node.el + '-' + gen_kubernetes_config_ethereum_node.cl + '-' +
   gen_kubernetes_config_ethereum_node.value + ':' + ethereum_node_el_ports_engine | string }}
 
-gen_kubernetes_config_ethereum_node:
+gen_kubernetes_config_ethereum_node: # noqa var-naming[no-role-prefix]
   el: geth
   cl: teku
   value: "001"
 
-gen_kubernetes_domain: "{{ domain | default('ethpandaops.io') }}"
+gen_kubernetes_domain: "{{ domain | default('ethpandaops.io') }}" # noqa var-naming[no-role-prefix]
 
-gen_kubernetes_config_helm_repositories:
+gen_kubernetes_config_helm_repositories: # noqa var-naming[no-role-prefix]
   - name: ethereum-helm-charts
     url: https://ethpandaops.github.io/ethereum-helm-charts
   - name: blobscan-helm-charts
     url: https://blobscan.github.io/blobscan-helm-charts/
 
-gen_kubernetes_config_ethereum_node_name: "{{ gen_kubernetes_config_ethereum_node.cl }}-{{ gen_kubernetes_config_ethereum_node.el }}-{{ gen_kubernetes_config_ethereum_node.value }}" # noqa yaml[line-length]
+gen_kubernetes_config_ethereum_node_name: >- # noqa var-naming[no-role-prefix] yaml[line-length]
+  {{ gen_kubernetes_config_ethereum_node.cl }}-{{ gen_kubernetes_config_ethereum_node.el }}-{{ gen_kubernetes_config_ethereum_node.value }}
 
-gen_kubernetes_config_helm_charts:
+gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
   config:
     valuesTemplatePath: templates/config.yaml.j2
   beacon-metrics-gazer:
@@ -92,7 +93,7 @@ gen_kubernetes_config_helm_charts:
     dependencies:
       - name: dora
         repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 0.0.3
+        version: 0.0.5
   forky:
     valuesTemplatePath: templates/forky.yaml.j2
     dependencies:
