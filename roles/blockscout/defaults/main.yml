@@ -36,7 +36,7 @@ blockscout_container_env:
   # Branding related
   LOGO: /images/blockscout_logo.svg
   FOOTER_LOGO: /images/blockscout_logo.svg
-  API_V2_ENABLED: true
+  API_V2_ENABLED: "true"
   # Rate limiting
   API_RATE_LIMIT_TIME_INTERVAL: 1s
   API_RATE_LIMIT_BY_IP_TIME_INTERVAL: 5m
