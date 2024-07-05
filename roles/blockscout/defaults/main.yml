@@ -12,7 +12,7 @@ blockscout_docker_networks:
 # blockscout
 blockscout_enabled: true
 blockscout_container_name: blockscout
-blockscout_container_image: blockscout/blockscout:5.1.5
+blockscout_container_image: blockscout/blockscout:6.7.2
 blockscout_container_entrypoint:
   - /bin/sh
   - -ace
@@ -22,7 +22,7 @@ blockscout_container_entrypoint:
 blockscout_container_env:
   # For all env variables, check https://docs.blockscout.com/for-developers/information-and-settings/env-variables
   ETHEREUM_JSONRPC_VARIANT: geth
-  ETHEREUM_JSONRPC_HTTP_URL: http://geth:8545/
+  ETHEREUM_JSONRPC_HTTP_URL: http://execution:8545/
   # ETHEREUM_JSONRPC_VARIANT: erigon
   # ETHEREUM_JSONRPC_HTTP_URL: http://erigon:8545/
   # ETHEREUM_JSONRPC_TRACE_URL: http://erigon:8545/
