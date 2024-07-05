@@ -64,7 +64,11 @@ blockscout_container_env:
   MICROSERVICE_SIG_PROVIDER_ENABLED: '"{{ blockscout_sig_provider_enabled }}"'
   MICROSERVICE_SIG_PROVIDER_URL: "http://{{ blockscout_sig_provider_container_name }}:8050/"
   DECODE_NOT_A_CONTRACT_CALLS: "true"
-blockscout_container_ports: []
+blockscout_container_ports:
+  - "4000:4000"
+
+blockscout_additional_envs: []
+
 blockscout_container_volumes: []
 blockscout_container_stop_timeout: "600"
 blockscout_container_pull: false
