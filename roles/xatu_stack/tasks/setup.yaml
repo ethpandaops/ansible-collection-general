@@ -1,0 +1,49 @@
+- name: Add xatu stack user
+  ansible.builtin.user:
+    name: "{{ xatu_stack_user }}"
+    shell: /bin/nologin
+
+- name: Get xatu stack uid
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ xatu_stack_user }}"
+  register: xatu_stack_user_getent
+
+- name: Create xatu stack dirs
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0777'
+    owner: "{{ xatu_stack_user }}"
+    group: "{{ xatu_stack_user }}"
+  loop:
+    - "{{ xatu_stack_paths_config }}"
+
+- name: Clone xatu stack repository
+  ansible.builtin.git:
+    repo: "{{ xatu_stack_repo_url }}"
+    version: "{{ xatu_stack_repo_version }}"
+    dest: "{{ xatu_stack_repo_path }}"
+    force: yes
+
+- name: Create docker-compose override file
+  ansible.builtin.copy:
+    dest: "{{ xatu_stack_repo_path }}/docker-compose.override.yml"
+    content: |
+      version: '3'
+      services:
+        xatu-nginx:
+          environment:
+            - DOMAIN={{ xatu_stack_config_domain }}
+        xatu-nginx-init:
+          environment:
+            - NGINX_AUTH_USER={{ xatu_stack_nginx_auth_xatu_server_user }}
+            - NGINX_AUTH_PASS={{ xatu_stack_nginx_auth_xatu_server_password }}
+- name: Run docker compose up
+  community.docker.docker_compose:
+    project_src: "{{ xatu_stack_repo_path }}"
+    files:
+      - docker-compose.yml
+      - docker-compose.override.yml
+    state: present
+    pull: yes

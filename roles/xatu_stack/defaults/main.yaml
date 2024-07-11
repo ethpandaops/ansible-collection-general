@@ -1,0 +1,14 @@
+xatu_stack_cleanup: false
+
+xatu_stack_user: "xatu-stack"
+
+xatu_stack_repo_url: "https://github.com/ethpandaops/xatu"
+xatu_stack_repo_version: "master"
+xatu_stack_repo_path: "/data/xatu-stack"
+
+xatu_stack_paths_config: /etc/xatu-stack/
+
+xatu_stack_config_domain: "example.com"
+xatu_stack_nginx_auth_xatu_server_user: "xatu-user"
+xatu_stack_nginx_auth_xatu_server_password: "xatu-password"
+

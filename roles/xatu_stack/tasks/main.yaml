@@ -1,0 +1,7 @@
+- name: Setup xatu sentry
+  ansible.builtin.import_tasks: setup.yaml
+  when: not xatu_sentry_cleanup
+
+- name: Cleanup xatu sentry
+  ansible.builtin.import_tasks: cleanup.yaml
+  when: xatu_sentry_cleanup
