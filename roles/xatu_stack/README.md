@@ -34,6 +34,9 @@ Default variables are defined in [defaults/main.yaml](defaults/main.yaml). Some 
 You'll need docker to run this role. One way of installing docker could be via ansible galaxy with the following dependencies set within `requirements.yaml`:
 
 ```yaml
+collections:
+- name: community.docker
+
 roles:
 - src: geerlingguy.docker
   version: latest
@@ -53,5 +56,6 @@ Your playbook could look like this:
   - role: geerlingguy.pip
     pip_install_packages:
     - name: docker
+    
   - role: ethpandaops.general.xatu_stack
 ```

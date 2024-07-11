@@ -46,4 +46,3 @@
       - docker-compose.yml
       - docker-compose.override.yml
     state: present
-    pull: yes
