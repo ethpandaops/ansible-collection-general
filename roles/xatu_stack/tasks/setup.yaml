@@ -30,7 +30,6 @@
   ansible.builtin.copy:
     dest: "{{ xatu_stack_repo_path }}/docker-compose.override.yml"
     content: |
-      version: '3'
       services:
         xatu-nginx:
           environment:
