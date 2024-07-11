@@ -1,4 +1,23 @@
-- name: Remove xatu sentry container
-  community.docker.docker_container:
-    name: "{{ xatu_sentry_container_name }}"
+- name: Remove xatu stack containers
+  community.docker.docker_compose:
+    project_src: "{{ xatu_stack_repo_path }}"
+    files:
+      - docker-compose.yml
+    state: absent
+    remove_volumes: yes
+
+- name: Remove xatu stack repository
+  ansible.builtin.file:
+    path: "{{ xatu_stack_repo_path }}"
+    state: absent
+
+- name: Remove xatu stack user
+  ansible.builtin.user:
+    name: "{{ xatu_stack_user }}"
+    state: absent
+    remove: yes
+
+- name: Remove xatu stack directories
+  ansible.builtin.file:
+    path: "{{ xatu_stack_paths_config }}"
     state: absent
