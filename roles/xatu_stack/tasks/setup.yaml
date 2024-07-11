@@ -45,3 +45,5 @@
       - docker-compose.yml
       - docker-compose.override.yml
     state: present
+    env: "{{ xatu_stack_env_vars }}"
+
