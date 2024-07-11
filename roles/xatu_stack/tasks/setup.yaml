@@ -40,7 +40,7 @@
             - NGINX_AUTH_USER={{ xatu_stack_nginx_auth_xatu_server_user }}
             - NGINX_AUTH_PASS={{ xatu_stack_nginx_auth_xatu_server_password }}
 - name: Run docker compose up
-  community.docker.docker_compose:
+  community.docker.docker_compose_v2:
     project_src: "{{ xatu_stack_repo_path }}"
     files:
       - docker-compose.yml
