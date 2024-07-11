@@ -34,14 +34,6 @@ xatu_stack_env_vars:
   POSTGRES_USER: user
   POSTGRES_PASSWORD: password
 
-  # Nginx
-  NGINX_ADDRESS: 0.0.0.0
-  NGINX_PORT: 80
-  DOMAIN: example.com
-  ## Xatu Server reverse proxy auth
-  NGINX_XATU_SERVER_AUTH_USER: admin
-  NGINX_XATU_SERVER_AUTH_PASS: password
-
   # Grafana
   GRAFANA_ADDRESS: 127.0.0.1
   GRAFANA_PORT: 3000

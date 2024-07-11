@@ -30,14 +30,7 @@
   ansible.builtin.copy:
     dest: "{{ xatu_stack_repo_path }}/docker-compose.override.yml"
     content: |
-      services:
-        xatu-nginx:
-          environment:
-            - DOMAIN={{ xatu_stack_config_domain }}
-        xatu-nginx-init:
-          environment:
-            - NGINX_AUTH_USER={{ xatu_stack_nginx_auth_xatu_server_user }}
-            - NGINX_AUTH_PASS={{ xatu_stack_nginx_auth_xatu_server_password }}
+      services: {}
 - name: Create .env file
   ansible.builtin.copy:
     dest: "{{ xatu_stack_repo_path }}/.env"
