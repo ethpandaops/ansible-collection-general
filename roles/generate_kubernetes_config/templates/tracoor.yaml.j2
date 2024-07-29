@@ -1,0 +1,52 @@
+# {{ ansible_managed }}
+
+tracoor:
+  fullnameOverride: "tracoor"
+  image:
+    repository: {{ default_tooling_images.tracoor.split(':') | first }}
+    tag: {{ default_tooling_images.tracoor.split(':') | last }}
+    pullPolicy: {% if "latest" in (default_tooling_images.tracoor.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
+
+  resources:
+      requests:
+        cpu: 500m
+        memory: 1Gi
+      limits:
+        cpu: 1000m
+        memory: 2Gi
+  ingress:
+      enabled: true
+      className: ingress-nginx-public
+      hosts:
+        - host: tracoor.{{ network_subdomain }}
+          paths:
+            - path: /
+              pathType: Prefix
+
+  config:
+    server:
+      services:
+        indexer:
+          retention:
+            beaconStates: 24h
+            executionBlockTraces: 24h
+            executionBadBlocks: 168h
+
+    agents:
+{% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
+{% if ((hostvars[host]['inventory_hostname'] | string)[-2:]) == "-1" %}
+      - name: {{ hostvars[host]['inventory_hostname'] }}
+        ethereum:
+          overrideNetworkName: {{ ethereum_network_name }}
+          beacon:
+            nodeAddress: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@bn.{{ hostvars[host]['inventory_hostname'] }}.{{ network_subdomain }}
+          execution:
+            nodeAddress: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@rpc.{{ hostvars[host]['inventory_hostname'] }}.{{ network_subdomain }}
+            traceDisableMemory: true
+            traceDisableStack: true
+            traceDisableStorage: true
+{% endif %}
+{% endfor %}
+
+
+
