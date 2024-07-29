@@ -117,7 +117,7 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
     dependencies:
       - name: tracoor-single
         repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 0.0.1
+        version: 0.0.2
   "{{ gen_kubernetes_config_ethereum_node_name }}":
     valuesTemplatePath: templates/ethereum-node.yaml.j2
     dependencies:
