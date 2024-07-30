@@ -64,6 +64,7 @@ erigon_container_command_extra_args: []
 
 # Only required changing when running custom networks
 erigon_init_custom_network: false
+erigon_init_autoremove_enabled: false
 erigon_init_custom_network_genesis_file: /config/genesis.json
 erigon_init_custom_network_container_env: {}
 erigon_init_custom_network_container_volumes:
