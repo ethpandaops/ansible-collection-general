@@ -37,7 +37,7 @@ tracoor-single:
         type: s3
         config:
           region: us-east-1
-          bucket_name: {{ devnet_name }}
+          bucket_name: {{ ethereum_network_name }}
           endpoint: https://<path:/secrets/services/services.enc.yaml#cloudflare | jsonPath {.account_ids.ethdevops}>.r2.cloudflarestorage.com/ethpandaops-devnet-dumpster
           prefer_urls: true
           access_key: <path:/secrets/services/services.enc.yaml#tracoor | jsonPath {.r2.devnets.access_key_id}>
