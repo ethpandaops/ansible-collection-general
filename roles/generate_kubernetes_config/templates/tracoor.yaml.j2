@@ -1,5 +1,4 @@
 # {{ ansible_managed }}
-
 tracoor-single:
   fullnameOverride: "tracoor"
   image:
@@ -23,6 +22,10 @@ tracoor-single:
           paths:
             - path: /
               pathType: Prefix
+
+  persistence:
+    enabled: true
+    size: 20Gi
 
   config:
     shared:
