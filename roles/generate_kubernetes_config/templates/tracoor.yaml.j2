@@ -54,9 +54,9 @@ tracoor-single:
       services:
         indexer:
           retention:
-            beaconStates: 7d
-            executionBlockTraces: 7d
-            beaconBlocks: 7d
+            beaconStates: 168h
+            executionBlockTraces: 168h
+            beaconBlocks: 168h
 
     agents:
 {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
