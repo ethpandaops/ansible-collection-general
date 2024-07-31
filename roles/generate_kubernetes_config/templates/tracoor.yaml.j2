@@ -31,9 +31,14 @@ tracoor-single:
       indexer:
         address: localhost:8081
       store:
-        type: fs
+        type: s3
         config:
-          base_path: "/tmp/tracoor"
+          region: us-east-1
+          bucket_name: {{ devnet_name }}
+          endpoint: https://<path:/secrets/services/services.enc.yaml#cloudflare | jsonPath {.account_ids.ethdevops}>.r2.cloudflarestorage.com/ethpandaops-devnet-dumpster
+          prefer_urls: true
+          access_key: <path:/secrets/services/services.enc.yaml#tracoor | jsonPath {.r2.devnets.access_key_id}>
+          access_secret: <path:/secrets/services/services.enc.yaml#tracoor | jsonPath {.r2.devnets.secret_access_key}>
 
     server:
       addr: ":8081"
@@ -49,9 +54,9 @@ tracoor-single:
       services:
         indexer:
           retention:
-            beaconStates: 30m
-            executionBlockTraces: 30m
-            beaconBlocks: 30m
+            beaconStates: 7d
+            executionBlockTraces: 7d
+            beaconBlocks: 7d
 
     agents:
 {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
