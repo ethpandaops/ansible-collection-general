@@ -1,0 +1,7 @@
+- name: Setup xatu stack
+  ansible.builtin.import_tasks: setup.yaml
+  when: not xatu_stack_cleanup
+
+- name: Cleanup xatu stack
+  ansible.builtin.import_tasks: cleanup.yaml
+  when: xatu_stack_cleanup

@@ -1,0 +1,50 @@
+- name: Add xatu stack user
+  ansible.builtin.user:
+    name: "{{ xatu_stack_user }}"
+    shell: /bin/nologin
+
+- name: Get xatu stack uid
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ xatu_stack_user }}"
+  register: xatu_stack_user_getent
+
+- name: Create xatu stack dirs
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0777'
+    owner: "{{ xatu_stack_user }}"
+    group: "{{ xatu_stack_user }}"
+  loop:
+    - "{{ xatu_stack_paths_config }}"
+
+- name: Clone xatu stack repository
+  ansible.builtin.git:
+    repo: "{{ xatu_stack_repo_url }}"
+    version: "{{ xatu_stack_repo_version }}"
+    dest: "{{ xatu_stack_repo_path }}"
+    force: yes
+
+- name: Create docker-compose override file
+  ansible.builtin.copy:
+    dest: "{{ xatu_stack_repo_path }}/docker-compose.override.yml"
+    content: |
+      services: {}
+- name: Create .env file
+  ansible.builtin.copy:
+    dest: "{{ xatu_stack_repo_path }}/.env"
+    content: |
+      {% for key, value in xatu_stack_env_vars.items() %}
+      {{ key }}={{ value }}
+      {% endfor %}
+
+- name: Run docker compose up
+  community.docker.docker_compose_v2:
+    project_src: "{{ xatu_stack_repo_path }}"
+    files:
+      - docker-compose.yml
+      - docker-compose.override.yml
+    state: present
+    env_files:
+      - "{{ xatu_stack_repo_path }}/.env"
