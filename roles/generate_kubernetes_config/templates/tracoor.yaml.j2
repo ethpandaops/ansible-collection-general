@@ -67,13 +67,13 @@ tracoor-single:
           path: network-configs/{{ ethereum_network_name | replace(devnet_name + "-", '') }}/metadata
         tools:
           ncli:
-            repository: {{ default_ethereum_client_images.nimbus.split(':') | first | default("status-im/nimbus-eth2") }}
-            branch: {{ default_ethereum_client_images.nimbus.split(':') | last | default("unstable") }}
+            repository: {{ default_tooling_images.ncli.split(':') | first | default("status-im/nimbus-eth2") }}
+            branch: {{ default_tooling_images.ncli.split(':') | last | default("unstable") }}
           lcli:
-            repository: {{ default_ethereum_client_images.lighthouse.split(':') | first | default("sigp/lighthouse") }}
-            branch: {{ default_ethereum_client_images.lighthouse.split(':') | last | default("electra-devnet-1") }}
+            repository: {{ default_tooling_images.lcli.split(':') | first | default("sigp/lighthouse") }}
+            branch: {{ default_tooling_images.lcli.split(':') | last | default("electra-devnet-1") }}
           zcli:
-            fork: electra
+            fork: {{ default_tooling_images.zcli | default("electra") }}
 
     agents:
 {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
