@@ -81,5 +81,6 @@ blockscout:
 
   postgresql:
     fullnameOverride: blockscout-postgresql
-    persistence:
-      size: "{{ gen_kubernetes_blockscout_postgres_size | default("100Gi") }}"
+    primary:
+      persistence:
+        size: "{{ gen_kubernetes_blockscout_postgres_size | default(100Gi) }}"
