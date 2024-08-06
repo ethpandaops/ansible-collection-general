@@ -57,9 +57,23 @@ tracoor-single:
       services:
         indexer:
           retention:
-            beaconStates: 168h
-            executionBlockTraces: 168h
-            beaconBlocks: 168h
+            beaconStates: 100h
+            executionBlockTraces: 100h
+            beaconBlocks: 100h
+      ethereum:
+        config:
+          repository: ethpandaops/{{ devnet_name }}-devnets
+          branch: master
+          path: network-configs/{{ ethereum_network_name | replace(devnet_name + "-", '') }}/metadata
+        tools:
+          ncli:
+            repository: {{ default_tooling_images.nimbus.split(':') | first | default("status-im/nimbus-eth2") }}
+            branch: {{ default_tooling_images.nimbus.split(':') | last | default("unstable") }}
+          lcli:
+            repository: {{ default_tooling_images.lighthouse.split(':') | first | default("sigp/lighthouse") }}
+            branch: {{ default_tooling_images.lighthouse.split(':') | last | default("electra-devnet-1") }}
+          zcli:
+            fork: electra
 
     agents:
 {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
