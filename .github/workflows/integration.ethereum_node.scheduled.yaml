@@ -19,7 +19,7 @@ jobs:
       matrix:
         consensus: [teku, prysm, lighthouse, nimbus, lodestar, grandine]
         execution: [geth, nethermind, erigon, besu, ethereumjs, reth]
-    runs-on: self-hosted-ghr-size-s-x64
+    runs-on: self-hosted-ghr-size-m-x64
     steps:
       - uses: actions/checkout@v4
         with:
