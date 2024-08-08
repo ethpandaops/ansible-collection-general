@@ -112,6 +112,12 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
       - name: rpc-proxy
         repository: https://ethpandaops.github.io/ethereum-helm-charts
         version: 0.1.2
+  assertoor:
+    valuesTemplatePath: templates/assertoor.yaml.j2
+    dependencies:
+      - name: assertoor
+        repository: https://ethpandaops.github.io/ethereum-helm-charts
+        version: 0.0.2
   tracoor:
     valuesTemplatePath: templates/tracoor.yaml.j2
     dependencies:
