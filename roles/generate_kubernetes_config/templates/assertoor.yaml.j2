@@ -4,8 +4,8 @@ assertoor:
   fullnameOverride: assertoor
 
   image:
-    repository: {{ default_tooling_images.assertoor.split(':') | first | default ('ethpandaops/assertoor') }}
-    tag: {{ default_tooling_images.assertoor.split(':') | last | default ('latest')}}
+    repository: {{ default_tooling_images.assertoor.split(':') | first | }}
+    tag: {{ default_tooling_images.assertoor.split(':') | last | }}
     pullPolicy: {% if default_tooling_images.assertoor.split(':') | last == 'latest' %}Always{% else %}IfNotPresent{% endif %}
 
   resources:
@@ -16,7 +16,7 @@ assertoor:
       cpu: 500m
       memory: 512Mi
 
-  ingess:
+  ingress:
     enabled: true
     className: ingress-nginx-public
     annotations:
@@ -26,20 +26,17 @@ assertoor:
         paths:
           - path: /
             pathType: Prefix
-            backend:
-              service:
-                name: assertoor
-                port:
-                  number: 8082
+
+  ingressAdmin:
+    enabled: true
+    className: ingress-nginx-public
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-production
+    hosts:
       - host: assertoor-admin.{{ network_subdomain }}
         paths:
           - path: /
             pathType: Prefix
-            backend:
-              service:
-                name: assertoor
-                port:
-                  number: 8080
 
   endpoints:
 {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
