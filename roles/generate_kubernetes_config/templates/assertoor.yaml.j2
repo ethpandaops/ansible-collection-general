@@ -6,7 +6,7 @@ assertoor:
   image:
     repository: {{ default_tooling_images.assertoor.split(':') | first }}
     tag: {{ default_tooling_images.assertoor.split(':') | last }}
-    pullPolicy: {% if default_tooling_images.assertoor.split(':') | last == 'latest' %}Always{% else %}IfNotPresent{% endif %}
+    pullPolicy: {% if "latest" in (default_tooling_images.assertoor.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
 
   resources:
     requests:

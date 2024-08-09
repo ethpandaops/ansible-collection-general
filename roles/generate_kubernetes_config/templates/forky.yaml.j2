@@ -6,7 +6,7 @@ forky:
   image:
     repository: {{ default_tooling_images.forky.split(':') | first }}
     tag: {{ default_tooling_images.forky.split(':') | last }}
-    pullPolicy: {% if default_tooling_images.forky.split(':') | last == 'latest' %}Always{% else %}IfNotPresent{% endif %}
+    pullPolicy: {% if "latest" in (default_tooling_images.forky.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
 
   resources:
     requests:
