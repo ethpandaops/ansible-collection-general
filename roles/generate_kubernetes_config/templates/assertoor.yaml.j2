@@ -1,0 +1,49 @@
+# {{ ansible_managed }}
+
+assertoor:
+  fullnameOverride: assertoor
+
+  image:
+    repository: {{ default_tooling_images.assertoor.split(':') | first }}
+    tag: {{ default_tooling_images.assertoor.split(':') | last }}
+    pullPolicy: {% if default_tooling_images.assertoor.split(':') | last == 'latest' %}Always{% else %}IfNotPresent{% endif %}
+
+  resources:
+    requests:
+      cpu: 64m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  ingress:
+    enabled: true
+    className: ingress-nginx-public
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-production
+    hosts:
+      - host: assertoor.{{ network_subdomain }}
+        paths:
+          - path: /
+            pathType: Prefix
+
+  ingressAdmin:
+    enabled: true
+    className: ingress-nginx-public
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-production
+    hosts:
+      - host: assertoor-admin.{{ network_subdomain }}
+        paths:
+          - path: /
+            pathType: Prefix
+
+  endpoints:
+{% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
+    - name:  {{ hostvars[host]['inventory_hostname'] }}
+      executionUrl: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@rpc.{{ hostvars[host]['inventory_hostname'] }}.{{ network_subdomain }}
+      consensusUrl: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@bn.{{ hostvars[host]['inventory_hostname'] }}.{{ network_subdomain }}
+{% endfor %}
+
+  validatorNamesInventory: https://config.{{ network_subdomain }}/api/v1/nodes/validator-ranges
+  assertoorTests: []
