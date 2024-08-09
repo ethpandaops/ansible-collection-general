@@ -96,6 +96,7 @@ testnet-homepage:
         beaconRpcUrl: https://beacon.{{ network_subdomain }}
         explorerUrl: https://explorer.{{ network_subdomain }}
         forkmonUrl: https://forkmon.{{ network_subdomain }}
+        assertoorUrl: https://assertoor.{{ network_subdomain }}
         beaconexplorerUrl: "https://{{ ethereum_network_name }}.beaconcha.in"
         doraUrl: https://dora.{{ network_subdomain }}
         checkpointSyncUrl: "https://checkpoint-sync.{{ network_subdomain }}"
@@ -128,6 +129,8 @@ testnet-homepage:
         dataLookup: explorerUrl
       - name: "Dora the Explorer"
         dataLookup: doraUrl
+      - name: "Assertoor"
+        dataLookup: assertoorUrl
       - name: "Beaconchain explorer"
         dataLookup: "beaconexplorerUrl"
       - name: "Blobscan"
