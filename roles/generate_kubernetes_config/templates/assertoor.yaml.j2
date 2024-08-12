@@ -46,4 +46,7 @@ assertoor:
 {% endfor %}
 
   validatorNamesInventory: https://config.{{ network_subdomain }}/api/v1/nodes/validator-ranges
+  globalVariables:
+    walletPrivkey: "<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.assertoor_private_key}>"
+
   assertoorTests: []
