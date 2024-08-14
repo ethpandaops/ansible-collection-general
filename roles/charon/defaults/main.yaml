@@ -1,0 +1,43 @@
+charon_user: charon
+charon_datadir: /data/charon
+
+charon_cleanup: false # when set to "true" it will remove the container(s)
+
+charon_ports_p2p_tcp: 3610
+charon_ports_validator_api: 3600
+charon_ports_monitoring: 3620
+
+charon_container_name: "charon"
+charon_container_image: "obolnetwork/charon:latest"
+charon_container_env:
+  CHARON_BEACON_NODE_ENDPOINTS: "{{ charon_beacon_node_endpoints }}"
+  CHARON_LOG_LEVEL: "{{ charon_log_level }}"
+  CHARON_LOG_FORMAT: "{{ charon_log_format }}"
+  CHARON_P2P_RELAYS: "{{ charon_p2p_relays }}"
+  CHARON_P2P_EXTERNAL_HOSTNAME: "{{ charon_p2p_external_hostname }}"
+  CHARON_P2P_EXTERNAL_IP: "{{ charon_p2p_external_ip }}"
+  CHARON_P2P_TCP_ADDRESS: "0.0.0.0:{{ charon_ports_p2p_tcp }}"
+  CHARON_VALIDATOR_API_ADDRESS: "0.0.0.0:{{ charon_ports_validator_api }}"
+  CHARON_MONITORING_ADDRESS: "0.0.0.0:{{ charon_ports_monitoring }}"
+  CHARON_BUILDER_API: "{{ charon_builder_api_enabled }}"
+
+charon_beacon_node_endpoints: "http://beacon:5052"
+charon_log_level: "info"
+charon_log_format: "console"
+charon_p2p_relays: "https://0.relay.obol.tech"
+charon_p2p_external_hostname: ""
+charon_p2p_external_ip: ""
+charon_builder_api_enabled: "false"
+
+charon_container_ports:
+  - "{{ charon_ports_p2p_tcp }}:{{ charon_ports_p2p_tcp }}/tcp"
+charon_container_volumes:
+  - "{{ charon_datadir }}:/opt/charon/.charon"
+charon_container_security_opts: []
+charon_container_stop_timeout: "300"
+charon_container_networks: []
+
+# charon_container_command: []
+# charon_container_command_extra_args: []
+
+charon_container_pull: false

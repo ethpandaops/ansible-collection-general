@@ -1,0 +1,7 @@
+- name: Setup charon
+  ansible.builtin.import_tasks: setup.yaml
+  when: not charon_cleanup
+
+- name: Cleanup charon
+  ansible.builtin.import_tasks: cleanup.yaml
+  when: charon_cleanup
