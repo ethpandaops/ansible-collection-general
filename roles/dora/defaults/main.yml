@@ -150,7 +150,7 @@ dora_config: |
     syncEpochCooldown: 1
 
     # max number of parallel state requests to make to the CL clients
-    maxParallelValidatorSetRequests: 4
+    maxParallelValidatorSetRequests: 2
 
   mevIndexer:
     # list of mev relays to crawl mev blocks from
