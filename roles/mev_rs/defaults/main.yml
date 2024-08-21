@@ -10,7 +10,7 @@ mev_rs_docker_networks:
 ##
 ################################################################################
 mev_rs_container_name: mev-rs
-mev_rs_container_image: ethpandaops/mev-rs:main
+mev_rs_container_image: ethpandaops/mev-rs:v0.4.0-alpha.6
 mev_rs_container_env: {}
 mev_rs_server_port: 18550
 mev_rs_container_ports:
