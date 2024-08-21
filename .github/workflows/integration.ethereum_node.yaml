@@ -25,7 +25,7 @@ jobs:
         with:
           filters: |
             ethereum_node: roles/ethereum_node/**
-          #  dependencies: requirements.*
+            dependencies: requirements.*
 
   # Integration test using molecule
   job:
