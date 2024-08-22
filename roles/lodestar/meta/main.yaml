@@ -1,3 +1,4 @@
+allow_duplicates: true
 dependencies:
   - role: ethpandaops.general.ethereum_auth_jwt
     vars:

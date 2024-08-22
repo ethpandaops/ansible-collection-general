@@ -3,80 +3,84 @@
     name: "{{ lodestar_user }}"
   register: lodestar_user_meta
 
-- name: Create data dir
-  ansible.builtin.file:
-    path: "{{ lodestar_datadir }}"
-    state: directory
-    mode: "0750"
-    owner: "{{ lodestar_user }}"
-    group: "{{ lodestar_user }}"
+- name: Configure lodestar beacon client
+  when: lodestar_enabled
+  block:
+    - name: Create data dir
+      ansible.builtin.file:
+        path: "{{ lodestar_datadir }}"
+        state: directory
+        mode: "0750"
+        owner: "{{ lodestar_user }}"
+        group: "{{ lodestar_user }}"
 
-- name: Set permissions
-  ansible.builtin.command: "chown -R {{ lodestar_user }}:{{ lodestar_user }} {{ lodestar_datadir }}" # noqa no-free-form
-  changed_when: false
+    - name: Set permissions
+      ansible.builtin.command: "chown -R {{ lodestar_user }}:{{ lodestar_user }} {{ lodestar_datadir }}" # noqa no-free-form
+      changed_when: false
 
-- name: Run lodestar container
-  community.docker.docker_container:
-    name: "{{ lodestar_container_name }}"
-    image: "{{ lodestar_container_image }}"
-    image_name_mismatch: recreate
-    state: started
-    restart_policy: always
-    stop_timeout: "{{ lodestar_container_stop_timeout }}"
-    ports: "{{ lodestar_container_ports }}"
-    volumes: "{{ lodestar_container_volumes }}"
-    env: "{{ lodestar_container_env }}"
-    networks: "{{ lodestar_container_networks }}"
-    entrypoint: "{{ lodestar_container_entrypoint | default(omit) }}"
-    command: >-
-      {{
-        lodestar_container_command +
-        lodestar_container_command_extra_args +
-        (lodestar_checkpoint_sync_enabled | ternary(lodestar_container_command_checkpoint_args, [])) +
-        (lodestar_mev_boost_enabled | ternary(lodestar_mev_boost_beacon_command, []))
-      }}
-    user: "{{ lodestar_user_meta.uid }}"
-    pull: "{{ lodestar_container_pull | bool }}"
-    security_opts: "{{ lodestar_container_security_opts }}"
+    - name: Run lodestar container
+      community.docker.docker_container:
+        name: "{{ lodestar_container_name }}"
+        image: "{{ lodestar_container_image }}"
+        image_name_mismatch: recreate
+        state: started
+        restart_policy: always
+        stop_timeout: "{{ lodestar_container_stop_timeout }}"
+        ports: "{{ lodestar_container_ports }}"
+        volumes: "{{ lodestar_container_volumes }}"
+        env: "{{ lodestar_container_env }}"
+        networks: "{{ lodestar_container_networks }}"
+        entrypoint: "{{ lodestar_container_entrypoint | default(omit) }}"
+        command: >-
+          {{
+            lodestar_container_command +
+            lodestar_container_command_extra_args +
+            (lodestar_checkpoint_sync_enabled | ternary(lodestar_container_command_checkpoint_args, [])) +
+            (lodestar_mev_boost_enabled | ternary(lodestar_mev_boost_beacon_command, []))
+          }}
+        user: "{{ lodestar_user_meta.uid }}"
+        pull: "{{ lodestar_container_pull | bool }}"
+        security_opts: "{{ lodestar_container_security_opts }}"
 
-- name: Create validator data dir
-  ansible.builtin.file:
-    path: "{{ item }}"
-    state: directory
-    mode: "0750"
-    owner: "{{ lodestar_user }}"
-    group: "{{ lodestar_user }}"
-  loop:
-    - "{{ lodestar_validator_datadir }}"
-    - "{{ lodestar_validator_datadir }}/keys"
-    - "{{ lodestar_validator_datadir }}/secrets"
+
+- name: Configure lodestar validator client
   when: lodestar_validator_enabled
+  block:
+    - name: Create validator data dir
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: "0750"
+        owner: "{{ lodestar_user }}"
+        group: "{{ lodestar_user }}"
+      loop:
+        - "{{ lodestar_validator_datadir }}"
+        - "{{ lodestar_validator_datadir }}/keys"
+        - "{{ lodestar_validator_datadir }}/secrets"
 
-- name: Set permissions for validator data dir
-  ansible.builtin.command: "chown -R {{ lodestar_user }}:{{ lodestar_user }} {{ lodestar_validator_datadir }}" # noqa no-free-form
-  changed_when: false
-  when: lodestar_validator_enabled
+    - name: Set permissions for validator data dir
+      ansible.builtin.command: "chown -R {{ lodestar_user }}:{{ lodestar_user }} {{ lodestar_validator_datadir }}" # noqa no-free-form
+      changed_when: false
 
-- name: Run lodestar validator container
-  community.docker.docker_container:
-    name: "{{ lodestar_validator_container_name }}"
-    image: "{{ lodestar_validator_container_image }}"
-    image_name_mismatch: recreate
-    state: started
-    restart_policy: always
-    stop_timeout: "{{ lodestar_validator_container_stop_timeout }}"
-    ports: "{{ lodestar_validator_container_ports }}"
-    volumes: "{{ lodestar_validator_container_volumes }}"
-    env: "{{ lodestar_validator_container_env }}"
-    networks: "{{ lodestar_validator_container_networks }}"
-    entrypoint: "{{ lodestar_validator_container_entrypoint | default(omit) }}"
-    command: >-
-      {{
-        lodestar_validator_container_command +
-        lodestar_validator_container_command_extra_args +
-        (lodestar_mev_boost_enabled | ternary(lodestar_mev_boost_validator_command, []))
-      }}
-    user: "{{ lodestar_user_meta.uid }}"
-    pull: "{{ lodestar_container_pull | bool }}"
-    security_opts: "{{ lodestar_validator_container_security_opts }}"
-  when: lodestar_validator_enabled
+    - name: Run lodestar validator container
+      community.docker.docker_container:
+        name: "{{ lodestar_validator_container_name }}"
+        image: "{{ lodestar_validator_container_image }}"
+        image_name_mismatch: recreate
+        state: started
+        restart_policy: always
+        stop_timeout: "{{ lodestar_validator_container_stop_timeout }}"
+        ports: "{{ lodestar_validator_container_ports }}"
+        volumes: "{{ lodestar_validator_container_volumes }}"
+        env: "{{ lodestar_validator_container_env }}"
+        networks: "{{ lodestar_validator_container_networks }}"
+        entrypoint: "{{ lodestar_validator_container_entrypoint | default(omit) }}"
+        command: >-
+          {{
+            lodestar_validator_container_command +
+            lodestar_validator_container_command_extra_args +
+            (lodestar_mev_boost_enabled | ternary(lodestar_mev_boost_validator_command, []))
+          }}
+        user: "{{ lodestar_user_meta.uid }}"
+        pull: "{{ lodestar_container_pull | bool }}"
+        security_opts: "{{ lodestar_validator_container_security_opts }}"
