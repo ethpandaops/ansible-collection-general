@@ -3,6 +3,7 @@ teku_user: teku
 teku_datadir: /data/teku
 teku_auth_jwt_path: /data/execution-auth.secret
 teku_execution_engine_endpoint: http://geth:8551
+teku_beacon_endpoint: "http://{{ teku_container_name }}:{{ teku_ports_http_beacon }}"
 teku_announced_ip: "{{ ansible_host }}"
 teku_announced_ipv6: "{{ ansible_default_ipv6.address if teku_ipv6_enabled and ansible_default_ipv6.address is defined else '' }}"
 teku_mev_boost_endpoint: "http://mev-boost:18550"
@@ -99,6 +100,13 @@ teku_container_validator_args:
   - --validators-keystore-locking-enabled=false
 teku_container_validator_volumes:
   - "{{ teku_validator_datadir }}:/validator-data"
+teku_container_validator_command: >-
+  {{
+    ["validator-client", "--beacon-node-api-endpoint=" + teku_beacon_endpoint ] +
+    teku_container_validator_args +
+    teku_container_command_metrics +
+    teku_container_command_extra_args
+  }}
 
 # Default image pull policy
 teku_container_pull: false
