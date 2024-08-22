@@ -1,3 +1,4 @@
+lighthouse_enabled: true
 lighthouse_user: lighthouse
 lighthouse_datadir: /data/lighthouse
 lighthouse_auth_jwt_path: /data/execution-auth.secret
