@@ -4,7 +4,8 @@ exclude_paths:
   - .github/
   - vendor/
   - roles/generate_kubernetes_config/files/ingress.config.yaml
-  - roles/k3s/files/
+  - roles/k3s/files/k3s-killall.sh
+  - roles/k3s/files/k3s-uninstall.sh
 
 skip_list:
   - galaxy[no-changelog]
