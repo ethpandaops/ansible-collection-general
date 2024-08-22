@@ -80,7 +80,8 @@
       {{
         ["validator-client"] +
         teku_container_validator_args +
-        teku_container_command_metrics
+        teku_container_command_metrics +
+        teku_container_command_extra_args
       }}
     user: "{{ teku_user_meta.uid }}"
     pull: "{{ teku_container_pull | bool }}"
