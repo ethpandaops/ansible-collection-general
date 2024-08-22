@@ -21,12 +21,12 @@ k3s_cleanup: false
 # Enable this if you also want to remove the persisten volumes created by the "local-path" storage class
 k3s_cleanup_localpath_persistent_volumes: false
 
+k3s_etcd_enabled: false
 
 k3s_etcd_snapshot_enabled: false
 k3s_etcd_snapshot_name: "" # Default: etcd-snapshot-<unix-timestamp>
 k3s_etcd_snapshot_schedule_cron: "0 /6 * * *" # Default (default: "0 */12 * * *")
 k3s_etcd_snapshot_retention: 5
-
 k3s_etcd_snapshot_bucket: k3s-etcd-snapshots
 k3s_etcd_snapshot_endpoint: localhost:9000
 k3s_etcd_snapshot_access_key: minio
