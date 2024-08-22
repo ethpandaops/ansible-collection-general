@@ -6,8 +6,8 @@
     group: root
     mode: "0755"
   loop:
-    - killall-k3s.sh
-    - uninstall-k3s.sh
+    - k3s-killall.sh
+    - k3s-uninstall.sh
 
 - name: Check k3s-agent systemd file
   ansible.builtin.stat:
@@ -36,10 +36,10 @@
   when: k3s_cleanup_systemd_server_meta.stat.exists
 
 - name: Run killall script
-  ansible.builtin.script: "/usr/local/bin/killall-k3s.sh"
+  ansible.builtin.script: "/usr/local/bin/k3s-killall.sh"
 
 - name: Run uninstall script
-  ansible.builtin.script: "/usr/local/bin/uninstall-k3s.sh"
+  ansible.builtin.script: "/usr/local/bin/k3s-uninstall.sh"
 
 - name: Remove binaries and directories
   ansible.builtin.file:
