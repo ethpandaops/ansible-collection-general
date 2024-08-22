@@ -20,7 +20,7 @@ lodestar_ports_metrics: 8008
 lodestar_ipv6_enabled: false
 
 lodestar_validator_enabled: false
-lodestar_validator_fee_recipient: "0xF29Ff96aaEa6C9A1fBa851f74737f3c069d4f1a9" # theprotocolguild.eth
+lodestar_validator_fee_recipient: "0x25941dC771bB64514Fc8abBce970307Fb9d477e9" # theprotocolguild.eth
 lodestar_validator_datadir: /data/lodestar-validator
 
 ################################################################################
