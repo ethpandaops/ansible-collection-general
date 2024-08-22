@@ -9,7 +9,7 @@ ExecStartPre=-/sbin/modprobe br_netfilter
 ExecStartPre=-/sbin/modprobe overlay
 ExecStart=/usr/local/bin/k3s server --data-dir {{ k3s_server_location }} \
 {{ "--cluster-init" if k3s_etcd_enabled else "" }} \
-{{ "--etcd-snapshot-schedule-cron " + k3s_etcd_snapshot_schedule_cron if k3s_etcd_snapshot_enabled else "" }} \
+{{ "--etcd-snapshot-schedule-cron '" + k3s_etcd_snapshot_schedule_cron + "'" if k3s_etcd_snapshot_enabled else "" }} \
 {{ k3s_server_extra_args | default("") }}
 
 KillMode=process
