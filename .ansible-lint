@@ -4,6 +4,7 @@ exclude_paths:
   - .github/
   - vendor/
   - roles/generate_kubernetes_config/files/ingress.config.yaml
+  - roles/k3s/files/
 
 skip_list:
   - galaxy[no-changelog]
