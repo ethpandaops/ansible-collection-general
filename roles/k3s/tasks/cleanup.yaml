@@ -37,11 +37,13 @@
 
 - name: Run killall script
   ansible.builtin.command: "/usr/local/bin/k3s-killall.sh"
-  ignore_errors: yes
+  failed_when: false
+  changed_when: false
 
 - name: Run uninstall script
   ansible.builtin.command: "/usr/local/bin/k3s-uninstall.sh"
-  ignore_errors: yes
+  failed_when: false
+  changed_when: false
 
 - name: Remove binaries and directories
   ansible.builtin.file:
@@ -51,8 +53,8 @@
     - /usr/local/bin/k3s
     - /usr/local/bin/kubectl
     - /usr/local/bin/crictl
-    - "/usr/local/bin/k3s-killall.sh"
-    - "/usr/local/bin/k3s-uninstall.sh"
+    - /usr/local/bin/k3s-killall.sh
+    - /usr/local/bin/k3s-uninstall.sh
     - /etc/rancher
     - "~/{{ ansible_user }}/.kube"
     - "{{ k3s_server_location }}/data"
@@ -67,5 +69,5 @@
     state: absent
   loop:
     - "{{ k3s_server_location }}/storage"
-    - "/opt/local-path-provisioner"
+    - /opt/local-path-provisioner
   when: k3s_cleanup_localpath_persistent_volumes
