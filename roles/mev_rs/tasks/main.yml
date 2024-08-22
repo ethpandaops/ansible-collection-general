@@ -1,0 +1,6 @@
+- name: Setup mev_rs
+  ansible.builtin.import_tasks: setup.yaml
+  when: not mev_rs_cleanup
+
+- name: Cleanup mev_rs
+  ansible.builtin.import_tasks: cleanup.yaml

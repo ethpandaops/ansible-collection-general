@@ -25,6 +25,8 @@ jobs:
           filters: |
             blockscout: roles/blockscout/**
             bootstrap: roles/bootstrap/**
+            mev_boost: roles/mev_boost/**
+            mev_rs: roles/mev_rs/**
 
   # Integration test using molecule
   job:

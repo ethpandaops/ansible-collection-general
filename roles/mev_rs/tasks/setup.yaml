@@ -1,0 +1,44 @@
+- name: Add mev_rs user
+  ansible.builtin.user:
+    name: "{{ mev_rs_user }}"
+  register: mev_rs_user_meta
+
+- name: Setup docker network
+  ansible.builtin.include_role:
+    name: ethpandaops.general.docker_network
+  vars:
+    docker_network_name: "{{ mev_rs_docker_network_name }}"
+
+- name: Create directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0750"
+    owner: "{{ mev_rs_user }}"
+    group: "{{ mev_rs_user }}"
+  loop:
+    - "{{ mev_rs_datadir }}"
+    - "{{ mev_rs_datadir }}/config"
+
+- name: Create mev-rs config file
+  ansible.builtin.copy:
+    content: "{{ mev_rs_config }}"
+    dest: "{{ mev_rs_datadir }}/config/config.toml"
+    owner: "{{ mev_rs_user }}"
+    group: "{{ mev_rs_user }}"
+    mode: '0640'
+
+- name: Run mev_rs container
+  community.docker.docker_container:
+    name: "{{ mev_rs_container_name }}"
+    image: "{{ mev_rs_container_image }}"
+    image_name_mismatch: recreate
+    state: started
+    restart_policy: always
+    stop_timeout: "{{ mev_rs_container_stop_timeout }}"
+    volumes: "{{ mev_rs_container_volumes }}"
+    env: "{{ mev_rs_container_env }}"
+    networks: "{{ mev_rs_container_networks }}"
+    ports: "{{ mev_rs_container_ports }}"
+    command: "{{ mev_rs_container_command + mev_rs_container_command_extra_args }} "
+    user: "{{ mev_rs_user_meta.uid }}"

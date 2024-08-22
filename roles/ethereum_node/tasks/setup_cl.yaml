@@ -16,7 +16,8 @@
     lighthouse_validator_enabled: "{{ ethereum_node_cl_validator_enabled }}"
     lighthouse_validator_container_networks: "{{ ethereum_node_docker_networks }}"
     lighthouse_validator_fee_recipient: "{{ ethereum_node_cl_validator_fee_recipient }}"
-    lighthouse_mev_boost_enabled: "{{ ethereum_node_mev_boost_enabled }}"
+    lighthouse_mev_boost_enabled: "{{ ethereum_node_external_builder_enabled }}"
+    lighthouse_mev_boost_endpoint: "{{ ethereum_node_external_builder_endpoint }}"
     lighthouse_checkpoint_sync_enabled: "{{ ethereum_node_cl_checkpoint_sync_enabled }}"
     lighthouse_ipv6_enabled: "{{ ethereum_node_ipv6_enabled }}"
 
@@ -36,7 +37,8 @@
     teku_validator_enabled: "{{ ethereum_node_cl_validator_enabled }}"
     teku_validator_container_networks: "{{ ethereum_node_docker_networks }}"
     teku_validator_fee_recipient: "{{ ethereum_node_cl_validator_fee_recipient }}"
-    teku_mev_boost_enabled: "{{ ethereum_node_mev_boost_enabled }}"
+    teku_mev_boost_enabled: "{{ ethereum_node_external_builder_enabled }}"
+    teku_mev_boost_endpoint: "{{ ethereum_node_external_builder_endpoint }}"
     teku_checkpoint_sync_enabled: "{{ ethereum_node_cl_checkpoint_sync_enabled }}"
     teku_ipv6_enabled: "{{ ethereum_node_ipv6_enabled }}"
 
@@ -57,7 +59,8 @@
     prysm_validator_enabled: "{{ ethereum_node_cl_validator_enabled }}"
     prysm_validator_container_networks: "{{ ethereum_node_docker_networks }}"
     prysm_validator_fee_recipient: "{{ ethereum_node_cl_validator_fee_recipient }}"
-    prysm_mev_boost_enabled: "{{ ethereum_node_mev_boost_enabled }}"
+    prysm_mev_boost_enabled: "{{ ethereum_node_external_builder_enabled }}"
+    prysm_mev_boost_endpoint: "{{ ethereum_node_external_builder_endpoint }}"
     prysm_checkpoint_sync_enabled: "{{ ethereum_node_cl_checkpoint_sync_enabled }}"
     prysm_ipv6_enabled: "{{ ethereum_node_ipv6_enabled }}"
 
@@ -78,7 +81,8 @@
     lodestar_validator_enabled: "{{ ethereum_node_cl_validator_enabled }}"
     lodestar_validator_container_networks: "{{ ethereum_node_docker_networks }}"
     lodestar_validator_fee_recipient: "{{ ethereum_node_cl_validator_fee_recipient }}"
-    lodestar_mev_boost_enabled: "{{ ethereum_node_mev_boost_enabled }}"
+    lodestar_mev_boost_enabled: "{{ ethereum_node_external_builder_enabled }}"
+    lodestar_mev_boost_endpoint: "{{ ethereum_node_external_builder_endpoint }}"
     lodestar_checkpoint_sync_enabled: "{{ ethereum_node_cl_checkpoint_sync_enabled }}"
     lodestar_ipv6_enabled: "{{ ethereum_node_ipv6_enabled }}"
 
@@ -98,7 +102,8 @@
     nimbus_validator_enabled: "{{ ethereum_node_cl_validator_enabled }}"
     nimbus_validator_container_networks: "{{ ethereum_node_docker_networks }}"
     nimbus_validator_fee_recipient: "{{ ethereum_node_cl_validator_fee_recipient }}"
-    nimbus_mev_boost_enabled: "{{ ethereum_node_mev_boost_enabled }}"
+    nimbus_mev_boost_enabled: "{{ ethereum_node_external_builder_enabled }}"
+    nimbus_mev_boost_endpoint: "{{ ethereum_node_external_builder_endpoint }}"
     nimbus_checkpoint_sync_enabled: "{{ ethereum_node_cl_checkpoint_sync_enabled }}"
     nimbus_ipv6_enabled: "{{ ethereum_node_ipv6_enabled }}"
 
@@ -118,6 +123,7 @@
     grandine_execution_engine_endpoint: "{{ ethereum_node_execution_engine_endpoint }}"
     grandine_validator_enabled: "{{ ethereum_node_cl_validator_enabled }}"
     grandine_validator_fee_recipient: "{{ ethereum_node_cl_validator_fee_recipient }}"
-    grandine_mev_boost_enabled: "{{ ethereum_node_mev_boost_enabled }}"
+    grandine_mev_boost_enabled: "{{ ethereum_node_external_builder_enabled }}"
+    grandine_mev_boost_endpoint: "{{ ethereum_node_external_builder_endpoint }}"
     grandine_checkpoint_sync_enabled: "{{ ethereum_node_cl_checkpoint_sync_enabled }}"
     grandine_ipv6_enabled: "{{ ethereum_node_ipv6_enabled }}"

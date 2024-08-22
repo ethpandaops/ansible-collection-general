@@ -11,12 +11,8 @@
   ansible.builtin.import_tasks: cleanup.yaml
   when: not ethereum_node_skip_cleanup
 
-- name: Setup mev_boost
-  ansible.builtin.include_role:
-    name: ethpandaops.general.mev_boost
-  vars:
-    mev_boost_container_networks: "{{ ethereum_node_docker_networks }}"
-  when: ethereum_node_mev_boost_enabled
+- name: Setup external block builder
+  ansible.builtin.import_tasks: addons/external_block_builder.yaml
 
 - name: Setup mev_mock_relay_builder
   ansible.builtin.include_role:

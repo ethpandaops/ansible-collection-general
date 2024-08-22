@@ -54,7 +54,10 @@ provisioner:
           - --ignore-weak-subjectivity-period-enabled
     host_vars:
       ethereum_node:
-        ethereum_node_cl: ${CONSENSUS_CLIENT:-lighthouse.yml}
-        ethereum_node_el: ${EXECUTION_CLIENT:-geth.yml}
+        ethereum_node_cl: ${CONSENSUS_CLIENT:-lighthouse}
+        ethereum_node_el: ${EXECUTION_CLIENT:-geth}
+        # Add additional vars here if you're manually testing a feature:
+        # ethereum_node_external_builder_enabled: true
+        # ethereum_node_external_builder_type: mev_boost
 verifier:
   name: ansible

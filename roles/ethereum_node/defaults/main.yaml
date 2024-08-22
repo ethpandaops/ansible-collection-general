@@ -46,8 +46,13 @@ ethereum_node_blobber_enabled: false
 ethereum_node_blobber_name: blobber
 ethereum_node_blobber_port: 20000
 
-# Mev boost
-ethereum_node_mev_boost_enabled: false
+# External block builder
+ethereum_node_external_builder_enabled: "{{ ethereum_node_mev_boost_enabled | default(false) }}"
+#                                           ^ Var used for backward compatability
+ethereum_node_external_builder_type: mev_boost # Valid options: mev_boost, mev_rs, custom
+ethereum_node_external_builder_container_name: external-block-builder
+ethereum_node_external_builder_server_port: 18550
+ethereum_node_external_builder_endpoint: "http://{{ ethereum_node_external_builder_container_name }}:{{ ethereum_node_external_builder_server_port }}"
 
 # Mev mock relay builder
 ethereum_node_mev_mock_relay_builder_enabled: false

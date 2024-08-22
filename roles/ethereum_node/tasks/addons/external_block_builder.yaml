@@ -1,0 +1,49 @@
+- name: Setup external block builder
+  when: ethereum_node_external_builder_enabled
+  block:
+    - name: Setup mev_boost
+      ansible.builtin.include_role:
+        name: ethpandaops.general.mev_boost
+      vars:
+        mev_boost_container_networks: "{{ ethereum_node_docker_networks }}"
+        mev_boost_container_name: "{{ ethereum_node_external_builder_container_name }}"
+        mev_boost_server_port: "{{ ethereum_node_external_builder_server_port }}"
+      when: ethereum_node_external_builder_type == "mev_boost"
+
+    - name: Setup mev_rs
+      ansible.builtin.include_role:
+        name: ethpandaops.general.mev_rs
+      vars:
+        mev_rs_container_networks: "{{ ethereum_node_docker_networks }}"
+        mev_rs_container_name: "{{ ethereum_node_external_builder_container_name }}"
+        mev_rs_server_port: "{{ ethereum_node_external_builder_server_port }}"
+      when: ethereum_node_external_builder_type == "mev_rs"
+
+    - name: Inform that the external block builder is enabled
+      ansible.builtin.debug:
+        msg: >-
+          External block builder '{{ ethereum_node_external_builder_type }}' is enabled.
+          The consensus layer nodes will use the following endpoint: '{{ ethereum_node_external_builder_endpoint }}'.
+
+- name: Cleanup external block builder
+  when: not ethereum_node_external_builder_enabled
+  block:
+    - name: Cleanup mev_boost
+      ansible.builtin.include_role:
+        name: ethpandaops.general.mev_boost
+      vars:
+        mev_boost_container_name: "{{ ethereum_node_external_builder_container_name }}"
+        mev_boost_cleanup: true
+      when: >-
+        ethereum_node_external_builder_type == "mev_boost" or
+        ethereum_node_external_builder_type == "custom"
+
+    - name: Cleanup mev_rs
+      ansible.builtin.include_role:
+        name: ethpandaops.general.mev_rs
+      vars:
+        mev_rs_container_name: "{{ ethereum_node_external_builder_container_name }}"
+        mev_rs_cleanup: true
+      when: >-
+        ethereum_node_external_builder_type == "mev_rs" or
+        ethereum_node_external_builder_type == "custom"
