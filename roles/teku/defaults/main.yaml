@@ -73,9 +73,9 @@ teku_container_command_v6: []
 
 teku_container_command: >-
   {{
-  teku_container_command_default +
-  teku_container_command_metrics +
-  (teku_container_command_v6 if teku_ipv6_enabled and ansible_default_ipv6.address is defined else [])
+    teku_container_command_default +
+    teku_container_command_metrics +
+    (teku_container_command_v6 if teku_ipv6_enabled and ansible_default_ipv6.address is defined else [])
   }}
 
 teku_container_command_extra_args:
@@ -102,7 +102,11 @@ teku_container_validator_volumes:
   - "{{ teku_validator_datadir }}:/validator-data"
 teku_container_validator_command: >-
   {{
-    ["validator-client", "--beacon-node-api-endpoint=" + teku_beacon_endpoint ] +
+    [
+      "validator-client",
+      "--beacon-node-api-endpoint=" + teku_beacon_endpoint,
+      "--data-path=/validator-data"
+    ] +
     teku_container_validator_args +
     teku_container_command_metrics +
     teku_container_command_extra_args

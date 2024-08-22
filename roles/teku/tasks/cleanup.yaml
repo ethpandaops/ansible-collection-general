@@ -8,4 +8,4 @@
   community.docker.docker_container:
     name: "{{ teku_container_name }}-validator"
     state: absent
-  when: teku_cleanup or (not teku_validator_enabled)
+  when: teku_cleanup or teku_enabled
