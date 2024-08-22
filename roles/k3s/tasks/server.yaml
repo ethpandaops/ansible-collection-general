@@ -60,7 +60,7 @@
 - name: Create backup file for etcd
   ansible.builtin.template:
     src: "k3s-etcd-backup.yaml.j2"
-    dest: /etc/rancher/k3s/config.yaml.d/etcd--backup.yaml
+    dest: "{{ k3s_server_location }}/config.yaml.d/etcd-backup.yaml"
     owner: root
     group: root
     mode: "0644"
