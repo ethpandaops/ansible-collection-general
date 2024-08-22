@@ -1,2 +1,0 @@
-roles/k3s/files/k3s-killall.sh shellcheck!skip
-roles/k3s/files/k3s-uninstall.sh shellcheck!skip
