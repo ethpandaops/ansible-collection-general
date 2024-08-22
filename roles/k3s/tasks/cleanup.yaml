@@ -51,6 +51,8 @@
     - /usr/local/bin/k3s
     - /usr/local/bin/kubectl
     - /usr/local/bin/crictl
+    - "/usr/local/bin/k3s-killall.sh"
+    - "/usr/local/bin/k3s-uninstall.sh"
     - /etc/rancher
     - "~/{{ ansible_user }}/.kube"
     - "{{ k3s_server_location }}/data"
