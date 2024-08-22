@@ -36,11 +36,11 @@
   when: k3s_cleanup_systemd_server_meta.stat.exists
 
 - name: Run killall script
-  ansible.builtin.shell: "sh /usr/local/bin/k3s-killall.sh"
+  ansible.builtin.command: "/usr/local/bin/k3s-killall.sh"
   ignore_errors: yes
 
 - name: Run uninstall script
-  ansible.builtin.shell: "sh /usr/local/bin/k3s-uninstall.sh"
+  ansible.builtin.command: "/usr/local/bin/k3s-uninstall.sh"
   ignore_errors: yes
 
 - name: Remove binaries and directories
