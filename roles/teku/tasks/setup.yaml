@@ -34,6 +34,7 @@
   when: teku_validator_enabled
 
 - name: Run teku container
+  when: teku_enabled
   community.docker.docker_container:
     name: "{{ teku_container_name }}"
     image: "{{ teku_container_image }}"
@@ -56,6 +57,30 @@
           teku_container_command_extra_args + teku_container_command_checkpoint_args,
           teku_container_command_extra_args
         ))
+      }}
+    user: "{{ teku_user_meta.uid }}"
+    pull: "{{ teku_container_pull | bool }}"
+    security_opts: "{{ teku_container_security_opts }}"
+
+- name: Run teku validator container
+  when: teku_validator_enabled and (not teku_enabled)
+  community.docker.docker_container:
+    name: "{{ teku_container_name }}-validator"
+    image: "{{ teku_container_image }}"
+    image_name_mismatch: recreate
+    state: started
+    restart_policy: always
+    stop_timeout: "{{ teku_container_stop_timeout }}"
+    ports: []
+    volumes: "{{ teku_container_validator_volumes }}"
+    env: "{{ teku_container_env }}"
+    networks: "{{ teku_container_networks }}"
+    entrypoint: "{{ teku_container_entrypoint | default(omit) }}"
+    command: >-
+      {{
+        ["validator-client"] +
+        teku_container_validator_args +
+        teku_container_command_metrics
       }}
     user: "{{ teku_user_meta.uid }}"
     pull: "{{ teku_container_pull | bool }}"

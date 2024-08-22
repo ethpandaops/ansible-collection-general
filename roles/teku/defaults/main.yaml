@@ -1,3 +1,4 @@
+teku_enabled: true
 teku_user: teku
 teku_datadir: /data/teku
 teku_auth_jwt_path: /data/execution-auth.secret
@@ -59,6 +60,8 @@ teku_container_command_default:
   - --rest-api-host-allowlist=*
   - --ee-endpoint={{ teku_execution_engine_endpoint }}
   - --ee-jwt-secret-file=/execution-auth.jwt
+
+teku_container_command_metrics:
   - --metrics-enabled=true
   - --metrics-interface=0.0.0.0
   - --metrics-port={{ teku_ports_metrics }}
@@ -68,7 +71,11 @@ teku_container_command_v6: []
 # - --p2p-advertised-ipv6={{ teku_announced_ipv6 }} # not supported yet
 
 teku_container_command: >-
-  {{ teku_container_command_default + (teku_container_command_v6 if teku_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
+  {{
+  teku_container_command_default +
+  teku_container_command_metrics +
+  (teku_container_command_v6 if teku_ipv6_enabled and ansible_default_ipv6.address is defined else [])
+  }}
 
 teku_container_command_extra_args:
   - --data-storage-mode=PRUNE

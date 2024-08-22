@@ -2,4 +2,10 @@
   community.docker.docker_container:
     name: "{{ teku_container_name }}"
     state: absent
-  when: teku_cleanup
+  when: teku_cleanup or (not teku_enabled)
+
+- name: Remove teku validator container
+  community.docker.docker_container:
+    name: "{{ teku_container_name }}-validator"
+    state: absent
+  when: teku_cleanup or (not teku_validator_enabled)
