@@ -64,4 +64,4 @@
   loop:
     - "{{ k3s_server_location }}/storage"
     - "/opt/local-path-provisioner"
-  when: k3s_cleanup_localpath_persisten_volumes
+  when: k3s_cleanup_localpath_persistent_volumes
