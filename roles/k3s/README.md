@@ -11,7 +11,7 @@ None
 Default variables are defined in [defaults/main.yaml](defaults/main.yaml)
 
 To clean up the installation you can use the `k3s_cleanup=true` variable.
-If you also want to remove the `local-path` provisioned volumes, you also need to set `k3s_cleanup_localpath_persisten_volumes=true`.
+If you also want to remove the `local-path` provisioned volumes, you also need to set `k3s_cleanup_localpath_persistent_volumes=true`.
 
 ## Dependencies
 
