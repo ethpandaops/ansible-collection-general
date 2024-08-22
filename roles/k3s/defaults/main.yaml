@@ -1,5 +1,5 @@
 ---
-k3s_version: v1.26.0+k3s1
+k3s_version: v1.28.0+k3s1
 k3s_node_type: agent # can be "agent" or "server"
 k3s_systemd_dir: /etc/systemd/system
 k3s_server_location: /var/lib/rancher/k3s
@@ -20,3 +20,19 @@ k3s_agent_extra_args: >-
 k3s_cleanup: false
 # Enable this if you also want to remove the persisten volumes created by the "local-path" storage class
 k3s_cleanup_localpath_persistent_volumes: false
+
+
+k3s_etcd_snapshot_enabled: false
+k3s_etcd_snapshot_name: "" # Default: etcd-snapshot-<unix-timestamp>
+k3s_etcd_snapshot_schedule_cron: "0 /6 * * *" # Default (default: "0 */12 * * *")
+k3s_etcd_snapshot_retention: 5
+
+k3s_etcd_snapshot_bucket: k3s-etcd-snapshots
+k3s_etcd_snapshot_endpoint: localhost:9000
+k3s_etcd_snapshot_access_key: minio
+k3s_etcd_snapshot_secret_key: minio123
+k3s_etcd_snapshot_skip_ssl_verify: true
+k3s_etcd_snapshot_region: us-east-1
+k3s_etcd_snapshot_folder: snapshots
+k3s_etcd_snapshot_insecure: true
+k3s_etcd_snapshot_timeout: 5m0s
