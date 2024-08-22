@@ -21,6 +21,7 @@ A collection of reusable ansible components used by the EthPandaOps team.
 - [goomy](roles/goomy)
 - [mev_boost](roles/mev_boost)
 - [mev_relay](roles/mev_relay)
+- [mev_rs](roles/mev_rs)
 - [powfaucet](roles/powfaucet)
 - [snapshotter](roles/snapshotter)
 - [xatu_sentry](roles/xatu_sentry)
