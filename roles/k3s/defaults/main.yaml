@@ -19,4 +19,4 @@ k3s_agent_extra_args: >-
 # Enable this if you want to cleanup and uninstall the k3s service on the host
 k3s_cleanup: false
 # Enable this if you also want to remove the persisten volumes created by the "local-path" storage class
-k3s_cleanup_localpath_persisten_volumes: false
+k3s_cleanup_localpath_persistent_volumes: false
