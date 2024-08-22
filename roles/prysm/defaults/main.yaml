@@ -1,3 +1,4 @@
+prysm_enabled: true
 prysm_user: prysm
 prysm_datadir: /data/prysm
 prysm_auth_jwt_path: /data/execution-auth.secret
