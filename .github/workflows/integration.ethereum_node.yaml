@@ -12,8 +12,7 @@ defaults:
 jobs:
   vars:
     runs-on: ubuntu-latest
-    steps:
-       - run: echo "null"
+    steps: []
     outputs:
       ALL_CONSENSUS_CLIENTS: "['teku', 'prysm', 'lighthouse', 'nimbus', 'lodestar', 'grandine']"
       ALL_EXECUTION_CLIENTS: "['geth', 'nethermind', 'erigon', 'besu', 'ethereumjs', 'reth']"
