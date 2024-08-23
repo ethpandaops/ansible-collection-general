@@ -86,7 +86,7 @@ jobs:
       ${{
         needs.changes.outputs.ethereum_node == 'false' &&
         needs.changes.outputs.dependencies == 'false' &&
-        needs.changes_consensus.outputs.clients == 'true'
+        needs.changes_consensus.outputs.clients != '[]'
       }}
     concurrency:
       group: >-
