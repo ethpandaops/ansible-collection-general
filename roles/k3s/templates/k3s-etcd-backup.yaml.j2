@@ -1,3 +1,5 @@
+cluster-init: {{ k3s_etcd_enabled }}
+etcd-snapshot-schedule-cron: {{ k3s_etcd_snapshot_schedule_cron }}
 etcd-snapshot-retention: {{ k3s_etcd_snapshot_retention }}
 etcd-s3: {{ k3s_etcd_snapshot_enabled }}
 etcd-s3-endpoint: {{ k3s_etcd_snapshot_endpoint }}
