@@ -24,7 +24,7 @@ k3s_cleanup_localpath_persistent_volumes: false
 k3s_etcd_enabled: false
 
 k3s_etcd_snapshot_enabled: false
-k3s_etcd_snapshot_schedule_cron: "0 /12 * * *"
+k3s_etcd_snapshot_schedule_cron: "0 */12 * * *"
 k3s_etcd_snapshot_retention: 5
 k3s_etcd_snapshot_bucket: k3s-etcd-snapshots
 k3s_etcd_snapshot_endpoint: localhost:9000
