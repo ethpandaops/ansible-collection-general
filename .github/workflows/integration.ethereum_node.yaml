@@ -10,24 +10,15 @@ defaults:
     working-directory: ansible_collections/ethpandaops/general
 
 jobs:
-  #global_vars:
-  #  runs-on: ubuntu-latest
-  #  steps: []
-  #    - run: echo "Setting vars to be used in other jobs"
-  #      shell: sh
-  #  outputs:
-  #    ALL_CONSENSUS_CLIENTS: "['teku', 'prysm', 'lighthouse', 'nimbus', 'lodestar', 'grandine']"
-  #    ALL_EXECUTION_CLIENTS: "['geth', 'nethermind', 'erigon', 'besu', 'ethereumjs', 'reth']"
-#
-  # Job for change detection
   changes:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: read
     outputs:
-      ethereum_node: ${{ steps.global.outputs.ethereum_node }}
       dependencies: ${{ steps.global.outputs.dependencies }}
+      ethereum_node: ${{ steps.global.outputs.ethereum_node }}
       consensus_clients: ${{ steps.consensus_clients.outputs.changes }}
+      execution_clients: ${{ steps.execution_clients.outputs.changes }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -46,6 +37,16 @@ jobs:
             nimbus: roles/nimbus/**
             prysm: roles/prysm/**
             teku: roles/teku/**
+      - uses: dorny/paths-filter@v3
+        id: execution_clients
+        with:
+          filters: |
+            geth: roles/geth/**
+            nethermind: roles/nethermind/**
+            erigon: roles/erigon/**
+            besu: roles/besu/**
+            ethereumjs: roles/ethereumjs/**
+            reth: roles/reth/**
 
   vars:
     runs-on: ubuntu-latest
@@ -55,19 +56,38 @@ jobs:
         working-directory: .
         id: vars
         run: |
-          echo "ALL_CONSENSUS_CLIENTS=['teku', 'prysm', 'lighthouse', 'nimbus', 'lodestar', 'grandine']" >> $GITHUB_ENV
-          echo "ALL_EXECUTION_CLIENTS=['geth', 'nethermind', 'erigon', 'besu', 'ethereumjs', 'reth']" >> $GITHUB_ENV
+          ALL_CONSENSUS_CLIENTS="['teku', 'prysm', 'lighthouse', 'nimbus', 'lodestar', 'grandine']";
+          ALL_EXECUTION_CLIENTS="['geth', 'nethermind', 'erigon', 'besu', 'ethereumjs', 'reth']";
+
+          CONSENSUS_CLIENTS="[]";
+          EXECUTION_CLIENTS="[]";
+
+          if [[ "${{ needs.changes.outputs.ethereum_node }}" == "true" ]] || \
+             [[ "${{ needs.changes.outputs.dependencies }}" == "true" ]] || \
+             [[ "${{ needs.changes.outputs.consensus_clients }}" != "[]" && "${{ needs.changes.outputs.execution_clients }}" != "[]" ]]; then
+            CONSENSUS_CLIENTS=$ALL_CONSENSUS_CLIENTS;
+            EXECUTION_CLIENTS=$ALL_EXECUTION_CLIENTS;
+          elif [[ "${{ needs.changes.outputs.consensus_clients }}" != "[]" ]]; then
+            CONSENSUS_CLIENTS="${{ needs.changes.outputs.consensus_clients }}";
+            EXECUTION_CLIENTS=$ALL_EXECUTION_CLIENTS;
+          elif [[ "${{ needs.changes.outputs.execution_clients }}" != "[]" ]]; then
+            EXECUTION_CLIENTS="${{ needs.changes.outputs.execution_clients }}";
+            CONSENSUS_CLIENTS=$ALL_CONSENSUS_CLIENTS;
+          fi
+
+          echo "CONSENSUS_CLIENTS=$CONSENSUS_CLIENTS" >> $GITHUB_ENV
+          echo "EXECUTION_CLIENTS=$EXECUTION_CLIENTS" >> $GITHUB_ENV
+
     outputs:
-      ALL_CONSENSUS_CLIENTS: ${{ env.ALL_CONSENSUS_CLIENTS }}
-      ALL_EXECUTION_CLIENTS: ${{ env.ALL_EXECUTION_CLIENTS }}
+      CONSENSUS_CLIENTS: ${{ env.CONSENSUS_CLIENTS }}
+      EXECUTION_CLIENTS: ${{ env.EXECUTION_CLIENTS }}
 
-  # Integration test using molecule ( all pairs )
-  all-clients:
+  test:
     needs: [changes,vars]
     if: >-
       ${{
-        needs.changes.outputs.ethereum_node == 'true' ||
-        needs.changes.outputs.dependencies == 'true'
+        needs.vars.outputs.EXECUTION_CLIENTS != '[]' &&
+        needs.vars.outputs.CONSENSUS_CLIENTS != '[]'
       }}
     concurrency:
       group: >-
@@ -76,42 +96,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        consensus: ${{ fromJSON(needs.vars.outputs.ALL_CONSENSUS_CLIENTS) }}
-        execution: ${{ fromJSON(needs.vars.outputs.ALL_EXECUTION_CLIENTS) }}
-    runs-on: self-hosted-ghr-size-s-x64
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          path: ansible_collections/ethpandaops/general
-
-      - uses: ./ansible_collections/ethpandaops/general/.github/actions/setup
-
-      - name: Run molecule
-        working-directory: ansible_collections/ethpandaops/general/roles/ethereum_node
-        run: molecule test
-        env:
-          PY_COLORS: '1'
-          EXECUTION_CLIENT: ${{ matrix.execution }}
-          CONSENSUS_CLIENT: ${{ matrix.consensus }}
-
-  # Integration test using molecule ( consensus layer )
-  consensus-clients:
-    needs: [changes,vars]
-    if: >-
-      ${{
-        needs.changes.outputs.ethereum_node == 'false' &&
-        needs.changes.outputs.dependencies == 'false' &&
-        needs.changes.outputs.consensus_clients != '[]'
-      }}
-    concurrency:
-      group: >-
-        ${{ github.head_ref }}-ethereum-node-${{ matrix.consensus }}-${{ matrix.execution }}
-      cancel-in-progress: true
-    strategy:
-      fail-fast: false
-      matrix:
-        consensus: ${{ fromJSON(needs.changes.outputs.consensus_clients) }}
-        execution: ${{ fromJSON(needs.vars.outputs.ALL_EXECUTION_CLIENTS) }}
+        consensus: ${{ fromJSON(needs.vars.outputs.CONSENSUS_CLIENTS) }}
+        execution: ${{ fromJSON(needs.vars.outputs.EXECUTION_CLIENTS) }}
     runs-on: self-hosted-ghr-size-s-x64
     steps:
       - uses: actions/checkout@v4
