@@ -1,7 +1,9 @@
+nimbus_enabled: true
 nimbus_user: nimbus
 nimbus_datadir: /data/nimbus
 nimbus_auth_jwt_path: /data/execution-auth.secret
 nimbus_execution_engine_endpoint: http://geth:8551
+nimbus_beacon_endpoint: "http://{{ nimbus_container_name }}:{{ nimbus_ports_http_beacon }}"
 nimbus_announced_ip: "{{ ansible_host }}"
 nimbus_announced_ipv6: "{{ ansible_default_ipv6.address if nimbus_ipv6_enabled and ansible_default_ipv6.address is defined else '' }}"
 nimbus_mev_boost_endpoint: "http://mev-boost:18550"
@@ -76,6 +78,8 @@ nimbus_container_command_default:
   - --rest-allow-origin=*
   - --web3-url={{ nimbus_execution_engine_endpoint }}
   - --jwt-secret=/execution-auth.jwt
+
+nimbus_container_command_metrics:
   - --metrics
   - --metrics-port={{ nimbus_ports_metrics }}
   - --metrics-address=0.0.0.0
@@ -84,7 +88,11 @@ nimbus_container_command_v6: []
   # - --nat=extip:{{ nimbus_announced_ipv6 }} # not supported yet
 
 nimbus_container_command: >-
-  {{ nimbus_container_command_default + (nimbus_container_command_v6 if nimbus_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
+  {{
+    nimbus_container_command_default +
+    nimbus_container_command_metrics +
+    (nimbus_container_command_v6 if nimbus_ipv6_enabled and ansible_default_ipv6.address is defined else [])
+  }}
 
 nimbus_container_command_extra_args: []
   # - --graffiti=hello-world
@@ -94,12 +102,23 @@ nimbus_container_command_extra_args: []
 ## Validator specific configuration
 ##
 ################################################################################
-nimbus_container_validator_args:
+nimbus_validator_container_image: statusim/nimbus-validator-client:amd64-latest
+nimbus_validator_container_name: "{{ nimbus_container_name }}-validator"
+nimbus_validator_container_args:
   - --validators-dir=/validator-data/keys
   - --secrets-dir=/validator-data/secrets
   - --suggested-fee-recipient={{ nimbus_validator_fee_recipient }}
-nimbus_container_validator_volumes:
+nimbus_validator_container_volumes:
   - "{{ nimbus_validator_datadir }}:/validator-data"
+nimbus_validator_container_command: >-
+  {{
+    [
+      "--beacon-node=" + nimbus_beacon_endpoint
+    ] +
+    nimbus_validator_container_args +
+    nimbus_container_command_metrics +
+    nimbus_container_command_extra_args
+  }}
 
 # Default image pull policy
 nimbus_container_pull: false
@@ -113,5 +132,3 @@ nimbus_mev_boost_enabled: false
 nimbus_mev_boost_beacon_command:
   - --payload-builder=true
   - --payload-builder-url={{ nimbus_mev_boost_endpoint }}
-
-nimbus_mev_boost_validator_command: []
