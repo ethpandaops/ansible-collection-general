@@ -30,8 +30,8 @@ k3s_etcd_snapshot_bucket: k3s-etcd-snapshots
 k3s_etcd_snapshot_endpoint: localhost:9000
 k3s_etcd_snapshot_access_key: minio
 k3s_etcd_snapshot_secret_key: minio123
-k3s_etcd_snapshot_skip_ssl_verify: true
+k3s_etcd_snapshot_skip_ssl_verify: false
 k3s_etcd_snapshot_region: us-east-1
 k3s_etcd_snapshot_folder: snapshots
-k3s_etcd_snapshot_insecure: true
+k3s_etcd_snapshot_insecure: false
 k3s_etcd_snapshot_timeout: 5m0s
