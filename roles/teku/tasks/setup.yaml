@@ -66,7 +66,7 @@
   when: teku_validator_enabled and (not teku_enabled)
   community.docker.docker_container:
     name: "{{ teku_container_name }}-validator"
-    image: "{{ teku_container_image }}"
+    image: "{{ teku_validator_container_image }}"
     image_name_mismatch: recreate
     state: started
     restart_policy: always
