@@ -10,7 +10,7 @@ defaults:
     working-directory: ansible_collections/ethpandaops/general
 
 jobs:
-  # Job for change detection
+  # Job for change detection ( ethereum_node, dependencies )
   changes:
     runs-on: ubuntu-latest
     permissions:
@@ -26,9 +26,28 @@ jobs:
           filters: |
             ethereum_node: roles/ethereum_node/**
             dependencies: requirements.*
+  # Job for change detection ( consensus layer clients )
+  changes_consensus:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      clients: ${{ steps.filter.outputs.changes }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            lighthouse: roles/lighthouse/**
+            lodestar: roles/lodestar/**
+            nimbus: roles/nimbus/**
+            prysm: roles/prysm/**
+            teku: roles/teku/**
 
-  # Integration test using molecule
-  job:
+
+  # Integration test using molecule ( all pairs )
+  all-clients:
     needs: changes
     if: >-
       ${{
@@ -43,6 +62,40 @@ jobs:
       fail-fast: false
       matrix:
         consensus: [teku, prysm, lighthouse, nimbus, lodestar, grandine]
+        execution: [geth, nethermind, erigon, besu, ethereumjs, reth]
+    runs-on: self-hosted-ghr-size-s-x64
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: ansible_collections/ethpandaops/general
+
+      - uses: ./ansible_collections/ethpandaops/general/.github/actions/setup
+
+      - name: Run molecule
+        working-directory: ansible_collections/ethpandaops/general/roles/ethereum_node
+        run: molecule test
+        env:
+          PY_COLORS: '1'
+          EXECUTION_CLIENT: ${{ matrix.execution }}
+          CONSENSUS_CLIENT: ${{ matrix.consensus }}
+
+  # Integration test using molecule ( consensus layer )
+  consensus-clients:
+    needs: changes
+    if: >-
+      ${{
+        needs.changes.outputs.ethereum_node == 'false' &&
+        needs.changes.outputs.dependencies == 'false' &&
+        needs.changes_consensus.outputs.clients == 'true'
+      }}
+    concurrency:
+      group: >-
+        ${{ github.head_ref }}-ethereum-node-${{ matrix.consensus }}-${{ matrix.execution }}
+      cancel-in-progress: true
+    strategy:
+      fail-fast: false
+      matrix:
+        consensus: ${{ fromJSON(needs.changes_consensus.outputs.clients) }}
         execution: [geth, nethermind, erigon, besu, ethereumjs, reth]
     runs-on: self-hosted-ghr-size-s-x64
     steps:
