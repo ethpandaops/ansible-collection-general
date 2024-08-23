@@ -95,6 +95,7 @@ teku_container_command_checkpoint_args:
 ##
 ################################################################################
 teku_validator_container_image: "{{ teku_container_image }}"
+teku_validator_container_name: "{{ teku_container_name }}-validator"
 teku_validator_container_args:
   - --validator-keys=/validator-data/keys:/validator-data/secrets
   - --validators-proposer-default-fee-recipient={{ teku_validator_fee_recipient }}
