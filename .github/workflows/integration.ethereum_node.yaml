@@ -70,11 +70,11 @@ jobs:
             CONSENSUS_CLIENTS=$ALL_CONSENSUS_CLIENTS;
             EXECUTION_CLIENTS=$ALL_EXECUTION_CLIENTS;
           elif [[ "${{ needs.changes.outputs.consensus_clients }}" != "[]" ]]; then
-            CONSENSUS_CLIENTS="${{ needs.changes.outputs.consensus_clients }}";
+            CONSENSUS_CLIENTS="${{ toJSON(needs.changes.outputs.consensus_clients) }}";
             EXECUTION_CLIENTS=$ALL_EXECUTION_CLIENTS;
             echo "Consensus clients have changed $CONSENSUS_CLIENTS";
           elif [[ "${{ needs.changes.outputs.execution_clients }}" != "[]" ]]; then
-            EXECUTION_CLIENTS="${{ needs.changes.outputs.execution_clients }}";
+            EXECUTION_CLIENTS="${{ toJSON(needs.changes.outputs.execution_clients) }}";
             CONSENSUS_CLIENTS=$ALL_CONSENSUS_CLIENTS;
             echo "Execution clients have changed $EXECUTION_CLIENTS";
           else
@@ -83,8 +83,8 @@ jobs:
 
           echo "=========================================";
           echo "The following matrix will be executed:";
-          echo "CONSENSUS_CLIENTS: $CONSENSUS_CLIENTS";
-          echo "EXECUTION_CLIENTS: $EXECUTION_CLIENTS";
+          echo "CONSENSUS_CLIENTS=$CONSENSUS_CLIENTS";
+          echo "EXECUTION_CLIENTS=$EXECUTION_CLIENTS";
 
           echo "CONSENSUS_CLIENTS=$CONSENSUS_CLIENTS" >> $GITHUB_ENV
           echo "EXECUTION_CLIENTS=$EXECUTION_CLIENTS" >> $GITHUB_ENV
