@@ -94,7 +94,7 @@ jobs:
       EXECUTION_CLIENTS: ${{ env.EXECUTION_CLIENTS }}
 
   test:
-    needs: [changes,vars]
+    needs: [changes, vars]
     if: >-
       ${{
         needs.vars.outputs.EXECUTION_CLIENTS != '[]' &&
