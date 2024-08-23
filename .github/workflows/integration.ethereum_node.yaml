@@ -52,8 +52,8 @@ jobs:
     needs: changes
     steps:
       - name: Set variables
+        working-directory: .
         id: vars
-        shell: sh
         run: |
           echo "ALL_CONSENSUS_CLIENTS=['teku', 'prysm', 'lighthouse', 'nimbus', 'lodestar', 'grandine']" >> $GITHUB_ENV
           echo "ALL_EXECUTION_CLIENTS=['geth', 'nethermind', 'erigon', 'besu', 'ethereumjs', 'reth']" >> $GITHUB_ENV
