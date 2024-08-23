@@ -5,42 +5,38 @@ on:
     branches:
       - master
 
-env:
-  ALL_CONSENSUS_CLIENTS: "['teku', 'prysm', 'lighthouse', 'nimbus', 'lodestar', 'grandine']"
-  ALL_EXECUTION_CLIENTS: "['geth', 'nethermind', 'erigon', 'besu', 'ethereumjs', 'reth']"
-
 defaults:
   run:
     working-directory: ansible_collections/ethpandaops/general
 
 jobs:
-  # Job for change detection ( ethereum_node, dependencies )
+  vars:
+    runs-on: ubuntu-latest
+    steps:
+       - run: echo "null"
+    outputs:
+      ALL_CONSENSUS_CLIENTS: "['teku', 'prysm', 'lighthouse', 'nimbus', 'lodestar', 'grandine']"
+      ALL_EXECUTION_CLIENTS: "['geth', 'nethermind', 'erigon', 'besu', 'ethereumjs', 'reth']"
+
+  # Job for change detection
   changes:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: read
     outputs:
-      ethereum_node: ${{ steps.filter.outputs.ethereum_node }}
-      dependencies: ${{ steps.filter.outputs.dependencies }}
+      ethereum_node: ${{ steps.global.outputs.ethereum_node }}
+      dependencies: ${{ steps.global.outputs.dependencies }}
+      consensus_clients: ${{ steps.consensus_clients.outputs.changes }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
-        id: filter
+        id: global
         with:
           filters: |
             ethereum_node: roles/ethereum_node/**
             dependencies: requirements.*
-  # Job for change detection ( consensus layer clients )
-  changes_consensus:
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: read
-    outputs:
-      clients: ${{ steps.filter.outputs.changes }}
-    steps:
-      - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
-        id: filter
+        id: consensus_clients
         with:
           filters: |
             grandine: roles/grandine/**
@@ -49,7 +45,6 @@ jobs:
             nimbus: roles/nimbus/**
             prysm: roles/prysm/**
             teku: roles/teku/**
-
 
   # Integration test using molecule ( all pairs )
   all-clients:
@@ -66,8 +61,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        consensus: ${{ fromJSON(env.ALL_CONSENSUS_CLIENTS) }}
-        execution: ${{ fromJSON(env.ALL_EXECUTION_CLIENTS) }}
+        consensus: ${{ fromJSON(needs.vars.outputs.ALL_CONSENSUS_CLIENTS) }}
+        execution: ${{ fromJSON(needs.vars.outputs.ALL_EXECUTION_CLIENTS) }}
     runs-on: self-hosted-ghr-size-s-x64
     steps:
       - uses: actions/checkout@v4
@@ -91,7 +86,7 @@ jobs:
       ${{
         needs.changes.outputs.ethereum_node == 'false' &&
         needs.changes.outputs.dependencies == 'false' &&
-        needs.changes_consensus.outputs.clients != '[]'
+        needs.changes.outputs.consensus_clients != '[]'
       }}
     concurrency:
       group: >-
@@ -100,8 +95,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        consensus: ${{ fromJSON(needs.changes_consensus.outputs.clients) }}
-        execution: ${{ fromJSON(env.ALL_EXECUTION_CLIENTS) }}
+        consensus: ${{ fromJSON(needs.changes.outputs.consensus_clients) }}
+        execution: ${{ fromJSON(needs.vars.outputs.ALL_EXECUTION_CLIENTS) }}
     runs-on: self-hosted-ghr-size-s-x64
     steps:
       - uses: actions/checkout@v4
