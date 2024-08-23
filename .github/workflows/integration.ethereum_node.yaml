@@ -10,15 +10,15 @@ defaults:
     working-directory: ansible_collections/ethpandaops/general
 
 jobs:
-  global_vars:
-    runs-on: ubuntu-latest
-    steps: []
-      - run: echo "Setting vars to be used in other jobs"
-        shell: sh
-    outputs:
-      ALL_CONSENSUS_CLIENTS: "['teku', 'prysm', 'lighthouse', 'nimbus', 'lodestar', 'grandine']"
-      ALL_EXECUTION_CLIENTS: "['geth', 'nethermind', 'erigon', 'besu', 'ethereumjs', 'reth']"
-
+  #global_vars:
+  #  runs-on: ubuntu-latest
+  #  steps: []
+  #    - run: echo "Setting vars to be used in other jobs"
+  #      shell: sh
+  #  outputs:
+  #    ALL_CONSENSUS_CLIENTS: "['teku', 'prysm', 'lighthouse', 'nimbus', 'lodestar', 'grandine']"
+  #    ALL_EXECUTION_CLIENTS: "['geth', 'nethermind', 'erigon', 'besu', 'ethereumjs', 'reth']"
+#
   # Job for change detection
   changes:
     needs: global_vars
@@ -48,9 +48,22 @@ jobs:
             prysm: roles/prysm/**
             teku: roles/teku/**
 
+  vars:
+    runs-on: ubuntu-latest
+    needs: changes
+    steps:
+      - name: Set variables
+        id: vars
+        run: |
+          echo "ALL_CONSENSUS_CLIENTS=['teku', 'prysm', 'lighthouse', 'nimbus', 'lodestar', 'grandine']" >> $GITHUB_ENV
+          echo "ALL_EXECUTION_CLIENTS=['geth', 'nethermind', 'erigon', 'besu', 'ethereumjs', 'reth']" >> $GITHUB_ENV
+    outputs:
+      ALL_CONSENSUS_CLIENTS: ${{ env.ALL_CONSENSUS_CLIENTS }}
+      ALL_EXECUTION_CLIENTS: ${{ env.ALL_EXECUTION_CLIENTS }}
+
   # Integration test using molecule ( all pairs )
   all-clients:
-    needs: changes
+    needs: [changes,vars]
     if: >-
       ${{
         needs.changes.outputs.ethereum_node == 'true' ||
@@ -63,8 +76,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        consensus: ${{ fromJSON(needs.global_vars.outputs.ALL_CONSENSUS_CLIENTS) }}
-        execution: ${{ fromJSON(needs.global_vars.outputs.ALL_EXECUTION_CLIENTS) }}
+        consensus: ${{ fromJSON(needs.vars.outputs.ALL_CONSENSUS_CLIENTS) }}
+        execution: ${{ fromJSON(needs.vars.outputs.ALL_EXECUTION_CLIENTS) }}
     runs-on: self-hosted-ghr-size-s-x64
     steps:
       - uses: actions/checkout@v4
@@ -98,7 +111,7 @@ jobs:
       fail-fast: false
       matrix:
         consensus: ${{ fromJSON(needs.changes.outputs.consensus_clients) }}
-        execution: ${{ fromJSON(needs.global_vars.outputs.ALL_EXECUTION_CLIENTS) }}
+        execution: ${{ fromJSON(needs.vars.outputs.ALL_EXECUTION_CLIENTS) }}
     runs-on: self-hosted-ghr-size-s-x64
     steps:
       - uses: actions/checkout@v4
