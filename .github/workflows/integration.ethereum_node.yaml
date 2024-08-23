@@ -5,6 +5,10 @@ on:
     branches:
       - master
 
+env:
+  ALL_CONSENSUS_CLIENTS: "['teku', 'prysm', 'lighthouse', 'nimbus', 'lodestar', 'grandine']"
+  ALL_EXECUTION_CLIENTS: "['geth', 'nethermind', 'erigon', 'besu', 'ethereumjs', 'reth']"
+
 defaults:
   run:
     working-directory: ansible_collections/ethpandaops/general
@@ -39,6 +43,7 @@ jobs:
         id: filter
         with:
           filters: |
+            grandine: roles/grandine/**
             lighthouse: roles/lighthouse/**
             lodestar: roles/lodestar/**
             nimbus: roles/nimbus/**
@@ -61,8 +66,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        consensus: [teku, prysm, lighthouse, nimbus, lodestar, grandine]
-        execution: [geth, nethermind, erigon, besu, ethereumjs, reth]
+        consensus: ${{ fromJSON(env.ALL_CONSENSUS_CLIENTS) }}
+        execution: ${{ fromJSON(env.ALL_EXECUTION_CLIENTS) }}
     runs-on: self-hosted-ghr-size-s-x64
     steps:
       - uses: actions/checkout@v4
@@ -96,7 +101,7 @@ jobs:
       fail-fast: false
       matrix:
         consensus: ${{ fromJSON(needs.changes_consensus.outputs.clients) }}
-        execution: [geth, nethermind, erigon, besu, ethereumjs, reth]
+        execution: ${{ fromJSON(env.ALL_EXECUTION_CLIENTS) }}
     runs-on: self-hosted-ghr-size-s-x64
     steps:
       - uses: actions/checkout@v4
