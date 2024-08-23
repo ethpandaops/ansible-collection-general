@@ -21,7 +21,6 @@ jobs:
 #
   # Job for change detection
   changes:
-    needs: global_vars
     runs-on: ubuntu-latest
     permissions:
       pull-requests: read
