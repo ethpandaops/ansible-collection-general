@@ -13,6 +13,8 @@ jobs:
   vars:
     runs-on: ubuntu-latest
     steps: []
+      - run: echo "Setting vars to be used in other jobs"
+        shell: sh
     outputs:
       ALL_CONSENSUS_CLIENTS: "['teku', 'prysm', 'lighthouse', 'nimbus', 'lodestar', 'grandine']"
       ALL_EXECUTION_CLIENTS: "['geth', 'nethermind', 'erigon', 'besu', 'ethereumjs', 'reth']"
