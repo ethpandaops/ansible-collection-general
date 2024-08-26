@@ -34,7 +34,7 @@
   when: nimbus_validator_enabled
 
 - name: Checkpoint sync nimbus node
-  when: nimbus_checkpoint_sync_enabled
+  when: nimbus_enabled and nimbus_checkpoint_sync_enabled
   community.docker.docker_container:
     name: "{{ nimbus_checkpoint_container_name }}"
     image: "{{ nimbus_container_image }}"
@@ -52,6 +52,7 @@
     security_opts: "{{ nimbus_container_security_opts }}"
 
 - name: Run nimbus container
+  when: nimbus_enabled
   community.docker.docker_container:
     name: "{{ nimbus_container_name }}"
     image: "{{ nimbus_container_image }}"
@@ -63,7 +64,7 @@
     volumes: >-
       {{
         nimbus_validator_enabled | ternary(
-          nimbus_container_volumes + nimbus_container_validator_volumes,
+          nimbus_container_volumes + nimbus_validator_container_volumes,
           nimbus_container_volumes
         )
       }}
@@ -73,11 +74,30 @@
     command: >-
       {{
         nimbus_validator_enabled | ternary(
-          nimbus_container_command + nimbus_container_validator_args + nimbus_container_command_extra_args +
+          nimbus_container_command + nimbus_validator_container_args + nimbus_container_command_extra_args +
           (nimbus_mev_boost_enabled | ternary(nimbus_mev_boost_beacon_command, [])),
           nimbus_container_command + nimbus_container_command_extra_args,
         )
       }}
+    user: "{{ nimbus_user_meta.uid }}"
+    pull: "{{ nimbus_container_pull | bool }}"
+    security_opts: "{{ nimbus_container_security_opts }}"
+
+- name: Run nimbus validator container
+  when: nimbus_validator_enabled and (not nimbus_enabled)
+  community.docker.docker_container:
+    name: "{{ nimbus_validator_container_name }}"
+    image: "{{ nimbus_validator_container_image }}"
+    image_name_mismatch: recreate
+    state: started
+    restart_policy: always
+    stop_timeout: "{{ nimbus_container_stop_timeout }}"
+    ports: []
+    volumes: "{{ nimbus_validator_container_volumes }}"
+    env: "{{ nimbus_container_env }}"
+    networks: "{{ nimbus_container_networks }}"
+    entrypoint: "{{ nimbus_container_entrypoint | default(omit) }}"
+    command: "{{ nimbus_validator_container_command }}"
     user: "{{ nimbus_user_meta.uid }}"
     pull: "{{ nimbus_container_pull | bool }}"
     security_opts: "{{ nimbus_container_security_opts }}"

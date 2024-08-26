@@ -1,3 +1,4 @@
+lodestar_enabled: true
 lodestar_user: lodestar
 lodestar_datadir: /data/lodestar
 lodestar_auth_jwt_path: /data/execution-auth.secret

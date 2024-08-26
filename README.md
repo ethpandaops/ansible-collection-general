@@ -36,8 +36,10 @@ A collection of reusable ansible components used by the EthPandaOps team.
 - [ethereumjs](roles/ethereumjs)
 - [geth](roles/geth)
 - [nethermind](roles/nethermind)
+- [reth](roles/reth)
 
 ### Ethereum consensus clients
+- [grandine](roles/grandine)
 - [lighthouse](roles/lighthouse)
 - [lodestar](roles/lodestar)
 - [nimbus](roles/nimbus)

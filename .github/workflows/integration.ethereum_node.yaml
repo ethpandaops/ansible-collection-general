@@ -10,30 +10,95 @@ defaults:
     working-directory: ansible_collections/ethpandaops/general
 
 jobs:
-  # Job for change detection
   changes:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: read
     outputs:
-      ethereum_node: ${{ steps.filter.outputs.ethereum_node }}
-      dependencies: ${{ steps.filter.outputs.dependencies }}
+      dependencies: ${{ steps.global.outputs.dependencies }}
+      ethereum_node: ${{ steps.global.outputs.ethereum_node }}
+      consensus_clients: ${{ steps.consensus_clients.outputs.changes }}
+      execution_clients: ${{ steps.execution_clients.outputs.changes }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
-        id: filter
+        id: global
         with:
           filters: |
             ethereum_node: roles/ethereum_node/**
             dependencies: requirements.*
+      - uses: dorny/paths-filter@v3
+        id: consensus_clients
+        with:
+          filters: |
+            grandine: roles/grandine/**
+            lighthouse: roles/lighthouse/**
+            lodestar: roles/lodestar/**
+            nimbus: roles/nimbus/**
+            prysm: roles/prysm/**
+            teku: roles/teku/**
+      - uses: dorny/paths-filter@v3
+        id: execution_clients
+        with:
+          filters: |
+            geth: roles/geth/**
+            nethermind: roles/nethermind/**
+            erigon: roles/erigon/**
+            besu: roles/besu/**
+            ethereumjs: roles/ethereumjs/**
+            reth: roles/reth/**
 
-  # Integration test using molecule
-  job:
+  vars:
+    runs-on: ubuntu-latest
     needs: changes
+    steps:
+      - name: Set variables
+        working-directory: .
+        id: vars
+        run: |
+          echo "Verifying which client roles have changed...";
+          ALL_CONSENSUS_CLIENTS='["teku", "prysm", "lighthouse", "nimbus", "lodestar", "grandine"]';
+          ALL_EXECUTION_CLIENTS='["geth", "nethermind", "erigon", "besu", "ethereumjs", "reth"]';
+
+          CONSENSUS_CLIENTS="[]";
+          EXECUTION_CLIENTS="[]";
+
+          if [[ "${{ needs.changes.outputs.ethereum_node }}" == "true" ]] || \
+             [[ "${{ needs.changes.outputs.dependencies }}" == "true" ]] || \
+             [[ "${{ needs.changes.outputs.consensus_clients }}" != "[]" && "${{ needs.changes.outputs.execution_clients }}" != "[]" ]]; then
+            echo "Global changes detected - Need to run all clients";
+            CONSENSUS_CLIENTS=$ALL_CONSENSUS_CLIENTS;
+            EXECUTION_CLIENTS=$ALL_EXECUTION_CLIENTS;
+          elif [[ "${{ needs.changes.outputs.consensus_clients }}" != "[]" ]]; then
+            CONSENSUS_CLIENTS="${{ toJSON(needs.changes.outputs.consensus_clients) }}";
+            EXECUTION_CLIENTS=$ALL_EXECUTION_CLIENTS;
+            echo "Consensus clients have changed $CONSENSUS_CLIENTS";
+          elif [[ "${{ needs.changes.outputs.execution_clients }}" != "[]" ]]; then
+            EXECUTION_CLIENTS="${{ toJSON(needs.changes.outputs.execution_clients) }}";
+            CONSENSUS_CLIENTS=$ALL_CONSENSUS_CLIENTS;
+            echo "Execution clients have changed $EXECUTION_CLIENTS";
+          else
+            echo "No changes detected - Skipping";
+          fi
+
+          echo "=========================================";
+          echo "The following matrix will be executed:";
+          echo "CONSENSUS_CLIENTS=$CONSENSUS_CLIENTS";
+          echo "EXECUTION_CLIENTS=$EXECUTION_CLIENTS";
+
+          echo "CONSENSUS_CLIENTS=$CONSENSUS_CLIENTS" >> $GITHUB_ENV
+          echo "EXECUTION_CLIENTS=$EXECUTION_CLIENTS" >> $GITHUB_ENV
+
+    outputs:
+      CONSENSUS_CLIENTS: ${{ env.CONSENSUS_CLIENTS }}
+      EXECUTION_CLIENTS: ${{ env.EXECUTION_CLIENTS }}
+
+  test:
+    needs: [changes, vars]
     if: >-
       ${{
-        needs.changes.outputs.ethereum_node == 'true' ||
-        needs.changes.outputs.dependencies == 'true'
+        needs.vars.outputs.EXECUTION_CLIENTS != '[]' &&
+        needs.vars.outputs.CONSENSUS_CLIENTS != '[]'
       }}
     concurrency:
       group: >-
@@ -42,8 +107,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        consensus: [teku, prysm, lighthouse, nimbus, lodestar, grandine]
-        execution: [geth, nethermind, erigon, besu, ethereumjs, reth]
+        consensus: ${{ fromJSON(needs.vars.outputs.CONSENSUS_CLIENTS) }}
+        execution: ${{ fromJSON(needs.vars.outputs.EXECUTION_CLIENTS) }}
     runs-on: self-hosted-ghr-size-s-x64
     steps:
       - uses: actions/checkout@v4
@@ -57,5 +122,6 @@ jobs:
         run: molecule test
         env:
           PY_COLORS: '1'
+          ANSIBLE_DOCKER_TIMEOUT: '120'
           EXECUTION_CLIENT: ${{ matrix.execution }}
           CONSENSUS_CLIENT: ${{ matrix.consensus }}
