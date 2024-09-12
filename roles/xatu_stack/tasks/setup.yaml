@@ -9,16 +9,6 @@
     key: "{{ xatu_stack_user }}"
   register: xatu_stack_user_getent
 
-- name: Create xatu stack dirs
-  ansible.builtin.file:
-    path: "{{ item }}"
-    state: directory
-    mode: '0777'
-    owner: "{{ xatu_stack_user }}"
-    group: "{{ xatu_stack_user }}"
-  loop:
-    - "{{ xatu_stack_paths_config }}"
-
 - name: Clone xatu stack repository
   ansible.builtin.git:
     repo: "{{ xatu_stack_repo_url }}"

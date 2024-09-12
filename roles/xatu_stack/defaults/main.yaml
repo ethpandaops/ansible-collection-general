@@ -6,13 +6,10 @@ xatu_stack_repo_url: "https://github.com/ethpandaops/xatu"
 xatu_stack_repo_version: "master"
 xatu_stack_repo_path: "/data/xatu-stack"
 
-xatu_stack_paths_config: /etc/xatu-stack/
-
 xatu_stack_env_vars:
   # NGINX
   NGINX_PORT: 80
   BASE_HOSTNAME: "http://xatu.example.com"
-
 
   # Clickhouse
   ## Clickhouse 01
