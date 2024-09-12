@@ -4,7 +4,7 @@
     files:
       - docker-compose.yml
     state: absent
-    remove_volumes: yes
+    remove_volumes: true
 
 - name: Remove xatu stack repository
   ansible.builtin.file:
