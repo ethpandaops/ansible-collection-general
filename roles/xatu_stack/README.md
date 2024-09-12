@@ -25,9 +25,6 @@ Default variables are defined in [defaults/main.yaml](defaults/main.yaml). Some 
 - `xatu_stack_repo_url`: The URL of the xatu repository (default: "https://github.com/ethpandaops/xatu")
 - `xatu_stack_repo_version`: The version/branch of the xatu repository to use (default: "master")
 - `xatu_stack_repo_path`: The local path where the xatu repository will be cloned (default: "/data/xatu-stack")
-- `xatu_stack_config_domain`: The domain for the xatu stack (default: "example.com")
-- `xatu_stack_nginx_auth_xatu_server_user`: The username for nginx authentication for xatu server (default: "xatu-user")
-- `xatu_stack_nginx_auth_xatu_server_password`: The password for nginx authentication for xatu server (default: "xatu-password")
 
 ## Dependencies
 
