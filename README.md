@@ -21,6 +21,7 @@ A collection of reusable ansible components used by the EthPandaOps team.
 - [goomy](roles/goomy)
 - [mev_boost](roles/mev_boost)
 - [mev_relay](roles/mev_relay)
+- [mev_rs](roles/mev_rs)
 - [powfaucet](roles/powfaucet)
 - [snapshotter](roles/snapshotter)
 - [xatu_sentry](roles/xatu_sentry)
@@ -35,8 +36,10 @@ A collection of reusable ansible components used by the EthPandaOps team.
 - [ethereumjs](roles/ethereumjs)
 - [geth](roles/geth)
 - [nethermind](roles/nethermind)
+- [reth](roles/reth)
 
 ### Ethereum consensus clients
+- [grandine](roles/grandine)
 - [lighthouse](roles/lighthouse)
 - [lodestar](roles/lodestar)
 - [nimbus](roles/nimbus)

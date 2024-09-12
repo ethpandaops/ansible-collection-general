@@ -52,7 +52,7 @@ nethermind_container_command_default:
   - --JsonRpc.EngineHost=0.0.0.0
   - --JsonRpc.EnginePort={{ nethermind_ports_engine }}
   - --Metrics.Enabled=true
-  - --Metrics.NodeName={{ inventory_hostname_short }}
+  - --Metrics.NodeName={{ ethereum_network_name | default("unknown") }}-{{ inventory_hostname }}
   - --Metrics.ExposePort={{ nethermind_ports_metrics }}
   - --Metrics.ExposeHost=0.0.0.0
 

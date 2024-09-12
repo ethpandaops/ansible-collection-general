@@ -1,0 +1,35 @@
+- name: Converge
+  hosts: all
+  become: true
+  pre_tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+  tasks:
+    - name: Setup
+      block:
+        - name: Install docker
+          ansible.builtin.import_role:
+            name: geerlingguy.docker
+        - name: Install pip and docker pkg
+          ansible.builtin.import_role:
+            name: geerlingguy.pip
+          vars:
+            pip_install_packages:
+              - name: docker
+        - name: Run mev rs
+          ansible.builtin.import_role:
+            name: mev_rs
+      always:
+        - name: Get logs
+          ansible.builtin.command:
+            cmd: docker logs {{ mev_rs_container_name }}
+          changed_when: false
+          register: container_logs
+        - name: Show logs
+          ansible.builtin.debug:
+            var: "{{ item }}"
+          loop:
+            - container_logs.stdout
+            - container_logs.stderr

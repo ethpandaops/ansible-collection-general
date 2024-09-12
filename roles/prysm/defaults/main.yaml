@@ -1,3 +1,4 @@
+prysm_enabled: true
 prysm_user: prysm
 prysm_datadir: /data/prysm
 prysm_auth_jwt_path: /data/execution-auth.secret
@@ -18,7 +19,7 @@ prysm_ports_grpc: 4000
 prysm_ipv6_enabled: false
 
 prysm_validator_enabled: false
-prysm_validator_fee_recipient: "0xF29Ff96aaEa6C9A1fBa851f74737f3c069d4f1a9" # theprotocolguild.eth
+prysm_validator_fee_recipient: "0x25941dC771bB64514Fc8abBce970307Fb9d477e9" # theprotocolguild.eth
 prysm_validator_datadir: /data/prysm-validator
 
 ################################################################################

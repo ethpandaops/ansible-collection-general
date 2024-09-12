@@ -6,7 +6,7 @@ blockscout:
   image:
     repository: {{ default_tooling_images.blockscout.split(':') | first }}
     tag: {{ default_tooling_images.blockscout.split(':') | last }}
-    pullPolicy: {% if default_tooling_images.blockscout.split(':') | last == 'latest' %}Always{% else %}IfNotPresent{% endif %}
+    pullPolicy: {% if "latest" in (default_tooling_images.blockscout.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
 
   podAnnotations:
     "promtail.io/ignore_pod": "true"
@@ -81,3 +81,6 @@ blockscout:
 
   postgresql:
     fullnameOverride: blockscout-postgresql
+    primary:
+      persistence:
+        size: "{{ gen_kubernetes_blockscout_postgres_size | default("100Gi") }}"

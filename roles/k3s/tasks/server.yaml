@@ -7,6 +7,32 @@
     group: root
     mode: "0644"
 
+- name: Copy config file to user home directory
+  ansible.builtin.copy:
+    src: /etc/rancher/k3s/k3s.yaml
+    dest: ~/{{ ansible_user }}/.kube/config
+    remote_src: true
+    owner: "{{ ansible_user }}"
+    mode: "u=rw,g=,o="
+
+- name: Create dir for /etc/rancher/k3s/config.yaml.d
+  ansible.builtin.file:
+    path: /etc/rancher/k3s/config.yaml.d
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  when: k3s_etcd_enabled and k3s_etcd_snapshot_enabled
+
+- name: Create backup file for etcd
+  ansible.builtin.template:
+    src: "k3s-etcd-backup.yaml.j2"
+    dest: "/etc/rancher/k3s/config.yaml.d/etcd-backup.yaml"
+    owner: root
+    group: root
+    mode: "0644"
+  when: k3s_etcd_enabled and k3s_etcd_snapshot_enabled
+
 - name: Enable and check K3s service
   ansible.builtin.systemd:
     name: k3s-server
@@ -48,14 +74,6 @@
     state: directory
     owner: "{{ ansible_user }}"
     mode: "u=rwx,g=rx,o="
-
-- name: Copy config file to user home directory
-  ansible.builtin.copy:
-    src: /etc/rancher/k3s/k3s.yaml
-    dest: ~/{{ ansible_user }}/.kube/config
-    remote_src: true
-    owner: "{{ ansible_user }}"
-    mode: "u=rw,g=,o="
 
 - name: Replace https://localhost:6443 by https://master-ip:6443
   ansible.builtin.command: >-

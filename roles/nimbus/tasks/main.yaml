@@ -1,7 +1,6 @@
+- name: Cleanup nimbus
+  ansible.builtin.import_tasks: cleanup.yaml
+
 - name: Setup nimbus
   ansible.builtin.import_tasks: setup.yaml
   when: not nimbus_cleanup
-
-- name: Cleanup nimbus
-  ansible.builtin.import_tasks: cleanup.yaml
-  when: nimbus_cleanup

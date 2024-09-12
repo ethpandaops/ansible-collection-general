@@ -57,7 +57,7 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
     dependencies:
       - name: blockscout
         repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 0.2.1
+        version: 0.2.2
   checkpointz:
     valuesTemplatePath: templates/checkpointz.yaml.j2
     dependencies:
@@ -112,6 +112,18 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
       - name: rpc-proxy
         repository: https://ethpandaops.github.io/ethereum-helm-charts
         version: 0.1.2
+  assertoor:
+    valuesTemplatePath: templates/assertoor.yaml.j2
+    dependencies:
+      - name: assertoor
+        repository: https://ethpandaops.github.io/ethereum-helm-charts
+        version: 0.0.4
+  tracoor:
+    valuesTemplatePath: templates/tracoor.yaml.j2
+    dependencies:
+      - name: tracoor-single
+        repository: https://ethpandaops.github.io/ethereum-helm-charts
+        version: 0.0.3
   "{{ gen_kubernetes_config_ethereum_node_name }}":
     valuesTemplatePath: templates/ethereum-node.yaml.j2
     dependencies:
