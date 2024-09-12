@@ -5,4 +5,3 @@
       - docker-compose.yml
     state: present
     restarted: true
-
