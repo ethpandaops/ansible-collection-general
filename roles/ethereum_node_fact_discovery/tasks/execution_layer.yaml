@@ -1,5 +1,5 @@
 - name: Handle Besu, Geth, Erigon, Nethermind enode
-  when: ethereum_node_el in ["besu", "geth", "erigon", "nethermind"]
+  when: ethereum_node_el in ["besu", "geth", "erigon", "nethermind", "reth"]
   block:
     - name: Get EL node key
       ansible.builtin.shell: "{{ ethereum_node_fact_discovery_el_key_cmd[ethereum_node_el] }}" # noqa command-instead-of-shell
