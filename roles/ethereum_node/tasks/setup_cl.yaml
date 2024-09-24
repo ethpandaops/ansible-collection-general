@@ -20,6 +20,7 @@
     lighthouse_mev_boost_endpoint: "{{ ethereum_node_external_builder_endpoint }}"
     lighthouse_checkpoint_sync_enabled: "{{ ethereum_node_cl_checkpoint_sync_enabled }}"
     lighthouse_ipv6_enabled: "{{ ethereum_node_ipv6_enabled }}"
+    lighthouse_supernode_enabled: "{{ ethereum_node_cl_supernode_enabled }}"
 
 - name: "Consensus client: teku"
   when: ethereum_node_cl == "teku"
@@ -41,6 +42,7 @@
     teku_mev_boost_endpoint: "{{ ethereum_node_external_builder_endpoint }}"
     teku_checkpoint_sync_enabled: "{{ ethereum_node_cl_checkpoint_sync_enabled }}"
     teku_ipv6_enabled: "{{ ethereum_node_ipv6_enabled }}"
+    teku_supernode_enabled: "{{ ethereum_node_cl_supernode_enabled }}"
 
 - name: "Consensus client: prysm"
   when: ethereum_node_cl == "prysm"
@@ -63,6 +65,7 @@
     prysm_mev_boost_endpoint: "{{ ethereum_node_external_builder_endpoint }}"
     prysm_checkpoint_sync_enabled: "{{ ethereum_node_cl_checkpoint_sync_enabled }}"
     prysm_ipv6_enabled: "{{ ethereum_node_ipv6_enabled }}"
+    prysm_supernode_enabled: "{{ ethereum_node_cl_supernode_enabled }}"
 
 - name: "Consensus client: lodestar"
   when: ethereum_node_cl == "lodestar"
@@ -85,6 +88,7 @@
     lodestar_mev_boost_endpoint: "{{ ethereum_node_external_builder_endpoint }}"
     lodestar_checkpoint_sync_enabled: "{{ ethereum_node_cl_checkpoint_sync_enabled }}"
     lodestar_ipv6_enabled: "{{ ethereum_node_ipv6_enabled }}"
+    lodestar_supernode_enabled: "{{ ethereum_node_cl_supernode_enabled }}"
 
 - name: "Consensus client: nimbus"
   when: ethereum_node_cl == "nimbus"
@@ -106,6 +110,7 @@
     nimbus_mev_boost_endpoint: "{{ ethereum_node_external_builder_endpoint }}"
     nimbus_checkpoint_sync_enabled: "{{ ethereum_node_cl_checkpoint_sync_enabled }}"
     nimbus_ipv6_enabled: "{{ ethereum_node_ipv6_enabled }}"
+    nimbus_supernode_enabled: "{{ ethereum_node_cl_supernode_enabled }}"
 
 - name: "Consensus client: grandine"
   when: ethereum_node_cl == "grandine"
@@ -127,3 +132,4 @@
     grandine_mev_boost_endpoint: "{{ ethereum_node_external_builder_endpoint }}"
     grandine_checkpoint_sync_enabled: "{{ ethereum_node_cl_checkpoint_sync_enabled }}"
     grandine_ipv6_enabled: "{{ ethereum_node_ipv6_enabled }}"
+    grandine_supernode_enabled: "{{ ethereum_node_cl_supernode_enabled }}"

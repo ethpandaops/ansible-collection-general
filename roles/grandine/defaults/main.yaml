@@ -15,6 +15,7 @@ grandine_ports_http_beacon: 5051
 grandine_ports_metrics: 8008
 
 grandine_ipv6_enabled: false
+grandine_supernode_enabled: false
 
 grandine_validator_enabled: false
 grandine_validator_fee_recipient: "0x25941dC771bB64514Fc8abBce970307Fb9d477e9" # theprotocolguild.eth
@@ -78,8 +79,15 @@ grandine_container_command_v6:
   - --enr-tcp-port-ipv6={{ grandine_ports_p2p_tcp }}
   - --enr-quic-port-ipv6={{ grandine_ports_quic }}
 
+grandine_container_supernode_command:
+  - --subscribe-all-data-column-subnets
+
 grandine_container_command: >-
-  {{ grandine_container_command_default + (grandine_container_command_v6 if grandine_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
+  {{
+    grandine_container_command_default +
+    (grandine_container_command_v6 if grandine_ipv6_enabled and ansible_default_ipv6.address is defined else []) +
+    (grandine_container_supernode_command if grandine_supernode_enabled else [])
+  }}
 
 grandine_container_command_extra_args: []
 # - --network=mainnet
