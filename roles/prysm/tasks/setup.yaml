@@ -30,6 +30,7 @@
         volumes: "{{ prysm_container_volumes }}"
         env: "{{ prysm_container_env }}"
         networks: "{{ prysm_container_networks }}"
+        tty: true
         entrypoint: "{{ prysm_container_entrypoint }}"
         command: >-
           {{
@@ -70,6 +71,7 @@
         volumes: "{{ prysm_validator_container_volumes }}"
         env: "{{ prysm_validator_container_env }}"
         networks: "{{ prysm_validator_container_networks }}"
+        tty: true
         entrypoint: "{{ prysm_validator_container_entrypoint }}"
         command: >-
           {{
