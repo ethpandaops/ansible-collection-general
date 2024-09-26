@@ -49,6 +49,7 @@ prysm_container_volumes:
 prysm_container_security_opts: []
 prysm_container_stop_timeout: "300"
 prysm_container_networks: []
+prysm_container_tty: false
 prysm_container_entrypoint:
   - /app/cmd/beacon-chain/beacon-chain
 prysm_container_command_default:
@@ -101,6 +102,7 @@ prysm_validator_container_volumes:
 prysm_validator_container_security_opts: []
 prysm_validator_container_stop_timeout: "300"
 prysm_validator_container_networks: []
+prysm_validator_container_tty: false
 prysm_validator_container_entrypoint:
   - /app/cmd/validator/validator
 prysm_validator_container_command:
