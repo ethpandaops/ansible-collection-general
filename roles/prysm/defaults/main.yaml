@@ -102,7 +102,7 @@ prysm_validator_container_volumes:
 prysm_validator_container_security_opts: []
 prysm_validator_container_stop_timeout: "300"
 prysm_validator_container_networks: []
-prysm_validator_container_tty: true
+prysm_validator_container_tty: false
 prysm_validator_container_entrypoint:
   - /app/cmd/validator/validator
 prysm_validator_container_command:
