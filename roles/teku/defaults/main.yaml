@@ -60,6 +60,7 @@ teku_container_command_default:
   - --rest-api-interface=0.0.0.0
   - --rest-api-port={{ teku_ports_http_beacon }}
   - --rest-api-host-allowlist=*
+  - --rest-api-docs-enabled
   - --ee-endpoint={{ teku_execution_engine_endpoint }}
   - --ee-jwt-secret-file=/execution-auth.jwt
 
