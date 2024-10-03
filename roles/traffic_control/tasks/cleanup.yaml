@@ -1,7 +1,7 @@
-- name: Remove traffic control script
-  ansible.builtin.file:
-    path: "{{ traffic_control_script_path }}"
-    state: absent
+- name: Stop traffic control service
+  ansible.builtin.systemd:
+    name: "{{ traffic_control_service_name }}"
+    state: stopped
 
 - name: Disable traffic control service
   ansible.builtin.systemd:
@@ -9,12 +9,10 @@
     enabled: false
     state: absent
 
-- name: Get list of network interfaces (excluding 'lo')
-  ansible.builtin.set_fact:
-    net_interfaces: "{{ ansible_interfaces | difference(['lo']) }}"
-
-- name: Remove all qdiscs from interfaces
-  ansible.builtin.command: tc qdisc del dev {{ item }} root
-  loop: "{{ net_interfaces }}"
-  failed_when: false
-  changed_when: true
+- name: Remove traffic control scripts
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ traffic_control_script_path_up }}"
+    - "{{ traffic_control_script_path_down }}"
