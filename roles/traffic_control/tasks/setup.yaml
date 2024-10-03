@@ -3,16 +3,23 @@
     name: "{{ 'iproute2' if ansible_os_family == 'Debian' else 'iproute' }}"
     state: present
 
-- name: Create script
+- name: Create up script
   ansible.builtin.template:
-    src: apply_traffic_control.sh.j2
-    dest: "{{ traffic_control_script_path }}"
+    src: script-up.sh.j2
+    dest: "{{ traffic_control_script_path_up }}"
+    mode: '0740'
+  notify: Restart traffic control service
+
+- name: Create down script
+  ansible.builtin.template:
+    src: script-down.sh.j2
+    dest: "{{ traffic_control_script_path_down }}"
     mode: '0740'
   notify: Restart traffic control service
 
 - name: Create systemd service file
   ansible.builtin.template:
-    src: traffic-control.service.j2
+    src: unit.service.j2
     dest: "/etc/systemd/system/{{ traffic_control_service_name }}"
     mode: '0640'
   register: traffic_control_systemd_file
