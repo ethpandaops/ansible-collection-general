@@ -87,7 +87,6 @@ tracoor-single:
 
     agents:
 {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
-{% if ((hostvars[host]['inventory_hostname'] | string)[-2:]) == "-1" %}
       - name: {{ hostvars[host]['inventory_hostname'] }}
         ethereum:
           overrideNetworkName: {{ ethereum_network_name }}
@@ -98,5 +97,4 @@ tracoor-single:
             traceDisableMemory: true
             traceDisableStack: true
             traceDisableStorage: true
-{% endif %}
 {% endfor %}
