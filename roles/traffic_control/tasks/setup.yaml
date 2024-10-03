@@ -3,6 +3,11 @@
     name: "{{ 'iproute2' if ansible_os_family == 'Debian' else 'iproute' }}"
     state: present
 
+- name: Enable IFB interfaces for download traffic controlling
+  community.general.modprobe:
+    name: ifb
+    state: present
+
 - name: Create up script
   ansible.builtin.template:
     src: script-up.sh.j2

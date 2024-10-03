@@ -37,7 +37,7 @@ Your playbook could look like this:
 - hosts: localhost
   become: true
   roles:
-  - role: ethpandaops.general.traffic_control
+    - role: ethpandaops.general.traffic_control
   vars:
     traffic_control_rules:
       - interface: eth0
