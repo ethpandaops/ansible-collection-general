@@ -23,9 +23,23 @@ tracoor-single:
             - path: /
               pathType: Prefix
 
-  persistence:
+  postgresql:
     enabled: true
-    size: 20Gi
+    fullnameOverride: "tracoor-postgresql"
+    auth:
+      username: <path:/secrets/services/services.enc.yaml#tracoor | jsonPath {.postgres.devnets.username}>
+      password: <path:/secrets/services/services.enc.yaml#tracoor | jsonPath {.postgres.devnets.password}>
+    primary:
+      persistence:
+        enabled: true
+        size: 20Gi
+      resources:
+        requests:
+          cpu: 1000m
+          memory: 2Gi
+        limits:
+          cpu: 2000m
+          memory: 4Gi
 
   config:
     shared:
@@ -37,11 +51,11 @@ tracoor-single:
         type: s3
         config:
           region: us-east-1
-          bucket_name: {{ ethereum_network_name }}
+          bucket_name: {{ ethereum_network_name }}/tracoor
           endpoint: https://<path:/secrets/services/services.enc.yaml#cloudflare | jsonPath {.account_ids.ethdevops}>.r2.cloudflarestorage.com/ethpandaops-devnet-dumpster
           prefer_urls: true
-          access_key: <path:/secrets/services/services.enc.yaml#tracoor | jsonPath {.r2.devnets.access_key_id}>
-          access_secret: <path:/secrets/services/services.enc.yaml#tracoor | jsonPath {.r2.devnets.secret_access_key}>
+          access_key: <path:/secrets/services/services.enc.yaml#cloudflare | jsonPath {.r2.devnets.access_key_id}>
+          access_secret: <path:/secrets/services/services.enc.yaml#cloudflare | jsonPath {.r2.devnets.secret_access_key}>
 
     server:
       addr: ":8081"
@@ -49,11 +63,7 @@ tracoor-single:
       pprofAddr: ":6060"
       preStopSleepSeconds: 1
       ntpServer: time.google.com
-
-      persistence:
-        dsn: "file:/data/tracoor.db"
-        driver_name: sqlite
-
+      persistence: {}
       services:
         indexer:
           retention:
