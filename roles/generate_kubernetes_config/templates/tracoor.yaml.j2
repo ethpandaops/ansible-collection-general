@@ -23,9 +23,15 @@ tracoor-single:
             - path: /
               pathType: Prefix
 
-  persistence:
+  postgres:
     enabled: true
-    size: 20Gi
+    name: "tracoor-postgresql"
+    auth:
+      username: <path:/secrets/services/services.enc.yaml#tracoor | jsonPath {.postgres.devnets.username}>
+      password: <path:/secrets/services/services.enc.yaml#tracoor | jsonPath {.postgres.devnets.password}>
+    persistence:
+      enabled: true
+      size: 8Gi
 
   config:
     shared:
@@ -51,8 +57,8 @@ tracoor-single:
       ntpServer: time.google.com
 
       persistence:
-        dsn: "file:/data/tracoor.db"
-        driver_name: sqlite
+        driver_name: postgres
+        dsn: postgres://<path:/secrets/services/services.enc.yaml#tracoor | jsonPath {.postgres.devnets.username}>:<path:/secrets/services/services.enc.yaml#tracoor | jsonPath {.postgres.devnets.password}>@tracoor-postgresql:5432/tracoor?sslmode=disable
 
       services:
         indexer:
