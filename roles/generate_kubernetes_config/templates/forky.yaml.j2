@@ -31,9 +31,15 @@ forky:
       addr: ":9090"
       enabled: true
     forky:
-      retention_period: "1m"
+      retention_period: "24h'
       store:
-        type: memory
+        type: s3
+        config:
+          region: us-east-1
+          bucket_name: {{ ethereum_network_name }}/forky
+          endpoint: https://<path:/secrets/services/services.enc.yaml#cloudflare | jsonPath {.account_ids.ethdevops}>.r2.cloudflarestorage.com/ethpandaops-devnet-dumpster
+          access_key: <path:/secrets/services/services.enc.yaml#cloudflare | jsonPath {.r2.devnets.access_key_id}>
+          access_secret: <path:/secrets/services/services.enc.yaml#cloudflare | jsonPath {.r2.devnets.secret_access_key}>
       indexer:
         dsn: "file::memory:?cache=shared"
         driver_name: sqlite
@@ -54,3 +60,6 @@ forky:
             polling_interval: "12s"
 {% endif %}
 {% endfor %}
+
+
+1727193752
