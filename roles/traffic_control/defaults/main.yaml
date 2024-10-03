@@ -1,0 +1,29 @@
+traffic_control_cleanup: false
+
+# List of bandwidth limit and latency definitions
+traffic_control_rules: []
+traffic_control_rules_post_raw_cmds: []
+
+# Path where the script will be placed
+traffic_control_script_path: /usr/local/bin/apply_traffic_control.sh
+
+# Name of the systemd service
+traffic_control_service_name: traffic-control.service
+
+
+#
+# Example of how to define traffic control network limits
+#
+# traffic_control_rules:
+#  - interface: eth0
+#    rate: 1mbit
+#    latency: 100ms
+#    jitter: 10ms
+#    loss: 0.1%
+#  - interface: eth1
+#    rate: 10mbit
+#  - interface: eth2
+#    rate: 100mbit
+#    latency: 50ms
+#  - interface: eth3
+#    state: absent
