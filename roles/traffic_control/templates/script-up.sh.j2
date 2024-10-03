@@ -21,6 +21,8 @@ ip link set {{ ifb_interface }} up
 
 {# Delete any existing qdisc configurations on {{ item.interface }} #}
 tc qdisc del dev {{ item.interface }} root || true
+tc qdisc del dev {{ item.interface }} ingress || true
+tc qdisc del dev {{ ifb_interface }} root || true
 {% if (item.state | default("present")) != "absent" %}
 {# Add root qdisc on #}
 tc qdisc add dev {{ item.interface }} root handle 1: htb default 30
