@@ -12,13 +12,11 @@ modprobe ifb
 
 {% set ifb_interface = 'tcifb' + item.interface %}
 #
-# Applying network limits on interface {{ item.interface }}
+# CONFIG FOR: {{ item.interface }}
 #
 {# Create ifb interface #}
 ip link add {{ ifb_interface }} type ifb
 ip link set {{ ifb_interface }} up
-
-
 {# Delete any existing qdisc configurations on {{ item.interface }} #}
 tc qdisc del dev {{ item.interface }} root || true
 tc qdisc del dev {{ item.interface }} ingress || true
@@ -47,16 +45,17 @@ tc filter add dev {{ ifb_interface }} protocol ip parent 1:0 prio 1 u32 match ip
 
 {# Add latency #}
 {% if item.latency is defined or item.jitter is defined %}
-#   Add latency on {{ item.interface }}
 tc qdisc add dev {{ item.interface }} parent 1:1 handle 10: netem \
 {% if item.latency is defined %}delay {{ item.latency }}{% if item.jitter is defined %} {{ item.jitter }}{% endif %}{% endif %} \
 {% if item.loss is defined %}loss {{ item.loss }}{% endif %}
 {% endif %}
-
 {% endif %}
+
 {% endfor %}
 
+{% if traffic_control_rules_post_raw_cmds | length > 0 %}
 # Additional custom commands
 {% for item in traffic_control_rules_post_raw_cmds %}
 {{ item }}
 {% endfor %}
+{% endif %}

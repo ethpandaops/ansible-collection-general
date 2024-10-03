@@ -5,7 +5,9 @@
 set -xe
 
 {% for item in traffic_control_rules %}
-
+#
+# CONFIG FOR: {{ item.interface }}
+#
 {% set ifb_interface = 'tcifb' + item.interface %}
 tc qdisc del dev {{ item.interface }} root
 tc qdisc del dev {{ item.interface }} ingress
