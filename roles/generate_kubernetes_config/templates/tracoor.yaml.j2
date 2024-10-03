@@ -25,8 +25,7 @@ tracoor-single:
 
   postgresql:
     enabled: true
-    name: "tracoor-postgresql"
-    architecture: "standalone"
+    fullnameOverride: "tracoor-postgresql"
     auth:
       username: <path:/secrets/services/services.enc.yaml#tracoor | jsonPath {.postgres.devnets.username}>
       password: <path:/secrets/services/services.enc.yaml#tracoor | jsonPath {.postgres.devnets.password}>
@@ -64,11 +63,7 @@ tracoor-single:
       pprofAddr: ":6060"
       preStopSleepSeconds: 1
       ntpServer: time.google.com
-
-      persistence:
-        driver_name: postgres
-        dsn: postgres://<path:/secrets/services/services.enc.yaml#tracoor | jsonPath {.postgres.devnets.username}>:<path:/secrets/services/services.enc.yaml#tracoor | jsonPath {.postgres.devnets.password}>@tracoor-postgresql-primary:5432/tracoor?sslmode=disable
-
+      persistence: {}
       services:
         indexer:
           retention:
