@@ -5,7 +5,7 @@ After=network.target
 [Service]
 Type=oneshot
 ExecStart={{ traffic_control_script_path_up }}
-ExecStop={{ traffic_control_script_path_down}}
+ExecStop={{ traffic_control_script_path_down }}
 RemainAfterExit=yes
 
 [Install]
