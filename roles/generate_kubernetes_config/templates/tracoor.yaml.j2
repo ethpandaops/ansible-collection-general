@@ -26,12 +26,21 @@ tracoor-single:
   postgresql:
     enabled: true
     name: "tracoor-postgresql"
+    architecture: "standalone"
     auth:
       username: <path:/secrets/services/services.enc.yaml#tracoor | jsonPath {.postgres.devnets.username}>
       password: <path:/secrets/services/services.enc.yaml#tracoor | jsonPath {.postgres.devnets.password}>
-    persistence:
-      enabled: true
-      size: 20Gi
+    primary:
+      persistence:
+        enabled: true
+        size: 20Gi
+      resources:
+        requests:
+          cpu: 1000m
+          memory: 2Gi
+        limits:
+          cpu: 2000m
+          memory: 4Gi
 
   config:
     shared:
@@ -58,7 +67,7 @@ tracoor-single:
 
       persistence:
         driver_name: postgres
-        dsn: postgres://<path:/secrets/services/services.enc.yaml#tracoor | jsonPath {.postgres.devnets.username}>:<path:/secrets/services/services.enc.yaml#tracoor | jsonPath {.postgres.devnets.password}>@tracoor-postgresql:5432/tracoor?sslmode=disable
+        dsn: postgres://<path:/secrets/services/services.enc.yaml#tracoor | jsonPath {.postgres.devnets.username}>:<path:/secrets/services/services.enc.yaml#tracoor | jsonPath {.postgres.devnets.password}>@tracoor-postgresql-primary:5432/tracoor?sslmode=disable
 
       services:
         indexer:
