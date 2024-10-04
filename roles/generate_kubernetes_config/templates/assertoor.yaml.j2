@@ -38,6 +38,9 @@ assertoor:
           - path: /
             pathType: Prefix
 
+  persistence:
+    enabled: true
+
   endpoints:
 {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
     - name:  {{ hostvars[host]['inventory_hostname'] }}
