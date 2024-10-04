@@ -28,15 +28,18 @@ dora:
   validatorNamesInventory: "https://config.{{ network_subdomain }}/api/v1/nodes/validator-ranges"
   proxyCount: 2
   extraEnv:
-   - name: FRONTEND_PPROF
-     value: "true"
-   - name: FRONTEND_SHOW_SENSITIVE_PEER_INFOS
-     value: "true"
-   
+    - name: FRONTEND_PPROF
+      value: "true"
+    - name: FRONTEND_SHOW_SENSITIVE_PEER_INFOS
+      value: "true"
+{% if 'peerdas' in ethereum_network_name %}
+    - name: FRONTEND_SHOW_PEER_DAS_INFOS
+      value: "true"
+{% endif %}
   postgresql:
     name: "dora-postgresql"
     fullnameOverride: "dora-postgresql"
-  
+
   endpoints:
   # Rpc
   - url: {{ default_cl_endpoint }}
