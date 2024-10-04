@@ -64,9 +64,13 @@ forky:
         network:
           name: "{{ ethereum_network_name }}"
           spec:
-            seconds_per_slot: {{ lookup('ansible.builtin.file', cl_config_path) ,split_lines=False| from_yaml.SECONDS_PER_SLOT }}
+            seconds_per_slot: {{ (lookup('ansible.builtin.file', cl_config_path) | from_yaml).SECONDS_PER_SLOT }}
+{% if (lookup('ansible.builtin.file', cl_config_path) | from_yaml).PRESET_BASE == "mainnet"%}
             slots_per_epoch: 32
-            genesis_time: {{ lookup('ansible.builtin.file', cl_config_path) ,split_lines=False| from_yaml.MIN_GENESIS_TIME + lookup('ansible.builtin.file', cl_config_path) ,split_lines=False| from_yaml.GENESIS_DELAY }}
+{% else %}
+            slots_per_epoch: 8
+{% endif %}
+            genesis_time: {{ (lookup('ansible.builtin.file', cl_config_path) | from_yaml).MIN_GENESIS_TIME + (lookup('ansible.builtin.file', cl_config_path)| from_yaml).GENESIS_DELAY }}
       sources:
 {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
 {% if ((hostvars[host]['inventory_hostname'] | string)[-2:]) == "-1" %}
