@@ -50,16 +50,19 @@ Your playbook could look like this:
         latency: 100ms
         jitter: 10ms
         loss: 0.1%
+
       # Limit traffic on eth1 to:
       # - 10Mbps up/download.
       - interface: eth1
         rate: 10mbit
+
       # Limit traffic on eth2 to:
       # - 100Mbps up/download
       # - 50ms latency
       - interface: eth2
         rate: 100mbit
         latency: 50ms
+
       # Remove traffic restrictions from eth3
       - interface: eth3
         state: absent
