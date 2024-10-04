@@ -23,6 +23,25 @@ forky:
         paths:
           - path: /
             pathType: Prefix
+
+  postgresql:
+    enabled: true
+    fullnameOverride: "forky-postgresql"
+    auth:
+      username: <path:/secrets/services/services.enc.yaml#forky | jsonPath {.postgres.devnets.username}>
+      password: <path:/secrets/services/services.enc.yaml#forky | jsonPath {.postgres.devnets.password}>
+    primary:
+      persistence:
+        enabled: true
+        size: 20Gi
+      resources:
+        requests:
+          cpu: 1000m
+          memory: 2Gi
+        limits:
+          cpu: 2000m
+          memory: 4Gi
+
   config:
     listen_addr: ":5555"
     pprof_addr: ":6060"
@@ -40,9 +59,7 @@ forky:
           endpoint: https://<path:/secrets/services/services.enc.yaml#cloudflare | jsonPath {.account_ids.ethdevops}>.r2.cloudflarestorage.com/ethpandaops-devnet-dumpster
           access_key: <path:/secrets/services/services.enc.yaml#cloudflare | jsonPath {.r2.devnets.access_key_id}>
           access_secret: <path:/secrets/services/services.enc.yaml#cloudflare | jsonPath {.r2.devnets.secret_access_key}>
-      indexer:
-        dsn: "file::memory:?cache=shared"
-        driver_name: sqlite
+      indexer: {}
       ethereum:
         network:
           name: "{{ ethereum_network_name }}"
