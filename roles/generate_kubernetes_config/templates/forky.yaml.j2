@@ -64,9 +64,9 @@ forky:
         network:
           name: "{{ ethereum_network_name }}"
           spec:
-            seconds_per_slot: {{ ((lookup('url', 'https://config.'network_subdomain'/cl/config.yaml') | from_yaml).SECONDS_PER_SLOT) }}
+            seconds_per_slot: {{ ((lookup('url', 'https://config.' + network_subdomain + '/cl/config.yaml') | from_yaml).SECONDS_PER_SLOT) }}
             slots_per_epoch: 32
-            genesis_time: {{ ((lookup('url', 'https://config.'network_subdomain'/cl/config.yaml') | from_yaml).MIN_GENESIS_TIME) + ((lookup('url', 'https://config.'network_subdomain'/cl/config.yaml') | from_yaml).GENESIS_DELAY)}}
+            genesis_time: {{ ((lookup('url', 'https://config.' + network_subdomain + '/cl/config.yaml') | from_yaml).MIN_GENESIS_TIME) + ((lookup('url', 'https://config.' + network_subdomain + '/cl/config.yaml') | from_yaml).GENESIS_DELAY)}}
       sources:
 {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
 {% if ((hostvars[host]['inventory_hostname'] | string)[-2:]) == "-1" %}
