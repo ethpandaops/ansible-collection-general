@@ -2,6 +2,8 @@ devnet_name: 'template' # noqa var-naming[no-role-prefix]
 
 gen_kubernetes_config_default_output_dir: ../kubernetes/{{ ethereum_network_name | replace(devnet_name + "-", '') }} # noqa var-naming[no-role-prefix]
 
+cl_config_path: ../network-configs/{{ ethereum_network_name | replace(devnet_name + "-", '') }}/metadata/config.yaml # noqa var-naming[no-role-prefix]
+
 default_cl_endpoint: >- # noqa var-naming[no-role-prefix]
   http://{{ gen_kubernetes_config_ethereum_node.cl + '-' + gen_kubernetes_config_ethereum_node.el + '-' +
   gen_kubernetes_config_ethereum_node.value + ':' + ethereum_node_cl_ports_http_beacon | string }}
