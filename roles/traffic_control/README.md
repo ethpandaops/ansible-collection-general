@@ -17,9 +17,9 @@ The `traffic_control_rules: []` variable defines the existing rules. Each rule c
 - `rate` - The rate controls the speed (bandwidth) at which traffic is allowed to pass through the interface. In tc, the rate parameter defines the maximum allowed transmission rate for a queue. You can specify this in kilobits per second (kbit), megabits per second (mbit). For example: `10mbit`.
 - `rate_download` - Same as rate, but for download speed only. If this is not defined and `rate` is defined, it will default to the value of `rate`.
 - `rate_upload` - Same as rate, but for upload speed only. If this is not defined and `rate` is defined, it will default to the value of `rate`.
-- `latency` - Latency is the time delay between the sending of a packet and its receipt at the destination. In tc, you can use queuing disciplines like netem to introduce artificial latency (delay) into the traffic flow. This is useful for simulating real-world network delays.
-- `jitter` - Jitter refers to the variation in packet latency over time. Inconsistent delay can affect applications, so jitter is useful to simulate fluctuating network conditions.
-- `loss` - Loss refers to the dropping of packets, which can occur in real-world networks due to congestion, corruption, or other issues
+- `latency` - Latency is the time delay between the sending of a packet and its receipt at the destination. In tc, you can use queuing disciplines like netem to introduce artificial latency (delay) into the traffic flow. This is useful for simulating real-world network delays. For example: `50ms`.
+- `jitter` - Jitter refers to the variation in packet latency over time. Inconsistent delay can affect applications, so jitter is useful to simulate fluctuating network conditions. For example: `10ms`.
+- `loss` - Loss refers to the dropping of packets, which can occur in real-world networks due to congestion, corruption, or other issues. This is given in percentage, for example: `0.1%`.
 - `state` - This allows you to clean up any rules for a specific interface by stating the `state=absent`.
 
 
@@ -40,17 +40,27 @@ Your playbook could look like this:
     - role: ethpandaops.general.traffic_control
   vars:
     traffic_control_rules:
+      # Limit traffic on eth0 to:
+      # - 100Mbps Down 50Mbps Up,
+      # - 100ms latency + 10ms jitter
+      # -  0.1% package loss
       - interface: eth0
         rate_download: 50mbit
         rate_upload: 10mbit
         latency: 100ms
         jitter: 10ms
         loss: 0.1%
+      # Limit traffic on eth1 to:
+      # - 10Mbps up/download.
       - interface: eth1
         rate: 10mbit
+      # Limit traffic on eth2 to:
+      # - 100Mbps up/download
+      # - 50ms latency
       - interface: eth2
         rate: 100mbit
         latency: 50ms
+      # Remove traffic restrictions from eth3
       - interface: eth3
         state: absent
 ```
