@@ -117,7 +117,7 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
     dependencies:
       - name: assertoor
         repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 0.0.4
+        version: 1.0.0
   tracoor:
     valuesTemplatePath: templates/tracoor.yaml.j2
     dependencies:
