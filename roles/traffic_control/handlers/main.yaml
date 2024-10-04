@@ -1,0 +1,4 @@
+- name: Restart traffic control service
+  ansible.builtin.service:
+    name: "{{ traffic_control_service_name }}"
+    state: restarted

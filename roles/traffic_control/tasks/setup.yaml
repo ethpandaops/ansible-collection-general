@@ -1,0 +1,38 @@
+- name: Install dependencies
+  ansible.builtin.package:
+    name: "{{ 'iproute2' if ansible_os_family == 'Debian' else 'iproute' }}"
+    state: present
+
+- name: Enable IFB interfaces for download traffic controlling
+  community.general.modprobe:
+    name: ifb
+    state: present
+
+- name: Create up script
+  ansible.builtin.template:
+    src: script-up.sh.j2
+    dest: "{{ traffic_control_script_path_up }}"
+    mode: '0740'
+  notify: Restart traffic control service
+
+- name: Create down script
+  ansible.builtin.template:
+    src: script-down.sh.j2
+    dest: "{{ traffic_control_script_path_down }}"
+    mode: '0740'
+  notify: Restart traffic control service
+
+- name: Create systemd service file
+  ansible.builtin.template:
+    src: unit.service.j2
+    dest: "/etc/systemd/system/{{ traffic_control_service_name }}"
+    mode: '0640'
+  register: traffic_control_systemd_file
+  notify: Restart traffic control service
+
+- name: Enable and start service
+  ansible.builtin.systemd:
+    name: "{{ traffic_control_service_name }}"
+    enabled: true
+    state: started
+    daemon_reload: true
