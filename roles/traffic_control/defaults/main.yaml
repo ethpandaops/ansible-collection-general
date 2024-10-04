@@ -11,6 +11,12 @@ traffic_control_script_path_down: /usr/local/bin/traffic_control_down.sh
 # Name of the systemd service
 traffic_control_service_name: traffic-control.service
 
+# Prefix for the IFB interfaces
+# If the target interface is eth0, the IFB interface will be named tc-ifb-eth0
+# The IFB interface is used to mirror and control the download traffic.
+# Only change this if you know what you are doing.
+traffic_control_ifb_interface_prefix: "tc-ifb-"
+
 #
 # Example of how to define traffic control network limits
 #

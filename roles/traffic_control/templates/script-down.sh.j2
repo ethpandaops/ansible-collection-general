@@ -8,7 +8,7 @@ set -xe
 #
 # CONFIG FOR: {{ item.interface }}
 #
-{% set ifb_interface = 'tcifb' + item.interface %}
+{% set ifb_interface = traffic_control_ifb_interface_prefix + item.interface %}
 tc qdisc del dev {{ item.interface }} root
 tc qdisc del dev {{ item.interface }} ingress
 tc qdisc del dev {{ ifb_interface }} root
