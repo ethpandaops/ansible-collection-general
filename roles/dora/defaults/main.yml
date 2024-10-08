@@ -31,10 +31,7 @@ dora_mev_relays: []
 #   name: "Relay 1"
 #   url: "http://mev-relay/"
 
-dora_chain_name: sepolia
 dora_chain_displayname: ""
-dora_chain_config: ""
-dora_chain_genesistime: 0
 dora_frontend_title: "Dora the Explorer"
 dora_frontend_subtitle: "Testnet"
 dora_frontend_ethexplorer: ""
@@ -44,6 +41,8 @@ dora_frontend_validatornames_inventory: ""
 dora_proxy_count: 1
 dora_callrate_limit: 2
 dora_callrate_burst: 10
+
+dora_indexer_in_memory_epochs: 10
 
 # This can be used to create additional config files for the beaconchain explorer.
 # It's useful when using private testnets and you need to mount a custom network config
@@ -88,9 +87,6 @@ dora_db_container_networks: "{{ dora_docker_networks }}"
 dora_config: |
   # Chain network configuration
   chain:
-    name: "{{ dora_chain_name }}"
-    genesisTimestamp: {{ dora_chain_genesistime }}
-    configPath: "{{ dora_chain_config }}"
     displayName: "{{ dora_chain_displayname }}"
 
   # HTTP Server configuration
@@ -143,18 +139,18 @@ dora_config: |
     - {{ endpoint | to_json }}
     {% endfor %}
 
-    depositLogBatchSize: 10000
+    depositLogBatchSize: 1000
 
   # indexer keeps track of the latest epochs in memory.
   indexer:
     # max number of epochs to keep in memory
-    inMemoryEpochs: 10
-
-    # disable synchronizing and everything that writes to the db (indexer just maintains local cache)
-    disableIndexWriter: false
+    inMemoryEpochs: {{ dora_indexer_in_memory_epochs }}
 
     # number of seconds to wait between each epoch (don't overload CL client)
     syncEpochCooldown: 1
+
+    # max number of parallel state requests to make to the CL clients
+    maxParallelValidatorSetRequests: 2
 
   mevIndexer:
     # list of mev relays to crawl mev blocks from
