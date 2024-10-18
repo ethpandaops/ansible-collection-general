@@ -4,6 +4,7 @@
   vars:
     pip_install_packages:
       - name: passlib
+        extra_args: --break-system-packages
 
 - name: Generate htpasswd files for nginx auth
   community.general.htpasswd:
