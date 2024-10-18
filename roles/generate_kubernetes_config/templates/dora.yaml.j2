@@ -25,7 +25,7 @@ dora:
 
   name: {{ ethereum_network_name }}
   configPath: "https://config.{{ network_subdomain }}/cl/config.yaml"
-  validatorNamesInventory: "https://config.{{ network_subdomain }}/api/v1/nodes/validator-ranges"
+  validatorNamesInventory: "https://bootnode-1.{{ network_subdomain }}/meta/api/v1/validator-ranges.json"
   proxyCount: 2
   extraEnv:
     - name: FRONTEND_PPROF
