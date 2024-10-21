@@ -27,6 +27,9 @@ metadata:
     nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
     nginx.ingress.kubernetes.io/upstream-vhost: "{{ .upstream }}"
     nginx.ingress.kubernetes.io/rewrite-target: "{{ .target }}"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      proxy_ssl_name {{ .upstream }};
+      proxy_ssl_server_name on;
 spec:
   rules:
   - host: "config.{{ $.Values.domain }}"
