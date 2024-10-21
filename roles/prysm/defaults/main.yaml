@@ -62,8 +62,8 @@ prysm_container_command_default:
   - --rpc-port={{ prysm_ports_grpc }}
   - --jwt-secret=/execution-auth.jwt
   - --execution-endpoint={{ prysm_execution_engine_endpoint }}
-  - --grpc-gateway-host=0.0.0.0
-  - --grpc-gateway-port={{ prysm_ports_http_beacon }}
+  - --http-host=0.0.0.0
+  - --http-port={{ prysm_ports_http_beacon }}
   - --monitoring-host=0.0.0.0
   - --monitoring-port={{ prysm_ports_metrics }}
 
