@@ -58,7 +58,11 @@ nimbus_eth1_container_command_v6: []
   # - --nat=extip:{{ nimbus_eth1_announced_ipv6 }} # not supported
 
 nimbus_eth1_container_command: >-
-  {{ nimbus_eth1_container_command_default + (nimbus_eth1_container_command_v6 if nimbus_eth1_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
+  {{
+    nimbus_eth1_container_command_default +
+    (nimbus_eth1_container_command_v6 if nimbus_eth1_ipv6_enabled and ansible_default_ipv6.address is defined
+    else [])
+  }}
 
 nimbus_eth1_container_command_extra_args: []
 #  - --rpc-api=eth,debug
