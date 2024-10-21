@@ -80,10 +80,10 @@
     reth_container_pull: "{{ ethereum_node_images_always_pull }}"
     reth_ipv6_enabled: "{{ ethereum_node_ipv6_enabled }}"
 
-- name: "Execution client: nimbus-eth1"
-  when: ethereum_node_el == "nimbus-eth1"
+- name: "Execution client: nimbus_eth1"
+  when: ethereum_node_el == "nimbus_eth1"
   ansible.builtin.include_role:
-    name: ethpandaops.general.nimbus-eth1
+    name: ethpandaops.general.nimbus_eth1
   vars:
     nimbus_eth1_announced_ip: "{{ ethereum_node_announced_ip }}"
     nimbus_eth1_ports_p2p: "{{ ethereum_node_el_ports_p2p_tcp }}"

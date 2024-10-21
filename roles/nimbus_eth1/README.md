@@ -1,4 +1,4 @@
-# ethpandaops.general.nimbus-eth1
+# ethpandaops.general.nimbus_eth1
 
 Setup [Nimbus-eth1](https://github.com/status-im/nimbus-eth1), an ethereum execution layer client.
 
@@ -34,6 +34,6 @@ Your playbook could look like this:
   - role: geerlingguy.pip
     pip_install_packages:
     - name: docker
-  - role: ethpandaops.general.nimbus-eth1
+  - role: ethpandaops.general.nimbus_eth1
   - role: ethpandaops.general.teku
 ```
