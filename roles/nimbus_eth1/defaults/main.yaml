@@ -38,6 +38,7 @@ nimbus_eth1_container_networks: []
 nimbus_eth1_container_command_default:
   - --log-level=INFO
   - --data-dir=/data
+  - --net-key=/data/nimbus_eth1/nodekey
   - --http-port={{ nimbus_eth1_ports_http_rpc }}
   - --http.addr=0.0.0.0
   - --rpc
