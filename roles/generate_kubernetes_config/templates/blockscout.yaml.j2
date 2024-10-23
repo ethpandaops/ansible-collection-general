@@ -18,7 +18,12 @@ blockscout-stack:
     nameService:
       enabled: true
       url: "https://explorer.{{ network_subdomain }}"
-
+  postgresql:
+    enabled: true
+    fullnameOverride: blockscout-postgresql
+    primary:
+      persistence:
+        size: "{{ gen_kubernetes_blockscout_postgres_size | default("100Gi") }}"
 
 ## Configuration options for backend
   blockscout:
@@ -74,11 +79,7 @@ blockscout-stack:
           - name: config-update
             mountPath: /config-update
 
-  postgresql:
-    fullnameOverride: blockscout-postgresql
-    primary:
-      persistence:
-        size: "{{ gen_kubernetes_blockscout_postgres_size | default("100Gi") }}"
+
 
 
   frontend:
