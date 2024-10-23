@@ -111,16 +111,13 @@ blockscout-stack:
       NEXT_PUBLIC_APP_PROTOCOL: https
       NEXT_PUBLIC_AD_BANNER_PROVIDER: none
       NEXT_PUBLIC_AD_TEXT_PROVIDER: none
-      NEXT_PUBLIC_STATS_API_HOST: explorer-stats.{{ network_subdomain }}
-
-  stats:
-    enabled: true
-    ingress:
-      enabled: true
-      className: ingress-nginx-public
-      hostname: explorer-stats.{{ network_subdomain }}
-    tls:
-      enabled: true
+      NEXT_PUBLIC_IS_TESTNET: true
+      NEXT_PUBLIC_GAS_TRACKER_ENABLED: true
+      NEXT_PUBLIC_GAS_TRACKER_UNITS: ['gwei']
+      NEXT_PUBLIC_HAS_BEACON_CHAIN: true
+      NEXT_PUBLIC_WEB3_WALLETS: ['metamask']
+      NEXT_PUBLIC_NETWORK_VERIFICATION_TYPE: validation
+      NEXT_PUBLIC_HOMEPAGE_STATS: ['latest_batch','total_blocks','average_block_time','total_txs' ,'latest_l1_state_batch','wallet_addresses','gas_tracker','current_epoch']
 
 postgresql:
   enabled: true
