@@ -1,7 +1,7 @@
 # {{ ansible_managed }}
 
 blockscout-stack:
-  fullnameOverride: blockscout
+  fullnameOverride: blockscout-stack
   config:
     network:
       id: {{ (lookup('ansible.builtin.file', cl_config_path) | from_yaml).DEPOSIT_CHAIN_ID }}
@@ -99,8 +99,20 @@ blockscout-stack:
       NEXT_PUBLIC_APP_PROTOCOL: https
 
 postgresql:
-    enabled: true
-    fullnameOverride: blockscout-postgresql
-    primary:
-      persistence:
-        size: "{{ gen_kubernetes_blockscout_postgres_size | default("100Gi") }}"
+  enabled: true
+  image:
+    registry: docker.io
+    repository: bitnami/postgresql
+    tag: 15.3.0-debian-11-r7
+  auth:
+    enablePostgresUser: true
+    postgresPassword: postgres
+    username: postgres
+    password: postgres
+  fullnameOverride: blockscout-postgresql
+  primary:
+    extendedConfiguration: |
+      max_connections = 1024
+    persistence:
+      enabled: true
+      size: "{{ gen_kubernetes_blockscout_postgres_size | default("100Gi") }}"
