@@ -86,17 +86,18 @@ blockscout-stack:
     ingress:
       enabled: true
       className: ingress-nginx-public
-      hosts:
-        - host: explorer.{{ network_subdomain }}
-          paths:
-            - path: /
-              pathType: Prefix
+      hostname: explorer.{{ network_subdomain }}
+      tls:
+        enabled: true
 
     env:
+      NEXT_PUBLIC_API_HOST: explorer.{{ network_subdomain }}
       NEXT_PUBLIC_NETWORK_NAME: {{ ethereum_network_name }}
       NEXT_PUBLIC_NETWORK_ID: {{ (lookup('ansible.builtin.file', cl_config_path) | from_yaml).DEPOSIT_CHAIN_ID }}
-      NEXT_PUBLIC_NETWORK_RPC_URL: https://rpc.{{ ethereum_network_name }}.{{ network_subdomain }}
+      NEXT_PUBLIC_NETWORK_RPC_URL: https://rpc.{{ network_subdomain }}
       NEXT_PUBLIC_APP_PROTOCOL: https
+      NEXT_PUBLIC_AD_BANNER_PROVIDER: none
+      NEXT_PUBLIC_AD_TEXT_PROVIDER: none
 
 postgresql:
   enabled: true
