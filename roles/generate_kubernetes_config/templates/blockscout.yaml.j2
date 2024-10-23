@@ -46,6 +46,16 @@ blockscout-stack:
       POOL_SIZE: "15"
       CHAIN_SPEC_PATH: /config-update/chainspec.json
 
+    service:
+      type: ClusterIP
+      port: 4000
+    ingress:
+      enabled: true
+      className: ingress-nginx-public
+      hostname: explorer-api.pectra-devnet-4.ethpandaops.io
+      tls:
+        enabled: true
+
     extraVolumes:
       - name: config-update
         emptyDir: {}
@@ -91,13 +101,26 @@ blockscout-stack:
         enabled: true
 
     env:
-      NEXT_PUBLIC_API_HOST: explorer.{{ network_subdomain }}
+      NEXT_PUBLIC_API_HOST: explorer-api.{{ network_subdomain }}
+      NEXT_PUBLIC_API_PROTOCOL: https
+      NEXT_PUBLIC_API_WEBSOCKET_PROTOCOL: wss
       NEXT_PUBLIC_NETWORK_NAME: {{ ethereum_network_name }}
       NEXT_PUBLIC_NETWORK_ID: {{ (lookup('ansible.builtin.file', cl_config_path) | from_yaml).DEPOSIT_CHAIN_ID }}
       NEXT_PUBLIC_NETWORK_RPC_URL: https://rpc.{{ network_subdomain }}
+      NEXT_PUBLIC_APP_HOST: explorer.pectra-devnet-4.ethpandaops.io
       NEXT_PUBLIC_APP_PROTOCOL: https
       NEXT_PUBLIC_AD_BANNER_PROVIDER: none
       NEXT_PUBLIC_AD_TEXT_PROVIDER: none
+      NEXT_PUBLIC_STATS_API_HOST: explorer-stats.{{ network_subdomain }}
+
+  stats:
+    enabled: true
+    ingress:
+      enabled: true
+      className: ingress-nginx-public
+      hostname: explorer-stats.{{ network_subdomain }}
+    tls:
+      enabled: true
 
 postgresql:
   enabled: true
