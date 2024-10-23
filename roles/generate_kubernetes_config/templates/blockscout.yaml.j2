@@ -18,17 +18,14 @@ blockscout-stack:
     nameService:
       enabled: true
       url: "https://explorer.{{ network_subdomain }}"
-  postgresql:
-    enabled: true
-    fullnameOverride: blockscout-postgresql
-    primary:
-      persistence:
-        size: "{{ gen_kubernetes_blockscout_postgres_size | default("100Gi") }}"
+    prometheus:
+      enabled: false
 
-## Configuration options for backend
   blockscout:
+    fullnameOverride: blockscout-backend
     podAnnotations:
       "promtail.io/ignore_pod": "true"
+
     image:
       repository: {{ default_tooling_images.blockscout.split(':') | first }}
       tag: {{ default_tooling_images.blockscout.split(':') | last }}
@@ -43,14 +40,12 @@ blockscout-stack:
       DATABASE_URL: postgres://postgres:postgres@blockscout-postgresql:5432/blockscout?ssl=false
       DISABLE_EXCHANGE_RATES: "true"
       ECTO_USE_SSL: "false"
-
-
       INDEXER_COIN_BALANCES_BATCH_SIZE: "5"
       NETWORK: Ethereum
       SUBNETWORK: {{ ethereum_network_name }}
-
       POOL_SIZE: "15"
       CHAIN_SPEC_PATH: /config-update/chainspec.json
+
     extraVolumes:
       - name: config-update
         emptyDir: {}
@@ -79,16 +74,15 @@ blockscout-stack:
           - name: config-update
             mountPath: /config-update
 
-
-
-
   frontend:
     image:
       repository: {{ default_tooling_images.blockscout_frontend.split(':') | first }}
       tag: {{ default_tooling_images.blockscout_frontend.split(':') | last }}
       pullPolicy: {% if "latest" in (default_tooling_images.blockscout_frontend.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
+
     podAnnotations:
       "promtail.io/ignore_pod": "true"
+
     ingress:
       enabled: true
       className: ingress-nginx-public
@@ -97,8 +91,16 @@ blockscout-stack:
           paths:
             - path: /
               pathType: Prefix
+
     env:
       NEXT_PUBLIC_NETWORK_NAME: {{ ethereum_network_name }}
       NEXT_PUBLIC_NETWORK_ID: {{ (lookup('ansible.builtin.file', cl_config_path) | from_yaml).DEPOSIT_CHAIN_ID }}
       NEXT_PUBLIC_NETWORK_RPC_URL: https://rpc.{{ ethereum_network_name }}.{{ network_subdomain }}
       NEXT_PUBLIC_APP_PROTOCOL: https
+
+postgresql:
+    enabled: true
+    fullnameOverride: blockscout-postgresql
+    primary:
+      persistence:
+        size: "{{ gen_kubernetes_blockscout_postgres_size | default("100Gi") }}"

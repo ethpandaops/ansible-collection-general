@@ -67,11 +67,11 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
       - name: postgresql
         repository: https://charts.bitnami.com/bitnami
         version: "14.x.x"
-        condition: blockscout-stack.postgresql.enabled
+        condition: postgresql.enabled
       - name: redis
         repository: https://charts.bitnami.com/bitnami
         version: "18.x.x"
-        condition: blockscout-stack.redis.enabled
+        condition: redis.enabled
   checkpointz:
     valuesTemplatePath: templates/checkpointz.yaml.j2
     dependencies:
