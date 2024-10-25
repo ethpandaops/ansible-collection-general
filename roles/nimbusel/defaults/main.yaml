@@ -40,7 +40,7 @@ nimbusel_container_command_default:
   - --data-dir=/data
   - --net-key=/data/nodekey
   - --http-port={{ nimbusel_ports_http_rpc }}
-  - --http.address=0.0.0.0
+  - --http-address=0.0.0.0
   - --rpc
   - --rpc-api=eth,debug
   - --ws
