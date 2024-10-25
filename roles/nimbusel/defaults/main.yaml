@@ -42,9 +42,7 @@ nimbusel_container_command_default:
   - --http-port={{ nimbusel_ports_http_rpc }}
   - --http-address=0.0.0.0
   - --rpc
-  - --rpc-api=eth,debug
   - --ws
-  - --ws-api=eth,debug
   - --engine-api
   - --engine-api-address=0.0.0.0
   - --engine-api-port={{ nimbusel_ports_engine }}
