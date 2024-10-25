@@ -5,6 +5,7 @@ ethereum_node_supported_el:
   - nethermind
   - ethereumjs
   - reth
+  - nimbusel
 
 ethereum_node_supported_cl:
   - lighthouse

@@ -1,0 +1,71 @@
+nimbusel_user: nimbusel
+nimbusel_datadir: /data/nimbusel
+nimbusel_auth_jwt_path: /data/execution-auth.secret
+nimbusel_announced_ip: "{{ ansible_host }}"
+nimbusel_announced_ipv6: "{{ ansible_default_ipv6.address if nimbusel_ipv6_enabled and ansible_default_ipv6.address is defined else '' }}"
+
+nimbusel_cleanup: false # when set to "true" it will remove the container
+
+nimbusel_ports_p2p: 30303
+nimbusel_ports_http_rpc: 8545
+nimbusel_ports_engine: 8551
+nimbusel_ports_metrics: 6060
+
+nimbusel_ipv6_enabled: false
+
+nimbusel_container_name: nimbusel
+nimbusel_container_image: ethpandaops/nimbus-eth1:master
+nimbusel_container_env: {}
+nimbusel_container_ports_ipv4:
+  - "127.0.0.1:{{ nimbusel_ports_http_rpc }}:{{ nimbusel_ports_http_rpc }}"
+  - "127.0.0.1:{{ nimbusel_ports_engine }}:{{ nimbusel_ports_engine }}"
+  - "0.0.0.0:{{ nimbusel_ports_p2p }}:{{ nimbusel_ports_p2p }}"
+  - "0.0.0.0:{{ nimbusel_ports_p2p }}:{{ nimbusel_ports_p2p }}/udp"
+
+nimbusel_container_ports_ipv6:
+  - "[::]:{{ nimbusel_ports_p2p }}:{{ nimbusel_ports_p2p }}"
+  - "[::]:{{ nimbusel_ports_p2p }}:{{ nimbusel_ports_p2p }}/udp"
+
+nimbusel_container_ports: >-
+  {{ nimbusel_container_ports_ipv4 + (nimbusel_container_ports_ipv6 if nimbusel_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
+
+nimbusel_container_volumes:
+  - "{{ nimbusel_datadir }}:/data"
+  - "{{ nimbusel_auth_jwt_path }}:/execution-auth.jwt:ro"
+nimbusel_container_security_opts: []
+nimbusel_container_stop_timeout: "300"
+nimbusel_container_networks: []
+nimbusel_container_command_default:
+  - --log-level=INFO
+  - --data-dir=/data
+  - --net-key=/data/nodekey
+  - --http-port={{ nimbusel_ports_http_rpc }}
+  - --http-address=0.0.0.0
+  - --rpc
+  - --ws
+  - --engine-api
+  - --engine-api-address=0.0.0.0
+  - --engine-api-port={{ nimbusel_ports_engine }}
+  - --jwt-secret=/execution-auth.jwt
+  - --metrics
+  - --metrics-address=0.0.0.0
+  - --metrics-port={{ nimbusel_ports_metrics }}
+  - --nat=extip:{{ nimbusel_announced_ip }}
+  - --tcp-port={{ nimbusel_ports_p2p }}
+
+nimbusel_container_command_v6: []
+  # - --nat=extip:{{ nimbusel_announced_ipv6 }} # not supported
+
+nimbusel_container_command: >-
+  {{
+    nimbusel_container_command_default +
+    (nimbusel_container_command_v6 if nimbusel_ipv6_enabled and ansible_default_ipv6.address is defined
+    else [])
+  }}
+
+nimbusel_container_command_extra_args: []
+#  - --rpc-api=eth,debug
+#  - --http.vhosts=*
+
+# Default image pull policy
+nimbusel_container_pull: false
