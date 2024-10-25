@@ -1,7 +1,0 @@
-- name: Remove nimbus_eth1 containers
-  community.docker.docker_container:
-    name: "{{ item }}"
-    state: absent
-  loop:
-    - "{{ nimbus_eth1_container_name }}"
-    - "{{ nimbus_eth1_container_name }}-init"

@@ -1,7 +1,0 @@
-- name: Setup nimbus_eth1
-  ansible.builtin.import_tasks: setup.yaml
-  when: not nimbus_eth1_cleanup
-
-- name: Cleanup nimbus_eth1
-  ansible.builtin.import_tasks: cleanup.yaml
-  when: nimbus_eth1_cleanup
