@@ -57,10 +57,8 @@ assertoor:
 {% endfor %}
     validatorPairNames:
 {% for host in (groups['ethereum_node']) | sort %}
-{% if hostvars[host]['validator_start'] and hostvars[host]['validator_end'] is defined %}
-{% if hostvars[host]['validator_start'] and hostvars[host]['validator_end'] > hostvars[host]['validator_start'] %}
+{% if hostvars[host].get('validator_start') | default(false) and hostvars[host].get('validator_end') | default(false) > hostvars[host].get('validator_start') | default(false) %}
       - {{ hostvars[host]['inventory_hostname'] }}
-{% endif %}
 {% endif %}
 {% endfor %}
 
