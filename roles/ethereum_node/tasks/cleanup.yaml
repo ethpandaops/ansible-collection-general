@@ -40,12 +40,12 @@
   vars:
     reth_cleanup: true
 
-- name: "Cleanup execution client: nimbus_eth1"
-  when: (ethereum_node_el != "nimbus_eth1") or (not ethereum_node_el_enabled)
+- name: "Cleanup execution client: nimbusel"
+  when: (ethereum_node_el != "nimbusel") or (not ethereum_node_el_enabled)
   ansible.builtin.include_role:
-    name: ethpandaops.general.nimbus_eth1
+    name: ethpandaops.general.nimbusel
   vars:
-    nimbus_eth1_cleanup: true
+    nimbusel_cleanup: true
 
 - name: "Cleanup consensus client: lighthouse"
   when: (ethereum_node_cl != "lighthouse") or (not ethereum_node_cl_enabled)
