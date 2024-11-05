@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# Check if a Docker container named "beacon" is running
+if docker ps --filter "name=beacon" --filter "status=running" | grep -q "beacon"; then
+  echo "Container 'beacon' is already running. Exiting."
+  echo "Please stop beacon before running this script with 'docker stop beacon'"
+  exit 0
+else
+  echo "Container 'beacon' is not running. Continuing..."
+  # Your additional commands go here
+fi
+
+
+sudo /home/devops/grandine/target/release/grandine \
+    --data-dir=/data/grandine \
+    --http-address=127.0.0.1 \
+    --http-port={{ grandine_ports_http_beacon }} \
+    --libp2p-port={{ grandine_ports_p2p_tcp }} \
+    --discovery-port={{ grandine_ports_p2p_tcp }} \
+    --jwt-secret=/data/execution-auth.secret \
+    --eth1-rpc-urls=http://127.0.0.1:8561 \
+    --disable-enr-auto-update \
+    --enr-address={{ grandine_announced_ip }} \
+    --enr-udp-port={{ grandine_ports_p2p_udp }} \
+    --enr-tcp-port={{ grandine_ports_p2p_tcp }} \
+    --quic-port={{ grandine_ports_quic }} \
+    --enr-quic-port={{ grandine_ports_quic }} \
+    --metrics \
+    --metrics-address=127.0.0.1 \
+    --metrics-port={{ grandine_ports_metrics }} \
+    --keystore-dir=/data/grandine-validator/keys \
+    --keystore-password-file=/data/grandine-validator/secrets \
+    --suggested-fee-recipient={{ grandine_validator_fee_recipient }} \
+    --configuration-directory=/data/ethereum-network-config/metadata/ \
+    --network=custom \
+    --boot-nodes={{ ethereum_cl_bootnodes | join(',') }} \
+    --graffiti={{ ansible_hostname }} \
+    --features=WarnOnStateCacheSlotProcessing \
+    --features=LogHttpRequests \
+    --features=LogHttpBodies \
+    --checkpoint-sync-url={{ checkpoint_sync_url }} \
+    --force-checkpoint-sync

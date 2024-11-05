@@ -60,3 +60,11 @@
     user: "{{ grandine_user_meta.uid }}"
     pull: "{{ grandine_container_pull | bool }}"
     security_opts: "{{ grandine_container_security_opts }}"
+
+- name: Add oneliner.sh to the host machine
+  ansible.builtin.template:
+    src: oneliner.sh.j2
+    dest: /home/{{ ansible_user }}/oneliner.sh
+    mode: "0755"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
