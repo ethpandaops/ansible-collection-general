@@ -5,7 +5,12 @@ if docker ps --filter "name=beacon" --filter "status=running" | grep -q "beacon"
   exit 0
 else
   echo "Container 'beacon' is not running. Continuing..."
-  # Your additional commands go here
+  echo "Checking if grandine binary exists... at /home/{{ ansible_user }}/grandine/target/release/grandine"
+  if [ ! -f /home/{{ ansible_user }}/grandine/target/release/grandine ]; then
+    echo "grandine binary not found. Exiting."
+    echo "Please build grandine with 'cargo build --release' from the grandine directory."
+    exit 1
+  fi
 fi
 
 
