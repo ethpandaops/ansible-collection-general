@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # Check if a Docker container named "beacon" is running
 if docker ps --filter "name=beacon" --filter "status=running" | grep -q "beacon"; then
   echo "Container 'beacon' is already running. Exiting."
