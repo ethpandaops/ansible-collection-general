@@ -10,6 +10,7 @@ node_exporter_container_volumes:
 node_exporter_container_stop_timeout: "30"
 node_exporter_container_networks:
   - name: "host"
+node_exporter_container_command_extra_args: []
 node_exporter_container_command:
   - '--path.procfs=/host/proc'
   - '--path.rootfs=/rootfs'
