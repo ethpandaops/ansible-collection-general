@@ -13,5 +13,5 @@
     command: >-
       {{
         node_exporter_container_command +
-        node_exporter_container_command_extra_args +
+        node_exporter_container_command_extra_args
       }}
