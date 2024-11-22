@@ -16,7 +16,7 @@
   when: eth_testnet_config_git_enabled
 
 - name: Move files to destination
-  ansible.builtin.command: mv "{{ eth_testnet_temp_config_dir }}/{{ eth_testnet_path_in_temp_git_repo }}" "{{ eth_testnet_config_dir }}"
+  ansible.builtin.command: mv "{{ eth_testnet_temp_config_dir }}/{{ eth_testnet_path_in_temp_git_repo }}" "{{ eth_testnet_config_dir }}" # noqa: no-changed-when
   when: eth_testnet_config_git_enabled
 
 # Option B: Allow copying over local dir
