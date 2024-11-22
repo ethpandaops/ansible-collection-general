@@ -13,6 +13,7 @@
     repo: "{{ eth_testnet_config_git_repo }}"
     dest: "{{ eth_testnet_temp_config_dir }}"
     version: "{{ eth_testnet_config_git_version }}"
+    update: yes
   when: eth_testnet_config_git_enabled
 
 - name: Move files to destination
