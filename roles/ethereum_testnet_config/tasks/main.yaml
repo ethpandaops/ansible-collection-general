@@ -22,7 +22,7 @@
 
 - name: Recursively remove directory
   ansible.builtin.file:
-    path: /tmp/checkout
+    path: "{{ eth_testnet_temp_config_dir }}"
     state: absent
   when: eth_testnet_config_git_enabled
 
