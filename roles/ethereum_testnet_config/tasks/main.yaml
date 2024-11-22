@@ -20,6 +20,12 @@
   ansible.builtin.command: mv "{{ eth_testnet_temp_config_dir }}/{{ eth_testnet_path_in_temp_git_repo }}" "{{ eth_testnet_config_dir }}" # noqa: no-changed-when
   when: eth_testnet_config_git_enabled
 
+- name: Recursively remove directory
+  ansible.builtin.file:
+    path: /tmp/checkout
+    state: absent
+  when: eth_testnet_config_git_enabled
+
 # Option B: Allow copying over local dir
 - name: Create dest dir
   ansible.builtin.file:
