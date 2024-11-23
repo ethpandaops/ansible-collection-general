@@ -4,7 +4,7 @@ eth_testnet_config_git_enabled: false # noqa var-naming[no-role-prefix]
 eth_testnet_config_git_repo: https://github.com/ethpandaops/dencun-devnets # noqa var-naming[no-role-prefix]
 eth_testnet_config_git_version: master # noqa var-naming[no-role-prefix]
 eth_testnet_temp_config_dir: /tmp/checkout # noqa var-naming[no-role-prefix]
-eth_testnet_path_in_temp_git_repo: network-configs/devnet-0/metadata # noqa var-naming[no-role-prefix]
+eth_testnet_path_in_temp_git_repo: network-configs/devnet-0/metadata/ # noqa var-naming[no-role-prefix]
 eth_testnet_config_git_update: false # noqa var-naming[no-role-prefix] - Once it's cloned, it wont update anymore, unless this var is changed
 
 eth_testnet_config_local_dir_enabled: false # noqa var-naming[no-role-prefix]
