@@ -14,6 +14,7 @@
     dest: "{{ eth_testnet_temp_config_dir }}"
     version: "{{ eth_testnet_config_git_version }}"
     update: true
+    force: true
   when: eth_testnet_config_git_enabled
 
 - name: Synchronize two directories on one remote host.
