@@ -13,11 +13,14 @@
     repo: "{{ eth_testnet_config_git_repo }}"
     dest: "{{ eth_testnet_temp_config_dir }}"
     version: "{{ eth_testnet_config_git_version }}"
-    update: yes
+    update: true
   when: eth_testnet_config_git_enabled
 
-- name: Move files to destination
-  ansible.builtin.command: mv "{{ eth_testnet_temp_config_dir }}/{{ eth_testnet_path_in_temp_git_repo }}" "{{ eth_testnet_config_dir }}" # noqa: no-changed-when
+- name: Synchronize two directories on one remote host.
+  ansible.posix.synchronize:
+    src: "{{ eth_testnet_temp_config_dir }}/{{ eth_testnet_path_in_temp_git_repo }}"
+    dest: "{{ eth_testnet_config_dir }}"
+  delegate_to: "{{ inventory_hostname }}"
   when: eth_testnet_config_git_enabled
 
 - name: Recursively remove directory
