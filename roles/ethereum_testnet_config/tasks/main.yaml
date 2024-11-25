@@ -17,6 +17,13 @@
     force: true
   when: eth_testnet_config_git_enabled
 
+- name: Create dest dir
+  ansible.builtin.file:
+    path: "{{ eth_testnet_config_dir }}"
+    state: directory
+    recurse: true
+  when: eth_testnet_config_git_enabled
+
 - name: Synchronize two directories on one remote host.
   ansible.posix.synchronize:
     src: "{{ eth_testnet_temp_config_dir }}/{{ eth_testnet_path_in_temp_git_repo }}"
