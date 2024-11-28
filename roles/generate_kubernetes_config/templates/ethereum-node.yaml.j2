@@ -94,7 +94,7 @@
       pullPolicy: Always
     p2pNodePort:
       enabled: true
-      port: {{ (31000 | random(start=31000, seed=ethereum_genesis_network_seed)) }}
+      port: {{ (32000 | random(start=31000, seed=ethereum_genesis_network_seed)) }}
     persistence:
       enabled: true
       size: 100Gi
@@ -180,7 +180,7 @@
     mode: "beacon"
     p2pNodePort:
       enabled: true
-      port: {{ (32000 | random(start=32000, seed=ethereum_genesis_network_seed)) }}
+      port: {{ (33000 | random(start=32000, seed=ethereum_genesis_network_seed)) }}
     podLabels:
       network: {{ ethereum_network_name }}
       testnet: {{ ethereum_network_name }}
