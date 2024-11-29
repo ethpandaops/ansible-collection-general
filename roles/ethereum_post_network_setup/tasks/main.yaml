@@ -18,36 +18,52 @@
     # Generate missing network config files
     - name: Generate enodes.txt for EL clients
       ansible.builtin.copy:
-        content: |
-          {% for host in (groups['ethereum_node'] | sort | unique)[:20] %}
+        content: |-
+        content: |-
+          {% for host in (groups['ethereum_node'] | sort | unique)[:20] -%}
           {% if hostvars[host]['ethereum_node_fact_el_enode'] is defined %}
-          {{ hostvars[host]['ethereum_node_fact_el_enode'] | rstrip }}
+          {{ hostvars[host]['ethereum_node_fact_el_enode'] }}
+          {%- if not loop.last %}
+
+          {% endif %}
           {% endif %}
           {% endfor %}
         dest: "{{ ethereum_genesis_generator_output_dir }}/metadata/enodes.txt"
         mode: "0644"
     - name: Generate "bootstrap_nodes.txt" for CL clients
       ansible.builtin.copy:
-        content: |
-          {% for host in ((groups['ethereum_node'] + groups['bootnode']) | sort | unique)[:20] %}
+        content: |-
+          {% for host in ((groups['ethereum_node'] + groups['bootnode']) | sort | unique)[:20] -%}
           {% if hostvars[host]['cl_bootnode_fact_enr'] is defined %}
           {{ hostvars[host]['cl_bootnode_fact_enr'] }}
+          {%- if not loop.last %}
+
+          {% endif %}
           {% endif %}
           {% if hostvars[host]['ethereum_node_fact_cl_enr'] is defined %}
-          {{ hostvars[host]['ethereum_node_fact_cl_enr'] | rstrip }}
+          {{ hostvars[host]['ethereum_node_fact_cl_enr'] }}
+          {%- if not loop.last %}
+
+          {% endif %}
           {% endif %}
           {% endfor %}
         dest: "{{ ethereum_genesis_generator_output_dir }}/metadata/bootstrap_nodes.txt"
         mode: "0644"
     - name: Generate "bootstrap_nodes.yaml" for Prysm
       ansible.builtin.copy:
-        content: |
-          {% for host in ((groups['ethereum_node'] + groups['bootnode']) | sort | unique)[:20] %}
+        content: |-
+          {% for host in ((groups['ethereum_node'] + groups['bootnode']) | sort | unique)[:20] -%}
           {% if hostvars[host]['cl_bootnode_fact_enr'] is defined %}
           - {{ hostvars[host]['cl_bootnode_fact_enr'] }}
+          {%- if not loop.last %}
+
+          {% endif %}
           {% endif %}
           {% if hostvars[host]['ethereum_node_fact_cl_enr'] is defined %}
           - {{ hostvars[host]['ethereum_node_fact_cl_enr'] }}
+          {%- if not loop.last %}
+
+          {% endif %}
           {% endif %}
           {% endfor %}
         dest: "{{ ethereum_genesis_generator_output_dir }}/metadata/bootstrap_nodes.yaml"
