@@ -63,7 +63,7 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
     dependencies:
       - name: blockscout-stack
         repository: https://blockscout.github.io/helm-charts
-        version: 1.6.8
+        version: 1.8.0
       - name: postgresql
         repository: https://charts.bitnami.com/bitnami
         version: "14.x.x"
@@ -79,7 +79,7 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
     dependencies:
       - name: dugtrio
         repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 0.0.3
+        version: 0.0.6
   ethstats:
     valuesTemplatePath: templates/ethstats.yaml.j2
     dependencies:
@@ -97,7 +97,7 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
     dependencies:
       - name: forkmon
         repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 0.1.4
+        version: 0.1.5
   dora:
     valuesTemplatePath: templates/dora.yaml.j2
     dependencies:
@@ -115,7 +115,7 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
     dependencies:
       - name: testnet-homepage
         repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 0.2.2
+        version: 0.2.3
   rpc:
     valuesTemplatePath: templates/rpc-proxy.yaml.j2
     dependencies:
@@ -139,5 +139,5 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
     dependencies:
       - name: ethereum-node
         repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 0.0.7
+        version: 0.0.27
         alias: "{{ gen_kubernetes_config_ethereum_node_name }}"
