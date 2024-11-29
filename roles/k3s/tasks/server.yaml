@@ -7,6 +7,13 @@
     group: root
     mode: "0644"
 
+- name: Create directory .kube
+  ansible.builtin.file:
+    path: ~/{{ ansible_user }}/.kube
+    state: directory
+    owner: "{{ ansible_user }}"
+    mode: "u=rwx,g=rx,o="
+
 - name: Copy config file to user home directory
   ansible.builtin.copy:
     src: /etc/rancher/k3s/k3s.yaml
@@ -67,13 +74,6 @@
   ansible.builtin.file:
     path: "{{ k3s_server_location }}/server/node-token"
     mode: "{{ p.stat.mode }}"
-
-- name: Create directory .kube
-  ansible.builtin.file:
-    path: ~/{{ ansible_user }}/.kube
-    state: directory
-    owner: "{{ ansible_user }}"
-    mode: "u=rwx,g=rx,o="
 
 - name: Replace https://localhost:6443 by https://master-ip:6443
   ansible.builtin.command: >-
