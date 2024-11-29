@@ -1,0 +1,102 @@
+# {{ ansible_managed }}
+tracoor-single:
+  fullnameOverride: "tracoor"
+  image:
+    repository: {{ default_tooling_images.tracoor.split(':') | first }}
+    tag: {{ default_tooling_images.tracoor.split(':') | last }}
+    pullPolicy: {% if "latest" in (default_tooling_images.tracoor.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
+
+  resources:
+    requests:
+      cpu: 1000m
+      memory: 2Gi
+    limits:
+      cpu: 2000m
+      memory: 4Gi
+  ingress:
+    http:
+      enabled: true
+      className: ingress-nginx-public
+      hosts:
+        - host: tracoor.{{ network_subdomain }}
+          paths:
+            - path: /
+              pathType: Prefix
+
+  postgresql:
+    enabled: true
+    fullnameOverride: "tracoor-postgresql"
+    auth:
+      username: <path:/secrets/services/services.enc.yaml#tracoor | jsonPath {.postgres.devnets.username}>
+      password: <path:/secrets/services/services.enc.yaml#tracoor | jsonPath {.postgres.devnets.password}>
+    primary:
+      persistence:
+        enabled: true
+        size: 20Gi
+      resources:
+        requests:
+          cpu: 1000m
+          memory: 2Gi
+        limits:
+          cpu: 2000m
+          memory: 4Gi
+
+  config:
+    shared:
+      metricsAddr: ":9091"
+      logging: "debug"
+      indexer:
+        address: localhost:8081
+      store:
+        type: s3
+        config:
+          region: us-east-1
+          bucket_name: {{ ethereum_network_name }}/tracoor
+          endpoint: https://<path:/secrets/services/services.enc.yaml#cloudflare | jsonPath {.account_ids.ethdevops}>.r2.cloudflarestorage.com/ethpandaops-devnet-dumpster
+          prefer_urls: true
+          access_key: <path:/secrets/services/services.enc.yaml#cloudflare | jsonPath {.r2.devnets.access_key_id}>
+          access_secret: <path:/secrets/services/services.enc.yaml#cloudflare | jsonPath {.r2.devnets.secret_access_key}>
+
+    server:
+      addr: ":8081"
+      gatewayAddr: ":8080"
+      pprofAddr: ":6060"
+      preStopSleepSeconds: 1
+      ntpServer: time.google.com
+      persistence: {}
+      services:
+        indexer:
+          retention:
+            beaconStates: 100h
+            executionBlockTraces: 100h
+            beaconBlocks: 100h
+      ethereum:
+        config:
+          repository: ethpandaops/{{ devnet_name }}-devnets
+          branch: master
+          path: network-configs/{{ ethereum_network_name | replace(devnet_name + "-", '') }}/metadata
+        tools:
+          ncli:
+            repository: {{ default_tooling_images.ncli.split(':') | first | default("status-im/nimbus-eth2") }}
+            branch: {{ default_tooling_images.ncli.split(':') | last | default("unstable") }}
+          lcli:
+            repository: {{ default_tooling_images.lcli.split(':') | first | default("sigp/lighthouse") }}
+            branch: {{ default_tooling_images.lcli.split(':') | last | default("electra-devnet-1") }}
+          zcli:
+            fork: {{ default_tooling_images.zcli | default("electra") }}
+
+    agents:
+{% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
+{% if ((hostvars[host]['inventory_hostname'] | string)[-2:]) == "-1" %}
+      - name: {{ hostvars[host]['inventory_hostname'] }}
+        ethereum:
+          overrideNetworkName: {{ ethereum_network_name }}
+          beacon:
+            nodeAddress: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@bn.{{ hostvars[host]['inventory_hostname'] }}.{{ network_subdomain }}
+          execution:
+            nodeAddress: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@rpc.{{ hostvars[host]['inventory_hostname'] }}.{{ network_subdomain }}
+            traceDisableMemory: true
+            traceDisableStack: true
+            traceDisableStorage: true
+{% endif %}
+{% endfor %}

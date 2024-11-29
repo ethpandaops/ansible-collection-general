@@ -1,3 +1,14 @@
+- name: Copy killall and uninstall scripts
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "/usr/local/bin/{{ item }}"
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - k3s-killall.sh
+    - k3s-uninstall.sh
+
 - name: Check k3s-agent systemd file
   ansible.builtin.stat:
     path: "{{ k3s_systemd_dir }}/k3s-agent.service"
@@ -24,6 +35,16 @@
     enabled: false
   when: k3s_cleanup_systemd_server_meta.stat.exists
 
+- name: Run killall script
+  ansible.builtin.command: "/usr/local/bin/k3s-killall.sh"
+  failed_when: false
+  changed_when: true
+
+- name: Run uninstall script
+  ansible.builtin.command: "/usr/local/bin/k3s-uninstall.sh"
+  failed_when: false
+  changed_when: true
+
 - name: Remove binaries and directories
   ansible.builtin.file:
     path: "{{ item }}"
@@ -32,8 +53,10 @@
     - /usr/local/bin/k3s
     - /usr/local/bin/kubectl
     - /usr/local/bin/crictl
+    - /usr/local/bin/k3s-killall.sh
+    - /usr/local/bin/k3s-uninstall.sh
     - /etc/rancher
-    - "~{{ ansible_user }}/.kube"
+    - "~/{{ ansible_user }}/.kube"
     - "{{ k3s_server_location }}/data"
     - "{{ k3s_server_location }}/agent"
     - "{{ k3s_server_location }}/server"
@@ -42,6 +65,9 @@
 
 - name: Remove local-path PV directories
   ansible.builtin.file:
-    path: "{{ k3s_server_location }}/storage"
+    path: "{{ item }}"
     state: absent
-  when: k3s_cleanup_localpath_persisten_volumes
+  loop:
+    - "{{ k3s_server_location }}/storage"
+    - /opt/local-path-provisioner
+  when: k3s_cleanup_localpath_persistent_volumes

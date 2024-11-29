@@ -31,6 +31,8 @@ platforms:
     pre_build_image: true
 provisioner:
   name: ansible
+  env:
+    ANSIBLE_VERBOSITY: 3
   inventory:
     group_vars:
       all:
@@ -38,9 +40,24 @@ provisioner:
         ethereum_node_announced_ip: 127.0.0.1
         docker_daemon_options:
           storage-driver: "vfs"
+        # Fixes for integration tests to be able to run
+        lighthouse_container_command_extra_args:
+        # Fixes: Failed to start beacon node reason: Syncing from genesis is insecure and
+        # incompatible with data availability checks. You should instead perform a checkpoint
+        # sync from a trusted node using the --checkpoint-sync-url option. For a list of public endpoints,
+        #  see: https://eth-clients.github.io/checkpoint-sync-endpoints/
+        # Alternatively, use --allow-insecure-genesis-sync if the risks are understood.",
+          - --allow-insecure-genesis-sync
+        teku_container_command_extra_args:
+         # Fixes: Cannot sync outside of weak subjectivity period.
+         # Consider re-syncing your node using --checkpoint-sync-url or use --ignore-weak-subjectivity-period-enabled to ignore this check
+          - --ignore-weak-subjectivity-period-enabled
     host_vars:
       ethereum_node:
-        ethereum_node_cl: ${CONSENSUS_CLIENT:-lighthouse.yml}
-        ethereum_node_el: ${EXECUTION_CLIENT:-geth.yml}
+        ethereum_node_cl: ${CONSENSUS_CLIENT:-lighthouse}
+        ethereum_node_el: ${EXECUTION_CLIENT:-geth}
+        # Add additional vars here if you're manually testing a feature:
+        # ethereum_node_external_builder_enabled: true
+        # ethereum_node_external_builder_type: mev_boost
 verifier:
   name: ansible

@@ -1,0 +1,7 @@
+- name: Setup
+  ansible.builtin.import_tasks: setup.yaml
+  when: not traffic_control_cleanup
+
+- name: Cleanup
+  ansible.builtin.import_tasks: cleanup.yaml
+  when: traffic_control_cleanup

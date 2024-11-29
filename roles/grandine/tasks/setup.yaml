@@ -1,0 +1,62 @@
+- name: Add grandine user
+  ansible.builtin.user:
+    name: "{{ grandine_user }}"
+  register: grandine_user_meta
+
+- name: Create data dir
+  ansible.builtin.file:
+    path: "{{ grandine_datadir }}"
+    state: directory
+    mode: "0750"
+    owner: "{{ grandine_user }}"
+    group: "{{ grandine_user }}"
+
+- name: Set permissions
+  ansible.builtin.command: "chown -R {{ grandine_user }}:{{ grandine_user }} {{ grandine_datadir }}" # noqa no-free-form
+  changed_when: false
+
+- name: Create validator data dir
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0750"
+    owner: "{{ grandine_user }}"
+    group: "{{ grandine_user }}"
+  loop:
+    - "{{ grandine_validator_datadir }}"
+    - "{{ grandine_validator_datadir }}/keys"
+    - "{{ grandine_validator_datadir }}/secrets"
+  when: grandine_validator_enabled
+
+- name: Set permissions for validator data dir
+  ansible.builtin.command: "chown -R {{ grandine_user }}:{{ grandine_user }} {{ grandine_validator_datadir }}" # noqa no-free-form
+  changed_when: false
+  when: grandine_validator_enabled
+
+- name: Run grandine container
+  community.docker.docker_container:
+    name: "{{ grandine_container_name }}"
+    image: "{{ grandine_container_image }}"
+    image_name_mismatch: recreate
+    state: started
+    restart_policy: always
+    stop_timeout: "{{ grandine_container_stop_timeout }}"
+    ports: "{{ grandine_container_ports }}"
+    volumes: "{{ grandine_container_volumes + (grandine_validator_enabled | ternary(grandine_container_validator_volumes, [])) }}"
+    env: "{{ grandine_container_env }}"
+    networks: "{{ grandine_container_networks }}"
+    entrypoint: "{{ grandine_container_entrypoint | default(omit) }}"
+    command: >-
+      {{
+        grandine_container_command +
+        (grandine_validator_enabled | ternary(grandine_container_validator_args +
+          (grandine_mev_boost_enabled | ternary(grandine_mev_boost_beacon_command,[])),
+        [])) +
+        (grandine_checkpoint_sync_enabled | ternary(
+          grandine_container_command_extra_args + grandine_container_command_checkpoint_args,
+          grandine_container_command_extra_args
+        ))
+      }}
+    user: "{{ grandine_user_meta.uid }}"
+    pull: "{{ grandine_container_pull | bool }}"
+    security_opts: "{{ grandine_container_security_opts }}"

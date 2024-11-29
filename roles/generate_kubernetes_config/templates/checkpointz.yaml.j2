@@ -7,7 +7,7 @@ checkpointz:
   image:
     repository: {{ default_tooling_images.checkpointz.split(':') | first }}
     tag: {{ default_tooling_images.checkpointz.split(':') | last }}
-    pullPolicy: {% if default_tooling_images.checkpointz.split(':') | last == 'latest' %}Always{% else %}IfNotPresent{% endif %}
+    pullPolicy: {% if "latest" in (default_tooling_images.checkpointz.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
 
   resources:
     requests:
@@ -46,11 +46,13 @@ checkpointz:
 
     beacon:
       upstreams:
-      - name: rpc-{{ gen_kubernetes_config_ethereum_node_name }}
-        address: {{ default_cl_endpoint }}
-        dataProvider: true
+        - name: rpc-{{ gen_kubernetes_config_ethereum_node_name }}
+          address: {{ default_cl_endpoint }}
+          dataProvider: true
 {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
-      - name: {{ hostvars[host]['inventory_hostname'] }}
-        address: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@bn.{{ hostvars[host]['inventory_hostname'] }}.{{ network_subdomain }}
-        dataProvider: true
+{% if ((hostvars[host]['inventory_hostname'] | string)[-2:]) == "-1" %}
+        - name: {{ hostvars[host]['inventory_hostname'] }}
+          address: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@bn.{{ hostvars[host]['inventory_hostname'] }}.{{ network_subdomain }}
+          dataProvider: true
+{% endif %}
 {% endfor %}

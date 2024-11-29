@@ -7,6 +7,8 @@ ethereum_node_fact_discovery_el_key_cmd:
   geth: cat /data/geth/geth/nodekey
   erigon: cat /data/erigon/nodekey
   nethermind: xxd -p -c32 /data/nethermind/keystore/node.key.plain
+  reth: cat /data/reth/discovery-secret
+  nimbusel: cat /data/nimbusel/nodekey | cut -d 'x' -f2
 
 # How to find the EL enode on the target system
 ethereum_node_fact_discovery_el_enode_cmd:

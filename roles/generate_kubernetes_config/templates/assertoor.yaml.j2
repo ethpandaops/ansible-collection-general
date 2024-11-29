@@ -1,0 +1,65 @@
+# {{ ansible_managed }}
+
+assertoor:
+  fullnameOverride: assertoor
+
+  image:
+    repository: {{ default_tooling_images.assertoor.split(':') | first }}
+    tag: {{ default_tooling_images.assertoor.split(':') | last }}
+    pullPolicy: {% if "latest" in (default_tooling_images.assertoor.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
+
+  resources:
+    requests:
+      cpu: 500m
+      memory: 500Mi
+    limits:
+      cpu: 2000m
+      memory: 2Gi
+
+  ingress:
+    enabled: true
+    className: ingress-nginx-public
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-production
+    hosts:
+      - host: assertoor.{{ network_subdomain }}
+        paths:
+          - path: /
+            pathType: Prefix
+
+  ingressAdmin:
+    enabled: true
+    className: ingress-nginx-public
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-production
+    hosts:
+      - host: assertoor-admin.{{ network_subdomain }}
+        paths:
+          - path: /
+            pathType: Prefix
+
+  persistence:
+    enabled: true
+
+  endpoints:
+{% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
+    - name:  {{ hostvars[host]['inventory_hostname'] }}
+      executionUrl: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@rpc.{{ hostvars[host]['inventory_hostname'] }}.{{ network_subdomain }}
+      consensusUrl: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@bn.{{ hostvars[host]['inventory_hostname'] }}.{{ network_subdomain }}
+{% endfor %}
+
+  validatorNamesInventory: https://config.{{ network_subdomain }}/api/v1/nodes/validator-ranges
+  globalVariables:
+    walletPrivkey: "<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.assertoor_private_key}>"
+    clientPairNames:
+{% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
+      - {{ hostvars[host]['inventory_hostname'] }}
+{% endfor %}
+    validatorPairNames:
+{% for host in (groups['ethereum_node']) | sort %}
+{% if hostvars[host].get('validator_start') | default(false) and hostvars[host].get('validator_end') | default(false) > hostvars[host].get('validator_start') | default(false) %}
+      - {{ hostvars[host]['inventory_hostname'] }}
+{% endif %}
+{% endfor %}
+
+  assertoorTests: []

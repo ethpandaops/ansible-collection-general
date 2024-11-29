@@ -28,13 +28,18 @@ dora:
   validatorNamesInventory: "https://config.{{ network_subdomain }}/api/v1/nodes/validator-ranges"
   proxyCount: 2
   extraEnv:
-   - name: FRONTEND_PPROF
-     value: "true"
-   
+    - name: FRONTEND_PPROF
+      value: "true"
+    - name: FRONTEND_SHOW_SENSITIVE_PEER_INFOS
+      value: "true"
+{% if 'peerdas' in ethereum_network_name %}
+    - name: FRONTEND_SHOW_PEER_DAS_INFOS
+      value: "true"
+{% endif %}
   postgresql:
     name: "dora-postgresql"
     fullnameOverride: "dora-postgresql"
-  
+
   endpoints:
   # Rpc
   - url: {{ default_cl_endpoint }}
@@ -48,4 +53,16 @@ dora:
 {% if 'lighthouse' in hostvars[host]['inventory_hostname'] %}
     archive: true
 {% endif %}
+{% endfor %}
+  executionEndpoints:
+  # Rpc
+  - url: {{ default_el_endpoint }}
+    name: rpc-{{ gen_kubernetes_config_ethereum_node_name }}
+    archive: true
+    priority: 1
+{% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
+  - url: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@rpc.{{ hostvars[host]['inventory_hostname'] }}.{{ network_subdomain }}
+    name: {{ hostvars[host]['inventory_hostname'] }}
+    priority: -1
+    archive: false
 {% endfor %}

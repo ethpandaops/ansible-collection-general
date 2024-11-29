@@ -52,6 +52,7 @@
     volumes: "{{ geth_container_volumes }}"
     env: "{{ geth_container_env }}"
     networks: "{{ geth_container_networks }}"
+    entrypoint: "{{ geth_container_entrypoint | default(omit) }}"
     command: "{{ geth_container_command + geth_container_command_extra_args }}"
     user: "{{ geth_user_meta.uid }}"
     pull: "{{ geth_container_pull | bool }}"

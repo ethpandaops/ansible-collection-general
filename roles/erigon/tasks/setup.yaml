@@ -28,7 +28,7 @@
         image: "{{ erigon_container_image }}"
         image_name_mismatch: recreate
         detach: false
-        auto_remove: true
+        auto_remove: "{{ erigon_init_autoremove_enabled }}"
         restart_policy: "no"
         state: started
         volumes: "{{ erigon_init_custom_network_container_volumes }}"
@@ -54,7 +54,7 @@
     volumes: "{{ erigon_container_volumes }}"
     env: "{{ erigon_container_env }}"
     networks: "{{ erigon_container_networks }}"
-    entrypoint: "{{ erigon_container_entrypoint }}"
+    entrypoint: "{{ erigon_container_entrypoint | default(omit) }}"
     command: "{{ erigon_container_command + erigon_container_command_extra_args }}"
     user: "{{ erigon_user_meta.uid }}"
     pull: "{{ erigon_container_pull | bool }}"

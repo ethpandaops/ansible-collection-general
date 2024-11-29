@@ -18,12 +18,15 @@ jobs:
     outputs:
       roles: ${{ steps.filter.outputs.changes }}
     steps:
-      - uses: actions/checkout@v3
-      - uses: dorny/paths-filter@v2
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
         id: filter
         with:
           filters: |
             blockscout: roles/blockscout/**
+            bootstrap: roles/bootstrap/**
+            mev_boost: roles/mev_boost/**
+            mev_rs: roles/mev_rs/**
 
   # Integration test using molecule
   job:
@@ -37,7 +40,7 @@ jobs:
         role: ${{ fromJSON(needs.changes.outputs.roles) }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           path: ansible_collections/ethpandaops/general
 

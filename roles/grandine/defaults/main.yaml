@@ -1,0 +1,124 @@
+grandine_user: grandine
+grandine_datadir: /data/grandine
+grandine_auth_jwt_path: /data/execution-auth.secret
+grandine_execution_engine_endpoint: http://geth:8551
+grandine_announced_ip: "{{ ansible_host }}"
+grandine_announced_ipv6: "{{ ansible_default_ipv6.address if grandine_ipv6_enabled and ansible_default_ipv6.address is defined else '' }}"
+grandine_mev_boost_endpoint: "http://mev-boost:18550"
+
+grandine_cleanup: false # when set to "true" it will remove the container
+
+grandine_ports_p2p_tcp: 9000
+grandine_ports_p2p_udp: 9000
+grandine_ports_quic: 9001
+grandine_ports_http_beacon: 5051
+grandine_ports_metrics: 8008
+
+grandine_ipv6_enabled: false
+grandine_supernode_enabled: false
+
+grandine_validator_enabled: false
+grandine_validator_fee_recipient: "0x25941dC771bB64514Fc8abBce970307Fb9d477e9" # theprotocolguild.eth
+grandine_validator_datadir: /data/grandine-validator
+
+################################################################################
+##
+## Beacon node container configuration
+##
+################################################################################
+grandine_container_name: grandine
+grandine_container_image: ethpandaops/grandine:develop
+grandine_container_env: {}
+grandine_container_ports_ipv4:
+  - "127.0.0.1:{{ grandine_ports_http_beacon }}:{{ grandine_ports_http_beacon }}"
+  - "0.0.0.0:{{ grandine_ports_p2p_tcp }}:{{ grandine_ports_p2p_tcp }}"
+  - "0.0.0.0:{{ grandine_ports_p2p_udp }}:{{ grandine_ports_p2p_udp }}/udp"
+  - "0.0.0.0:{{ grandine_ports_quic }}:{{ grandine_ports_quic }}"
+  - "0.0.0.0:{{ grandine_ports_quic }}:{{ grandine_ports_quic }}/udp"
+
+grandine_container_ports_ipv6:
+  - "[::]:{{ grandine_ports_p2p_tcp }}:{{ grandine_ports_p2p_tcp }}"
+  - "[::]:{{ grandine_ports_p2p_udp }}:{{ grandine_ports_p2p_udp }}/udp"
+  - "[::]:{{ grandine_ports_quic }}:{{ grandine_ports_quic }}"
+  - "[::]:{{ grandine_ports_quic }}:{{ grandine_ports_quic }}/udp"
+
+grandine_container_ports: >-
+  {{ grandine_container_ports_ipv4 + (grandine_container_ports_ipv6 if grandine_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
+
+grandine_container_volumes:
+  - "{{ grandine_datadir }}:/data"
+  - "{{ grandine_auth_jwt_path }}:/execution-auth.jwt:ro"
+grandine_container_security_opts: []
+grandine_container_stop_timeout: "300"
+grandine_container_networks: []
+grandine_container_command_default:
+  - --data-dir=/data
+  - --http-address=0.0.0.0
+  - --http-port={{ grandine_ports_http_beacon }}
+  - --libp2p-port={{ grandine_ports_p2p_tcp }}
+  - --discovery-port={{ grandine_ports_p2p_tcp }}
+  - --jwt-secret=/execution-auth.jwt
+  - --eth1-rpc-urls={{ grandine_execution_engine_endpoint }}
+  - --disable-enr-auto-update
+  - --enr-address={{ grandine_announced_ip }}
+  - --enr-udp-port={{ grandine_ports_p2p_udp }}
+  - --enr-tcp-port={{ grandine_ports_p2p_tcp }}
+  - --quic-port={{ grandine_ports_quic }}
+  - --enr-quic-port={{ grandine_ports_quic }}
+  - --metrics
+  - --metrics-address=0.0.0.0
+  - --metrics-port={{ grandine_ports_metrics }}
+
+grandine_container_command_v6:
+  - --listen-address-ipv6={{ grandine_announced_ipv6 }}
+  - --libp2p-port-ipv6={{ grandine_ports_p2p_tcp }}
+  - --discovery-port-ipv6={{ grandine_ports_p2p_tcp }}
+  - --quic-port-ipv6={{ grandine_ports_quic }}
+  - --enr-address-ipv6={{ grandine_announced_ipv6 }}
+  - --enr-udp-port-ipv6={{ grandine_ports_p2p_udp }}
+  - --enr-tcp-port-ipv6={{ grandine_ports_p2p_tcp }}
+  - --enr-quic-port-ipv6={{ grandine_ports_quic }}
+
+grandine_container_supernode_command:
+  - --subscribe-all-data-column-subnets
+
+grandine_container_command: >-
+  {{
+    grandine_container_command_default +
+    (grandine_container_command_v6 if grandine_ipv6_enabled and ansible_default_ipv6.address is defined else []) +
+    (grandine_container_supernode_command if grandine_supernode_enabled else [])
+  }}
+
+grandine_container_command_extra_args: []
+# - --network=mainnet
+# - --graffiti=hello-world
+
+checkpoint_sync_url: https://beaconstate.ethstaker.cc # noqa var-naming[no-role-prefix]
+grandine_checkpoint_sync_enabled: true
+grandine_container_command_checkpoint_args:
+  - --checkpoint-sync-url={{ checkpoint_sync_url }}
+
+################################################################################
+##
+## Validator specific configuration
+##
+################################################################################
+grandine_container_validator_args:
+  - --keystore-dir=/validator-data/keys
+  - --keystore-password-file=/validator-data/secrets
+  - --suggested-fee-recipient={{ grandine_validator_fee_recipient }}
+
+grandine_container_validator_volumes:
+  - "{{ grandine_validator_datadir }}:/validator-data"
+
+# Default image pull policy
+grandine_container_pull: false
+
+################################################################################
+##
+## MEV Boost configuration
+##
+################################################################################
+grandine_mev_boost_enabled: false
+grandine_mev_boost_beacon_command:
+  - --builder-url={{ grandine_mev_boost_endpoint }}

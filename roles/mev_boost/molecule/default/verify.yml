@@ -1,0 +1,19 @@
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Wait and let the container start
+      ansible.builtin.pause:
+        seconds: 5
+    - name: Get infos from container
+      community.docker.docker_container_info:
+        name: "{{ mev_boost_container_name }}"
+      register: result_container
+    - name: Show infos
+      ansible.builtin.debug:
+        var: "{{ item }}"
+      loop:
+        - result_container
+    - name: Assert results
+      ansible.builtin.assert:
+        that:
+          - "result_container.container.State.Running == true"

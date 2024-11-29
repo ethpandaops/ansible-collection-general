@@ -6,12 +6,15 @@ forky:
   image:
     repository: {{ default_tooling_images.forky.split(':') | first }}
     tag: {{ default_tooling_images.forky.split(':') | last }}
-    pullPolicy: {% if default_tooling_images.forky.split(':') | last == 'latest' %}Always{% else %}IfNotPresent{% endif %}
+    pullPolicy: {% if "latest" in (default_tooling_images.forky.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
 
   resources:
     requests:
       cpu: 256m
       memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 2Gi
   ingress:
     enabled: true
     className: ingress-nginx-public
@@ -20,6 +23,25 @@ forky:
         paths:
           - path: /
             pathType: Prefix
+
+  postgresql:
+    enabled: true
+    fullnameOverride: "forky-postgresql"
+    auth:
+      username: <path:/secrets/services/services.enc.yaml#forky | jsonPath {.postgres.devnets.username}>
+      password: <path:/secrets/services/services.enc.yaml#forky | jsonPath {.postgres.devnets.password}>
+    primary:
+      persistence:
+        enabled: true
+        size: 20Gi
+      resources:
+        requests:
+          cpu: 1000m
+          memory: 2Gi
+        limits:
+          cpu: 2000m
+          memory: 4Gi
+
   config:
     listen_addr: ":5555"
     pprof_addr: ":6060"
@@ -28,19 +50,27 @@ forky:
       addr: ":9090"
       enabled: true
     forky:
-      retention_period: "1m"
+      retention_period: "24h"
       store:
-        type: memory
-      indexer:
-        dsn: "file::memory:?cache=shared"
-        driver_name: sqlite
+        type: s3
+        config:
+          region: us-east-1
+          bucket_name: {{ ethereum_network_name }}/forky
+          endpoint: https://<path:/secrets/services/services.enc.yaml#cloudflare | jsonPath {.account_ids.ethdevops}>.r2.cloudflarestorage.com/ethpandaops-devnet-dumpster
+          access_key: <path:/secrets/services/services.enc.yaml#cloudflare | jsonPath {.r2.devnets.access_key_id}>
+          access_secret: <path:/secrets/services/services.enc.yaml#cloudflare | jsonPath {.r2.devnets.secret_access_key}>
+      indexer: {}
       ethereum:
         network:
           name: "{{ ethereum_network_name }}"
           spec:
-            seconds_per_slot: 12
+            seconds_per_slot: {{ (lookup('ansible.builtin.file', cl_config_path) | from_yaml).SECONDS_PER_SLOT }}
+{% if (lookup('ansible.builtin.file', cl_config_path) | from_yaml).PRESET_BASE == "mainnet"%}
             slots_per_epoch: 32
-            genesis_time: {{ ethereum_genesis_timestamp | int + ethereum_genesis_timedelay | int }}
+{% else %}
+            slots_per_epoch: 8
+{% endif %}
+            genesis_time: {{ (lookup('ansible.builtin.file', cl_config_path) | from_yaml).MIN_GENESIS_TIME + (lookup('ansible.builtin.file', cl_config_path)| from_yaml).GENESIS_DELAY }}
       sources:
 {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
 {% if ((hostvars[host]['inventory_hostname'] | string)[-2:]) == "-1" %}

@@ -5,6 +5,7 @@ ethereum_node_supported_el:
   - nethermind
   - ethereumjs
   - reth
+  - nimbusel
 
 ethereum_node_supported_cl:
   - lighthouse
@@ -12,6 +13,11 @@ ethereum_node_supported_cl:
   - prysm
   - lodestar
   - nimbus
+  - grandine
+
+ethereum_node_supported_external_builders:
+  - mev_boost
+  - mev_rs
 
 ethereum_node_docker_networks:
   - name: "{{ ethereum_node_docker_network_name }}"

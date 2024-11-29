@@ -1,0 +1,5 @@
+- name: Remove mev_rs container
+  community.docker.docker_container:
+    name: "{{ mev_rs_container_name }}"
+    state: absent
+  when: mev_rs_cleanup

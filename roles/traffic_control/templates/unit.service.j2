@@ -1,0 +1,12 @@
+[Unit]
+Description=Apply network limits using tc (traffic control)
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart={{ traffic_control_script_path_up }}
+ExecStop={{ traffic_control_script_path_down }}
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

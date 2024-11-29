@@ -1,83 +1,136 @@
 # {{ ansible_managed }}
 
-blockscout:
-  fullnameOverride: blockscout
-
-  image:
-    repository: {{ default_tooling_images.blockscout.split(':') | first }}
-    tag: {{ default_tooling_images.blockscout.split(':') | last }}
-    pullPolicy: {% if default_tooling_images.blockscout.split(':') | last == 'latest' %}Always{% else %}IfNotPresent{% endif %}
-
-  podAnnotations:
-    "promtail.io/ignore_pod": "true"
-  resources:
-    requests:
-      cpu: 2000m
-      memory: 2Gi
-    limits:
-      cpu: 2000m
-      memory: 6Gi
-
-  ingress:
-    enabled: true
-    className: ingress-nginx-public
-    hosts:
-      - host: explorer.{{ network_subdomain }}
-        paths:
-          - path: /
-            pathType: Prefix
-
+blockscout-stack:
+  fullnameOverride: blockscout-stack
   config:
-    COIN: ETH
-    DATABASE_URL: postgres://postgres:postgres@blockscout-postgresql:5432/blockscout?ssl=false
-    DISABLE_EXCHANGE_RATES: "true"
-    DISABLE_KNOWN_TOKENS: "true"
-    SHOW_PRICE_CHART: "false"
-    ENABLE_1559_SUPPORT: "true"
-    DISABLE_READ_API: "false"
-    DISABLE_WRITE_API: "true"
-    ENABLE_TXS_STATS: "true"
-    ECTO_USE_SSL: "false"
-    SHOW_TXS_CHART: "true"
-    ETHEREUM_JSONRPC_VARIANT: "{{ gen_kubernetes_config_ethereum_node.el }}"
-    ETHEREUM_JSONRPC_HTTP_URL: {{ default_el_endpoint }}
-    ETHEREUM_JSONRPC_WS_URL: {{ default_el_ws_endpoint }}
-    ETHEREUM_JSONRPC_TRACE_URL: {{ default_el_endpoint }}
-    INDEXER_COIN_BALANCES_BATCH_SIZE: "5"
-    NETWORK: Ethereum
-    SUBNETWORK: {{ ethereum_network_name }}
-    BLOCK_TRANSFORMER: base
-    POOL_SIZE: "15"
-    CHAIN_SPEC_PATH: /config-update/chainspec.json
-  extraVolumes:
-    - name: config-update
-      emptyDir: {}
+    network:
+      id: {{ (lookup('ansible.builtin.file', cl_config_path) | from_yaml).DEPOSIT_CHAIN_ID }}
+      name: {{ ethereum_network_name }}
+      shortname: {{ ethereum_network_name }}
+      currency:
+        name: Ether
+        symbol: ETH
+        decimals: 18
+        dualToken: false
+    account:
+      enabled: false
+    testnet: true
+    nameService:
+      enabled: true
+      url: "https://explorer.{{ network_subdomain }}"
+    prometheus:
+      enabled: false
 
-  extraVolumeMounts:
-    - name: config-update
-      mountPath: "/config-update"
+  blockscout:
+    fullnameOverride: blockscout-backend
+    podAnnotations:
+      "promtail.io/ignore_pod": "true"
 
-  initContainers:
-    - name: init-config
-      image: alpine:latest
-      imagePullPolicy: IfNotPresent
-      securityContext:
-        runAsNonRoot: false
-        runAsUser: 0
-      command:
-      - sh
-      - -ace
-      - >
-        CHAINSPEC=https://config.{{ network_subdomain }}/el/chainspec.json;
-        mkdir -p /config-update;
-        wget -O /config-update/chainspec.json $CHAINSPEC;
-        echo "got genesis";
-      volumeMounts:
-        - name: config-update
-          mountPath: /config-update
+    image:
+      repository: {{ default_tooling_images.blockscout.split(':') | first }}
+      tag: {{ default_tooling_images.blockscout.split(':') | last }}
+      pullPolicy: {% if "latest" in (default_tooling_images.blockscout.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
 
-  serviceMonitor:
-    enabled: true
+    env:
+      ETHEREUM_JSONRPC_VARIANT: "{{ gen_kubernetes_config_ethereum_node.el }}"
+      ETHEREUM_JSONRPC_HTTP_URL: {{ default_el_endpoint }}
+      ETHEREUM_JSONRPC_WS_URL: {{ default_el_ws_endpoint }}
+      ETHEREUM_JSONRPC_TRACE_URL: {{ default_el_endpoint }}
+      COIN: ETH
+      DATABASE_URL: postgres://postgres:postgres@blockscout-postgresql:5432/blockscout?ssl=false
+      DISABLE_EXCHANGE_RATES: "true"
+      ECTO_USE_SSL: "false"
+      INDEXER_COIN_BALANCES_BATCH_SIZE: "5"
+      NETWORK: Ethereum
+      SUBNETWORK: {{ ethereum_network_name }}
+      POOL_SIZE: "15"
+      CHAIN_SPEC_PATH: /config-update/chainspec.json
 
-  postgresql:
-    fullnameOverride: blockscout-postgresql
+    service:
+      type: ClusterIP
+      port: 4000
+    ingress:
+      enabled: true
+      className: ingress-nginx-public
+      hostname: explorer-api.{{ network_subdomain }}
+      tls:
+        enabled: true
+
+    extraVolumes:
+      - name: config-update
+        emptyDir: {}
+
+    extraVolumeMounts:
+      - name: config-update
+        mountPath: "/config-update"
+
+    initContainers:
+      - name: init-config
+        image: alpine:latest
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          runAsNonRoot: false
+          runAsUser: 0
+        command:
+        - sh
+        - -ace
+        - >
+          CHAINSPEC=https://config.{{ network_subdomain }}/el/chainspec.json;
+          mkdir -p /config-update;
+          wget -O /config-update/chainspec.json $CHAINSPEC;
+          echo "got genesis";
+          /bin/blockscout eval "Elixir.Explorer.ReleaseTasks.create_and_migrate()"
+        volumeMounts:
+          - name: config-update
+            mountPath: /config-update
+
+  frontend:
+    image:
+      repository: {{ default_tooling_images.blockscout_frontend.split(':') | first }}
+      tag: {{ default_tooling_images.blockscout_frontend.split(':') | last }}
+      pullPolicy: {% if "latest" in (default_tooling_images.blockscout_frontend.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
+
+    podAnnotations:
+      "promtail.io/ignore_pod": "true"
+
+    ingress:
+      enabled: true
+      className: ingress-nginx-public
+      hostname: explorer.{{ network_subdomain }}
+      tls:
+        enabled: true
+
+    env:
+      NEXT_PUBLIC_API_HOST: explorer-api.{{ network_subdomain }}
+      NEXT_PUBLIC_API_PROTOCOL: https
+      NEXT_PUBLIC_API_WEBSOCKET_PROTOCOL: wss
+      NEXT_PUBLIC_NETWORK_NAME: {{ ethereum_network_name }}
+      NEXT_PUBLIC_NETWORK_ID: {{ (lookup('ansible.builtin.file', cl_config_path) | from_yaml).DEPOSIT_CHAIN_ID }}
+      NEXT_PUBLIC_NETWORK_RPC_URL: https://rpc.{{ network_subdomain }}
+      NEXT_PUBLIC_APP_HOST: explorer.{{ network_subdomain }}
+      NEXT_PUBLIC_APP_PROTOCOL: https
+      NEXT_PUBLIC_AD_BANNER_PROVIDER: none
+      NEXT_PUBLIC_AD_TEXT_PROVIDER: none
+      NEXT_PUBLIC_IS_TESTNET: true
+      NEXT_PUBLIC_GAS_TRACKER_ENABLED: true
+      NEXT_PUBLIC_HAS_BEACON_CHAIN: true
+      NEXT_PUBLIC_NETWORK_VERIFICATION_TYPE: validation
+
+postgresql:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: bitnami/postgresql
+    tag: 15.3.0-debian-11-r7
+  auth:
+    enablePostgresUser: true
+    postgresPassword: postgres
+    username: postgres
+    password: postgres
+  fullnameOverride: blockscout-postgresql
+  primary:
+    extendedConfiguration: |
+      max_connections = 1024
+    persistence:
+      enabled: true
+      size: "{{ gen_kubernetes_blockscout_postgres_size | default("100Gi") }}"

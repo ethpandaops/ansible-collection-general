@@ -1,6 +1,8 @@
 - name: Converge
   hosts: all
   become: true
+  environment:
+    DOCKER_TIMEOUT: "120"
   pre_tasks:
     - name: Update apt cache
       ansible.builtin.apt:

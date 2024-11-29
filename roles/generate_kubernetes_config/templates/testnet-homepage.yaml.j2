@@ -8,7 +8,7 @@ testnet-homepage:
   image:
     repository: {{ default_tooling_images.homepage.split(':') | first  }}
     tag: {{ default_tooling_images.homepage.split(':') | last  }}
-    pullPolicy: {% if default_tooling_images.homepage.split(':') | last == 'latest' %}Always{% else %}IfNotPresent{% endif %}
+    pullPolicy: {% if "latest" in (default_tooling_images.homepage.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
 
   resources:
     requests:
@@ -61,14 +61,15 @@ testnet-homepage:
     ## Genesis configuration
     ### Execution layer clients
     - https://config.{{ network_subdomain }}/el/genesis.json
+    - https://config.{{ network_subdomain }}/el/besu.json
     - https://config.{{ network_subdomain }}/el/chainspec.json
 
     ### Consensus layer clients
     - https://config.{{ network_subdomain }}/cl/config.yaml
     - https://config.{{ network_subdomain }}/cl/genesis.ssz
-    - https://config.{{ network_subdomain }}/cl/deploy_block.txt
     - https://config.{{ network_subdomain }}/cl/deposit_contract.txt
     - https://config.{{ network_subdomain }}/cl/deposit_contract_block.txt
+    - https://config.{{ network_subdomain }}/cl/deposit_contract_block_hash.txt
 
 
   customArgs:
@@ -95,6 +96,7 @@ testnet-homepage:
         beaconRpcUrl: https://beacon.{{ network_subdomain }}
         explorerUrl: https://explorer.{{ network_subdomain }}
         forkmonUrl: https://forkmon.{{ network_subdomain }}
+        assertoorUrl: https://assertoor.{{ network_subdomain }}
         beaconexplorerUrl: "https://{{ ethereum_network_name }}.beaconcha.in"
         doraUrl: https://dora.{{ network_subdomain }}
         checkpointSyncUrl: "https://checkpoint-sync.{{ network_subdomain }}"
@@ -103,7 +105,7 @@ testnet-homepage:
         ethstatsUrl: https://ethstats.{{ network_subdomain }}
         chainName: "{{ ethereum_network_name }}"
         chainId: "{{ ethereum_genesis_chain_id }}"
-        github: https://github.com/ethpandaops/{{ devnet_name }}-devnets/tree/master/network-configs/{{ ethereum_network_name  | replace(devnet_name + "-", '')}}
+        github: https://github.com/ethpandaops/{{ devnet_name }}-devnets/tree/master/network-configs/{{ ethereum_network_name  | replace(devnet_name + "-", '')}}/metadata
       metamask:
         enabled: true
       logo:
@@ -127,6 +129,8 @@ testnet-homepage:
         dataLookup: explorerUrl
       - name: "Dora the Explorer"
         dataLookup: doraUrl
+      - name: "Assertoor"
+        dataLookup: assertoorUrl
       - name: "Beaconchain explorer"
         dataLookup: "beaconexplorerUrl"
       - name: "Blobscan"

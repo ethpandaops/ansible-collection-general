@@ -12,7 +12,7 @@ blockscout_docker_networks:
 # blockscout
 blockscout_enabled: true
 blockscout_container_name: blockscout
-blockscout_container_image: blockscout/blockscout:5.1.5
+blockscout_container_image: blockscout/blockscout:6.7.2
 blockscout_container_entrypoint:
   - /bin/sh
   - -ace
@@ -22,7 +22,8 @@ blockscout_container_entrypoint:
 blockscout_container_env:
   # For all env variables, check https://docs.blockscout.com/for-developers/information-and-settings/env-variables
   ETHEREUM_JSONRPC_VARIANT: geth
-  ETHEREUM_JSONRPC_HTTP_URL: http://geth:8545/
+  ETHEREUM_JSONRPC_HTTP_URL: http://execution:8545/
+  ETHEREUM_JSONRPC_TRACE_URL: http://execution:8545/
   # ETHEREUM_JSONRPC_VARIANT: erigon
   # ETHEREUM_JSONRPC_HTTP_URL: http://erigon:8545/
   # ETHEREUM_JSONRPC_TRACE_URL: http://erigon:8545/
@@ -36,6 +37,7 @@ blockscout_container_env:
   # Branding related
   LOGO: /images/blockscout_logo.svg
   FOOTER_LOGO: /images/blockscout_logo.svg
+  API_V2_ENABLED: "true"
   # Rate limiting
   API_RATE_LIMIT_TIME_INTERVAL: 1s
   API_RATE_LIMIT_BY_IP_TIME_INTERVAL: 5m
@@ -62,7 +64,11 @@ blockscout_container_env:
   MICROSERVICE_SIG_PROVIDER_ENABLED: '"{{ blockscout_sig_provider_enabled }}"'
   MICROSERVICE_SIG_PROVIDER_URL: "http://{{ blockscout_sig_provider_container_name }}:8050/"
   DECODE_NOT_A_CONTRACT_CALLS: "true"
-blockscout_container_ports: []
+blockscout_container_ports:
+  - "4000:4000"
+
+blockscout_additional_envs: []
+
 blockscout_container_volumes: []
 blockscout_container_stop_timeout: "600"
 blockscout_container_pull: false

@@ -1,8 +1,11 @@
+teku_enabled: true
 teku_user: teku
 teku_datadir: /data/teku
 teku_auth_jwt_path: /data/execution-auth.secret
 teku_execution_engine_endpoint: http://geth:8551
+teku_beacon_endpoint: "http://{{ teku_container_name }}:{{ teku_ports_http_beacon }}"
 teku_announced_ip: "{{ ansible_host }}"
+teku_announced_ipv6: "{{ ansible_default_ipv6.address if teku_ipv6_enabled and ansible_default_ipv6.address is defined else '' }}"
 teku_mev_boost_endpoint: "http://mev-boost:18550"
 
 teku_cleanup: false # when set to "true" it will remove the container
@@ -12,8 +15,11 @@ teku_ports_p2p_udp: 9000
 teku_ports_http_beacon: 5051
 teku_ports_metrics: 8008
 
+teku_ipv6_enabled: false
+teku_supernode_enabled: false
+
 teku_validator_enabled: false
-teku_validator_fee_recipient: "0xF29Ff96aaEa6C9A1fBa851f74737f3c069d4f1a9" # theprotocolguild.eth
+teku_validator_fee_recipient: "0x25941dC771bB64514Fc8abBce970307Fb9d477e9" # theprotocolguild.eth
 teku_validator_datadir: /data/teku-validator
 
 ################################################################################
@@ -24,17 +30,25 @@ teku_validator_datadir: /data/teku-validator
 teku_container_name: teku
 teku_container_image: consensys/teku:latest
 teku_container_env: {}
-teku_container_ports:
+teku_container_ports_ipv4:
   - "127.0.0.1:{{ teku_ports_http_beacon }}:{{ teku_ports_http_beacon }}"
-  - "{{ teku_ports_p2p_tcp }}:{{ teku_ports_p2p_tcp }}"
-  - "{{ teku_ports_p2p_udp }}:{{ teku_ports_p2p_udp }}/udp"
+  - "0.0.0.0:{{ teku_ports_p2p_tcp }}:{{ teku_ports_p2p_tcp }}"
+  - "0.0.0.0:{{ teku_ports_p2p_udp }}:{{ teku_ports_p2p_udp }}/udp"
+
+teku_container_ports_ipv6:
+  - "[::]:{{ teku_ports_p2p_tcp }}:{{ teku_ports_p2p_tcp }}"
+  - "[::]:{{ teku_ports_p2p_udp }}:{{ teku_ports_p2p_udp }}/udp"
+
+teku_container_ports: >-
+  {{ teku_container_ports_ipv4 + (teku_container_ports_ipv6 if teku_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
+
 teku_container_volumes:
   - "{{ teku_datadir }}:/data"
   - "{{ teku_auth_jwt_path }}:/execution-auth.jwt:ro"
 teku_container_security_opts: []
 teku_container_stop_timeout: "300"
 teku_container_networks: []
-teku_container_command:
+teku_container_command_default:
   - --data-path=/data
   - --log-destination=CONSOLE
   - --p2p-enabled=true
@@ -48,18 +62,35 @@ teku_container_command:
   - --rest-api-host-allowlist=*
   - --ee-endpoint={{ teku_execution_engine_endpoint }}
   - --ee-jwt-secret-file=/execution-auth.jwt
+
+teku_container_command_metrics:
   - --metrics-enabled=true
   - --metrics-interface=0.0.0.0
   - --metrics-port={{ teku_ports_metrics }}
   - --metrics-host-allowlist=*
+
+teku_container_command_v6: []
+# - --p2p-advertised-ipv6={{ teku_announced_ipv6 }} # not supported yet
+
+teku_container_supernode_command:
+  - --p2p-subscribe-all-custody-subnets-enabled
+
+teku_container_command: >-
+  {{
+    teku_container_command_default +
+    teku_container_command_metrics +
+    (teku_container_command_v6 if teku_ipv6_enabled and ansible_default_ipv6.address is defined else []) +
+    (teku_container_supernode_command if teku_supernode_enabled else [])
+  }}
+
 teku_container_command_extra_args:
   - --data-storage-mode=PRUNE
 # - --network=mainnet
 # - --logging=INFO
 # - ---validators-graffiti=hello-world
 
-checkpoint_sync_url: https://beaconstate.ethstaker.cc
-teku_checkpoint_sync_enabled: false
+checkpoint_sync_url: https://beaconstate.ethstaker.cc # noqa var-naming[no-role-prefix]
+teku_checkpoint_sync_enabled: true
 teku_container_command_checkpoint_args:
   - --checkpoint-sync-url={{ checkpoint_sync_url }}
 
@@ -68,12 +99,25 @@ teku_container_command_checkpoint_args:
 ## Validator specific configuration
 ##
 ################################################################################
-teku_container_validator_args:
+teku_validator_container_image: "{{ teku_container_image }}"
+teku_validator_container_name: "{{ teku_container_name }}-validator"
+teku_validator_container_args:
   - --validator-keys=/validator-data/keys:/validator-data/secrets
   - --validators-proposer-default-fee-recipient={{ teku_validator_fee_recipient }}
   - --validators-keystore-locking-enabled=false
-teku_container_validator_volumes:
+teku_validator_container_volumes:
   - "{{ teku_validator_datadir }}:/validator-data"
+teku_validator_container_command: >-
+  {{
+    [
+      "validator-client",
+      "--beacon-node-api-endpoint=" + teku_beacon_endpoint,
+      "--data-path=/validator-data"
+    ] +
+    teku_validator_container_args +
+    teku_container_command_metrics +
+    teku_container_command_extra_args
+  }}
 
 # Default image pull policy
 teku_container_pull: false

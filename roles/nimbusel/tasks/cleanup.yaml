@@ -1,0 +1,7 @@
+- name: Remove nimbusel containers
+  community.docker.docker_container:
+    name: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ nimbusel_container_name }}"
+    - "{{ nimbusel_container_name }}-init"

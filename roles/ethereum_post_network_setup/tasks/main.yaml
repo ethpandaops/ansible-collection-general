@@ -7,11 +7,16 @@
   block:
     - name: Make sure output dir exists
       ansible.builtin.file:
-        path: "{{ ethereum_genesis_generator_output_dir }}"
+        path: "{{ ethereum_genesis_generator_output_dir }}/metadata"
+        state: directory
+        recurse: true
+    - name: Generate parsed dir exists
+      ansible.builtin.file:
+        path: "{{ ethereum_genesis_generator_output_dir }}/parsed"
         state: directory
         recurse: true
     # Generate missing network config files
-    - name: Generate bootnode.txt for EL clients
+    - name: Generate enodes.txt for EL clients
       ansible.builtin.copy:
         content: |
           {% for host in (groups['ethereum_node']) | sort | unique %}
@@ -19,20 +24,7 @@
           {{ hostvars[host]['ethereum_node_fact_el_enode'] }}
           {% endif %}
           {% endfor %}
-        dest: "{{ ethereum_genesis_generator_output_dir }}/bootnode.txt"
-        mode: "0644"
-    - name: Generate "boot_enr.yaml" for CL clients
-      ansible.builtin.copy:
-        content: |
-          {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort | unique %}
-          {% if hostvars[host]['cl_bootnode_fact_enr'] is defined %}
-          - {{ hostvars[host]['cl_bootnode_fact_enr'] }}
-          {% endif %}
-          {% if hostvars[host]['ethereum_node_fact_cl_enr'] is defined %}
-          - {{ hostvars[host]['ethereum_node_fact_cl_enr'] }}
-          {% endif %}
-          {% endfor %}
-        dest: "{{ ethereum_genesis_generator_output_dir }}/boot_enr.yaml"
+        dest: "{{ ethereum_genesis_generator_output_dir }}/metadata/enodes.txt"
         mode: "0644"
     - name: Generate "bootstrap_nodes.txt" for CL clients
       ansible.builtin.copy:
@@ -45,5 +37,18 @@
           {{ hostvars[host]['ethereum_node_fact_cl_enr'] }}
           {% endif %}
           {% endfor %}
-        dest: "{{ ethereum_genesis_generator_output_dir }}/bootstrap_nodes.txt"
+        dest: "{{ ethereum_genesis_generator_output_dir }}/metadata/bootstrap_nodes.txt"
+        mode: "0644"
+    - name: Generate "bootstrap_nodes.yaml" for Prysm
+      ansible.builtin.copy:
+        content: |
+          {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort | unique %}
+          {% if hostvars[host]['cl_bootnode_fact_enr'] is defined %}
+          - {{ hostvars[host]['cl_bootnode_fact_enr'] }}
+          {% endif %}
+          {% if hostvars[host]['ethereum_node_fact_cl_enr'] is defined %}
+          - {{ hostvars[host]['ethereum_node_fact_cl_enr'] }}
+          {% endif %}
+          {% endfor %}
+        dest: "{{ ethereum_genesis_generator_output_dir }}/metadata/bootstrap_nodes.yaml"
         mode: "0644"

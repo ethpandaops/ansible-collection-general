@@ -5,7 +5,7 @@ blobscan:
   image:
     repository: {{ default_tooling_images.blobscan.split(':') | first }}
     tag: {{ default_tooling_images.blobscan.split(':') | last }}
-    pullPolicy: {% if default_tooling_images.blobscan.split(':') | last == 'latest' %}Always{% else %}IfNotPresent{% endif %}
+    pullPolicy: {% if "latest" in (default_tooling_images.blobscan.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
 
   ingress:
     enabled: true

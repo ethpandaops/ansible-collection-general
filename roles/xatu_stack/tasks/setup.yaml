@@ -1,0 +1,36 @@
+- name: Add xatu stack user
+  ansible.builtin.user:
+    name: "{{ xatu_stack_user }}"
+    shell: /bin/nologin
+
+- name: Get xatu stack uid
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ xatu_stack_user }}"
+  register: xatu_stack_user_getent
+
+- name: Clone xatu stack repository
+  ansible.builtin.git:
+    repo: "{{ xatu_stack_repo_url }}"
+    version: "{{ xatu_stack_repo_version }}"
+    dest: "{{ xatu_stack_repo_path }}"
+    force: true
+- name: Create .env file
+  ansible.builtin.copy:
+    dest: "{{ xatu_stack_repo_path }}/.env"
+    mode: '0600'
+    owner: "{{ xatu_stack_user }}"
+    group: "{{ xatu_stack_user }}"
+    content: |
+      {% for key, value in xatu_stack_env_vars.items() %}
+      {{ key }}={{ value }}
+      {% endfor %}
+
+- name: Run docker compose up
+  community.docker.docker_compose_v2:
+    project_src: "{{ xatu_stack_repo_path }}"
+    files:
+      - docker-compose.yml
+    state: present
+    env_files:
+      - "{{ xatu_stack_repo_path }}/.env"

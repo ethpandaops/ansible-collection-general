@@ -1,0 +1,39 @@
+mev_rs_user: mev_rs
+mev_rs_datadir: "/data/mev-rs"
+mev_rs_cleanup: false # when set to "true" it will remove the container(s)
+mev_rs_docker_network_name: shared
+mev_rs_docker_networks:
+  - name: "{{ mev_rs_docker_network_name }}"
+################################################################################
+##
+## mev_rs container configuration
+##
+################################################################################
+mev_rs_container_name: mev-rs
+mev_rs_container_image: ethpandaops/mev-rs:v0.4.0-alpha.6
+mev_rs_container_env: {}
+mev_rs_server_port: 18550
+mev_rs_container_ports:
+  - "127.0.0.1:{{ mev_rs_server_port }}:{{ mev_rs_server_port }}"
+mev_rs_container_stop_timeout: "300"
+mev_rs_container_networks: "{{ mev_rs_docker_networks }}"
+mev_rs_container_volumes:
+  - "{{ mev_rs_datadir }}/config:/config"
+
+# Available subcommands are: 'boost', 'relay', 'build'
+mev_rs_container_command:
+  - boost
+  - /config/config.toml
+
+mev_rs_container_command_extra_args: []
+
+# Configuration file. Example from: https://github.com/ralexstokes/mev-rs/blob/main/example.config.toml
+mev_rs_config: |
+  network = "sepolia"
+
+  [boost]
+  host = "0.0.0.0"
+  port = {{ mev_rs_server_port }}
+  relays = [
+      "https://0x845bd072b7cd566f02faeb0a4033ce9399e42839ced64e8b2adcfc859ed1e8e1a5a293336a49feac6d9a5edb779be53a@boost-relay-sepolia.flashbots.net",
+  ]

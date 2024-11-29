@@ -1,4 +1,4 @@
 beacon_stopper_datadir: /data/beacon_stopper
-slot_to_stop_at: 0
-url: http://beacon:5052
-ethereum_node_json_rpc_snooper_engine_name: snooper-engine
+slot_to_stop_at: 0 # noqa var-naming[no-role-prefix]
+url: http://beacon:5052 # noqa var-naming[no-role-prefix]
+ethereum_node_json_rpc_snooper_engine_name: snooper-engine # noqa var-naming[no-role-prefix]
