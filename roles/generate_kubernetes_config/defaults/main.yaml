@@ -40,24 +40,24 @@ gen_kubernetes_config_ethereum_node_name: >- # noqa var-naming[no-role-prefix] y
 gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
   config:
     valuesTemplatePath: templates/config.yaml.j2
-  beacon-metrics-gazer:
-    valuesTemplatePath: templates/beacon-metrics-gazer.yaml.j2
-    dependencies:
-      - name: beacon-metrics-gazer
-        repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 0.1.3
-  blobscan:
-    valuesTemplatePath: templates/blobscan.yaml.j2
-    dependencies:
-      - name: blobscan
-        repository: https://blobscan.github.io/blobscan-helm-charts/
-        version: 0.2.12
-      - name: blobscan-api
-        repository: https://blobscan.github.io/blobscan-helm-charts/
-        version: 0.2.8
-      - name: blobscan-indexer
-        repository: https://blobscan.github.io/blobscan-helm-charts/
-        version: 0.2.9
+  # beacon-metrics-gazer:
+  #   valuesTemplatePath: templates/beacon-metrics-gazer.yaml.j2
+  #   dependencies:
+  #     - name: beacon-metrics-gazer
+  #       repository: https://ethpandaops.github.io/ethereum-helm-charts
+  #       version: 0.1.3
+  # blobscan:
+  #   valuesTemplatePath: templates/blobscan.yaml.j2
+  #   dependencies:
+  #     - name: blobscan
+  #       repository: https://blobscan.github.io/blobscan-helm-charts/
+  #       version: 0.2.12
+  #     - name: blobscan-api
+  #       repository: https://blobscan.github.io/blobscan-helm-charts/
+  #       version: 0.2.8
+  #     - name: blobscan-indexer
+  #       repository: https://blobscan.github.io/blobscan-helm-charts/
+  #       version: 0.2.9
   blockscout:
     valuesTemplatePath: templates/blockscout.yaml.j2
     dependencies:
@@ -92,12 +92,12 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
       - name: powfaucet
         repository: https://ethpandaops.github.io/ethereum-helm-charts
         version: 0.0.4
-  forkmon:
-    valuesTemplatePath: templates/forkmon.yaml.j2
-    dependencies:
-      - name: forkmon
-        repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 0.1.5
+  # forkmon:
+  #   valuesTemplatePath: templates/forkmon.yaml.j2
+  #   dependencies:
+  #     - name: forkmon
+  #       repository: https://ethpandaops.github.io/ethereum-helm-charts
+  #       version: 0.1.5
   dora:
     valuesTemplatePath: templates/dora.yaml.j2
     dependencies:
@@ -116,12 +116,12 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
       - name: testnet-homepage
         repository: https://ethpandaops.github.io/ethereum-helm-charts
         version: 0.2.3
-  rpc:
-    valuesTemplatePath: templates/rpc-proxy.yaml.j2
-    dependencies:
-      - name: rpc-proxy
-        repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 0.1.2
+  # rpc:
+  #   valuesTemplatePath: templates/rpc-proxy.yaml.j2
+  #   dependencies:
+  #     - name: rpc-proxy
+  #       repository: https://ethpandaops.github.io/ethereum-helm-charts
+  #       version: 0.1.2
   assertoor:
     valuesTemplatePath: templates/assertoor.yaml.j2
     dependencies:

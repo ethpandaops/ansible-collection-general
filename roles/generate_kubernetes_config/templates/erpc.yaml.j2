@@ -20,7 +20,7 @@ erpc:
     annotations:
       nginx.ingress.kubernetes.io/rewrite-target: /main/evm/{{ (lookup('ansible.builtin.file', cl_config_path) | from_yaml).DEPOSIT_CHAIN_ID }}/$1
     hosts:
-      - host: erpc.{{ network_subdomain }}
+      - host: rpc.{{ network_subdomain }}
         paths:
           - path: /(.*)
             pathType: Prefix
