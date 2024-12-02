@@ -18,7 +18,7 @@ erpc:
     enabled: true
     className: ingress-nginx-public
     annotations:
-      ingress.kubernetes.io/rewrite-target: /main/evm/{{ (lookup('ansible.builtin.file', cl_config_path) | from_yaml).DEPOSIT_CHAIN_ID }}/$1
+      nginx.kubernetes.io/rewrite-target: /main/evm/{{ (lookup('ansible.builtin.file', cl_config_path) | from_yaml).DEPOSIT_CHAIN_ID }}/$1
     hosts:
       - host: erpc.{{ network_subdomain }}
         paths:
@@ -49,4 +49,8 @@ erpc:
         upstreams:
 {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
           - endpoint: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@rpc.{{ hostvars[host]['inventory_hostname'] }}.{{ network_subdomain }}
+            ignoreMethods:
+              - "*"
+            allowMethods:
+              - "eth_getBlockByNumber"
 {% endfor %}
