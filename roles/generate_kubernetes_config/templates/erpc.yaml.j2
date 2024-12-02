@@ -1,0 +1,48 @@
+# {{ ansible_managed }}
+
+erpc:
+  fullnameOverride: erpc
+  image:
+    repository: {{ default_tooling_images.erpc.split(':') | first | default('ghcr.io/erpc/erpc') }}
+    tag: {{ default_tooling_images.erpc.split(':') | last | default('latest') }}
+    pullPolicy: {% if "latest" in (default_tooling_images.erpc.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+  ingress:
+    enabled: true
+    className: ingress-nginx-public
+    hosts:
+      - host: erpc.{{ network_subdomain }}
+        paths:
+          - path: /
+            pathType: Prefix
+  config: |
+    logLevel: info
+
+    database:
+      evmJsonRpcCache:
+        driver: memory
+
+    server:
+      httpHostV4: "0.0.0.0"
+      listenV6: true
+      httpHostV6: "[::]"
+      httpPort: 4000
+
+    metrics:
+      enabled: true
+      hostV4: "0.0.0.0"
+      hostV6: "[::]"
+      port: 4001
+
+    projects:
+      - id: main
+        upstreams:
+        {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
+          - endpoint: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@rpc.{{ hostvars[host]['inventory_hostname'] }}.{{ network_subdomain }}
+        {% endfor %}

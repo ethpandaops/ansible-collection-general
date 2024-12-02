@@ -141,3 +141,9 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
         repository: https://ethpandaops.github.io/ethereum-helm-charts
         version: 0.0.27
         alias: "{{ gen_kubernetes_config_ethereum_node_name }}"
+  erpc:
+    valuesTemplatePath: templates/erpc.yaml.j2
+    dependencies:
+      - name: erpc
+        repository: https://ethpandaops.github.io/ethereum-helm-charts
+        version: 0.0.1
