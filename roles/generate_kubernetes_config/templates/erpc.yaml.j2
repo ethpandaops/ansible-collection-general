@@ -6,6 +6,7 @@ erpc:
     repository: {{ default_tooling_images.erpc.split(':') | first | default('ghcr.io/erpc/erpc') }}
     tag: {{ default_tooling_images.erpc.split(':') | last | default('latest') }}
     pullPolicy: {% if "latest" in (default_tooling_images.erpc.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
+
   resources:
     limits:
       cpu: 500m
