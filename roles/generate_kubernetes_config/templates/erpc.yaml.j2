@@ -17,10 +17,12 @@ erpc:
   ingress:
     enabled: true
     className: ingress-nginx-public
+    annotations:
+      ingress.kubernetes.io/rewrite-target: /main/evm/{{ (lookup('ansible.builtin.file', cl_config_path) | from_yaml).DEPOSIT_CHAIN_ID }}/$1
     hosts:
       - host: erpc.{{ network_subdomain }}
         paths:
-          - path: /
+          - path: /(.*)
             pathType: Prefix
   config: |
     logLevel: info
