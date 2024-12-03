@@ -92,12 +92,12 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
       - name: powfaucet
         repository: https://ethpandaops.github.io/ethereum-helm-charts
         version: 0.0.4
-  # forkmon:
-  #   valuesTemplatePath: templates/forkmon.yaml.j2
-  #   dependencies:
-  #     - name: forkmon
-  #       repository: https://ethpandaops.github.io/ethereum-helm-charts
-  #       version: 0.1.5
+  forkmon:
+    valuesTemplatePath: templates/forkmon.yaml.j2
+    dependencies:
+      - name: forkmon
+        repository: https://ethpandaops.github.io/ethereum-helm-charts
+        version: 0.1.5
   dora:
     valuesTemplatePath: templates/dora.yaml.j2
     dependencies:
