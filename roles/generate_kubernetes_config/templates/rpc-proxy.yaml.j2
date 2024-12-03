@@ -24,7 +24,7 @@ rpc-proxy:
             pathType: Prefix
 
   args:
-    - --url=http://erpc:4000
+    - --url={{ default_el_endpoint }}
     - --wsurl={{ default_el_ws_endpoint}}
     - --rpm=10000
 
