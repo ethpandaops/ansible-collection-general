@@ -38,9 +38,9 @@ erpc:
       aliasing:
         rules:
           - matchDomain: "*"
-          - serveProject: "main"
-          - serveArchitecture: "evm"
-          - serveChain: "{{ (lookup('ansible.builtin.file', cl_config_path) | from_yaml).DEPOSIT_CHAIN_ID }}"
+            serveProject: "main"
+            serveArchitecture: "evm"
+            serveChain: "{{ (lookup('ansible.builtin.file', cl_config_path) | from_yaml).DEPOSIT_CHAIN_ID }}"
 
     metrics:
       enabled: true
@@ -48,12 +48,47 @@ erpc:
       hostV6: "[::]"
       port: 4001
 
-
     projects:
       - id: main
         upstreamDefaults:
           allowMethods:
+            - "eth_blockNumber"
+            - "eth_call"
+            - "eth_chainId"
+            - "eth_estimateGas"
+            - "eth_feeHistory"
+            - "eth_gasPrice"
+            - "eth_getBalance"
+            - "eth_getBlockByHash"
             - "eth_getBlockByNumber"
+            - "eth_getBlockReceipts"
+            - "eth_getBlockTransactionCountByHash"
+            - "eth_getBlockTransactionCountByNumber"
+            - "eth_getCode"
+            - "eth_getFilterChanges"
+            - "eth_getLogs"
+            - "eth_getStorageAt"
+            - "eth_getTransactionByBlockHashAndIndex"
+            - "eth_getTransactionByBlockNumberAndIndex"
+            - "eth_getTransactionByHash"
+            - "eth_getTransactionCount"
+            - "eth_getTransactionReceipt"
+            - "eth_newBlockFilter"
+            - "eth_newPendingTransactionFilter"
+            - "eth_maxPriorityFeePerGas"
+            - "eth_sendRawTransaction"
+            - "eth_subscribe"
+            - "eth_syncing"
+            - "eth_uninstallFilter"
+            - "eth_unsubscribe"
+            - "net_listening"
+            - "net_version"
+            - "rpc_modules"
+            - "web3_clientVersion"
+            - "debug_getRawReceipts"
+            - "debug_traceBlock"
+            - "trace_transaction"
+            - "trace_block"
         upstreams:
 {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
           - endpoint: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@rpc.{{ hostvars[host]['inventory_hostname'] }}.{{ network_subdomain }}
