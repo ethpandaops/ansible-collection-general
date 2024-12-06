@@ -41,8 +41,10 @@ k3s_etcd_snapshot_timeout: 5m0s
 # NOTE: enabling this will add the following args to the k3s server node:
 #   --flannel-backend=none
 #   --disable-network-policy
+# NOTE: If you run rancher webhook you may run into this issue:
+# https://ranchermanager.docs.rancher.com/reference-guides/rancher-webhook#eks-cluster-with-calico-cni
 k3s_calico: false
-k3s_calico_version: "v3.27.0"
+k3s_calico_version: "v3.29.1"
 # Change this if you want to use a different version of calico custom resources.
 # The default calico custom resources will be used when this is omitted.
 # https://docs.tigera.io/calico/latest/getting-started/kubernetes/k3s/multi-node-install#install-calico

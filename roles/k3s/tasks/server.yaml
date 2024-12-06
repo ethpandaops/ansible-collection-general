@@ -95,6 +95,7 @@
     state: link
 
 - name: Install Calico for k3s
+  when: k3s_calico
   block:
     - name: Check if custom Calico resources are defined
       ansible.builtin.set_fact:
@@ -158,5 +159,3 @@
       retries: 5
       delay: 10
       until: apply_custom_resources is succeeded
-
-  when: k3s_calico
