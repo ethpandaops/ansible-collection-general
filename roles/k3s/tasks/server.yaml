@@ -117,6 +117,11 @@
         mode: "0644"
       register: download_tigera_operator
 
+    - name: Remove existing custom resources
+      ansible.builtin.command:
+        cmd: k3s kubectl delete -f {{ k3s_server_location }}/server/calico/custom-resources.yaml
+      ignore_errors: true
+
     - name: Apply tigera-operator.yaml with --force-conflicts
       ansible.builtin.command:
         cmd: >
@@ -128,40 +133,27 @@
       delay: 10
       until: apply_tigera_operator is succeeded
 
-    - name: Check if custom-resources.yaml is already applied
-      ansible.builtin.command:
-        cmd: >
-          k3s kubectl get -f {{ k3s_server_location }}/server/calico/custom-resources.{{ k3s_calico_version }}.yaml
-      register: check_custom_resources
-      ignore_errors: true
-
     - name: Write custom resources to file
       ansible.builtin.copy:
-        dest: "{{ k3s_server_location }}/server/calico/custom-resources.{{ k3s_calico_version }}.yaml"
+        dest: "{{ k3s_server_location }}/server/calico/custom-resources.yaml"
         content: "{{ k3s_calico_custom_resources }}"
         mode: "0644"
-      register: custom_resources_written
-      when: custom_resources_defined and (check_custom_resources.rc != 0)
+      when: custom_resources_defined
 
     - name: Download default custom-resources.yaml
       ansible.builtin.get_url:
         url: "https://raw.githubusercontent.com/projectcalico/calico/{{ k3s_calico_version }}/manifests/custom-resources.yaml"
-        dest: "{{ k3s_server_location }}/server/calico/custom-resources.{{ k3s_calico_version }}.yaml"
+        dest: "{{ k3s_server_location }}/server/calico/custom-resources.yaml"
         owner: root
         group: root
         mode: "0644"
-      register: download_custom_resources
-      when: not custom_resources_defined and (check_custom_resources.rc != 0)
+      when: not custom_resources_defined
 
     - name: Apply custom-resources.yaml
       ansible.builtin.command:
         cmd: >
           k3s kubectl apply --server-side -f
-          {{ k3s_server_location }}/server/calico/custom-resources.{{ k3s_calico_version }}.yaml
-      when: 
-        - (custom_resources_written.changed | default(false))
-        - (download_custom_resources.changed | default(false))
-        - (check_custom_resources.rc != 0)
+          {{ k3s_server_location }}/server/calico/custom-resources.yaml
       register: apply_custom_resources
       retries: 5
       delay: 10
