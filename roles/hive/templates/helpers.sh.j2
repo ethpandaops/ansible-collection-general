@@ -12,7 +12,12 @@ HIVE_BIN_DIR="{{ hive_dir_bin }}"
 HIVE_BIN_PATH="$HIVE_BIN_DIR/hive"
 HIVEVIEW_BIN_PATH="$HIVE_BIN_DIR/hiveview"
 
-HIVE_DOCKER_CLEANUP_EXCLUSIONS="{{ hive_simulations.container_cleanup_exclusions | join('\|') }}"
+HIVE_DOCKER_CLEANUP_EXCLUSIONS="{{ hive_simulations_container_cleanup_exclusions | join('\|') }}"
+
+HIVE_CLIENT_CONFIG_FLAG=""
+{% if hive_simulations_client_config|length > 0 %}
+HIVE_CLIENT_CONFIG_FLAG="-client-file={{ hive_dir_scripts }}/client-config.yaml"
+{% endif %}
 
 # Logs a message with timestamp
 function log {
@@ -79,11 +84,11 @@ function pruneTestResults {
 }
 
 # Pulls the base docker images for specified ethereum clients
-function pullContainerImages {
+function buildContainerImages {
   local clients=${1:-"go-ethereum,besu,nethermind,reth,ethereumjs"}
-  log "pulling/building container images: $clients"
-  $HIVE_BIN_PATH --docker.pull --client $clients
-  log "pulling/building container images done"
+  log "building container images: $clients"
+  $HIVE_BIN_PATH --docker.pull --client $clients $HIVE_CLIENT_CONFIG_FLAG
+  log "building container images done"
 }
 
 # Runs a hive test suite for a specific client and test type
@@ -95,7 +100,7 @@ function runHiveTest {
   ALL_FLAGS="$extra_flags"
   log "starting hive $simulation simulation [$client] ($extra_flags)"
   set -x
-  $HIVE_BIN_PATH \
+  $HIVE_BIN_PATH $HIVE_CLIENT_CONFIG_FLAG \
     --sim "$simulation" \
     --client $client \
     --results-root $HIVE_RESULTS_PATH \
