@@ -34,9 +34,10 @@ hive_log_level_simulator: 3 #  Selects log level of client instances. Supports v
 hive_simulations_build_images_once: true
 # Global flags provided to all test runs
 hive_simulations_global_flags:
-  - --docker.nocache=.
   - --sim.loglevel={{ hive_log_level_simulator }}
   - --loglevel={{ hive_log_level }}
+  # Uncomment to disable docker cache and always rebuild images on every simulation run
+  # - --docker.nocache=.
 # Exclude these containers from cleanup /
 hive_simulations_container_cleanup_exclusions:
   - telegraf
