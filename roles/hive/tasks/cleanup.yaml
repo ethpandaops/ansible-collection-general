@@ -1,8 +1,12 @@
+- name: Get service facts to verify if service is running
+  ansible.builtin.service_facts:
+
 - name: Stop systemd service
   ansible.builtin.systemd:
     name: "{{ hive_systemd_service_name }}"
     state: stopped
     enabled: false
+  when: ansible_facts['services'][hive_systemd_service_name]['status'] | default('not-found') != 'not-found'
 
 - name: Remove container
   community.general.docker_container:
