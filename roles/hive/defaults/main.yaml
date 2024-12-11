@@ -198,7 +198,7 @@ hive_simulations_tests:
   #     #- --sim.timelimit=2h
 
   # # Consume Engine
-  # - simulator: ethereum/eest-engine
+  # - simulator: ethereum/eest/consume-engine
   #   clients:
   #     - besu
   #     - erigon
@@ -210,11 +210,10 @@ hive_simulations_tests:
   #   extra_flags:
   #     - --client.checktimelimit=60s
   #     - --sim.parallelism=4
-  #     - --client-file configs/prague.yaml
   #     #- --sim.timelimit=2h
 
   # # Consume RLP
-  # - simulator: ethereum/eest-block-rlp
+  # - simulator: ethereum/eest/consume-rlp
   #   clients:
   #     - besu
   #     - erigon
