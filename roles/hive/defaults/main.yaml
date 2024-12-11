@@ -27,14 +27,17 @@ hive_container_www_restart_policy: "always"
 hive_container_www_stop_timeout: 10
 
 
+hive_log_level: 3 # Log level for system events. Supports values 0-5. (default 3)
+hive_log_level_simulator: 3 #  Selects log level of client instances. Supports values 0-5. (default 3)
+
 hive_simulations:
   # Always pull / build the latest container images
   always_pull_images: true
   # Global flags provided to all test runs
   global_flags:
     - --docker.nocache=.
-    - --sim.loglevel=3
-    - --loglevel=3
+    - --sim.loglevel={{ hive_log_level_simulator }}
+    - --loglevel={{ hive_log_level }}
   # Exclude these containers from cleanup /
   container_cleanup_exclusions:
     - telegraf
@@ -47,7 +50,7 @@ hive_simulations:
     - prometheus
     - grafana
   # Prune test results older than this value
-  prune_test_results_older_than: 720h # 30 days
+  prune_test_results_older_than: 168h # 7 days
   # Tests to run
   tests:
     # Sync tests
