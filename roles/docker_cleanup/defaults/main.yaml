@@ -1,3 +1,4 @@
 docker_cleanup_cron_name: docker-clean-up
 docker_cleanup_schedule: ["0", "0", "*", "*", "*"] # Cron format https://en.wikipedia.org/wiki/Cron
                                                    # Defaults to 00h00 every day
+docker_cleanup_command: "docker image prune -f"
