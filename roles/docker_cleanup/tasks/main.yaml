@@ -7,4 +7,4 @@
       day: "{{ docker_cleanup_schedule[2] }}"
       month: "{{ docker_cleanup_schedule[3] }}"
       weekday: "{{ docker_cleanup_schedule[4] }}"
-      job: "{{ docker_cleanup_command}}"
+      job: "{{ docker_cleanup_command }}"
