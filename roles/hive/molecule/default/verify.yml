@@ -1,0 +1,30 @@
+- name: Verify
+  hosts: all
+  tasks:
+    # Check if the web container is running
+    - name: Wait and let the service start
+      ansible.builtin.pause:
+        seconds: 5
+    - name: Get infos from web container
+      community.docker.docker_container_info:
+        name: "{{ hive_container_www_name }}"
+      register: result_container
+    - name: Show infos
+      ansible.builtin.debug:
+        var: result_container
+    - name: Assert container results
+      ansible.builtin.assert:
+        that:
+          - "result_container.container.State.Running == true"
+    # Check if the systemd service is running
+    - name: Get infos from systemd service
+      ansible.builtin.service_facts:
+      register: result_service
+    - name: Show service infos
+      ansible.builtin.debug:
+        var: result_service.ansible_facts.services[hive_systemd_service_name]
+    - name: Assert service results
+      ansible.builtin.assert:
+        that:
+          - "result_service.ansible_facts.services[hive_systemd_service_name]['state'] == 'running'"
+          - "result_service.ansible_facts.services[hive_systemd_service_name]['status'] == 'enabled'"
