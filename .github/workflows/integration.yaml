@@ -27,6 +27,7 @@ jobs:
             bootstrap: roles/bootstrap/**
             mev_boost: roles/mev_boost/**
             mev_rs: roles/mev_rs/**
+            hive: roles/hive/**
 
   # Integration test using molecule
   job:
