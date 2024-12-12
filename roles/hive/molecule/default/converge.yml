@@ -7,7 +7,8 @@
         update_cache: true
         cache_valid_time: 3600
   tasks:
-    - block:
+    - name: Main block
+      block:
         - name: Run hive
           ansible.builtin.import_role:
             name: hive
