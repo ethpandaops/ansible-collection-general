@@ -25,14 +25,20 @@
 - name: Create client config file
   ansible.builtin.copy:
     content: "{{ hive_simulations_client_config | to_yaml }}"
-    dest: "{{ hive_dir_scripts }}/client-config.yaml"
+    dest: "{{ item }}"
     mode: "0644"
+  loop:
+    - "{{ hive_dir_scripts }}/client-config.yaml"
+    - "{{ hive_dir_web }}/client-config.yaml"
   when: hive_simulations_client_config | length > 0
 
 - name: Remove client config file
   ansible.builtin.file:
-    path: "{{ hive_dir_scripts }}/client-config.yaml"
+    path: "{{ item }}"
     state: "absent"
+  loop:
+    - "{{ hive_dir_scripts }}/client-config.yaml"
+    - "{{ hive_dir_web }}/client-config.yaml"
   when: hive_simulations_client_config | length == 0
 
 - name: Create hive service
