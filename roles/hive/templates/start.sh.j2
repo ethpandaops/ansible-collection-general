@@ -1,0 +1,27 @@
+#!/bin/bash
+
+source "$(dirname "$0")/helpers.sh"
+
+FLAGS="{{ hive_simulations_global_flags | join(' ') }}"
+RESULT_PRUNE_OLDER_THAN="{{ hive_simulations_prune_test_results_older_than }}"
+
+while true
+do
+  # Fetch the latet version of the hive repository and build the hive binary
+  # Clean up docker containers and volumes and older logs
+  updateRepo && updateIndex && pruneDocker && pruneTestResults $RESULT_PRUNE_OLDER_THAN
+
+{% if hive_simulations_build_images_once %}
+  # Build container images for all clients in all tests
+  buildContainerImages "{{ hive_simulations_tests | map(attribute='clients') | list | flatten | unique | sort | join(',') }}"
+{% endif %}
+
+{% for test in hive_simulations_tests %}
+
+  # SIMULATOR: {{ test.simulator }}
+  for client in {{ test.clients | join(' ') }}; do
+    runHiveTest '{{ test.simulator }}' "$client" "{{ test.extra_flags | join(' ') }} $FLAGS"
+  done
+{% endfor %}
+
+done

@@ -1,0 +1,15 @@
+[Unit]
+Description=Ethereum Hive
+Requires=network.target
+After=syslog.target network.target
+
+[Service]
+Type=simple
+ExecStart=bash -c "{{ hive_dir_scripts }}/start.sh"
+ExecStopPost=bash -c "{{ hive_dir_scripts }}/cleanup.sh"
+WorkingDirectory={{ hive_dir_scripts }}
+
+Environment="PATH={{ hive_dir_bin }}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+[Install]
+WantedBy=multi-user.target
