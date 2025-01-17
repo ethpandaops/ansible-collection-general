@@ -93,7 +93,8 @@
       tag: {{ default_ethereum_client_images[gen_kubernetes_config_ethereum_node.el] | split(':') | last }}
       pullPolicy: Always
     p2pNodePort:
-      enabled: false
+      enabled: true
+      port: {{ (32000 | random(start=31000, seed=ethereum_genesis_network_seed)) }}
     persistence:
       enabled: true
       size: 100Gi
@@ -178,7 +179,8 @@
       pullPolicy: Always
     mode: "beacon"
     p2pNodePort:
-      enabled: false
+      enabled: true
+      port: {{ (33000 | random(start=32000, seed=ethereum_genesis_network_seed)) }}
     podLabels:
       network: {{ ethereum_network_name }}
       testnet: {{ ethereum_network_name }}

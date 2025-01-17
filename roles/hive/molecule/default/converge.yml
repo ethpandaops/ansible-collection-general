@@ -1,0 +1,26 @@
+- name: Converge
+  hosts: all
+  become: true
+  pre_tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+  tasks:
+    - name: Main block
+      block:
+        - name: Run hive
+          ansible.builtin.import_role:
+            name: hive
+      always:
+        - name: Get logs
+          ansible.builtin.command:
+            cmd: journalctl -u {{ hive_systemd_service_name }}
+          changed_when: false
+          register: journalctl_logs
+        - name: Show logs
+          ansible.builtin.debug:
+            var: "{{ item }}"
+          loop:
+            - journalctl_logs.stdout
+            - journalctl_logs.stderr

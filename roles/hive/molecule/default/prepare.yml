@@ -1,0 +1,26 @@
+- name: Prepare
+  hosts: all
+  become: true
+  pre_tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+  tasks:
+    - name: Main block
+      block:
+        - name: Install docker
+          ansible.builtin.import_role:
+            name: geerlingguy.docker
+        - name: Install pip and docker pkg
+          ansible.builtin.import_role:
+            name: geerlingguy.pip
+          vars:
+            pip_install_packages:
+              - name: docker
+        - name: Install golang
+          ansible.builtin.import_role:
+            name: gantsign.golang
+          vars:
+            golang_gopath: '/data/workspace-go'
+            golang_version: '1.21.13'

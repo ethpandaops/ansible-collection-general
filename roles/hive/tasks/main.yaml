@@ -1,0 +1,7 @@
+- name: Setup hive
+  ansible.builtin.import_tasks: setup.yaml
+  when: not hive_cleanup
+
+- name: Cleanup hive
+  ansible.builtin.import_tasks: cleanup.yaml
+  when: hive_cleanup

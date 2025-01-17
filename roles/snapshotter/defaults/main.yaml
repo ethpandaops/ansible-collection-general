@@ -10,7 +10,7 @@ snapshotter_container_restart_policy: always
 snapshotter_container_networks: []
 snapshotter_container_volumes_from: []
 snapshotter_container_volumes:
-  - "{{ snapshotter_datadir }}/config.yaml:/etc/snapshotter/config.yaml:ro"
+  - "{{ snapshotter_datadir }}:/etc/snapshotter:ro"
   - "/var/run/docker.sock:/var/run/docker.sock:ro"
 snapshotter_container_env: {}
 snapshotter_container_command:

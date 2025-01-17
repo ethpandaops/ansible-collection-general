@@ -1,0 +1,117 @@
+#!/bin/bash
+
+HIVE_HOME_PATH="{{ hive_dir_source }}"
+HIVE_RESULTS_PATH="{{ hive_dir_results }}"
+HIVE_WEB_PATH="{{ hive_dir_web }}"
+
+HIVE_REMOTE="{{ hive_repo_remote }}"
+HIVE_VERSION="{{ hive_repo_version }}"
+HIVE_REPO_ADDRESS="{{ hive_repo_address }}"
+
+HIVE_BIN_DIR="{{ hive_dir_bin }}"
+HIVE_BIN_PATH="$HIVE_BIN_DIR/hive"
+HIVEVIEW_BIN_PATH="$HIVE_BIN_DIR/hiveview"
+
+HIVE_DOCKER_CLEANUP_EXCLUSIONS="{{ hive_simulations_container_cleanup_exclusions | join('\|') }}"
+
+HIVE_CLIENT_CONFIG_FLAG=""
+{% if hive_simulations_client_config|length > 0 %}
+HIVE_CLIENT_CONFIG_FLAG="-client-file={{ hive_dir_scripts }}/client-config.yaml"
+{% endif %}
+
+# Logs a message with timestamp
+function log {
+  echo -e "\033[36m[$(date '+%Y-%m-%d %H:%M:%S')]\033[0m (HIVE-SERVICE) $1"
+}
+
+# Updates the hive test results index file
+function updateIndex {
+  log "updating index at $HIVE_RESULTS_PATH"
+  cd $HIVE_HOME_PATH
+  $HIVEVIEW_BIN_PATH -listing -logdir "$HIVE_RESULTS_PATH" > "${HIVE_WEB_PATH}/listing.jsonl.tmp" \
+    || { log "failed to update web index"; exit 1; }
+  cp "${HIVE_WEB_PATH}/listing.jsonl.tmp" "${HIVE_WEB_PATH}/listing.jsonl"
+  log "updating index done"
+}
+
+# Updates/clones the hive repo and checks out specified version
+function updateRepo {
+  log "fetching repo code: "
+  if [ ! -d "$HIVE_HOME_PATH/.git" ]; then
+    git clone --depth 1 --branch "$HIVE_VERSION" "$HIVE_REPO_ADDRESS" "$HIVE_HOME_PATH" \
+      || { log "failed to clone hive repo"; exit 1; }
+  fi
+  cd $HIVE_HOME_PATH
+  git pull "${HIVE_REMOTE}" \
+    || { log "failed to pull hive repo"; exit 1; }
+  git checkout "${HIVE_REMOTE}/${HIVE_VERSION}" \
+    || { log "failed to checkout hive repo"; exit 1; }
+  log "fetching repo code done"
+  buildHive && deployHiveWeb
+}
+
+# Builds the binaries
+function buildHive {
+  command -v go >/dev/null 2>&1 || { source /etc/profile.d/golang.sh; }
+  export GOCACHE="${GOPATH}/.cache/go-build"
+  log "building hive"
+  ( cd $HIVE_HOME_PATH \
+    && go build -o $HIVE_BIN_PATH . \
+    && go build -o $HIVEVIEW_BIN_PATH ./cmd/hiveview ) \
+    || { log "failed to build hive binaries"; exit 1; }
+  log "building hive done"
+}
+
+# Deploys the files required for the hive web interface
+function deployHiveWeb {
+  log "deploying hive web"
+  $HIVEVIEW_BIN_PATH -deploy $HIVE_WEB_PATH \
+    || { log "failed to deploy hive web"; exit 1; }
+  log "deploying hive web done"
+}
+
+# Cleans up docker containers and volumes except for specific services
+function pruneDocker {
+  log "pruning docker resources"
+  containers=$(docker ps -a | tail -n +2 | grep -v $HIVE_DOCKER_CLEANUP_EXCLUSIONS | cut -d" " -f1)
+  if [ ! -z "$containers" ]; then
+    docker stop $containers
+  fi
+  docker system prune --volumes -f
+  log "pruning docker done"
+}
+
+# Prunes old test results
+function pruneTestResults {
+  local keep_logs_for=${1:-"720h"} # 30 days
+  log "pruning old test results, greater than $keep_logs_for)"
+  $HIVEVIEW_BIN_PATH -gc -logdir $HIVE_RESULTS_PATH -keep $keep_logs_for \
+    || { log "failed to prune old test results"; exit 1; }
+  log "pruning old test results done"
+}
+
+# Pulls the base docker images for specified ethereum clients
+function buildContainerImages {
+  local clients=${1:-"go-ethereum,besu,nethermind,reth,ethereumjs"}
+  log "building container images: $clients"
+  $HIVE_BIN_PATH --docker.pull --client $clients $HIVE_CLIENT_CONFIG_FLAG
+  log "building container images done"
+}
+
+# Runs a hive test suite for a specific client and test type
+function runHiveTest {
+  local simulation=$1
+  local client=$2
+  local extra_flags=${3:-""}
+
+  ALL_FLAGS="$extra_flags"
+  log "starting hive $simulation simulation [$client] ($extra_flags)"
+  set -x
+  $HIVE_BIN_PATH $HIVE_CLIENT_CONFIG_FLAG \
+    --sim "$simulation" \
+    --client $client \
+    --results-root $HIVE_RESULTS_PATH \
+    $extra_flags
+  set -x
+  updateIndex
+}

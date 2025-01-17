@@ -1,0 +1,68 @@
+- name: Create directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  with_items:
+    - "{{ hive_dir }}"
+    - "{{ hive_dir_bin }}"
+    - "{{ hive_dir_scripts }}"
+    - "{{ hive_dir_results }}"
+    - "{{ hive_dir_web }}"
+
+- name: Copy scripts
+  ansible.builtin.template:
+    src: "{{ item }}"
+    dest: "{{ hive_dir_scripts }}/{{ item | replace('.j2', '') }}"
+    mode: "0744"
+  loop:
+    - start.sh.j2
+    - helpers.sh.j2
+    - cleanup.sh.j2
+  notify:
+    - Restart hive service
+
+- name: Create client config file
+  ansible.builtin.copy:
+    content: "{{ hive_simulations_client_config | to_yaml }}"
+    dest: "{{ item }}"
+    mode: "0644"
+  loop:
+    - "{{ hive_dir_scripts }}/client-config.yaml"
+    - "{{ hive_dir_web }}/client-config.yaml"
+  when: hive_simulations_client_config | length > 0
+
+- name: Remove client config file
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: "absent"
+  loop:
+    - "{{ hive_dir_scripts }}/client-config.yaml"
+    - "{{ hive_dir_web }}/client-config.yaml"
+  when: hive_simulations_client_config | length == 0
+
+- name: Create hive service
+  ansible.builtin.template:
+    src: unit.service.j2
+    dest: /etc/systemd/system/{{ hive_systemd_service_name }}
+    mode: '0640'
+  notify:
+    - Restart hive service
+
+- name: Enable and start service
+  ansible.builtin.systemd:
+    name: "{{ hive_systemd_service_name }}"
+    enabled: true
+    state: started
+    daemon_reload: true
+
+- name: Run webserver
+  community.general.docker_container:
+    name: "{{ hive_container_www_name }}"
+    image: "{{ hive_container_www_image }}"
+    env: "{{ hive_container_www_env }}"
+    published_ports: "{{ hive_container_www_ports }}"
+    restart_policy: "{{ hive_container_www_restart_policy }}"
+    volumes: "{{ hive_container_www_volumes }}"
+    networks: "{{ hive_container_www_networks }}"
+    stop_timeout: "{{ hive_container_www_stop_timeout }}"
