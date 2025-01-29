@@ -30,6 +30,8 @@ snapshotter_ssh_known_hosts: ""
 # Will be mounted within the container at:
 # - /etc/snapshotter/config.yaml
 snapshotter_config: |
+  server:
+    listen_addr: 0.0.0.0:5000
   global:
     logging: warn
     chainID: "0x4268" # Holesky
