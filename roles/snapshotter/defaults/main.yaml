@@ -3,14 +3,14 @@ snapshotter_datadir: /data/snapshotter
 
 snapshotter_cleanup: false # when set to "true" it will remove the container(s)
 
-snapshotter_container_image: skylenet/snapshotter:latest
+snapshotter_container_image: ghcr.io/ethpandaops/snapshotter:master
 snapshotter_container_name: snapshotter
 snapshotter_container_ports: []
 snapshotter_container_restart_policy: always
 snapshotter_container_networks: []
 snapshotter_container_volumes_from: []
 snapshotter_container_volumes:
-  - "{{ snapshotter_datadir }}:/etc/snapshotter:ro"
+  - "{{ snapshotter_datadir }}:/etc/snapshotter"
   - "/var/run/docker.sock:/var/run/docker.sock:ro"
 snapshotter_container_env: {}
 snapshotter_container_command:
@@ -33,6 +33,8 @@ snapshotter_config: |
   global:
     logging: warn
     chainID: "0x4268" # Holesky
+    database:
+      path: /etc/snapshotter/snapshots.db
     ssh:
       private_key_path: /etc/snapshotter/.ssh/id_rsa
       private_key_passphrase_path: "/etc/snapshotter/.ssh/id_rsa.passphrase"
@@ -43,6 +45,7 @@ snapshotter_config: |
       check_interval_seconds: 1
       block_interval: 100000
       run_once: false
+      dry_run: false
       rclone:
         version: "1.65.2"
         env:
@@ -76,6 +79,7 @@ snapshotter_config: |
         docker_containers:
           engine_snooper: snooper-engine
           execution: execution
+          beacon: beacon
         endpoints:
           beacon: http://localhost:5052
           execution: http://localhost:8545
@@ -88,6 +92,7 @@ snapshotter_config: |
         docker_containers:
           engine_snooper: snooper-engine
           execution: execution
+          beacon: beacon
         endpoints:
           beacon: http://localhost:5052
           execution: http://localhost:8545
