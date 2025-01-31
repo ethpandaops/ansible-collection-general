@@ -13,8 +13,21 @@ panda-pulse:
   config:
     network: "{{ ethereum_network_name }}"
     discordChannel: "<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.panda_pulse_discord_channel}>"
-    ethereumCl: "?"
-    ethereumEl: "?"
+    ethereumCls:
+      - grandine
+      - lighthouse
+      - lodestar
+      - nimbus
+      - prysm
+      - teku
+    ethereumEls:
+      - besu
+      - erigon
+      - ethereumjs
+      - geth
+      - nethermind
+      - nimbusel
+      - reth
 
   secrets:
     grafanaServiceToken: "<path:/secrets/services/services.enc.yaml#panda-pulse | jsonPath {.grafana_service_token}>"
@@ -28,5 +41,3 @@ panda-pulse:
     requests:
       cpu: 100m
       memory: 128Mi
-
-  
