@@ -152,4 +152,4 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
     dependencies:
       - name: panda-pulse
         repository: https://ethpandaops.github.io/general-helm-charts
-        version: 0.0.1
+        version: 0.0.2
