@@ -147,3 +147,9 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
       - name: erpc
         repository: https://ethpandaops.github.io/ethereum-helm-charts
         version: 0.0.2
+  panda-pulse:
+    valuesTemplatePath: templates/panda-pulse.yaml.j2
+    dependencies:
+      - name: panda-pulse
+        repository: https://ethpandaops.github.io/general-helm-charts
+        version: 0.0.1

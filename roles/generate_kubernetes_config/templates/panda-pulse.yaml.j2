@@ -1,0 +1,32 @@
+# {{ ansible_managed }}
+
+panda-pulse:
+  fullnameOverride: "panda-pulse"
+
+  image:
+    repository: {{ default_tooling_images.panda_pulse.split(':') | first }}
+    tag: {{ default_tooling_images.panda_pulse.split(':') | last }}
+    pullPolicy: {% if "latest" in (default_tooling_images.panda_pulse.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
+
+  schedule: "0 7 * * *"
+
+  config:
+    network: "{{ ethereum_network_name }}"
+    discordChannel: "<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.panda_pulse_discord_channel}>"
+    ethereumCl: "?"
+    ethereumEl: "?"
+
+  secrets:
+    grafanaServiceToken: "<path:/secrets/services/services.enc.yaml#panda-pulse | jsonPath {.grafana_service_token}>"
+    discordBotToken: "<path:/secrets/services/services.enc.yaml#panda-pulse | jsonPath {.discord_bot_token}>"
+    openrouterApiKey: "<path:/secrets/services/services.enc.yaml#panda-pulse | jsonPath {.openrouter_api_key}>"
+
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  
