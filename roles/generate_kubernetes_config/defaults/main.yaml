@@ -39,6 +39,12 @@ gen_kubernetes_config_helm_repositories: # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_ethereum_node_name: >- # noqa var-naming[no-role-prefix] yaml[line-length]
   {{ gen_kubernetes_config_ethereum_node.cl }}-{{ gen_kubernetes_config_ethereum_node.el }}-{{ gen_kubernetes_config_ethereum_node.value }}
 
+gen_kubernetes_config_dora_frontend_explorer_link: "https://explorer.{{ network_subdomain }}" # noqa var-naming[no-role-prefix]
+gen_kubernetes_config_dora_frontend_rainbowkit_id: "" # noqa var-naming[no-role-prefix]
+gen_kubernetes_config_dora_frontend_public_rpc: "https://rpc.{{ network_subdomain }}" # noqa var-naming[no-role-prefix]
+gen_kubernetes_config_dora_frontend_with_submit_deposits: true # noqa var-naming[no-role-prefix]
+gen_kubernetes_config_dora_frontend_with_submit_el_requests: true # noqa var-naming[no-role-prefix]
+
 gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
   config:
     valuesTemplatePath: templates/config.yaml.j2
