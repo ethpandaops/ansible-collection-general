@@ -180,7 +180,7 @@
     mode: "beacon"
     p2pNodePort:
       enabled: true
-      port: {{ (33000 | random(start=32000, seed=ethereum_genesis_network_seed)) }}
+      port: {{ (32767 | random(start=32000, seed=ethereum_genesis_network_seed)) }}
     podLabels:
       network: {{ ethereum_network_name }}
       testnet: {{ ethereum_network_name }}
