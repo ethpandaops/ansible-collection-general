@@ -36,6 +36,26 @@ dora:
     - name: FRONTEND_SHOW_PEER_DAS_INFOS
       value: "true"
 {% endif %}
+{% if gen_kubernetes_config_dora_frontend_explorer_link %}
+    - name: FRONTEND_ETH_EXPLORER_LINK
+      value: "{{ gen_kubernetes_config_dora_frontend_explorer_link }}"
+{% endif %}
+{% if gen_kubernetes_config_dora_frontend_public_rpc %}
+    - name: FRONTEND_PUBLIC_RPC_URL
+      value: "{{ gen_kubernetes_config_dora_frontend_public_rpc }}"
+{% endif %}
+{% if gen_kubernetes_config_dora_frontend_rainbowkit_id %}
+    - name: FRONTEND_RAINBOWKIT_PROJECT_ID
+      value: "{{ gen_kubernetes_config_dora_frontend_rainbowkit_id }}"
+{% endif %}
+{% if gen_kubernetes_config_dora_frontend_with_submit_deposits %}
+    - name: FRONTEND_SHOW_SUBMIT_DEPOSIT
+      value: "true"
+{% endif %}
+{% if gen_kubernetes_config_dora_frontend_with_submit_el_requests %}
+    - name: FRONTEND_SHOW_SUBMIT_EL_REQUESTS
+      value: "true"
+{% endif %}
   postgresql:
     name: "dora-postgresql"
     fullnameOverride: "dora-postgresql"
