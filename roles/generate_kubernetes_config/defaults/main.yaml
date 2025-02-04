@@ -33,6 +33,8 @@ gen_kubernetes_config_helm_repositories: # noqa var-naming[no-role-prefix]
     url: https://blockscout.github.io/helm-charts
   - name: bitnami
     url: https://charts.bitnami.com/bitnami
+  - name: ethpandaops-general-helm-charts
+    url: https://ethpandaops.github.io/general-helm-charts
 
 gen_kubernetes_config_ethereum_node_name: >- # noqa var-naming[no-role-prefix] yaml[line-length]
   {{ gen_kubernetes_config_ethereum_node.cl }}-{{ gen_kubernetes_config_ethereum_node.el }}-{{ gen_kubernetes_config_ethereum_node.value }}
@@ -42,6 +44,9 @@ gen_kubernetes_config_dora_frontend_rainbowkit_id: "" # noqa var-naming[no-role-
 gen_kubernetes_config_dora_frontend_public_rpc: "https://rpc.{{ network_subdomain }}" # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_dora_frontend_with_submit_deposits: true # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_dora_frontend_with_submit_el_requests: true # noqa var-naming[no-role-prefix]
+
+gen_kubernetes_config_panda_pulse_discord_channel: "1207978750004690974" # noqa var-naming[no-role-prefix]
+gen_kubernetes_config_panda_pulse_schedule: "0 7 * * *" # noqa var-naming[no-role-prefix]
 
 gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
   config:
@@ -152,4 +157,10 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
     dependencies:
       - name: erpc
         repository: https://ethpandaops.github.io/ethereum-helm-charts
+        version: 0.0.2
+  panda-pulse:
+    valuesTemplatePath: templates/panda-pulse.yaml.j2
+    dependencies:
+      - name: panda-pulse
+        repository: https://ethpandaops.github.io/general-helm-charts
         version: 0.0.2
