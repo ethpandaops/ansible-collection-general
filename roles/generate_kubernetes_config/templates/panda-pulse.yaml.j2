@@ -8,26 +8,17 @@ panda-pulse:
     tag: {{ default_tooling_images.panda_pulse.split(':') | last }}
     pullPolicy: {% if "latest" in (default_tooling_images.panda_pulse.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
 
-  schedule: "0 7 * * *"
+  schedule: "{{ gen_kubernetes_config_panda_pulse_schedule }}"
 
   config:
     network: "{{ ethereum_network_name }}"
-    discordChannel: "1207978750004690974"
+    discordChannel: "{{ gen_kubernetes_config_panda_pulse_discord_channel }}"
     ethereumCls:
-      - grandine
-      - lighthouse
-      - lodestar
-      - nimbus
-      - prysm
-      - teku
+{% for group in groups | select('match', '^(lighthouse|lodestar|nimbus|teku|prysm|grandine)$') %}      - {{ group }}
+{% endfor %}
     ethereumEls:
-      - besu
-      - erigon
-      - ethereumjs
-      - geth
-      - nethermind
-      - nimbusel
-      - reth
+{% for group in groups | select('match', '^(besu|ethereumjs|geth|nethermind|erigon|reth|nimbusel)$') %}      - {{ group }}
+{% endfor %}
 
   secrets:
     grafanaServiceToken: "<path:/secrets/services/services.enc.yaml#panda-pulse | jsonPath {.grafana_service_token}>"
