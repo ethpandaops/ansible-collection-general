@@ -23,7 +23,6 @@ panda-pulse:
   secrets:
     grafanaServiceToken: "<path:/secrets/services/services.enc.yaml#panda-pulse | jsonPath {.grafana_service_token}>"
     discordBotToken: "<path:/secrets/services/services.enc.yaml#panda-pulse | jsonPath {.discord_bot_token}>"
-    openrouterApiKey: "<path:/secrets/services/services.enc.yaml#panda-pulse | jsonPath {.openrouter_api_key}>"
 
   resources:
     limits:
