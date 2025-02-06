@@ -16,11 +16,13 @@
   changed_when: false
 
 - name: Create rbuilder config file
-  ansible.builtin.file:
-    path: "{{ reth_rbuilder_config_path }}"
+  ansible.builtin.copy:
+    dest: "{{ reth_rbuilder_config_path }}"
     content: "{{ reth_rbuilder_config }}"
+    mode: "0640"
     owner: "{{ reth_user }}"
     group: "{{ reth_user }}"
+  when: reth_rbuilder_enabled
 
 - name: Run reth container
   community.docker.docker_container:
