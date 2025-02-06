@@ -5,3 +5,9 @@
   loop:
     - "{{ reth_container_name }}"
     - "{{ reth_container_name }}-init"
+
+- name: Remove rbuilder config file
+  ansible.builtin.file:
+    path: "{{ reth_rbuilder_config_path }}"
+    state: absent
+  when: not reth_rbuilder_enabled
