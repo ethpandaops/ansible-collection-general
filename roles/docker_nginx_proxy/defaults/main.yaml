@@ -27,8 +27,6 @@ docker_nginx_proxy_container_custom_config_files: {} # Will be added to /etc/ngi
   #   # content of the custom.conf file
   #   client_max_body_size 100m;
 
-
-
 ############################################################################
 ## Docker-gen
 ############################################################################
