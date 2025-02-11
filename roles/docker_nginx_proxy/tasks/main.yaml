@@ -25,6 +25,15 @@
     group: "{{ docker_nginx_proxy_user }}"
     mode: "0640"
 
+- name: Add custom nginx config files
+  ansible.builtin.copy:
+    content: "{{ item.value }}"
+    dest: "{{ docker_nginx_proxy_datadir }}/conf/{{ item.key }}"
+    owner: "{{ docker_nginx_proxy_user }}"
+    group: "{{ docker_nginx_proxy_user }}"
+    mode: "0640"
+  loop: "{{ docker_nginx_proxy_container_custom_config_files }}"
+
 - name: Run nginx proxy container
   community.general.docker_container:
     name: "{{ docker_nginx_proxy_container_name }}"

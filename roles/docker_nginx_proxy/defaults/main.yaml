@@ -21,6 +21,13 @@ docker_nginx_proxy_container_volumes:
   - "{{ docker_nginx_proxy_datadir }}/vhost:/etc/nginx/vhost.d"
   - "{{ docker_nginx_proxy_datadir }}/certs:/etc/nginx/certs:ro"
   - html:/usr/share/nginx/html
+docker_nginx_proxy_container_custom_config_files: {} # Will be added to /etc/nginx/conf.d/{key}
+  # Example:
+  # custom.conf: |
+  #   # content of the custom.conf file
+  #   client_max_body_size 100m;
+
+
 
 ############################################################################
 ## Docker-gen
