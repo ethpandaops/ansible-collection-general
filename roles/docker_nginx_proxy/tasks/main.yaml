@@ -32,7 +32,7 @@
     owner: "{{ docker_nginx_proxy_user }}"
     group: "{{ docker_nginx_proxy_user }}"
     mode: "0640"
-  loop: "{{ docker_nginx_proxy_container_custom_config_files }}"
+  loop: "{{ docker_nginx_proxy_container_custom_config_files | dict2items }}"
 
 - name: Run nginx proxy container
   community.general.docker_container:
