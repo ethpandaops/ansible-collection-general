@@ -23,11 +23,5 @@ jobs:
 
       - uses: ./ansible_collections/ethpandaops/general/.github/actions/setup
 
-      - name: Lint roles
-        run: ansible-lint roles
-
-      - name: Lint playbooks
-        run: ansible-lint playbooks
-
-      - name: Sanity test
-        run: ansible-test sanity
+      - name: Lint
+        run: make lint

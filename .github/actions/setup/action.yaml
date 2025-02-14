@@ -16,5 +16,5 @@ runs:
 
     - name: Run setup
       shell: bash
-      run: ./setup.sh
+      run: make setup
       working-directory: ansible_collections/ethpandaops/general
