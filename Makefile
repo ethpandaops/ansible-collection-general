@@ -12,4 +12,4 @@ lint-playbooks:
 	ansible-lint playbooks
 
 sanity:
-	ansible-test sanity --exclude .ansible/
+	ansible-test sanity
