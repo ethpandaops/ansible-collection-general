@@ -1,5 +1,5 @@
 snapshot_fetcher_network: sepolia  # Network to fetch snapshot for (mainnet, sepolia, etc)
-snapshot_fetcher_client: {{ ethereum_node_el }}  # Client to fetch snapshot for (geth, nethermind, etc) 
+snapshot_fetcher_client: "{{ ethereum_node_el }}"  # Client to fetch snapshot for (geth, nethermind, etc) 
 ethereum_node_el: geth  # Name of the execution client
 snapshot_data_dir: "/data/{{ ethereum_node_el }}"  # Where to store the snapshot
 snapshot_base_url: "https://snapshots.ethpandaops.io"  # Base URL for snapshots
