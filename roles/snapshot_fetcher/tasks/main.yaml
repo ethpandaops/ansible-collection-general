@@ -1,0 +1,33 @@
+- name: Install required packages
+  become: true
+  ansible.builtin.apt:
+    name: 
+      - curl
+      - tar
+      - zstd
+      - jq
+      - tmux
+    state: present
+    update_cache: true
+
+- name: Create data directory
+  become: true
+  ansible.builtin.file:
+    path: "{{ snapshot_data_dir }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+
+- name: Copy snapshot download script
+  ansible.builtin.template:
+    src: download_snapshot.sh.j2
+    dest: "{{ snapshot_data_dir }}/download_snapshot.sh"
+    mode: '0755'
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+
+- name: Run script in tmux
+  ansible.builtin.shell: "tmux new-session -d -s snapshot_download '{{ snapshot_data_dir }}/download_snapshot.sh'"
+  args:
+    chdir: "{{ snapshot_data_dir }}" 
