@@ -31,4 +31,7 @@ echo "Downloading and extracting snapshot..."
 curl -s -L "$BASE_URL/$NETWORK/$CLIENT/$BLOCK/snapshot.tar.zst" | \
   tar -I zstd -xf - -C "$DATA_DIR"
 
-echo "Snapshot downloaded and extracted to $DATA_DIR" 
+echo "Snapshot downloaded and extracted to $DATA_DIR"
+echo "================================"
+echo "Press Enter to close this session"
+read -r 
