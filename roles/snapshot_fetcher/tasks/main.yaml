@@ -1,7 +1,7 @@
 - name: Install required packages
   become: true
   ansible.builtin.apt:
-    name: 
+    name:
       - curl
       - tar
       - zstd
@@ -27,7 +27,7 @@
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
 
-- name: Run script in tmux
-  ansible.builtin.shell: "tmux new-session -d -s snapshot_{{ snapshot_fetcher_network }}_{{ snapshot_fetcher_client }} '{{ snapshot_data_dir }}/download_snapshot.sh'"
+- name: Run script
+  ansible.builtin.shell: "./download_snapshot.sh"
   args:
-    chdir: "{{ snapshot_data_dir }}" 
+    chdir: "{{ snapshot_data_dir }}"

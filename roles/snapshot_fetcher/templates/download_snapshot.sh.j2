@@ -28,10 +28,15 @@ echo "Client: $CLIENT_VERSION"
 
 # Download and extract
 echo "Downloading and extracting snapshot..."
-curl -s -L "$BASE_URL/$NETWORK/$CLIENT/$BLOCK/snapshot.tar.zst" | \
-  tar -I zstd -xf - -C "$DATA_DIR"
 
-echo "Snapshot downloaded and extracted to $DATA_DIR"
+docker run -d --name snapshot_fetcher \
+  -v $DATA_DIR:/data \
+  --entrypoint "/bin/sh" \
+  docker.ethquokkaops.io/dh/library/alpine -c "apk add --no-cache curl tar zstd && \
+  curl -s -L $BASE_URL/$NETWORK/$CLIENT/$BLOCK/snapshot.tar.zst | \
+  tar -I zstd -xvf - -C /data"
+
+echo "Snapshot downloading to $DATA_DIR"
 echo "================================"
-echo "Press Enter to close this session"
-read -r 
+
+echo "Use 'docker logs -f snapshot_fetcher' to follow the progress"
