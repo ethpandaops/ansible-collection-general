@@ -28,6 +28,7 @@
     group: "{{ ansible_user }}"
 
 - name: Run script
-  ansible.builtin.shell: "./download_snapshot.sh"
+  ansible.builtin.command: "./download_snapshot.sh"
   args:
     chdir: "{{ snapshot_data_dir }}"
+    creates: "{{ snapshot_data_dir }}/.snapshot_fetcher_started"
