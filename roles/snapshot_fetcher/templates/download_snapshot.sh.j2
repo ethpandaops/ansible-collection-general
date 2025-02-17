@@ -27,16 +27,22 @@ echo "Block: $BLOCK_NUMBER"
 echo "Client: $CLIENT_VERSION"
 
 # Download and extract
-echo "Downloading and extracting snapshot..."
+echo "Starting snapshot download container..."
 
-docker run -d --name snapshot_fetcher \
-  -v $DATA_DIR:/data \
-  --entrypoint "/bin/sh" \
-  docker.ethquokkaops.io/dh/library/alpine -c "apk add --no-cache curl tar zstd && \
-  curl -s -L $BASE_URL/$NETWORK/$CLIENT/$BLOCK/snapshot.tar.zst | \
-  tar -I zstd -xvf - -C /data"
+# Only run the snapshot download once. You have to manually remove the file if you want to run it again.
+if [ ! -f "$DATA_DIR/.snapshot_fetcher_started" ]; then
+  docker run -d --name snapshot_fetcher \
+    -v $DATA_DIR:/data \
+    --entrypoint "/bin/sh" \
+    docker.ethquokkaops.io/dh/library/alpine -c "apk add --no-cache curl tar zstd && \
+    curl -s -L $BASE_URL/$NETWORK/$CLIENT/$BLOCK/snapshot.tar.zst | \
+    tar -I zstd -xvf - -C /data"
+  touch $DATA_DIR/.snapshot_fetcher_started
+  echo "================================================"
+  echo "Snapshot downloading to $DATA_DIR"
+  echo "================================================"
+  echo "Use 'docker logs -f snapshot_fetcher' to follow the progress"
 
-echo "Snapshot downloading to $DATA_DIR"
-echo "================================"
-
-echo "Use 'docker logs -f snapshot_fetcher' to follow the progress"
+else
+  echo "Snapshot download container did already run. Skipping..."
+fi
