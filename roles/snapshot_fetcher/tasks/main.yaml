@@ -28,6 +28,6 @@
     group: "{{ ansible_user }}"
 
 - name: Run script in tmux
-  ansible.builtin.shell: "tmux new-session -d -s snapshot_download '{{ snapshot_data_dir }}/download_snapshot.sh'"
+  ansible.builtin.shell: "tmux new-session -d -s snapshot_{{ snapshot_fetcher_network }}_{{ snapshot_fetcher_client }} '{{ snapshot_data_dir }}/download_snapshot.sh'"
   args:
     chdir: "{{ snapshot_data_dir }}" 

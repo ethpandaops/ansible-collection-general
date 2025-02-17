@@ -7,6 +7,15 @@ DATA_DIR="{{ snapshot_data_dir }}"
 BLOCK="{{ block_number }}"
 BASE_URL="{{ snapshot_base_url }}"
 
+# Set tmux window title
+printf '\033]2;%s\033\\' "Snapshot: $NETWORK-$CLIENT"
+
+echo "=== Snapshot Download Started ==="
+echo "Network: $NETWORK"
+echo "Client: $CLIENT"
+echo "Target Block: $BLOCK"
+echo "================================"
+
 # Get block info
 echo "Fetching snapshot info for $NETWORK $CLIENT at block $BLOCK..."
 BLOCK_INFO=$(curl -s "$BASE_URL/$NETWORK/$CLIENT/$BLOCK/_snapshot_eth_getBlockByNumber.json")
