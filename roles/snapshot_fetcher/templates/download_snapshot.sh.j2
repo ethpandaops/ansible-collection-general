@@ -38,7 +38,7 @@ if [ ! -f "$DATA_DIR/.snapshot_fetcher_started" ]; then
     apk add --no-cache curl tar zstd && \
     mkfifo snapshot_pipe && \
     curl -L --http1.1 --fail --retry 3 --retry-delay 10 $BASE_URL/$NETWORK/$CLIENT/$BLOCK/snapshot.tar.zst > snapshot_pipe & \
-    tar -I zstd -xvf snapshot_pipe -C /data && \
+    zstd -d < snapshot_pipe | tar xvf - -C /data && \
     rm snapshot_pipe"
 
   touch $DATA_DIR/.snapshot_fetcher_started
