@@ -34,12 +34,18 @@ if [ ! -f "$DATA_DIR/.snapshot_fetcher_started" ]; then
   docker run -d --name snapshot_fetcher \
     -v $DATA_DIR:/data \
     --entrypoint "/bin/sh" \
+    -e RCLONE_CONFIG_MYS3_TYPE=s3 \
+    -e RCLONE_CONFIG_MYS3_PROVIDER=Cloudflare \
+    -e RCLONE_CONFIG_MYS3_ACL=public-read \
+    -e RCLONE_CONFIG_MYS3_REGION=auto \
+    -e RCLONE_CONFIG_MYS3_NO_CHECK_BUCKET=true \
+    -e RCLONE_CONFIG_MYS3_NO_LIST=true \
+    -e "RCLONE_CONFIG_MYS3_ENDPOINT={{ snapshot_fetcher_s3_endpoint }}" \
+    -e "RCLONE_CONFIG_MYS3_ACCESS_KEY_ID={{ snapshot_fetcher_s3_access_key_id }}" \
+    -e "RCLONE_CONFIG_MYS3_SECRET_ACCESS_KEY={{ snapshot_fetcher_s3_secret_access_key }}" \
     docker.ethquokkaops.io/dh/library/alpine -c "cd /data && \
-    apk add --no-cache curl tar zstd && \
-    mkfifo snapshot_pipe && \
-    curl -L --http1.1 --fail --retry 3 --retry-delay 10 $BASE_URL/$NETWORK/$CLIENT/$BLOCK/snapshot.tar.zst > snapshot_pipe & \
-    zstd -d < snapshot_pipe | tar xvf - -C /data && \
-    rm snapshot_pipe"
+    apk add --no-cache curl tar zstd rclone && \
+    rclone cat mys3:/ethpandaops-ethereum-node-snapshots/$NETWORK/$CLIENT/$BLOCK/snapshot.tar.zst | tar -I zstd -xvf - -C /data"
 
   touch $DATA_DIR/.snapshot_fetcher_started
   echo "================================================"

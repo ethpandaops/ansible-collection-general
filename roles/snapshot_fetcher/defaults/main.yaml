@@ -1,6 +1,10 @@
 snapshot_fetcher_network: sepolia  # Network to fetch snapshot for (mainnet, sepolia, etc)
-snapshot_fetcher_client: "{{ ethereum_node_el }}"  # Client to fetch snapshot for (geth, nethermind, etc) 
+snapshot_fetcher_client: "{{ ethereum_node_el }}"  # Client to fetch snapshot for (geth, nethermind, etc)
 ethereum_node_el: geth  # Name of the execution client
 snapshot_data_dir: "/data/{{ ethereum_node_el }}"  # Where to store the snapshot
 snapshot_base_url: "https://snapshots.ethpandaops.io"  # Base URL for snapshots
 block_number: "latest"  # Block number to fetch, defaults to latest
+
+snapshot_fetcher_s3_endpoint: "https://xxxxxx.r2.cloudflarestorage.com"
+snapshot_fetcher_s3_access_key_id: "your-access-key-id"
+snapshot_fetcher_s3_secret_access_key: "your-secret-access-key"
