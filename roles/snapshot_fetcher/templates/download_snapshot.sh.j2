@@ -35,7 +35,7 @@ if [ ! -f "$DATA_DIR/.snapshot_fetcher_started" ]; then
     -v $DATA_DIR:/data \
     --entrypoint "/bin/sh" \
     docker.ethquokkaops.io/dh/library/alpine -c "apk add --no-cache curl tar zstd && \
-    curl -L --fail --retry 3 --retry-delay 10 $BASE_URL/$NETWORK/$CLIENT/$BLOCK/snapshot.tar.zst | \
+    curl -L --http1.1 --fail --retry 3 --retry-delay 10 $BASE_URL/$NETWORK/$CLIENT/$BLOCK/snapshot.tar.zst | \
     tar -I zstd -xvf - -C /data"
   touch $DATA_DIR/.snapshot_fetcher_started
   echo "================================================"
