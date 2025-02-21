@@ -1,6 +1,9 @@
 # Vendored ansible collections and roles
 vendor/
 
+# Ansible cache
+.ansible/
+
 # Test outputs from ansible-test
 tests/output/
 

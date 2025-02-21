@@ -110,14 +110,16 @@ git clone git@github.com:ethpandaops/ansible-collection-general.git ansible_coll
 
 If you want to test and develop on this ansible collection you'll need some tools. We're using [`asdf`](https://asdf-vm.com/) to commit to certain [versions](.tool-versions) of those tools. Some additional python specific tools are defined in the [`requirements.txt`](requirements.txt).
 
-Make sure you have `asdf` installed and then you can run the `./setup.sh` script which will install all required tools.
+Make sure you have `asdf` installed and then you can run the `./setup.sh` script which will install all required tools. Alternatively you can run `make setup` which will do the same thing.
 
 For linting and sanity checks you can run the following commands:
 
 ```sh
 ansible-lint
-ansible-test sanity
+ansible-test sanity --exclude .ansible/
 ```
+
+Alternatively you can run `make lint` which will run the linting and sanity checks.
 
 Some roles have [molecule](https://ansible.readthedocs.io/projects/molecule/) tests inside. You can check this if a role has a `molecule` directory within. To run molecule ona given role you can do the following:
 

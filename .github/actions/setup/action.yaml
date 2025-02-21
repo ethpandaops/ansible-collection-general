@@ -11,8 +11,10 @@ runs:
 
     - name: Install asdf
       uses: asdf-vm/actions/setup@v3
+      with:
+        asdf_branch: v0.15.0
 
     - name: Run setup
       shell: bash
-      run: ./setup.sh
+      run: make setup
       working-directory: ansible_collections/ethpandaops/general
