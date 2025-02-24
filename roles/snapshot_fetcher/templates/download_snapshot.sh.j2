@@ -3,9 +3,9 @@ set -euo pipefail
 
 NETWORK="{{ snapshot_fetcher_network }}"
 CLIENT="{{ snapshot_fetcher_client }}"
-DATA_DIR="{{ snapshot_data_dir }}"
-BLOCK="{{ block_number }}"
-BASE_URL="{{ snapshot_base_url }}"
+DATA_DIR="{{ snapshot_fetcher_out_dir }}"
+BLOCK="{{ snapshot_fetcher_block }}"
+BASE_URL="{{ snapshot_fetcher_base_url }}"
 
 # Set tmux window title
 printf '\033]2;%s\033\\' "Snapshot: $NETWORK-$CLIENT"
@@ -19,11 +19,11 @@ echo "================================"
 # Get block info
 echo "Fetching snapshot info for $NETWORK $CLIENT at block $BLOCK..."
 BLOCK_INFO=$(curl -s "$BASE_URL/$NETWORK/$CLIENT/$BLOCK/_snapshot_eth_getBlockByNumber.json")
-BLOCK_NUMBER=$(echo "$BLOCK_INFO" | jq -r '.result.number')
+snapshot_fetcher_block=$(echo "$BLOCK_INFO" | jq -r '.result.number')
 CLIENT_VERSION=$(curl -s "$BASE_URL/$NETWORK/$CLIENT/$BLOCK/_snapshot_web3_clientVersion.json" | jq -r '.result')
 
 echo "Snapshot info:"
-echo "Block: $BLOCK_NUMBER"
+echo "Block: $snapshot_fetcher_block"
 echo "Client: $CLIENT_VERSION"
 
 # Download and extract
