@@ -1,0 +1,25 @@
+spamoor_user: "spamoor"
+spamoor_cleanup: false # when set to "true" it will remove the container
+
+spamoor_container_name: "spamoor"
+spamoor_container_image: "ethpandaops/spamoor:latest"
+spamoor_container_env: {}
+spamoor_container_ports: []
+spamoor_container_volumes: []
+
+spamoor_container_stop_timeout: "300"
+spamoor_container_networks: []
+
+spamoor_container_command: |
+  {{ spamoor_scenario }}
+  {% for url in spamoor_rpc_urls %}
+  -h={{ url }}
+  {% endfor %}
+  -p={{ spamoor_private_key }}
+  -t={{ spamoor_rpc_throughput }}
+
+spamoor_rpc_urls:
+  - your-execution-node:8545
+spamoor_rpc_throughput: "10"
+spamoor_scenario: "eoatx"
+spamoor_private_key: ""
