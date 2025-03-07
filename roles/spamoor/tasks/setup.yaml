@@ -1,0 +1,26 @@
+- name: Add spamoor user
+  ansible.builtin.user:
+    name: "{{ spamoor_user }}"
+    shell: /bin/nologin
+
+- name: Get spamoor uid
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ spamoor_user }}"
+  register: spamoor_user_getent
+
+
+- name: Run spamoor sentry container
+  community.docker.docker_container:
+    name: "{{ spamoor_container_name }}"
+    image: "{{ spamoor_container_image }}"
+    image_name_mismatch: recreate
+    user: "{{ spamoor_user_getent.ansible_facts.getent_passwd[spamoor_user][1] }}"
+    state: started
+    restart_policy: always
+    stop_timeout: "{{ spamoor_container_stop_timeout }}"
+    ports: "{{ spamoor_container_ports }}"
+    volumes: "{{ spamoor_container_volumes }}"
+    env: "{{ spamoor_container_env }}"
+    networks: "{{ spamoor_container_networks }}"
+    command: "{{ spamoor_container_command }}"

@@ -1,0 +1,7 @@
+- name: Setup spamoor
+  ansible.builtin.import_tasks: setup.yaml
+  when: not spamoor_cleanup
+
+- name: Cleanup spamoor
+  ansible.builtin.import_tasks: cleanup.yaml
+  when: spamoor_cleanup

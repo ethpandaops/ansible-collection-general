@@ -1,0 +1,5 @@
+- name: Remove spamoor container
+  community.docker.docker_container:
+    name: "{{ spamoor_container_name }}"
+    state: absent
+  when: spamoor_cleanup
