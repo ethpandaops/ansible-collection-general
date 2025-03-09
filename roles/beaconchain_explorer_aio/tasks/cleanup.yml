@@ -1,5 +1,5 @@
 - name: Stop services
-  community.docker.docker_compose:
+  community.docker.docker_compose_v2:
     project_src: "{{ beaconchain_explorer_aio_installation_dir }}"
     state: absent
 
