@@ -94,7 +94,7 @@
   loop: "{{ beaconchain_explorer_aio_extra_config_files | dict2items }}"
 
 - name: Create and start database services
-  community.docker.docker_compose:
+  community.docker.docker_compose_v2:
     project_src: "{{ beaconchain_explorer_aio_installation_dir }}"
     services:
       - postgres
@@ -111,7 +111,7 @@
   when: not beaconchain_explorer_aio_bigtable_external_enabled
   block:
     - name: Create and start database service
-      community.docker.docker_compose:
+      community.docker.docker_compose_v2:
         project_src: "{{ beaconchain_explorer_aio_installation_dir }}"
         services:
           - bigtable
@@ -126,7 +126,7 @@
         creates: "{{ beaconchain_explorer_aio_installation_dir }}/bigtable/initialized"
 
 - name: Create remaining explorer services
-  community.docker.docker_compose:
+  community.docker.docker_compose_v2:
     project_src: "{{ beaconchain_explorer_aio_installation_dir }}"
     services:
       - exporter
