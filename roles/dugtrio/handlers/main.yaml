@@ -1,0 +1,5 @@
+- name: Restart dugtrio container
+  community.docker.docker_container:
+    name: "{{ dugtrio_container_name }}"
+    state: started
+    restart: true
