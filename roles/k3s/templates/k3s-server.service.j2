@@ -7,7 +7,7 @@ After=network-online.target
 Type=notify
 ExecStartPre=-/sbin/modprobe br_netfilter
 ExecStartPre=-/sbin/modprobe overlay
-ExecStart=/usr/local/bin/k3s server --data-dir {{ k3s_server_location }} {{ k3s_server_extra_args | default("") }}
+ExecStart=/usr/local/bin/k3s server --data-dir {{ k3s_server_location }} {{ k3s_server_extra_args | default("") }}{% if k3s_calico %} --flannel-backend=none --disable-network-policy{% endif %}{{ "" }}
 
 KillMode=process
 Delegate=yes
