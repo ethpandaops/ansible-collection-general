@@ -26,6 +26,7 @@
     owner: "{{ dugtrio_user }}"
     group: "{{ dugtrio_user }}"
     mode: '0640'
+  notify: Restart dugtrio container
 
 - name: Setup dugtrio
   community.docker.docker_container:
