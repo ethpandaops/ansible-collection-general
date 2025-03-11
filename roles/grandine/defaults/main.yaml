@@ -80,7 +80,7 @@ grandine_container_command_v6:
   - --enr-quic-port-ipv6={{ grandine_ports_quic }}
 
 grandine_container_supernode_command:
-  - --subscribe-all-subnets
+  - --subscribe-all-data-column-subnets
 
 grandine_container_command: >-
   {{
