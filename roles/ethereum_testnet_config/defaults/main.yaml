@@ -9,3 +9,6 @@ eth_testnet_config_git_update: false # noqa var-naming[no-role-prefix] - Once it
 
 eth_testnet_config_local_dir_enabled: false # noqa var-naming[no-role-prefix]
 eth_testnet_config_local_dir_src: "files/ethereum-network-config/metadata" # noqa var-naming[no-role-prefix]
+
+eth_testnet_config_tarball_enabled: false # noqa var-naming[no-role-prefix]
+eth_testnet_config_tarball_url: "https://some-url.tar.gz" # noqa var-naming[no-role-prefix]
