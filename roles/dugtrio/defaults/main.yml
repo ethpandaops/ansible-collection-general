@@ -24,6 +24,9 @@ dugtrio_proxy_sticky_endpoint: true
 dugtrio_proxy_call_rate_limit: 100
 dugtrio_proxy_call_rate_burst: 1000
 dugtrio_proxy_blocked_paths: []
+dugtrio_proxy_auth_required: false
+dugtrio_proxy_auth_password: ""
+
 dugtrio_frontend_enabled: true
 dugtrio_frontend_title: "Dugtrio"
 dugtrio_metrics_enabled: true
@@ -103,6 +106,11 @@ dugtrio_config: |
       - {{ blocked_path | quote }}
       {% endfor %}
     {% endif %}
+
+    # proxy authentication
+    auth:
+      required: {{ dugtrio_proxy_auth_required }}
+      password: {{ dugtrio_proxy_auth_password | quote }}
 
   # Frontend configuration
   frontend:
