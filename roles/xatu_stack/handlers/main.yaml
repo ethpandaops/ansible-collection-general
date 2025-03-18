@@ -3,5 +3,4 @@
     project_src: "{{ xatu_stack_repo_path }}"
     files:
       - docker-compose.yml
-    state: present
-    restarted: true
+    state: restarted
