@@ -8,11 +8,20 @@ set -xe
 #
 # CONFIG FOR: {{ item.interface }}
 #
+
+NETNS_CMD=""
+{% if item.container is defined %}
+# If the container-specific network namespace exists, prepare to run commands there.
+if [ -f "/var/run/netns/{{ item.container }}_ns" ]; then
+  NETNS_CMD="ip netns exec {{ item.container }}_ns"
+fi
+{% endif %}
+
 {% set ifb_interface = traffic_control_ifb_interface_prefix + item.interface %}
-tc qdisc del dev {{ item.interface }} root
-tc qdisc del dev {{ item.interface }} ingress
-tc qdisc del dev {{ ifb_interface }} root
-ip link set {{ ifb_interface }} down
-ip link delete {{ ifb_interface }} type ifb
+${NETNS_CMD} tc qdisc del dev {{ item.interface }} root
+${NETNS_CMD} tc qdisc del dev {{ item.interface }} ingress
+${NETNS_CMD} tc qdisc del dev {{ ifb_interface }} root
+${NETNS_CMD} ip link set {{ ifb_interface }} down
+${NETNS_CMD} ip link delete {{ ifb_interface }} type ifb
 
 {% endfor %}
