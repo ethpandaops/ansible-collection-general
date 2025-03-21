@@ -1,0 +1,51 @@
+xatu_cannon_cleanup: false
+
+xatu_cannon_user: "xatu-cannon"
+
+xatu_cannon_container_name: "xatu-cannon"
+xatu_cannon_container_image: "ethpandaops/xatu:latest"
+xatu_cannon_container_env: {}
+xatu_cannon_container_ports: []
+xatu_cannon_container_volumes:
+  - "{{ xatu_cannon_paths_config }}/config.yaml:/config.yaml:ro"
+
+xatu_cannon_container_stop_timeout: "120"
+xatu_cannon_container_networks: []
+
+xatu_cannon_paths_config: /etc/xatu-cannon/
+
+xatu_cannon_container_command:
+  - cannon
+  - --config=/config.yaml
+
+xatu_cannon_config_name: "{{ inventory_hostname }}"
+xatu_cannon_config_beacon_uri: your-beacon-node:4000
+xatu_cannon_config_server_address: remote-xatu-server:1234
+xatu_cannon_config_server_tls_enabled: true
+xatu_cannon_config_server_auth_user: xatu-user
+xatu_cannon_config_server_auth_password: xatu-password
+xatu_cannon_config_coordinator_address: remote-xatu-server:1234
+xatu_cannon_config_coordinator_tls_enabled: true
+xatu_cannon_config_coordinator_authorization: coordinator-secret
+xatu_cannon_config_network_name_override: ""
+
+xatu_cannon_config: |
+  logging: "info"
+  metricsAddr: ":9090"
+  name: "{{ xatu_cannon_config_name }}"
+  ethereum:
+    beaconNodeAddress: {{ xatu_cannon_config_beacon_uri }}
+    overrideNetworkName: {{ xatu_cannon_config_network_name_override }}
+  coordinator:
+    address: {{ xatu_cannon_config_coordinator_address }}
+    tls: {{ xatu_cannon_config_coordinator_tls_enabled }}
+    headers:
+      authorization: "Bearer {{ xatu_cannon_config_coordinator_authorization | b64encode }}"
+  outputs:
+  - name: grpc
+    type: xatu
+    config:
+      address: {{ xatu_cannon_config_server_address }}
+      tls: {{ xatu_cannon_config_server_tls_enabled }}
+      headers:
+        authorization: "Basic {{ (xatu_cannon_config_server_auth_user + ":" + xatu_cannon_config_server_auth_password) | b64encode }}"
