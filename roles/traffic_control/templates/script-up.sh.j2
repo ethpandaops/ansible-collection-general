@@ -12,38 +12,53 @@ set -xe
 #
 # CONFIG FOR: {{ item.interface }}
 #
-{# Create ifb interface #}
-ip link add {{ ifb_interface }} type ifb
-ip link set {{ ifb_interface }} up
-{# Delete any existing qdisc configurations on {{ item.interface }} #}
-tc qdisc del dev {{ item.interface }} root || true
-tc qdisc del dev {{ item.interface }} ingress || true
-tc qdisc del dev {{ ifb_interface }} root || true
-{% if (item.state | default("present")) != "absent" %}
-{# Add root qdisc on #}
-tc qdisc add dev {{ item.interface }} root handle 1: htb default 30
-{# Add bandwith limits on #}
-{% if item.rate is defined or item.rate_upload is defined %}
-tc class add dev {{ item.interface }} parent 1: classid 1:1 htb rate {{ item.rate_upload | default(item.rate) }} ceil {{ item.rate_upload | default(item.rate) }}
+{% if item.container is defined %}
+# Setup network namespace for container {{ item.container }}
+container_pid=$(docker inspect -f '{{ '{{.State.Pid}}' }}' {{ item.container }})
+mkdir -p /var/run/netns
+ln -sfT /proc/$container_pid/ns/net /var/run/netns/{{ item.container }}_ns
+NETNS_CMD="ip netns exec {{ item.container }}_ns"
+{% else %}
+NETNS_CMD=""
 {% endif %}
-{% if item.rate is defined or item.rate_download is defined %}
-tc class add dev {{ item.interface }} parent 1: classid 1:2 htb rate {{ item.rate_download | default(item.rate) }} ceil {{ item.rate_download | default(item.rate) }}
-{% endif %}
-{# Add filter to upload direction #}
-tc filter add dev {{ item.interface }} protocol ip parent 1:0 prio 1 u32 match ip dst 0.0.0.0/0 flowid 1:1
-{# Redirect ingress traffic to ifb interface #}
-tc qdisc add dev {{ item.interface }} handle ffff: ingress
-tc filter add dev {{ item.interface }} parent ffff: protocol ip u32 match u32 0 0 action mirred egress redirect dev {{ ifb_interface }}
-{# Add bandwith limits on ifb interface #}
-tc qdisc add dev {{ ifb_interface }} root handle 1: htb default 30
-{% if item.rate is defined or item.rate_download is defined %}
-tc class add dev {{ ifb_interface }} parent 1: classid 1:2 htb rate {{ item.rate_download | default(item.rate) }} ceil {{ item.rate_download | default(item.rate) }}
-{% endif %}
-tc filter add dev {{ ifb_interface }} protocol ip parent 1:0 prio 1 u32 match ip src 0.0.0.0/0 flowid 1:2
 
-{# Add latency #}
+{# Create ifb interface #}
+if ! ${NETNS_CMD} ip link show {{ ifb_interface }} &>/dev/null; then
+  ${NETNS_CMD} ip link add {{ ifb_interface }} type ifb
+else
+  echo "Interface {{ ifb_interface }} already exists. Skipping creation."
+fi
+${NETNS_CMD} ip link set {{ ifb_interface }} up
+{# Delete any existing qdisc configurations on {{ item.interface }} #}
+${NETNS_CMD} tc qdisc del dev {{ item.interface }} root || true
+${NETNS_CMD} tc qdisc del dev {{ item.interface }} ingress || true
+${NETNS_CMD} tc qdisc del dev {{ ifb_interface }} root || true
+
+{% if (item.state | default("present")) != "absent" %}
+{# Add root qdisc on {{ item.interface }} #}
+${NETNS_CMD} tc qdisc add dev {{ item.interface }} root handle 1: htb default 30
+{# Add bandwidth limits on {{ item.interface }} #}
+{% if item.rate is defined or item.rate_upload is defined %}
+${NETNS_CMD} tc class add dev {{ item.interface }} parent 1: classid 1:1 htb rate {{ item.rate_upload | default(item.rate) }} ceil {{ item.rate_upload | default(item.rate) }}
+{% endif %}
+{% if item.rate is defined or item.rate_download is defined %}
+${NETNS_CMD} tc class add dev {{ item.interface }} parent 1: classid 1:2 htb rate {{ item.rate_download | default(item.rate) }} ceil {{ item.rate_download | default(item.rate) }}
+{% endif %}
+{# Add filter to upload direction on {{ item.interface }} #}
+${NETNS_CMD} tc filter add dev {{ item.interface }} protocol ip parent 1:0 prio 1 u32 match ip dst 0.0.0.0/0 flowid 1:1
+{# Redirect ingress traffic to ifb interface #}
+${NETNS_CMD} tc qdisc add dev {{ item.interface }} handle ffff: ingress
+${NETNS_CMD} tc filter add dev {{ item.interface }} parent ffff: protocol ip u32 match u32 0 0 action mirred egress redirect dev {{ ifb_interface }}
+{# Add bandwidth limits on ifb interface #}
+${NETNS_CMD} tc qdisc add dev {{ ifb_interface }} root handle 1: htb default 30
+{% if item.rate is defined or item.rate_download is defined %}
+${NETNS_CMD} tc class add dev {{ ifb_interface }} parent 1: classid 1:2 htb rate {{ item.rate_download | default(item.rate) }} ceil {{ item.rate_download | default(item.rate) }}
+{% endif %}
+${NETNS_CMD} tc filter add dev {{ ifb_interface }} protocol ip parent 1:0 prio 1 u32 match ip src 0.0.0.0/0 flowid 1:2
+
+{# Add latency on {{ item.interface }} #}
 {% if item.latency is defined or item.jitter is defined %}
-tc qdisc add dev {{ item.interface }} parent 1:1 handle 10: netem \
+${NETNS_CMD} tc qdisc add dev {{ item.interface }} parent 1:1 handle 10: netem \
 {% if item.latency is defined %}delay {{ item.latency }}{% if item.jitter is defined %} {{ item.jitter }}{% endif %}{% endif %} \
 {% if item.loss is defined %}loss {{ item.loss }}{% endif %}
 {% endif %}
