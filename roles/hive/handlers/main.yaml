@@ -1,0 +1,5 @@
+- name: Restart hive service
+  ansible.builtin.service:
+    name: "{{ hive_systemd_service_name }}"
+    state: restarted
+    daemon_reload: true

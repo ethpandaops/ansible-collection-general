@@ -1,0 +1,31 @@
+- name: Get service facts to verify if service is running
+  ansible.builtin.service_facts:
+
+- name: Stop systemd service
+  ansible.builtin.systemd:
+    name: "{{ hive_systemd_service_name }}"
+    state: stopped
+    enabled: false
+  when: ansible_facts['services'][hive_systemd_service_name]['status'] | default('not-found') != 'not-found'
+
+- name: Remove container
+  community.general.docker_container:
+    name: "{{ hive_container_www_name }}"
+    state: absent
+
+- name: Remove systemd service file
+  ansible.builtin.file:
+    path: "/etc/systemd/system/{{ hive_systemd_service_name }}"
+    state: absent
+
+- name: Remove directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ hive_dir_bin }}"
+    - "{{ hive_dir_source }}"
+    - "{{ hive_dir_scripts }}"
+    - "{{ hive_dir_results }}"
+    - "{{ hive_dir_web }}"
+    - "{{ hive_dir }}"

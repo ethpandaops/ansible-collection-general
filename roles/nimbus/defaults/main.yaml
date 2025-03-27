@@ -90,7 +90,7 @@ nimbus_container_command_v6: []
   # - --nat=extip:{{ nimbus_announced_ipv6 }} # not supported yet
 
 nimbus_container_supernode_command:
-  - --subscribe-all-subnets=true
+  - --debug-peerdas-supernode=true
 
 nimbus_container_command: >-
   {{

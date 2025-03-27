@@ -30,6 +30,7 @@ bootstrap_default_common_packages:
       - bat
       - cron
       - nfs-common
+      - rsync
 
 bootstrap_hostname_set: true
 bootstrap_harden_sshd_config: true

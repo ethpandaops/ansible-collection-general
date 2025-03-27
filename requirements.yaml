@@ -13,3 +13,5 @@ roles:
     version: "2.2.0"
   - name: gantsign.oh-my-zsh
     version: "2.4.0"
+  - name: gantsign.golang
+    version: "3.4.0"

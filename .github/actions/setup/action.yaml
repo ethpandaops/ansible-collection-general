@@ -10,9 +10,11 @@ runs:
         sudo apt install -y build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev curl git libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev;
 
     - name: Install asdf
-      uses: asdf-vm/actions/setup@v3
+      uses: asdf-vm/actions/setup@05e0d2ed97b598bfce82fd30daf324ae0c4570e6 # v3.0.2
+      with:
+        asdf_branch: v0.15.0
 
     - name: Run setup
       shell: bash
-      run: ./setup.sh
+      run: make setup
       working-directory: ansible_collections/ethpandaops/general
