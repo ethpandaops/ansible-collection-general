@@ -118,7 +118,7 @@ dugtrio_config: |
 
     # how often to check for session imbalances (0 = disabled)
     rebalanceInterval: {{ dugtrio_proxy_rebalance_interval }}
-    
+
     # how much imbalance to tolerate (0-1)
     rebalanceThreshold: {{ dugtrio_proxy_rebalance_threshold }}
 
