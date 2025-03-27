@@ -19,6 +19,7 @@ erigon_container_env: {}
 erigon_container_ports_ipv4:
   - "127.0.0.1:{{ erigon_ports_engine }}:{{ erigon_ports_engine }}"
   - "127.0.0.1:{{ erigon_ports_http_rpc }}:{{ erigon_ports_http_rpc }}"
+  - "127.0.0.1:{{ erigon_ports_metrics }}:{{ erigon_ports_metrics }}"
   - "0.0.0.0:{{ erigon_ports_p2p }}:{{ erigon_ports_p2p }}"
   - "0.0.0.0:{{ erigon_ports_p2p }}:{{ erigon_ports_p2p }}/udp"
 

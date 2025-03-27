@@ -19,6 +19,7 @@ reth_container_env: {}
 reth_container_ports_ipv4:
   - "127.0.0.1:{{ reth_ports_http_rpc }}:{{ reth_ports_http_rpc }}"
   - "127.0.0.1:{{ reth_ports_engine }}:{{ reth_ports_engine }}"
+  - "127.0.0.1:{{ reth_ports_metrics }}:{{ reth_ports_metrics }}"
   - "0.0.0.0:{{ reth_ports_p2p }}:{{ reth_ports_p2p }}"
   - "0.0.0.0:{{ reth_ports_p2p }}:{{ reth_ports_p2p }}/udp"
 

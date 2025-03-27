@@ -9,7 +9,7 @@ ethereumjs_cleanup: false # when set to "true" it will remove the container
 ethereumjs_ports_p2p: 30303
 ethereumjs_ports_http_rpc: 8545
 ethereumjs_ports_engine: 8551
-
+ethereumjs_ports_metrics: 8000
 ethereumjs_ipv6_enabled: false
 
 ethereumjs_container_name: ethereumjs
@@ -18,6 +18,7 @@ ethereumjs_container_env: {}
 ethereumjs_container_ports_ipv4:
   - "127.0.0.1:{{ ethereumjs_ports_http_rpc }}:{{ ethereumjs_ports_http_rpc }}"
   - "127.0.0.1:{{ ethereumjs_ports_engine }}:{{ ethereumjs_ports_engine }}"
+  - "127.0.0.1:{{ ethereumjs_ports_metrics }}:{{ ethereumjs_ports_metrics }}"
   - "0.0.0.0:{{ ethereumjs_ports_p2p }}:{{ ethereumjs_ports_p2p }}"
   - "0.0.0.0:{{ ethereumjs_ports_p2p }}:{{ ethereumjs_ports_p2p }}/udp"
 
@@ -46,6 +47,8 @@ ethereumjs_container_command_default:
   - --rpcEnginePort={{ ethereumjs_ports_engine }}
   - --jwt-secret=/execution-auth.jwt
   - --extIP={{ ethereumjs_announced_ip }}
+  - --prometheus
+  - --prometheusPort={{ ethereumjs_ports_metrics }}
 
 ethereumjs_container_command_v6: []
   # - --extIP={{ ethereumjs_announced_ipv6 }} # not supported
