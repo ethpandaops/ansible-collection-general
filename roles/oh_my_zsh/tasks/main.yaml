@@ -5,16 +5,18 @@
   check_mode: true
   register: oh_my_zsh_user_meta
 
-- name: install zsh-autosuggestions
+- name: Install zsh-autosuggestions
   ansible.builtin.git:
     repo: https://github.com/zsh-users/zsh-autosuggestions
     dest: "{{ oh_my_zsh_user_meta.home }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
+    version: master
     force: true
 
-- name: install zsh-syntax-highlighting
+- name: Install zsh-syntax-highlighting
   ansible.builtin.git:
     repo: https://github.com/zsh-users/zsh-syntax-highlighting
     dest: "{{ oh_my_zsh_user_meta.home }}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
+    version: master
     force: true
 
 - name: Set custom .zshrc config

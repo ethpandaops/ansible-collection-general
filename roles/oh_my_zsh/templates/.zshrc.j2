@@ -1,8 +1,8 @@
 {{ ansible_managed | comment }}
 
 {% set oh_my_zsh = user.oh_my_zsh|default({}) %}
-{% set oh_my_zsh_update_mode = oh_my_zsh_update_mode|default('reminder') %}
-{% set oh_my_zsh_update_frequency = oh_my_zsh_update_frequency|default(13) %}
+{% set oh_my_zsh_update_mode = oh_my_zsh.update_mode|default(oh_my_zsh_update_mode|default('reminder')) %}
+{% set oh_my_zsh_update_frequency = oh_my_zsh.update_frequency|default(oh_my_zsh_update_frequency|default(13)) %}
 
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
@@ -29,10 +29,11 @@ ZSH_THEME="{{ oh_my_zsh.theme | default(oh_my_zsh_theme) }}"
 # Case-sensitive completion must be off. _ and - will be interchangeable.
 # HYPHEN_INSENSITIVE="true"
 
-{% if 'auto' == oh_my_zsh.update_mode | default(oh_my_zsh_update_mode) %}
+# Update mode configuration
+{% if oh_my_zsh_update_mode == 'auto' %}
 # Update automatically without asking
 zstyle ':omz:update' mode auto
-{% elif 'reminder' == oh_my_zsh.update_mode | default(oh_my_zsh_update_mode) %}
+{% elif oh_my_zsh_update_mode == 'reminder' %}
 # Just remind me to update when it's time
 zstyle ':omz:update' mode reminder
 {% else %}
@@ -41,10 +42,10 @@ zstyle ':omz:update' mode disabled
 {% endif %}
 
 # How often to auto-update (in days).
-{% if 'disabled' != oh_my_zsh.update_mode | default(oh_my_zsh_update_mode) %}
-zstyle ':omz:update' frequency {{ oh_my_zsh.update_frequency | default(oh_my_zsh_update_frequency) }}
+{% if oh_my_zsh_update_mode != 'disabled' %}
+zstyle ':omz:update' frequency {{ oh_my_zsh_update_frequency }}
 {% else %}
-# zstyle ':omz:update' frequency {{ oh_my_zsh.update_frequency | default(oh_my_zsh_update_frequency) }}
+# zstyle ':omz:update' frequency {{ oh_my_zsh_update_frequency }}
 {% endif %}
 
 # Uncomment the following line if pasting URLs and other text is messed up.
