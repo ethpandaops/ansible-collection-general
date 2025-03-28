@@ -1,6 +1,8 @@
 {{ ansible_managed | comment }}
 
 {% set oh_my_zsh = user.oh_my_zsh|default({}) %}
+{% set oh_my_zsh_update_mode = oh_my_zsh_update_mode|default('reminder') %}
+{% set oh_my_zsh_update_frequency = oh_my_zsh_update_frequency|default(13) %}
 
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
