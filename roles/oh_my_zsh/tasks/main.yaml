@@ -21,7 +21,6 @@
   ansible.builtin.template:
     src: .zshrc.j2
     dest: "{{ oh_my_zsh_user_meta.home }}/.zshrc"
-    state: present
     mode: "0644"
     owner: "{{ oh_my_zsh_user }}"
     group: "{{ oh_my_zsh_user }}"
