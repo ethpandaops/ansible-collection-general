@@ -1,0 +1,35 @@
+# {{ ansible_managed }}
+
+spamoor:
+  fullnameOverride: spamoor
+  image:
+    repository: {{ default_tooling_images.spamoor.split(':') | first }}
+    tag: {{ default_tooling_images.spamoor.split(':') | last }}
+    pullPolicy: {% if "latest" in (default_tooling_images.spamoor.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
+
+  resources:
+    requests:
+      cpu: 250m
+      memory: 500Mi
+    limits:
+      cpu: 2000m
+      memory: 2Gi
+  ingress:
+    enabled: true
+    className: ingress-nginx-public
+    hosts:
+      - host: spamoor.{{ network_subdomain }}
+        paths:
+          - path: /
+            pathType: Prefix
+
+  persistence:
+    enabled: true
+
+  privateKey: "<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.spamoor_private_key}>"
+  rpcEndpoints:
+  # Rpc
+  - "{{ default_el_endpoint }}"
+{% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
+  - "https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@rpc.{{ hostvars[host]['inventory_hostname'] }}.{{ network_subdomain }}"
+{% endfor %}
