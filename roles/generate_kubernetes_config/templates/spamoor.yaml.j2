@@ -26,7 +26,7 @@ spamoor:
   persistence:
     enabled: true
 
-  privateKey: "<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.faucet_private_key}>"
+  privateKey: "<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.spamoor_private_key}>"
   rpcEndpoints:
   # Rpc
   - "{{ default_el_endpoint }}"
