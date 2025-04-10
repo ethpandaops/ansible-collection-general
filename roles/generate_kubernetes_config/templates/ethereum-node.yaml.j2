@@ -171,6 +171,10 @@
 {%- endif +%}
 
   {{ gen_kubernetes_config_ethereum_node.cl }}:
+    checkpointSync:
+      enabled: {{ ethereum_node_cl_checkpoint_sync_enabled | lower }}
+      addresses:
+        {{ ethereum_network_name }}: {{ checkpoint_sync_url_kube }}
     enabled: true
     fullnameOverride: {{ item.key }}
     image:
