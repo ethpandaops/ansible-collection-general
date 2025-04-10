@@ -94,10 +94,10 @@ xatu-cannon:
     tracing:
       enabled: false
     ethereum:
-    {% if groups['bootnode'] | length > 0 %}
+{% if groups['bootnode'] | length > 0 %}
       beaconNodeAddress: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@beacon.{{ hostvars[groups['bootnode'][0]]['inventory_hostname'] }}.{{ network_subdomain }}
-    {% endif %}
-      beaconNodeHeaders: {} #FILL_ME
+{% endif %}
+      beaconNodeHeaders: {}
       blockCacheSize: 300
       blockCacheTtl: 1h
       blockPreloadWorkers: 50
