@@ -5,9 +5,24 @@
   check_mode: true
   register: oh_my_zsh_user_meta
 
+- name: Install zsh-autosuggestions
+  ansible.builtin.git:
+    repo: https://github.com/zsh-users/zsh-autosuggestions
+    dest: "{{ oh_my_zsh_user_meta.home }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
+    version: master
+    force: true
+
+- name: Install zsh-syntax-highlighting
+  ansible.builtin.git:
+    repo: https://github.com/zsh-users/zsh-syntax-highlighting
+    dest: "{{ oh_my_zsh_user_meta.home }}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
+    version: master
+    force: true
+
 - name: Set custom .zshrc config
-  ansible.builtin.lineinfile:
+  ansible.builtin.template:
+    src: .zshrc.j2
     dest: "{{ oh_my_zsh_user_meta.home }}/.zshrc"
-    state: present
-    line: "{{ item }}"
-  loop: "{{ oh_my_zsh_config }}"
+    mode: "0644"
+    owner: "{{ oh_my_zsh_user }}"
+    group: "{{ oh_my_zsh_user }}"
