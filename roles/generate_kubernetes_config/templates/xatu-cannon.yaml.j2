@@ -105,7 +105,7 @@ xatu-cannon:
       address: server.xatu-experimental.ethpandaops.io:443
       tls: true
       headers:
-        authorization: "Bearer {{xatu.experimental.coordinator_secret}}"
+        authorization: "Bearer <path:/secrets/services/services.enc.yaml#xatu | jsonPath {.experimental.coordinator_secret}>"
     outputs:
     - name: grpc
       type: xatu
@@ -115,5 +115,5 @@ xatu-cannon:
         tls: true
         workers: 10
         headers:
-          authorization: "Basic {{xatu.experimental.event_ingester_auth}}"
+          authorization: "Basic <path:/secrets/services/services.enc.yaml#xatu | jsonPath {.experimental.event_ingester_auth}>"
         maxExportBatchSize: 64
