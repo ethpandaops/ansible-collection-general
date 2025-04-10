@@ -161,3 +161,9 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
       - name: spamoor
         repository: https://ethpandaops.github.io/ethereum-helm-charts
         version: 0.0.1
+  xatu-cannon:
+    valuesTemplatePath: templates/xatu-cannon.yaml.j2
+    dependencies:
+      - name: xatu-cannon
+        repository: https://ethpandaops.github.io/ethereum-helm-charts
+        version: 0.2.2
