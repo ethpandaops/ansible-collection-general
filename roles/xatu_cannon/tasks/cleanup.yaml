@@ -1,0 +1,4 @@
+- name: Remove xatu cannon container
+  community.docker.docker_container:
+    name: "{{ xatu_cannon_container_name }}"
+    state: absent
