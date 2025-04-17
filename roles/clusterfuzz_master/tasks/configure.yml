@@ -18,7 +18,10 @@
 
 - name: Install dependencies
   ansible.builtin.shell:
-    cmd: "{{ clusterfuzz_master_repo_path }}/local/install_deps.bash"
+    cmd: |
+      "{{ clusterfuzz_master_repo_path }}/local/install_deps_linux.bash"
+      export PYTHON='python3'
+      "{{ clusterfuzz_master_repo_path }}/local/install_python_deps_linux.bash"
     chdir: "{{ clusterfuzz_master_repo_path }}"
   become: yes
   become_user: devops
