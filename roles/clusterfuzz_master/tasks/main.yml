@@ -8,4 +8,3 @@
 - name: Include configure tasks
   ansible.builtin.include_tasks: configure.yml
   when: not clusterfuzz_master_cleanup | default(true) | bool
-

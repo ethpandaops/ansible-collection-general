@@ -12,25 +12,27 @@
     repo: "{{ clusterfuzz_master_repo_url }}"
     dest: "{{ clusterfuzz_master_repo_path }}"
     version: master
-    force: yes
-  become: yes
+    force: true
+  become: true
   become_user: devops
 
 - name: Install system dependencies
-  ansible.builtin.shell:
+  ansible.builtin.command:
     cmd: "{{ clusterfuzz_master_repo_path }}/local/install_deps_linux.bash"
     chdir: "{{ clusterfuzz_master_repo_path }}"
-  become: yes
+  become: true
   become_user: devops
+  changed_when: false
 
 - name: Install Python dependencies
-  ansible.builtin.shell:
+  ansible.builtin.command:
     cmd: |
       export PYTHON='python3'
       "{{ clusterfuzz_master_repo_path }}/local/install_python_deps_linux.bash"
     chdir: "{{ clusterfuzz_master_repo_path }}"
-  become: yes
+  become: true
   become_user: devops
+  changed_when: false
 
 - name: Create clusterfuzz service script
   ansible.builtin.template:
@@ -42,10 +44,10 @@
 
 - name: Reload systemd
   ansible.builtin.systemd:
-    daemon_reload: yes 
+    daemon_reload: true
 
 - name: Ensure clusterfuzz service is started and enabled
   ansible.builtin.systemd:
     name: clusterfuzz
     state: started
-    enabled: yes
+    enabled: true

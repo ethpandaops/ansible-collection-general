@@ -11,4 +11,4 @@ clusterfuzz_master_repo_url: https://github.com/ethpandaops/clusterfuzz.git
 clusterfuzz_master_web_port: 9000
 clusterfuzz_master_datastore_port: 9004
 clusterfuzz_master_pubsub_port: 9006
-clusterfuzz_master_storage_port: 9008 
+clusterfuzz_master_storage_port: 9008
