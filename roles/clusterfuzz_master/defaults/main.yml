@@ -1,4 +1,7 @@
 ---
+# Cleanup
+clusterfuzz_master_cleanup: false
+
 # Storage configuration
 clusterfuzz_master_storage_path: /data/clusterfuzz
 clusterfuzz_master_repo_path: "{{ clusterfuzz_master_storage_path }}/clusterfuzz"

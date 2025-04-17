@@ -1,6 +1,12 @@
 ---
+# tasks file for clusterfuzz-master
+
 - name: Include configure tasks
   ansible.builtin.include_tasks: configure.yml
+
+- name: Include cleanup tasks
+  ansible.builtin.import_tasks: cleanup.yml
+  when: clusterfuzz_master_cleanup | default(false) | bool
 
 - name: Ensure clusterfuzz service is started and enabled
   ansible.builtin.systemd:
