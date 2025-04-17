@@ -43,3 +43,9 @@
 - name: Reload systemd
   ansible.builtin.systemd:
     daemon_reload: yes 
+
+- name: Ensure clusterfuzz service is started and enabled
+  ansible.builtin.systemd:
+    name: clusterfuzz
+    state: started
+    enabled: yes
