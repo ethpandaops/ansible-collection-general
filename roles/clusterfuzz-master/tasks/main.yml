@@ -1,0 +1,10 @@
+---
+- name: Include configure tasks
+  ansible.builtin.include_tasks: configure.yml
+
+- name: Ensure clusterfuzz service is started and enabled
+  ansible.builtin.systemd:
+    name: clusterfuzz
+    state: started
+    enabled: yes
+
