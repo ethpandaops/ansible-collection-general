@@ -36,8 +36,8 @@
   ansible.builtin.template:
     src: clusterfuzz.service.j2
     dest: /etc/systemd/system/clusterfuzz.service
-    owner: root
-    group: root
+    owner: devops
+    group: devops
     mode: '0644'
 
 - name: Reload systemd
