@@ -5,6 +5,8 @@ vector_cleanup: false # when set to "true" it will remove the container(s)
 
 vector_container_image: timberio/vector:0.46.1-alpine
 vector_container_name: vector
+vector_container_entrypoint: ["/usr/local/bin/vector"]
+vector_container_command: ["--config", "/etc/vector/vector.toml"]
 vector_container_ports: []
 vector_container_restart_policy: always
 vector_container_networks: []
