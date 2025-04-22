@@ -33,6 +33,8 @@
     name: "{{ vector_container_name }}"
     image: "{{ vector_container_image }}"
     image_name_mismatch: recreate
+    command: "{{ vector_container_command }}"
+    entrypoint: "{{ vector_container_entrypoint }}"
     ports: "{{ vector_container_ports }}"
     restart_policy: "{{ vector_container_restart_policy }}"
     networks: "{{ vector_container_networks }}"
