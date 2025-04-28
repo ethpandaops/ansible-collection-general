@@ -1,0 +1,58 @@
+#!/bin/bash
+set -euo pipefail
+
+NETWORK="{{ snapshot_fetcher_network }}"
+CLIENT="{{ snapshot_fetcher_client }}"
+DATA_DIR="{{ snapshot_fetcher_out_dir }}"
+BLOCK="{{ snapshot_fetcher_block }}"
+BASE_URL="{{ snapshot_fetcher_base_url }}"
+
+# Set tmux window title
+printf '\033]2;%s\033\\' "Snapshot: $NETWORK-$CLIENT"
+
+echo "=== Snapshot Download Started ==="
+echo "Network: $NETWORK"
+echo "Client: $CLIENT"
+echo "Target Block: $BLOCK"
+echo "================================"
+
+# Get block info
+echo "Fetching snapshot info for $NETWORK $CLIENT at block $BLOCK..."
+BLOCK_INFO=$(curl -s "$BASE_URL/$NETWORK/$CLIENT/$BLOCK/_snapshot_eth_getBlockByNumber.json")
+snapshot_fetcher_block=$(echo "$BLOCK_INFO" | jq -r '.result.number')
+CLIENT_VERSION=$(curl -s "$BASE_URL/$NETWORK/$CLIENT/$BLOCK/_snapshot_web3_clientVersion.json" | jq -r '.result')
+
+echo "Snapshot info:"
+echo "Block: $snapshot_fetcher_block"
+echo "Client: $CLIENT_VERSION"
+
+# Download and extract
+echo "Starting snapshot download container..."
+
+# Only run the snapshot download once. You have to manually remove the file if you want to run it again.
+if [ ! -f "$DATA_DIR/.snapshot_fetcher_started" ]; then
+  docker run -d --name snapshot_fetcher \
+    -v $DATA_DIR:/data \
+    --entrypoint "/bin/sh" \
+    -e RCLONE_CONFIG_MYS3_TYPE=s3 \
+    -e RCLONE_CONFIG_MYS3_PROVIDER=Cloudflare \
+    -e RCLONE_CONFIG_MYS3_ACL=public-read \
+    -e RCLONE_CONFIG_MYS3_REGION=auto \
+    -e RCLONE_CONFIG_MYS3_NO_CHECK_BUCKET=true \
+    -e RCLONE_CONFIG_MYS3_NO_LIST=true \
+    -e "RCLONE_CONFIG_MYS3_ENDPOINT={{ snapshot_fetcher_s3_endpoint }}" \
+    -e "RCLONE_CONFIG_MYS3_ACCESS_KEY_ID={{ snapshot_fetcher_s3_access_key_id }}" \
+    -e "RCLONE_CONFIG_MYS3_SECRET_ACCESS_KEY={{ snapshot_fetcher_s3_secret_access_key }}" \
+    docker.ethquokkaops.io/dh/library/alpine -c "cd /data && \
+    apk add --no-cache curl tar zstd rclone && \
+    rclone cat mys3:/ethpandaops-ethereum-node-snapshots/$NETWORK/$CLIENT/$BLOCK/snapshot.tar.zst | tar -I zstd -xvf - -C /data"
+
+  touch $DATA_DIR/.snapshot_fetcher_started
+  echo "================================================"
+  echo "Snapshot downloading to $DATA_DIR"
+  echo "================================================"
+  echo "Use 'docker logs -f snapshot_fetcher' to follow the progress"
+
+else
+  echo "Snapshot download container did already run. Skipping..."
+fi
