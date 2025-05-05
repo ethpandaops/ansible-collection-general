@@ -13,7 +13,7 @@ ethereumjs_ports_metrics: 8000
 ethereumjs_ipv6_enabled: false
 
 ethereumjs_container_name: ethereumjs
-ethereumjs_container_image: g11tech/ethereumjs:latest
+ethereumjs_container_image: ethpandaops/ethereumjs:master
 ethereumjs_container_env: {}
 ethereumjs_container_ports_ipv4:
   - "127.0.0.1:{{ ethereumjs_ports_http_rpc }}:{{ ethereumjs_ports_http_rpc }}"
