@@ -32,6 +32,7 @@ teku_container_image: consensys/teku:latest
 teku_container_env: {}
 teku_container_ports_ipv4:
   - "127.0.0.1:{{ teku_ports_http_beacon }}:{{ teku_ports_http_beacon }}"
+  - "127.0.0.1:{{ teku_ports_metrics }}:{{ teku_ports_metrics }}"
   - "0.0.0.0:{{ teku_ports_p2p_tcp }}:{{ teku_ports_p2p_tcp }}"
   - "0.0.0.0:{{ teku_ports_p2p_udp }}:{{ teku_ports_p2p_udp }}/udp"
 
