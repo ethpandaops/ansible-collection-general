@@ -1,0 +1,119 @@
+xatu-cannon:
+  enabled: true
+  fullnameOverride: xatu-cannon
+  image:
+    repository: {{ default_tooling_images.xatu_cannon.split(':') | first }}
+    tag: {{ default_tooling_images.xatu_cannon.split(':') | last }}
+    pullPolicy: {% if "latest" in (default_tooling_images.xatu_cannon.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
+
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 8000Mi
+    requests:
+      cpu: 256m
+      memory: 512Mi
+
+  config:
+    logging: "info"
+    metricsAddr: ":9090"
+    pprofAddr: ":6060"
+    name: "{{ ethereum_network_name }}-xatu-cannon"
+    derivers:
+      attesterSlashing:
+        enabled: true
+        iterator:
+          backfill:
+            enabled: true
+      blsToExecutionChange:
+        enabled: true
+        iterator:
+          backfill:
+            enabled: true
+      deposit:
+        enabled: true
+        iterator:
+          backfill:
+            enabled: true
+      executionTransaction:
+        enabled: true
+        iterator:
+          backfill:
+            enabled: true
+      proposerSlashing:
+        enabled: true
+        iterator:
+          backfill:
+            enabled: true
+      voluntaryExit:
+        enabled: true
+        iterator:
+          backfill:
+            enabled: true
+      withdrawal:
+        enabled: true
+        iterator:
+          backfill:
+            enabled: true
+      beaconBlock:
+        enabled: true
+        iterator:
+          backfill:
+            enabled: true
+      blockClassification:
+        enabled: false
+        iterator:
+          backfill:
+            enabled: false
+      beaconBlobSidecar:
+        enabled: true
+        iterator:
+          backfill:
+            enabled: true
+      proposerDuty:
+        enabled: true
+        iterator:
+          backfill:
+            enabled: true
+      elaboratedAttestation:
+        enabled: true
+        iterator:
+          backfill:
+            enabled: true
+      beaconValidators:
+        enabled: true
+        chunkSize: 10
+        iterator:
+          backfill:
+            enabled: true
+      beaconCommittee:
+        enabled: true
+        iterator:
+          backfill:
+            enabled: true
+    tracing:
+      enabled: false
+    ethereum:
+{% if groups['bootnode'] | length > 0 %}
+      beaconNodeAddress: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@beacon.{{ hostvars[groups['bootnode'][0]]['inventory_hostname'] }}.{{ network_subdomain }}
+{% endif %}
+      beaconNodeHeaders: {}
+      blockCacheSize: 300
+      blockCacheTtl: 1h
+      blockPreloadWorkers: 50
+    coordinator:
+      address: server.xatu-experimental.ethpandaops.io:443
+      tls: true
+      headers:
+        authorization: "Bearer <path:/secrets/services/services.enc.yaml#xatu | jsonPath {.experimental.coordinator_secret}>"
+    outputs:
+    - name: grpc
+      type: xatu
+      config:
+        address: server.xatu-experimental.ethpandaops.io:443
+        maxQueueSize: 100000
+        tls: true
+        workers: 10
+        headers:
+          authorization: "Basic <path:/secrets/services/services.enc.yaml#xatu | jsonPath {.experimental.event_ingester_auth}>"
+        maxExportBatchSize: 64

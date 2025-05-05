@@ -12,7 +12,7 @@ xatu_sentry_container_volumes:
 xatu_sentry_container_stop_timeout: "120"
 xatu_sentry_container_networks: []
 
-xatu_sentry_paths_config: /etc/xatu-sentry/
+xatu_sentry_paths_config: /data/xatu-sentry/
 
 xatu_sentry_container_command:
   - sentry
