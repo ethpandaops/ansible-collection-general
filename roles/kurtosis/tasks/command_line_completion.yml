@@ -1,71 +1,60 @@
 ---
 # Install Kurtosis command-line completion
 
-- name: Get shell type
-  ansible.builtin.command: basename $SHELL
-  register: shell_type
-  changed_when: false
+- name: Create Bash completion directory
+  become: true
+  ansible.builtin.file:
+    path: /etc/bash_completion.d
+    state: directory
+    mode: '0755'
+  when: kurtosis_install_completion | bool
 
-- name: Install Bash completion
-  when: shell_type.stdout == "bash"
-  block:
-    - name: Create Bash completion directory if it doesn't exist
-      become: true
-      ansible.builtin.file:
-        path: /etc/bash_completion.d
-        state: directory
-        mode: '0755'
+- name: Generate and install Bash completion
+  become: true
+  ansible.builtin.shell: |
+    kurtosis completion bash > /etc/bash_completion.d/kurtosis
+  args:
+    creates: /etc/bash_completion.d/kurtosis
+  when: kurtosis_install_completion | bool
 
-    - name: Generate Bash completion
-      ansible.builtin.shell: |
-        kurtosis completion bash > /tmp/kurtosis_bash_completion
-      args:
-        creates: /tmp/kurtosis_bash_completion
+- name: Create Zsh completion directory
+  become: true
+  ansible.builtin.file:
+    path: "/home/{{ kurtosis_default_user }}/.zsh/completion"
+    state: directory
+    mode: '0755'
+    owner: "{{ kurtosis_default_user }}"
+    group: "{{ kurtosis_default_user }}"
+  when: kurtosis_install_completion | bool
 
-    - name: Install Bash completion
-      become: true
-      ansible.builtin.copy:
-        src: /tmp/kurtosis_bash_completion
-        dest: /etc/bash_completion.d/kurtosis
-        mode: '0644'
-        remote_src: true
+- name: Generate and install Zsh completion
+  become: true
+  ansible.builtin.shell: |
+    kurtosis completion zsh > "/home/{{ kurtosis_default_user }}/.zsh/completion/_kurtosis"
+  args:
+    creates: "/home/{{ kurtosis_default_user }}/.zsh/completion/_kurtosis"
+  when: kurtosis_install_completion | bool
 
-    - name: Add Bash completion to ~/.bashrc
-      ansible.builtin.lineinfile:
-        path: "{{ ansible_env.HOME }}/.bashrc"
-        line: "source /etc/bash_completion.d/kurtosis"
-        state: present
+- name: Add Zsh completion to .zshrc
+  become: true
+  ansible.builtin.lineinfile:
+    path: "/home/{{ kurtosis_default_user }}/.zshrc"
+    line: "fpath=(/home/{{ kurtosis_default_user }}/.zsh/completion $fpath)"
+    state: present
+    create: yes
+    mode: '0644'
+    owner: "{{ kurtosis_default_user }}"
+    group: "{{ kurtosis_default_user }}"
+  when: kurtosis_install_completion | bool
 
-- name: Install Zsh completion
-  when: shell_type.stdout == "zsh"
-  block:
-    - name: Create Zsh completion directory if it doesn't exist
-      ansible.builtin.file:
-        path: "{{ ansible_env.HOME }}/.zsh/completion"
-        state: directory
-        mode: '0755'
-
-    - name: Generate Zsh completion
-      ansible.builtin.shell: |
-        kurtosis completion zsh > /tmp/kurtosis_zsh_completion
-      args:
-        creates: /tmp/kurtosis_zsh_completion
-
-    - name: Install Zsh completion
-      ansible.builtin.copy:
-        src: /tmp/kurtosis_zsh_completion
-        dest: "{{ ansible_env.HOME }}/.zsh/completion/_kurtosis"
-        mode: '0644'
-        remote_src: true
-
-    - name: Add Zsh completion to ~/.zshrc
-      ansible.builtin.lineinfile:
-        path: "{{ ansible_env.HOME }}/.zshrc"
-        line: "fpath=({{ ansible_env.HOME }}/.zsh/completion $fpath)"
-        state: present
-
-    - name: Enable compinit in ~/.zshrc
-      ansible.builtin.lineinfile:
-        path: "{{ ansible_env.HOME }}/.zshrc"
-        line: "autoload -U compinit && compinit"
-        state: present
+- name: Enable compinit in .zshrc
+  become: true
+  ansible.builtin.lineinfile:
+    path: "/home/{{ kurtosis_default_user }}/.zshrc"
+    line: "autoload -U compinit && compinit"
+    state: present
+    create: yes
+    mode: '0644'
+    owner: "{{ kurtosis_default_user }}"
+    group: "{{ kurtosis_default_user }}"
+  when: kurtosis_install_completion | bool

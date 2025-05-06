@@ -3,3 +3,6 @@
 
 # Whether to install command-line completion
 kurtosis_install_completion: true
+
+# Default user for bootstrapping
+kurtosis_default_user: devops
