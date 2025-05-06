@@ -13,9 +13,6 @@ This role installs [Kurtosis](https://kurtosis.com/) on the target machine.
 Available variables are listed below, along with default values:
 
 ```yaml
-# Whether to install Docker if not already present
-kurtosis_install_docker: true
-
 # Whether to install command-line completion
 kurtosis_install_completion: true
 ```
