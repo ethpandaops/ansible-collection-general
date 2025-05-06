@@ -5,4 +5,4 @@
 kurtosis_install_completion: true
 
 # Default user for bootstrapping
-kurtosis_default_user: "{{ bootstrap_default_user | default("devops") }}"
+kurtosis_default_user: "{{ bootstrap_default_user | default('devops') }}"
