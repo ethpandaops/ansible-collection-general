@@ -33,8 +33,7 @@
         - name: Add Kurtosis apt repository
           become: true
           ansible.builtin.apt_repository:
-            repo: "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/"
-            filename: kurtosis
+            repo: deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /
             state: present
 
         - name: Update apt cache
