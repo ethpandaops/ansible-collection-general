@@ -1,0 +1,8 @@
+---
+# Defaults for kurtosis role
+
+# Whether to install command-line completion
+kurtosis_install_completion: true
+
+# Default user for bootstrapping
+kurtosis_default_user: "{{ bootstrap_default_user | default('devops') }}"
