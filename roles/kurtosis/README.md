@@ -4,6 +4,7 @@ This role installs [Kurtosis](https://kurtosis.com/) on the target machine.
 
 ## Requirements
 
+- Docker must be installed and running (handled by the geerlingguy.docker dependency)
 - For MacOS targets: Homebrew should be installed.
 - For Linux targets: Root access (`become: true`) is required.
 
@@ -21,7 +22,7 @@ kurtosis_install_completion: true
 
 ## Dependencies
 
-None.
+- [geerlingguy.docker](https://galaxy.ansible.com/geerlingguy/docker) - For Docker installation
 
 ## Example Playbook
 

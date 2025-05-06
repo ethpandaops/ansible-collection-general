@@ -11,7 +11,7 @@
   block:
     - name: Create Bash completion directory if it doesn't exist
       become: true
-      file:
+      ansible.builtin.file:
         path: /etc/bash_completion.d
         state: directory
         mode: '0755'
@@ -24,14 +24,14 @@
 
     - name: Install Bash completion
       become: true
-      copy:
+      ansible.builtin.copy:
         src: /tmp/kurtosis_bash_completion
         dest: /etc/bash_completion.d/kurtosis
         mode: '0644'
-        remote_src: yes
+        remote_src: true
 
     - name: Add Bash completion to ~/.bashrc
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: "{{ ansible_env.HOME }}/.bashrc"
         line: "source /etc/bash_completion.d/kurtosis"
         state: present
@@ -40,7 +40,7 @@
   when: shell_type.stdout == "zsh"
   block:
     - name: Create Zsh completion directory if it doesn't exist
-      file:
+      ansible.builtin.file:
         path: "{{ ansible_env.HOME }}/.zsh/completion"
         state: directory
         mode: '0755'
@@ -52,20 +52,20 @@
         creates: /tmp/kurtosis_zsh_completion
 
     - name: Install Zsh completion
-      copy:
+      ansible.builtin.copy:
         src: /tmp/kurtosis_zsh_completion
         dest: "{{ ansible_env.HOME }}/.zsh/completion/_kurtosis"
         mode: '0644'
-        remote_src: yes
+        remote_src: true
 
     - name: Add Zsh completion to ~/.zshrc
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: "{{ ansible_env.HOME }}/.zshrc"
         line: "fpath=({{ ansible_env.HOME }}/.zsh/completion $fpath)"
         state: present
 
     - name: Enable compinit in ~/.zshrc
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: "{{ ansible_env.HOME }}/.zshrc"
         line: "autoload -U compinit && compinit"
         state: present
