@@ -1,0 +1,71 @@
+---
+# Install and configure Kurtosis
+# Based on: https://docs.kurtosis.com/install
+
+- name: Ensure Docker is installed
+  include_tasks: install_docker.yml
+  when: kurtosis_install_docker | bool
+
+- name: Install Kurtosis CLI
+  block:
+    - name: Install Kurtosis on MacOS
+      when: ansible_os_family == "Darwin"
+      block:
+        - name: Ensure Homebrew is installed (MacOS)
+          homebrew:
+            update_homebrew: true
+
+        - name: Install Kurtosis CLI via Homebrew
+          homebrew:
+            name: kurtosis-tech/tap/kurtosis-cli
+            state: present
+
+    - name: Install Kurtosis on Debian/Ubuntu
+      when: ansible_os_family == "Debian"
+      block:
+        - name: Add Kurtosis apt repository
+          become: true
+          ansible.builtin.shell: |
+            echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
+          args:
+            creates: /etc/apt/sources.list.d/kurtosis.list
+
+        - name: Update apt cache
+          become: true
+          apt:
+            update_cache: yes
+
+        - name: Install Kurtosis CLI via apt
+          become: true
+          apt:
+            name: kurtosis-cli
+            state: present
+
+    - name: Install Kurtosis on RHEL/CentOS
+      when: ansible_os_family == "RedHat"
+      block:
+        - name: Add Kurtosis yum repository
+          become: true
+          ansible.builtin.shell: |
+            echo '[kurtosis]
+            name=Kurtosis
+            baseurl=https://yum.fury.io/kurtosis-tech/
+            enabled=1
+            gpgcheck=0' | sudo tee /etc/yum.repos.d/kurtosis.repo
+          args:
+            creates: /etc/yum.repos.d/kurtosis.repo
+
+        - name: Install Kurtosis CLI via yum
+          become: true
+          yum:
+            name: kurtosis-cli
+            state: present
+
+- name: Verify Kurtosis installation
+  ansible.builtin.command: kurtosis version
+  register: kurtosis_version
+  changed_when: false
+
+- name: Install command-line completion
+  include_tasks: command_line_completion.yml
+  when: kurtosis_install_completion | bool

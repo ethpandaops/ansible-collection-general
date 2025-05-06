@@ -1,0 +1,100 @@
+---
+# Install Docker if not already installed
+
+- name: Check if Docker is installed
+  ansible.builtin.command: command -v docker
+  register: docker_check
+  changed_when: false
+  failed_when: false
+
+- name: Install Docker on MacOS
+  when: ansible_os_family == "Darwin" and docker_check.rc != 0
+  block:
+    - name: Install Docker via Homebrew
+      homebrew_cask:
+        name: docker
+        state: present
+
+    - name: Ensure Docker is started on MacOS
+      ansible.builtin.debug:
+        msg: "Please start Docker Desktop manually after installation"
+
+- name: Install Docker on Debian/Ubuntu
+  when: ansible_os_family == "Debian" and docker_check.rc != 0
+  block:
+    - name: Install dependencies
+      become: true
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+        state: present
+
+    - name: Add Docker GPG key
+      become: true
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker repository
+      become: true
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable"
+        state: present
+
+    - name: Install Docker packages
+      become: true
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+        state: present
+
+    - name: Start and enable Docker service
+      become: true
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+- name: Install Docker on RHEL/CentOS
+  when: ansible_os_family == "RedHat" and docker_check.rc != 0
+  block:
+    - name: Install dependencies
+      become: true
+      yum:
+        name:
+          - yum-utils
+        state: present
+
+    - name: Add Docker repository
+      become: true
+      command: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+      args:
+        creates: /etc/yum.repos.d/docker-ce.repo
+
+    - name: Install Docker packages
+      become: true
+      yum:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+        state: present
+
+    - name: Start and enable Docker service
+      become: true
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+- name: Verify Docker installation
+  ansible.builtin.command: docker --version
+  register: docker_version
+  changed_when: false
+  when: docker_check.rc == 0 or ansible_os_family in ["Debian", "RedHat"]

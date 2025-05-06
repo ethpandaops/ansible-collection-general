@@ -1,0 +1,31 @@
+---
+galaxy_info:
+  role_name: kurtosis
+  author: ethereum
+  description: Installs Kurtosis CLI and dependencies
+  license: MIT
+  min_ansible_version: 2.9
+
+  platforms:
+    - name: Ubuntu
+      versions:
+        - all
+    - name: Debian
+      versions:
+        - all
+    - name: EL
+      versions:
+        - 7
+        - 8
+    - name: MacOSX
+      versions:
+        - all
+
+  galaxy_tags:
+    - kurtosis
+    - docker
+    - development
+    - testing
+    - infrastructure
+
+dependencies: []
