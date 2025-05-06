@@ -32,12 +32,10 @@
       block:
         - name: Add Kurtosis apt repository
           become: true
-          ansible.builtin.shell: |
-            set -o pipefail
-            echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
-          args:
-            creates: /etc/apt/sources.list.d/kurtosis.list
-            executable: /bin/bash
+          ansible.builtin.apt_repository:
+            repo: "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/"
+            filename: kurtosis
+            state: present
 
         - name: Update apt cache
           become: true
@@ -55,16 +53,13 @@
       block:
         - name: Add Kurtosis yum repository
           become: true
-          ansible.builtin.shell: |
-            set -o pipefail
-            echo '[kurtosis]
-            name=Kurtosis
-            baseurl=https://yum.fury.io/kurtosis-tech/
-            enabled=1
-            gpgcheck=0' | sudo tee /etc/yum.repos.d/kurtosis.repo
-          args:
-            creates: /etc/yum.repos.d/kurtosis.repo
-            executable: /bin/bash
+          ansible.builtin.yum_repository:
+            name: kurtosis
+            description: Kurtosis
+            baseurl: https://yum.fury.io/kurtosis-tech/
+            enabled: true
+            gpgcheck: false
+            state: present
 
         - name: Install Kurtosis CLI via yum
           become: true
