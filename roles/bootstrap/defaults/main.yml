@@ -32,6 +32,7 @@ bootstrap_default_common_packages:
       - nfs-common
       - rsync
       - tree
+      - smartmontools
 
 bootstrap_hostname_set: true
 bootstrap_harden_sshd_config: true
