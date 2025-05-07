@@ -1,0 +1,44 @@
+- name: Add xatu cannon user
+  ansible.builtin.user:
+    name: "{{ xatu_cannon_user }}"
+    shell: /bin/nologin
+
+- name: Get xatu cannon uid
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ xatu_cannon_user }}"
+  register: xatu_cannon_user_getent
+
+- name: Create xatu cannon dirs
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0777'
+    owner: "{{ xatu_cannon_user }}"
+    group: "{{ xatu_cannon_user }}"
+  loop:
+    - "{{ xatu_cannon_paths_config }}"
+
+- name: Create xatu cannon config
+  ansible.builtin.copy:
+    content: "{{ xatu_cannon_config }}"
+    dest: "{{ xatu_cannon_paths_config }}/config.yaml"
+    owner: "{{ xatu_cannon_user }}"
+    group: "{{ xatu_cannon_user }}"
+    mode: '0640'
+  notify: Restart xatu cannon container
+
+- name: Run xatu cannon container
+  community.docker.docker_container:
+    name: "{{ xatu_cannon_container_name }}"
+    image: "{{ xatu_cannon_container_image }}"
+    image_name_mismatch: recreate
+    user: "{{ xatu_cannon_user_getent.ansible_facts.getent_passwd[xatu_cannon_user][1] }}"
+    state: started
+    restart_policy: always
+    stop_timeout: "{{ xatu_cannon_container_stop_timeout }}"
+    ports: "{{ xatu_cannon_container_ports }}"
+    volumes: "{{ xatu_cannon_container_volumes }}"
+    env: "{{ xatu_cannon_container_env }}"
+    networks: "{{ xatu_cannon_container_networks }}"
+    command: "{{ xatu_cannon_container_command }}"
