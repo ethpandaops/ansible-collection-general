@@ -56,3 +56,6 @@
 
 - name: Configure blobber
   ansible.builtin.import_tasks: addons/blobber.yaml
+
+- name: Configure Grafana Alloy
+  ansible.builtin.import_tasks: addons/grafana_alloy.yaml
