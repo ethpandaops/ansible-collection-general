@@ -79,3 +79,53 @@ ethereum_node_cl_beacon_grpc_endpoint: >-
   http://{{ vars[ethereum_node_cl + '_container_name'] | default(ethereum_node_cl) }}:{{ ethereum_node_cl_ports_grpc_beacon }}
 ethereum_node_cl_beacon_blobber_endpoint: >-
   http://{{ ethereum_node_blobber_name }}:{{ ethereum_node_blobber_port }}
+
+# Ethereum node Grafana Alloy
+ethereum_node_grafana_alloy_enabled: false
+
+## Pyroscope server secrets
+ethereum_node_pyroscope_server_user: "user"
+ethereum_node_pyroscope_server_password: "password"
+ethereum_node_pyroscope_server_endpoint: "http://pyroscope.server"
+
+ethereum_node_grafana_alloy_container_name: "ethereum-node-grafana-alloy"
+ethereum_node_grafana_alloy_container_pid_mode: "host"
+ethereum_node_grafana_alloy_container_privileged: true
+ethereum_node_grafana_alloy_container_networks:
+  - name: "{{ ethereum_node_docker_network_name }}"
+ethereum_node_grafana_alloy_config_content: |
+  discovery.docker "local_containers" {
+    host = "unix:///var/run/docker.sock"
+
+    filter {
+      name = "name"
+      values = [
+        "{{ ethereum_node_el }}",
+        "{{ ethereum_node_cl }}",
+        "{{ ethereum_node_cl }}-validator",
+      ]
+    }
+  }
+
+  pyroscope.ebpf "instance" {
+    forward_to = [pyroscope.write.endpoint.receiver]
+    targets = discovery.docker.local_containers.targets
+  }
+
+  pyroscope.write "endpoint" {
+    endpoint {
+      basic_auth {
+        password = "{{ ethereum_node_pyroscope_server_password }}"
+        username = "{{ ethereum_node_pyroscope_server_user }}"
+      }
+      url = "{{ ethereum_node_pyroscope_server_endpoint }}"
+    }
+    external_labels = {
+      "instance" = "{{ ethereum_network_name }}-{{ inventory_hostname }}"
+      "ip_address" = "{{ ansible_host }}"
+      "network" = "{{ ethereum_network_name }}"
+      "testnet" = "{{ ethereum_network_name }}"
+      "execution_client" = "{{ ethereum_node_el }}"
+      "consensus_client" = "{{ ethereum_node_cl }}"
+    }
+  }
