@@ -1,42 +1,31 @@
-- name: Gather facts
-  ansible.builtin.setup:
-    gather_subset: '!all'
-    filter: ansible_config
-  delegate_to: localhost
-  become: false
-
-- name: Get fact cache directory
-  ansible.builtin.set_fact:
-    fact_cache_dir: "{{ ansible_config.get('fact_caching_connection', '/tmp/ansible_facts') }}"
-
-- name: Create temporary directory for keys
+- name: Create directory for keys
   ansible.builtin.file:
-    path: "{{ fact_cache_dir }}/github_keys"
+    path: "/tmp/github_keys"
     state: directory
     mode: '0700'
 
 - name: Fetch all GitHub keys
   ansible.builtin.get_url:
     url: "https://github.com/{{ item }}.keys"
-    dest: "{{ fact_cache_dir }}/github_keys/{{ item }}.keys"
+    dest: "/tmp/github_keys/{{ item }}.keys"
     mode: '0440'
   loop: "{{ bootstrap_default_user_authorized_keys_github }}"
   delegate_to: localhost
 
 - name: Combine all GitHub keys into one file
   ansible.builtin.shell: |
-    for f in {{ fact_cache_dir }}/github_keys/*.keys; do
+    for f in /tmp/github_keys/*.keys; do
       username=$(basename "$f" .keys)
       while IFS= read -r key; do
         echo "$key # github:$username"
       done < "$f"
-    done > {{ fact_cache_dir }}/github_keys/all_keys
+    done > /tmp/github_keys/all_keys
   delegate_to: localhost
 
 - name: Copy combined keys to remote
   ansible.builtin.copy:
-    src: "{{ fact_cache_dir }}/github_keys/all_keys"
-    dest: "/tmp/github_keys"
+    src: "/tmp/github_keys/all_keys"
+    dest: "/tmp/github_keys_remote"
     mode: '0440'
 
 - name: Add all GitHub keys at once
@@ -44,10 +33,10 @@
     user: "{{ bootstrap_default_user }}"
     state: present
     key: "{{ item }}"
-  loop: "{{ lookup('file', '/tmp/github_keys').split('\n') }}"
+  loop: "{{ lookup('file', '/tmp/github_keys_remote').split('\n') }}"
 
 - name: Cleanup temporary files
   ansible.builtin.file:
-    path: "{{ fact_cache_dir }}/github_keys"
+    path: "/tmp/github_keys"
     state: absent
   delegate_to: localhost 
