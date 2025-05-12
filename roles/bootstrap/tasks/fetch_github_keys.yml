@@ -2,9 +2,6 @@
   ansible.builtin.file:
     path: "/tmp/github_keys"
     state: directory
-    mode: '0755'
-    owner: "{{ ansible_user_id }}"
-    group: "{{ ansible_user_gid }}"
   delegate_to: localhost
   become: false
 
@@ -12,7 +9,6 @@
   ansible.builtin.get_url:
     url: "https://github.com/{{ item }}.keys"
     dest: "/tmp/github_keys/{{ item }}.keys"
-    mode: '0440'
   loop: "{{ bootstrap_default_user_authorized_keys_github }}"
   delegate_to: localhost
   become: false
@@ -32,7 +28,6 @@
   ansible.builtin.copy:
     src: "/tmp/github_keys/all_keys"
     dest: "/tmp/github_keys_remote"
-    mode: '0440'
 
 - name: Debug remote keys file
   ansible.builtin.debug:
