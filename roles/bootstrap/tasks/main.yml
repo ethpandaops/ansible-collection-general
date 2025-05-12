@@ -26,6 +26,13 @@
         regexp: "^%{{ bootstrap_default_user }}"
         line: "%{{ bootstrap_default_user }} ALL=(ALL) NOPASSWD: ALL"
 
+    - name: Validate that SSH keys are defined
+      ansible.builtin.assert:
+        that:
+          - (bootstrap_default_user_authorized_keys_plain | length > 0) or
+            (bootstrap_default_user_authorized_keys_github | length > 0)
+        fail_msg: "bootstrap_default_user_authorized_keys_plain or bootstrap_default_user_authorized_keys_github is not defined"
+
     - name: Create SSH keys directory
       ansible.builtin.file:
         path: "{{ bootstrap_default_user_authorized_keys_dir }}"
