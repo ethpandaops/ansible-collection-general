@@ -26,9 +26,8 @@ spamoor:
 {% set cl_config = lookup('ansible.builtin.file', cl_config_path) | from_yaml %}
 {% if cl_config.FULU_FORK_EPOCH != 18446744073709551615 %}
 {% set min_genesis_plus_delay = cl_config.MIN_GENESIS_TIME + cl_config.GENESIS_DELAY %}
-  extraEnv:
-    - name: FULU_ACTIVATION
-      value: "{{
+  customArgs:
+    - --fulu-activation={{
       (cl_config.PRESET_BASE == 'mainnet') | ternary(
         min_genesis_plus_delay + (32 * cl_config.SECONDS_PER_SLOT * cl_config.FULU_FORK_EPOCH),
         min_genesis_plus_delay + (8 * cl_config.SECONDS_PER_SLOT * cl_config.FULU_FORK_EPOCH)
