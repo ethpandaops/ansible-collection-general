@@ -1,3 +1,9 @@
+- name: Gather facts
+  ansible.builtin.setup:
+    gather_subset: '!all'
+    filter: ansible_config
+  delegate_to: localhost
+
 - name: Get fact cache directory
   ansible.builtin.set_fact:
     fact_cache_dir: "{{ ansible_config.get('fact_caching_connection', '/tmp/ansible_facts') }}"
