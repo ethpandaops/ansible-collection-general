@@ -46,9 +46,3 @@
   loop: "{{ (remote_keys.content | b64decode).split('\n') | select('string') }}"
   when: remote_keys.content is defined
 
-- name: Cleanup temporary files
-  ansible.builtin.file:
-    path: "/tmp/github_keys"
-    state: absent
-  delegate_to: localhost
-  become: false 
