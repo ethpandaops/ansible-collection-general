@@ -2,7 +2,9 @@
   ansible.builtin.file:
     path: "/tmp/github_keys"
     state: directory
-    mode: '0700'
+    mode: '0755'
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_user_gid }}"
   delegate_to: localhost
   become: false
 
