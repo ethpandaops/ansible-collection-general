@@ -3,6 +3,7 @@
     gather_subset: '!all'
     filter: ansible_config
   delegate_to: localhost
+  become: false
 
 - name: Get fact cache directory
   ansible.builtin.set_fact:
