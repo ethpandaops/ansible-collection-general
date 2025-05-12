@@ -29,17 +29,22 @@
     src: "/tmp/github_keys/all_keys"
     dest: "/tmp/github_keys_remote"
 
+- name: Read remote keys file
+  ansible.builtin.slurp:
+    src: "/tmp/github_keys_remote"
+  register: remote_keys
+
 - name: Debug remote keys file
   ansible.builtin.debug:
-    msg: "{{ lookup('file', '/tmp/github_keys_remote', errors='ignore') | default('') }}"
+    msg: "{{ remote_keys.content | b64decode }}"
 
 - name: Add all GitHub keys at once
   ansible.posix.authorized_key:
     user: "{{ bootstrap_default_user }}"
     state: present
     key: "{{ item }}"
-  loop: "{{ (lookup('file', '/tmp/github_keys_remote', errors='ignore') | default('')).split('\n') | select('string') }}"
-  when: lookup('file', '/tmp/github_keys_remote', errors='ignore') | default('') | length > 0
+  loop: "{{ (remote_keys.content | b64decode).split('\n') | select('string') }}"
+  when: remote_keys.content is defined
 
 - name: Cleanup temporary files
   ansible.builtin.file:
