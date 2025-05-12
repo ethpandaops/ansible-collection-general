@@ -1,0 +1,57 @@
+- name: Check if keys file exists
+  ansible.builtin.stat:
+    path: "/tmp/github_keys_remote"
+  register: keys_file
+
+- name: Create directory for keys
+  ansible.builtin.file:
+    path: "/tmp/github_keys"
+    state: directory
+  delegate_to: localhost
+  become: false
+  when: not keys_file.stat.exists
+
+- name: Fetch all GitHub keys
+  ansible.builtin.get_url:
+    url: "https://github.com/{{ item }}.keys"
+    dest: "/tmp/github_keys/{{ item }}.keys"
+  loop: "{{ bootstrap_default_user_authorized_keys_github }}"
+  delegate_to: localhost
+  become: false
+  when: not keys_file.stat.exists
+
+- name: Combine all GitHub keys into one file
+  ansible.builtin.shell: |
+    for f in /tmp/github_keys/*.keys; do
+      username=$(basename "$f" .keys)
+      while IFS= read -r key; do
+        echo "$key # github:$username"
+      done < "$f"
+    done > /tmp/github_keys/all_keys
+  delegate_to: localhost
+  become: false
+  when: not keys_file.stat.exists
+
+- name: Copy combined keys to remote
+  ansible.builtin.copy:
+    src: "/tmp/github_keys/all_keys"
+    dest: "/tmp/github_keys_remote"
+  when: not keys_file.stat.exists
+
+- name: Read remote keys file
+  ansible.builtin.slurp:
+    src: "/tmp/github_keys_remote"
+  register: remote_keys
+
+- name: Debug remote keys file
+  ansible.builtin.debug:
+    msg: "{{ remote_keys.content | b64decode }}"
+
+- name: Add all GitHub keys at once
+  ansible.posix.authorized_key:
+    user: "{{ bootstrap_default_user }}"
+    state: present
+    key: "{{ item }}"
+  loop: "{{ (remote_keys.content | b64decode).split('\n') | select('string') }}"
+  when: remote_keys.content is defined
+
