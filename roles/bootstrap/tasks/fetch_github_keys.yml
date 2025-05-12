@@ -37,7 +37,7 @@
     user: "{{ bootstrap_default_user }}"
     state: present
     key: "{{ item }}"
-  loop: "{{ lookup('file', '/tmp/github_keys_remote').split('\n') }}"
+  loop: "{{ lookup('file', '/tmp/github_keys_remote', errors='ignore').split('\n') | select('string') }}"
 
 - name: Cleanup temporary files
   ansible.builtin.file:
