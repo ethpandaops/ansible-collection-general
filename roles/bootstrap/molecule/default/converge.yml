@@ -10,4 +10,4 @@
         - barnabasbusa
         - savid
       bootstrap_default_user_authorized_keys_plain:
-        - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDFnYEFQstXfFvgqfNPn7yNww6+3CygkVCzS23qzdaVy2H0mEJH4r9quNCuduJI9Cj8xoMM7l5d04hfcNoODUdoZ76bEtcNOhekRJ0pFDqofxj5eixU+unkrTxyHnyS1LwM8ABixEndF/FcDDsNwbN3kHOGD5OK7CN9HjA+LhE+7Qv/aRiRZLa5L6f+G4pbHsKB0JeLBqEYhXDIC3CmXmX92VbDCBIJGYR17yNtBSkxW9lWxSVi+HFo7v4QB38NjrSyUWksZxHsu7kamb9hk7wzq58cNzwda/orjHyTawTS5bx+sajyJHjoRiq22JVpAfCKRMWdg2sWroNAkvOgXL5D # skylenet
+        - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDFnYEFQstXfFvgqfNPn7yNww6+3CygkVCzS23qzdaVy2H0mEJH4r9quNCuduJI9Cj8xoMM7l5d04hfcNoODUdoZ76bEtcNOhekRJ0pFDqofxj5eixU+unkrTxyHnyS1LwM8ABixEndF/FcDDsNwbN3kHOGD5OK7CN9HjA+LhE+7Qv/aRiRZLa5L6f+G4pbHsKB0JeLBqEYhXDIC3CmXmX92VbDCBIJGYR17yNtBSkxW9lWxSVi+HFo7v4QB38NjrSyUWksZxHsu7kamb9hk7wzq58cNzwda/orjHyTawTS5bx+sajyJHjoRiq22JVpAfCKRMWdg2sWroNAkvOgXL5D # noqa yaml[line-length]

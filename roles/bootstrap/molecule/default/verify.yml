@@ -9,15 +9,17 @@
         state: present
 
     - name: Check whoami
-      ansible.builtin.shell:
+      ansible.builtin.command:
         cmd: whoami
+      changed_when: false
       register: whoami
     - name: Print whoami
       ansible.builtin.debug:
         var: whoami.stdout
     - name: Check authorized_keys
-      ansible.builtin.shell:
+      ansible.builtin.command:
         cmd: cat ~/.ssh/authorized_keys
+      changed_when: false
       register: authorized_keys
     - name: Print authorized_keys
       ansible.builtin.debug:
