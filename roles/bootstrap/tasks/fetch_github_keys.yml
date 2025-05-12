@@ -32,6 +32,10 @@
     dest: "/tmp/github_keys_remote"
     mode: '0440'
 
+- name: Debug remote keys file
+  ansible.builtin.debug:
+    msg: "{{ lookup('file', '/tmp/github_keys_remote', errors='ignore') }}"
+
 - name: Add all GitHub keys at once
   ansible.posix.authorized_key:
     user: "{{ bootstrap_default_user }}"
