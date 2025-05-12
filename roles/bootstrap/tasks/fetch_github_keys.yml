@@ -1,9 +1,15 @@
+- name: Check if keys file exists
+  ansible.builtin.stat:
+    path: "/tmp/github_keys_remote"
+  register: keys_file
+
 - name: Create directory for keys
   ansible.builtin.file:
     path: "/tmp/github_keys"
     state: directory
   delegate_to: localhost
   become: false
+  when: not keys_file.stat.exists
 
 - name: Fetch all GitHub keys
   ansible.builtin.get_url:
@@ -12,6 +18,7 @@
   loop: "{{ bootstrap_default_user_authorized_keys_github }}"
   delegate_to: localhost
   become: false
+  when: not keys_file.stat.exists
 
 - name: Combine all GitHub keys into one file
   ansible.builtin.shell: |
@@ -23,11 +30,13 @@
     done > /tmp/github_keys/all_keys
   delegate_to: localhost
   become: false
+  when: not keys_file.stat.exists
 
 - name: Copy combined keys to remote
   ansible.builtin.copy:
     src: "/tmp/github_keys/all_keys"
     dest: "/tmp/github_keys_remote"
+  when: not keys_file.stat.exists
 
 - name: Read remote keys file
   ansible.builtin.slurp:
