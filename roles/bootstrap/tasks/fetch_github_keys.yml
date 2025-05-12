@@ -3,6 +3,8 @@
     path: "/tmp/github_keys"
     state: directory
     mode: '0700'
+  delegate_to: localhost
+  become: false
 
 - name: Fetch all GitHub keys
   ansible.builtin.get_url:
@@ -11,6 +13,7 @@
     mode: '0440'
   loop: "{{ bootstrap_default_user_authorized_keys_github }}"
   delegate_to: localhost
+  become: false
 
 - name: Combine all GitHub keys into one file
   ansible.builtin.shell: |
@@ -21,6 +24,7 @@
       done < "$f"
     done > /tmp/github_keys/all_keys
   delegate_to: localhost
+  become: false
 
 - name: Copy combined keys to remote
   ansible.builtin.copy:
@@ -39,4 +43,5 @@
   ansible.builtin.file:
     path: "/tmp/github_keys"
     state: absent
-  delegate_to: localhost 
+  delegate_to: localhost
+  become: false 
