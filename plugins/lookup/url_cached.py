@@ -11,6 +11,7 @@ import time
 import hashlib
 import tempfile
 import pathlib
+import fcntl  # Add fcntl for file locking
 
 DOCUMENTATION = """
 name: url_cached
@@ -254,6 +255,10 @@ class LookupModule(LookupBase):
         url_hash = hashlib.sha256(url.encode('utf-8')).hexdigest()
         return os.path.join(cache_dir, url_hash)
 
+    def _get_lock_file_path(self, cache_file):
+        """Generate a lock file path based on the cache file."""
+        return f"{cache_file}.lock"
+
     def _read_cache(self, cache_file, ttl):
         """Read content from cache file if valid."""
         if not os.path.exists(cache_file):
@@ -291,6 +296,43 @@ class LookupModule(LookupBase):
         except Exception as e:
             display.warning(f"Error writing to cache file {cache_file}: {e}")
 
+    def _acquire_lock(self, lock_file):
+        """Acquire a lock file for the cache entry."""
+        try:
+            # Ensure parent directory exists
+            lock_dir = os.path.dirname(lock_file)
+            pathlib.Path(lock_dir).mkdir(parents=True, exist_ok=True)
+
+            # Open or create the lock file
+            fd = open(lock_file, 'w+')
+
+            # Try to acquire an exclusive lock, non-blocking
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            display.vvvv(f"Acquired lock for {lock_file}")
+            return fd
+        except IOError:
+            # Lock is held by another process
+            display.vvvv(f"Waiting for lock on {lock_file}")
+            # Open or create the lock file
+            fd = open(lock_file, 'w+')
+            # Wait for the lock (blocking)
+            fcntl.flock(fd, fcntl.LOCK_EX)
+            display.vvvv(f"Acquired lock for {lock_file} after waiting")
+            return fd
+        except Exception as e:
+            display.warning(f"Error acquiring lock for {lock_file}: {e}")
+            return None
+
+    def _release_lock(self, fd, lock_file):
+        """Release a lock file for the cache entry."""
+        if fd is not None:
+            try:
+                fcntl.flock(fd, fcntl.LOCK_UN)
+                fd.close()
+                display.vvvv(f"Released lock for {lock_file}")
+            except Exception as e:
+                display.warning(f"Error releasing lock for {lock_file}: {e}")
+
     def _get_option_with_default(self, option_name, default_value):
         """Get option with fallback to default value if not found."""
         try:
@@ -315,58 +357,75 @@ class LookupModule(LookupBase):
 
             # Generate cache file path
             cache_file = self._get_cache_file_path(term, cache_dir)
+            lock_file = self._get_lock_file_path(cache_file)
+            lock_fd = None
 
-            content = None
-            if not force_refresh:
-                # Try to get content from cache
-                content = self._read_cache(cache_file, cache_ttl)
+            try:
+                content = None
+                if not force_refresh:
+                    # Try to get content from cache without a lock first
+                    content = self._read_cache(cache_file, cache_ttl)
 
-            # If cache miss or forced refresh, fetch from URL
-            if content is None:
-                follow_redirects = self.get_option('follow_redirects')
-                if follow_redirects in ('yes', 'no'):
-                    display.deprecated(
-                        msg="Using 'yes' or 'no' for 'follow_redirects' parameter is deprecated.",
-                        version='2.22',
-                    )
-                try:
-                    response = open_url(
-                        term, validate_certs=self.get_option('validate_certs'),
-                        use_proxy=self.get_option('use_proxy'),
-                        url_username=self.get_option('username'),
-                        url_password=self.get_option('password'),
-                        headers=self.get_option('headers'),
-                        force=self.get_option('force'),
-                        timeout=self.get_option('timeout'),
-                        http_agent=self.get_option('http_agent'),
-                        force_basic_auth=self.get_option('force_basic_auth'),
-                        follow_redirects=follow_redirects,
-                        use_gssapi=self.get_option('use_gssapi'),
-                        unix_socket=self.get_option('unix_socket'),
-                        ca_path=self.get_option('ca_path'),
-                        unredirected_headers=self.get_option('unredirected_headers'),
-                        ciphers=self.get_option('ciphers'),
-                        use_netrc=self.get_option('use_netrc')
-                    )
-                    content = response.read()
+                # If cache miss or forced refresh, we need to fetch or wait for another thread to fetch
+                if content is None:
+                    # Acquire lock before checking again and potentially making HTTP request
+                    lock_fd = self._acquire_lock(lock_file)
 
-                    # Cache the response
-                    self._write_cache(cache_file, content)
+                    # After acquiring the lock, check cache again
+                    # (another thread might have fetched while we were waiting)
+                    if not force_refresh:
+                        content = self._read_cache(cache_file, cache_ttl)
 
-                except HTTPError as e:
-                    raise AnsibleError(f"Received HTTP error for {term} : {to_native(e)}")
-                except URLError as e:
-                    raise AnsibleError(f"Failed lookup url for {term} : {to_native(e)}")
-                except SSLValidationError as e:
-                    raise AnsibleError(f"Error validating the server's certificate for {term}: {to_native(e)}")
-                except ConnectionError as e:
-                    raise AnsibleError(f"Error connecting to {term}: {to_native(e)}")
+                    # Still no content, now we can safely fetch
+                    if content is None:
+                        follow_redirects = self.get_option('follow_redirects')
+                        if follow_redirects in ('yes', 'no'):
+                            display.deprecated(
+                                msg="Using 'yes' or 'no' for 'follow_redirects' parameter is deprecated.",
+                                version='2.22',
+                            )
+                        try:
+                            response = open_url(
+                                term, validate_certs=self.get_option('validate_certs'),
+                                use_proxy=self.get_option('use_proxy'),
+                                url_username=self.get_option('username'),
+                                url_password=self.get_option('password'),
+                                headers=self.get_option('headers'),
+                                force=self.get_option('force'),
+                                timeout=self.get_option('timeout'),
+                                http_agent=self.get_option('http_agent'),
+                                force_basic_auth=self.get_option('force_basic_auth'),
+                                follow_redirects=follow_redirects,
+                                use_gssapi=self.get_option('use_gssapi'),
+                                unix_socket=self.get_option('unix_socket'),
+                                ca_path=self.get_option('ca_path'),
+                                unredirected_headers=self.get_option('unredirected_headers'),
+                                ciphers=self.get_option('ciphers'),
+                                use_netrc=self.get_option('use_netrc')
+                            )
+                            content = response.read()
 
-            # Process the content similar to original url plugin
-            if self.get_option('split_lines'):
-                for line in content.splitlines():
-                    ret.append(to_text(line))
-            else:
-                ret.append(to_text(content))
+                            # Cache the response
+                            self._write_cache(cache_file, content)
+
+                        except HTTPError as e:
+                            raise AnsibleError(f"Received HTTP error for {term} : {to_native(e)}")
+                        except URLError as e:
+                            raise AnsibleError(f"Failed lookup url for {term} : {to_native(e)}")
+                        except SSLValidationError as e:
+                            raise AnsibleError(f"Error validating the server's certificate for {term}: {to_native(e)}")
+                        except ConnectionError as e:
+                            raise AnsibleError(f"Error connecting to {term}: {to_native(e)}")
+
+                # Process the content similar to original url plugin
+                if self.get_option('split_lines'):
+                    for line in content.splitlines():
+                        ret.append(to_text(line))
+                else:
+                    ret.append(to_text(content))
+            finally:
+                # Always release lock if we acquired it
+                if lock_fd is not None:
+                    self._release_lock(lock_fd, lock_file)
 
         return ret
