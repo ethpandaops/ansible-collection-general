@@ -68,3 +68,7 @@ bootstrap_search:
 bootstrap_facts_packages: "{{ _bootstrap_packages[ansible_distribution ~'_'~ ansible_distribution_major_version]|default(
                            _bootstrap_packages[ansible_distribution])|default(
                            _bootstrap_packages[ansible_os_family]) }}"
+
+
+bootstrap_default_user_authorized_keys_file: >-
+  {{ bootstrap_default_user_authorized_keys_dir }}/{{ bootstrap_default_user_authorized_keys_file_name }}

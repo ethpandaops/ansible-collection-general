@@ -26,6 +26,10 @@ dugtrio_proxy_call_rate_burst: 1000
 dugtrio_proxy_blocked_paths: []
 dugtrio_proxy_auth_required: false
 dugtrio_proxy_auth_password: ""
+dugtrio_proxy_rebalance_interval: "60s"
+dugtrio_proxy_rebalance_threshold: 0.1
+dugtrio_proxy_rebalance_abs_threshold: 3
+dugtrio_proxy_rebalance_max_sweep: 5
 
 dugtrio_frontend_enabled: true
 dugtrio_frontend_title: "Dugtrio"
@@ -111,6 +115,18 @@ dugtrio_config: |
     auth:
       required: {{ dugtrio_proxy_auth_required }}
       password: {{ dugtrio_proxy_auth_password | quote }}
+
+    # how often to check for session imbalances (0 = disabled)
+    rebalanceInterval: {{ dugtrio_proxy_rebalance_interval }}
+
+    # how much imbalance to tolerate (0-1)
+    rebalanceThreshold: {{ dugtrio_proxy_rebalance_threshold }}
+
+    # absolute difference in sessions that triggers rebalancing
+    rebalanceAbsThreshold: {{ dugtrio_proxy_rebalance_abs_threshold }}
+
+    # maximum number of sessions to rebalance per run (0 = unlimited)
+    rebalanceMaxSweep: {{ dugtrio_proxy_rebalance_max_sweep }}
 
   # Frontend configuration
   frontend:

@@ -35,6 +35,7 @@ lodestar_container_image: chainsafe/lodestar:latest
 lodestar_container_env: {}
 lodestar_container_ports_ipv4:
   - "127.0.0.1:{{ lodestar_ports_http_beacon }}:{{ lodestar_ports_http_beacon }}"
+  - "127.0.0.1:{{ lodestar_ports_metrics }}:{{ lodestar_ports_metrics }}"
   - "0.0.0.0:{{ lodestar_ports_p2p_tcp }}:{{ lodestar_ports_p2p_tcp }}"
   - "0.0.0.0:{{ lodestar_ports_p2p_udp }}:{{ lodestar_ports_p2p_udp }}/udp"
 

@@ -13,24 +13,36 @@ bootstrap_default_user_create: true
 bootstrap_default_user: devops
 bootstrap_default_user_authorized_keys_github: []
 bootstrap_default_user_authorized_keys_plain: []
+bootstrap_default_user_authorized_keys_dir: /home/{{ bootstrap_default_user }}/.ssh
+bootstrap_default_user_authorized_keys_file_name: authorized_keys
+bootstrap_default_user_authorized_keys: |
+  {% for key in bootstrap_default_user_authorized_keys_plain %}
+  {{ key }}
+  {% endfor %}
+  {% for user in bootstrap_default_user_authorized_keys_github %}
+  # github:{{ user }}
+  {{ lookup('ansible.builtin.url', 'https://github.com/' + user + '.keys', split_lines=False) }}
+  {% endfor %}
 bootstrap_sudoers_file_path: /etc/sudoers
 bootstrap_reboot_if_required: false
 
 bootstrap_default_common_packages:
-      - htop
-      - tmux
-      - iftop
-      - sysstat
-      - vim
-      - jq
-      - curl
-      - wget
-      - screen
-      - chrony # enabled by default on Debian
-      - bat
-      - cron
-      - nfs-common
-      - rsync
+  - htop
+  - tmux
+  - iftop
+  - sysstat
+  - vim
+  - jq
+  - curl
+  - wget
+  - screen
+  - chrony # enabled by default on Debian
+  - bat
+  - cron
+  - nfs-common
+  - rsync
+  - tree
+  - smartmontools
 
 bootstrap_hostname_set: true
 bootstrap_harden_sshd_config: true

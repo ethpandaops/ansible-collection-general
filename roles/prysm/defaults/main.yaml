@@ -33,6 +33,7 @@ prysm_container_image: gcr.io/prysmaticlabs/prysm/beacon-chain:stable
 prysm_container_env: {}
 prysm_container_ports_ipv4:
   - "127.0.0.1:{{ prysm_ports_http_beacon }}:{{ prysm_ports_http_beacon }}"
+  - "127.0.0.1:{{ prysm_ports_metrics }}:{{ prysm_ports_metrics }}"
   - "0.0.0.0:{{ prysm_ports_p2p_tcp }}:{{ prysm_ports_p2p_tcp }}"
   - "0.0.0.0:{{ prysm_ports_p2p_udp }}:{{ prysm_ports_p2p_udp }}/udp"
 
@@ -71,7 +72,7 @@ prysm_container_command_v6: []
   # - --p2p-host-ipv6={{ prysm_announced_ipv6 }} # not supported yet
 
 prysm_container_supernode_command:
-  - --subscribe-all-subnets
+  - --subscribe-all-data-subnets
 
 prysm_container_command: >-
   {{
