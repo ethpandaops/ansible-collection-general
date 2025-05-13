@@ -43,6 +43,7 @@ bootstrap_default_common_packages:
   - tree
   - smartmontools
 
+bootstrap_ntp_enabled: true
 bootstrap_ntp_servers:
   # Generic
   - pool.ntp.org

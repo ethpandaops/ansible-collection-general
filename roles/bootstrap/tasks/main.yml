@@ -104,6 +104,7 @@
 
 # Configure NTP
 - name: Configure NTP
+  when: bootstrap_ntp_enabled | bool
   tags: ["bootstrap_ntp"]
   block:
     - name: Ensure chrony is installed
