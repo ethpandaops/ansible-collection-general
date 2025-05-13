@@ -130,6 +130,7 @@
 
 # Disable swap
 - name: Disable SWAP in fstab
+  tags: ["bootstrap_swap"]
   ansible.builtin.replace:
     path: /etc/fstab
     regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
