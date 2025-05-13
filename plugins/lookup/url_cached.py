@@ -6,17 +6,10 @@
 
 from __future__ import annotations
 
-import os
-import time
-import hashlib
-import tempfile
-import pathlib
-import fcntl  # Add fcntl for file locking
-
 DOCUMENTATION = """
 name: url_cached
-author: EthPandaOps
-version_added: "1.0"
+author: Rafael Matias (@skylenet) <rafael@skyle.net>
+version_added: "0.1.0"
 short_description: return contents from URL with local file caching
 description:
     - Returns the content of the URL requested to be used as data in play.
@@ -90,16 +83,6 @@ options:
     ini:
         - section: url_lookup
           key: force_basic_auth
-  follow_redirects:
-    type: string
-    default: 'urllib2'
-    vars:
-        - name: ansible_lookup_url_follow_redirects
-    env:
-        - name: ANSIBLE_LOOKUP_URL_FOLLOW_REDIRECTS
-    ini:
-        - section: url_lookup
-          key: follow_redirects
   use_gssapi:
     description:
     - Use GSSAPI handler of requests
@@ -235,6 +218,13 @@ RETURN = """
     type: list
     elements: str
 """
+
+import os
+import time
+import hashlib
+import tempfile
+import pathlib
+import fcntl  # Add fcntl for file locking
 
 from urllib.error import HTTPError, URLError
 
@@ -378,12 +368,6 @@ class LookupModule(LookupBase):
 
                     # Still no content, now we can safely fetch
                     if content is None:
-                        follow_redirects = self.get_option('follow_redirects')
-                        if follow_redirects in ('yes', 'no'):
-                            display.deprecated(
-                                msg="Using 'yes' or 'no' for 'follow_redirects' parameter is deprecated.",
-                                version='2.22',
-                            )
                         try:
                             response = open_url(
                                 term, validate_certs=self.get_option('validate_certs'),
@@ -393,9 +377,9 @@ class LookupModule(LookupBase):
                                 headers=self.get_option('headers'),
                                 force=self.get_option('force'),
                                 timeout=self.get_option('timeout'),
+                                follow_redirects='urllib2',
                                 http_agent=self.get_option('http_agent'),
                                 force_basic_auth=self.get_option('force_basic_auth'),
-                                follow_redirects=follow_redirects,
                                 use_gssapi=self.get_option('use_gssapi'),
                                 unix_socket=self.get_option('unix_socket'),
                                 ca_path=self.get_option('ca_path'),
