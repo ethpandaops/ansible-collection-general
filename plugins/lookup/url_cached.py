@@ -1,6 +1,9 @@
+# Based on https://raw.githubusercontent.com/ansible/ansible/refs/heads/devel/lib/ansible/plugins/lookup/url.py
+# Adapted by EthPandaOps to use a local cache directory
 # (c) 2015, Brian Coca <bcoca@ansible.com>
 # (c) 2012-17 Ansible Project
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+
 from __future__ import annotations
 
 import os
