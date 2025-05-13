@@ -7,3 +7,8 @@
   ansible.builtin.command: swapoff -a
   changed_when: true
   tags: ["swap"]
+
+- name: Reload chrony
+  ansible.builtin.command: chronyc reload sources
+  changed_when: true
+  tags: ["ntp"]
