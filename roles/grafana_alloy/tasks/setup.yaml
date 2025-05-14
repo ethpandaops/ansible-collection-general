@@ -1,0 +1,53 @@
+- name: Add grafana-alloy user
+  ansible.builtin.user:
+    name: "{{ grafana_alloy_user }}"
+  register: grafana_alloy_user_meta
+
+- name: Create grafana-alloy directories
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    mode: "{{ item.mode }}"
+    owner: "{{ grafana_alloy_user }}"
+    group: "{{ grafana_alloy_user }}"
+  loop_control:
+    label: "{{ item.path }}"
+  loop:
+    - path: "{{ grafana_alloy_base_dir }}"
+      mode: "0750"
+    - path: "{{ grafana_alloy_config_dir }}"
+      mode: "0750"
+    - path: "{{ grafana_alloy_data_dir }}"
+      mode: "0750"
+
+- name: Create grafana-alloy config file
+  ansible.builtin.copy:
+    content: "{{ item.content }}"
+    dest: "{{ item.path }}"
+    mode: "{{ item.mode }}"
+    owner: "{{ grafana_alloy_user }}"
+    group: "{{ grafana_alloy_user }}"
+  loop_control:
+    label: "{{ item.path }}"
+  loop:
+    - path: "{{ grafana_alloy_config_file }}"
+      mode: "0640"
+      content: "{{ grafana_alloy_config_content }}"
+
+- name: Run grafana-alloy container
+  community.docker.docker_container:
+    name: "{{ grafana_alloy_container_name }}"
+    image: "{{ grafana_alloy_container_image }}"
+    image_name_mismatch: "{{ grafana_alloy_container_image_name_mismatch }}"
+    pid_mode: "{{ grafana_alloy_container_pid_mode }}"
+    privileged: "{{ grafana_alloy_container_privileged }}"
+    restart: "{{ grafana_alloy_container_restart }}"
+    restart_policy: "{{ grafana_alloy_container_restart_policy }}"
+    recreate: "{{ grafana_alloy_container_recreate }}"
+    stop_timeout: "{{ grafana_alloy_container_stop_timeout }}"
+    env: "{{ grafana_alloy_container_env }}"
+    ports: "{{ grafana_alloy_container_ports }}"
+    expose: "{{ grafana_alloy_container_exposed_ports }}"
+    volumes: "{{ grafana_alloy_container_volumes }}"
+    networks: "{{ grafana_alloy_container_networks }}"
+    command: "{{ grafana_alloy_container_command }}"
