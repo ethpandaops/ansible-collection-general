@@ -6,6 +6,11 @@
 
 A collection of reusable ansible components used by the EthPandaOps team.
 
+## Plugins
+
+### Lookup
+- [ethpandaops.general.url_cached](plugins/lookup/url_cached.md)
+
 ## Roles
 
 ### Ethereum tooling

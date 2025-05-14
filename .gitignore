@@ -10,4 +10,8 @@ tests/output/
 # Build artifacts from ansible-galaxy
 ethpandaops-general-*.tar.gz
 
+# Python
+__pycache__/
+
+# Others
 .DS_Store
