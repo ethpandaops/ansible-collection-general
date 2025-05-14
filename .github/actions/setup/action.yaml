@@ -26,7 +26,7 @@ runs:
       with:
         username: ${{ inputs.dockerhub_username }}
         password: ${{ inputs.dockerhub_password }}
-      when: inputs.dockerhub_username != '' && inputs.dockerhub_password != ''
+      if: inputs.dockerhub_username != '' && inputs.dockerhub_password != ''
 
     - name: Run setup
       shell: bash
