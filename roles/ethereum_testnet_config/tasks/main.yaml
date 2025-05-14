@@ -50,3 +50,31 @@
     src: "{{ eth_testnet_config_local_dir_src }}"
     dest: "{{ eth_testnet_config_dir }}/"
   when: eth_testnet_config_local_dir_enabled
+
+# Option C: Download and extract tarball
+- name: Create dest dir for tarball
+  ansible.builtin.file:
+    path: "{{ eth_testnet_config_dir }}"
+    state: directory
+    recurse: true
+  when: eth_testnet_config_tarball_enabled
+
+- name: Download tarball
+  ansible.builtin.get_url:
+    url: "{{ eth_testnet_config_tarball_url }}"
+    dest: "/tmp/eth_testnet_config.tar.gz"
+    mode: '0644'
+  when: eth_testnet_config_tarball_enabled
+
+- name: Extract tarball
+  ansible.builtin.unarchive:
+    src: "/tmp/eth_testnet_config.tar.gz"
+    dest: "{{ eth_testnet_config_dir }}"
+    remote_src: true
+  when: eth_testnet_config_tarball_enabled
+
+- name: Clean up tarball
+  ansible.builtin.file:
+    path: "/tmp/eth_testnet_config.tar.gz"
+    state: absent
+  when: eth_testnet_config_tarball_enabled

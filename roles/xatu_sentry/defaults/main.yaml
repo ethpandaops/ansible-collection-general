@@ -12,7 +12,7 @@ xatu_sentry_container_volumes:
 xatu_sentry_container_stop_timeout: "120"
 xatu_sentry_container_networks: []
 
-xatu_sentry_paths_config: /etc/xatu-sentry/
+xatu_sentry_paths_config: /data/xatu-sentry/
 
 xatu_sentry_container_command:
   - sentry
@@ -21,6 +21,7 @@ xatu_sentry_container_command:
 xatu_sentry_config_name: "{{ inventory_hostname }}"
 xatu_sentry_config_beacon_uri: your-beacon-node:4000
 xatu_sentry_config_server_address: remote-xatu-server:1234
+xatu_sentry_config_server_tls_enabled: true
 xatu_sentry_config_server_auth_user: xatu-user
 xatu_sentry_config_server_auth_password: xatu-password
 xatu_sentry_config_network_name_override: ""
@@ -37,6 +38,6 @@ xatu_sentry_config: |
     type: xatu
     config:
       address: {{ xatu_sentry_config_server_address }}
-      tls: true
+      tls: {{ xatu_sentry_config_server_tls_enabled }}
       headers:
         authorization: "Basic {{ (xatu_sentry_config_server_auth_user + ":" + xatu_sentry_config_server_auth_password) | b64encode }}"

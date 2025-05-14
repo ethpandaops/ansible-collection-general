@@ -1,0 +1,76 @@
+---
+# Install and configure Kurtosis
+# Based on: https://docs.kurtosis.com/install
+
+- name: Check if Docker is installed and running
+  ansible.builtin.command: docker info
+  register: docker_check
+  changed_when: false
+  failed_when: false
+
+- name: Fail if Docker is not installed or not running
+  ansible.builtin.fail:
+    msg: "Docker is required for Kurtosis but is not installed or not running. Please make sure Docker is installed and running."
+  when: docker_check.rc != 0
+
+- name: Install Kurtosis CLI
+  block:
+    - name: Install Kurtosis on MacOS
+      when: ansible_os_family == "Darwin"
+      block:
+        - name: Ensure Homebrew is installed (MacOS)
+          community.general.homebrew:
+            update_homebrew: true
+
+        - name: Install Kurtosis CLI via Homebrew
+          community.general.homebrew:
+            name: kurtosis-tech/tap/kurtosis-cli
+            state: present
+
+    - name: Install Kurtosis on Debian/Ubuntu
+      when: ansible_os_family == "Debian"
+      block:
+        - name: Add Kurtosis apt repository
+          become: true
+          ansible.builtin.apt_repository:
+            repo: deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /
+            state: present
+
+        - name: Update apt cache
+          become: true
+          ansible.builtin.apt:
+            update_cache: true
+
+        - name: Install Kurtosis CLI via apt
+          become: true
+          ansible.builtin.apt:
+            name: kurtosis-cli
+            state: present
+
+    - name: Install Kurtosis on RHEL/CentOS
+      when: ansible_os_family == "RedHat"
+      block:
+        - name: Add Kurtosis yum repository
+          become: true
+          ansible.builtin.yum_repository:
+            name: kurtosis
+            description: Kurtosis
+            baseurl: https://yum.fury.io/kurtosis-tech/
+            enabled: true
+            gpgcheck: false
+            state: present
+
+        - name: Install Kurtosis CLI via yum
+          become: true
+          ansible.builtin.dnf:
+            name: kurtosis-cli
+            state: present
+
+- name: Verify Kurtosis installation
+  ansible.builtin.command: kurtosis version
+  register: kurtosis_version
+  changed_when: false
+
+- name: Install command-line completion
+  ansible.builtin.include_tasks: command_line_completion.yml
+  when: kurtosis_install_completion | bool

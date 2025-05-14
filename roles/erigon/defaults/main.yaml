@@ -10,7 +10,7 @@ erigon_ports_p2p: 30303
 erigon_ports_http_rpc: 8545
 erigon_ports_engine: 8551
 erigon_ports_metrics: 6060
-
+erigon_ports_torrent: 42069
 erigon_ipv6_enabled: false
 
 erigon_container_name: erigon
@@ -19,12 +19,17 @@ erigon_container_env: {}
 erigon_container_ports_ipv4:
   - "127.0.0.1:{{ erigon_ports_engine }}:{{ erigon_ports_engine }}"
   - "127.0.0.1:{{ erigon_ports_http_rpc }}:{{ erigon_ports_http_rpc }}"
+  - "127.0.0.1:{{ erigon_ports_metrics }}:{{ erigon_ports_metrics }}"
   - "0.0.0.0:{{ erigon_ports_p2p }}:{{ erigon_ports_p2p }}"
   - "0.0.0.0:{{ erigon_ports_p2p }}:{{ erigon_ports_p2p }}/udp"
+  - "0.0.0.0:{{ erigon_ports_torrent }}:{{ erigon_ports_torrent }}"
+  - "0.0.0.0:{{ erigon_ports_torrent }}:{{ erigon_ports_torrent }}/udp"
 
 erigon_container_ports_ipv6:
   - "[::]:{{ erigon_ports_p2p }}:{{ erigon_ports_p2p }}"
   - "[::]:{{ erigon_ports_p2p }}:{{ erigon_ports_p2p }}/udp"
+  - "[::]:{{ erigon_ports_torrent }}:{{ erigon_ports_torrent }}"
+  - "[::]:{{ erigon_ports_torrent }}:{{ erigon_ports_torrent }}/udp"
 
 erigon_container_ports: >-
   {{ erigon_container_ports_ipv4 + (erigon_container_ports_ipv6 if erigon_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
@@ -44,6 +49,7 @@ erigon_container_command_default:
   - --http
   - --http.addr=0.0.0.0
   - --http.port={{ erigon_ports_http_rpc }}
+  - --torrent.port={{ erigon_ports_torrent }}
   - --authrpc.jwtsecret=/execution-auth.jwt
   - --authrpc.addr=0.0.0.0
   - --authrpc.port={{ erigon_ports_engine }}

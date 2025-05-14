@@ -1,0 +1,47 @@
+# {{ ansible_managed }}
+
+spamoor:
+  fullnameOverride: spamoor
+  image:
+    repository: {{ default_tooling_images.spamoor.split(':') | first }}
+    tag: {{ default_tooling_images.spamoor.split(':') | last }}
+    pullPolicy: {% if "latest" in (default_tooling_images.spamoor.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
+
+  resources:
+    requests:
+      cpu: 250m
+      memory: 500Mi
+    limits:
+      cpu: 2000m
+      memory: 2Gi
+  ingress:
+    enabled: true
+    className: ingress-nginx-public
+    hosts:
+      - host: spamoor.{{ network_subdomain }}
+        paths:
+          - path: /
+            pathType: Prefix
+
+{% set cl_config = lookup('ansible.builtin.file', cl_config_path) | from_yaml %}
+{% if cl_config.FULU_FORK_EPOCH != 18446744073709551615 %}
+{% set min_genesis_plus_delay = cl_config.MIN_GENESIS_TIME + cl_config.GENESIS_DELAY %}
+  customArgs:
+    - --fulu-activation={{
+      (cl_config.PRESET_BASE == 'mainnet') | ternary(
+        min_genesis_plus_delay + (32 * cl_config.SECONDS_PER_SLOT * cl_config.FULU_FORK_EPOCH),
+        min_genesis_plus_delay + (8 * cl_config.SECONDS_PER_SLOT * cl_config.FULU_FORK_EPOCH)
+      )
+    }}
+{% endif %}
+
+  persistence:
+    enabled: true
+
+  privateKey: "<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.spamoor_private_key}>"
+  rpcEndpoints:
+  # Rpc
+  - "{{ default_el_endpoint }}"
+{% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
+  - "https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@rpc.{{ hostvars[host]['inventory_hostname'] }}.{{ network_subdomain }}"
+{% endfor %}
