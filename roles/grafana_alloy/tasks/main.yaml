@@ -1,0 +1,7 @@
+- name: Setup grafana-alloy
+  ansible.builtin.import_tasks: setup.yaml
+  when: not grafana_alloy_cleanup
+
+- name: Cleanup grafana-alloy
+  ansible.builtin.import_tasks: cleanup.yaml
+  when: grafana_alloy_cleanup

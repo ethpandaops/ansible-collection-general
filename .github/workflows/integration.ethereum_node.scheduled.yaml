@@ -26,6 +26,9 @@ jobs:
           path: ansible_collections/ethpandaops/general
 
       - uses: ./ansible_collections/ethpandaops/general/.github/actions/setup
+        with:
+          dockerhub_username: ethpandaops
+          dockerhub_password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Run molecule
         working-directory: ansible_collections/ethpandaops/general/roles/ethereum_node
@@ -34,6 +37,8 @@ jobs:
           PY_COLORS: '1'
           EXECUTION_CLIENT: ${{ matrix.execution }}
           CONSENSUS_CLIENT: ${{ matrix.consensus }}
+          DOCKERHUB_USERNAME: ethpandaops
+          DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
   notify:
     name: Discord Notification
     runs-on: ubuntu-latest

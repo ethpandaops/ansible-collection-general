@@ -1,0 +1,4 @@
+- name: Remove grafana-alloy container
+  community.docker.docker_container:
+    name: "{{ grafana_alloy_container_name }}"
+    state: absent

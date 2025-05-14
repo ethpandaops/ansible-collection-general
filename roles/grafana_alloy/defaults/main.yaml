@@ -1,0 +1,39 @@
+grafana_alloy_cleanup: false
+
+grafana_alloy_user: "{{ grafana_alloy_container_name }}"
+
+grafana_alloy_base_dir: "/data/{{ grafana_alloy_container_name }}"
+grafana_alloy_config_dir: "{{ grafana_alloy_base_dir }}/config"
+grafana_alloy_config_file: "{{ grafana_alloy_config_dir }}/config.alloy"
+grafana_alloy_data_dir: "{{ grafana_alloy_base_dir }}/data"
+
+grafana_alloy_http_port: 12345
+
+grafana_alloy_container_name: "grafana-alloy"
+grafana_alloy_container_image: "grafana/alloy:latest"
+grafana_alloy_container_image_name_mismatch: recreate
+grafana_alloy_container_pid_mode: "{{ omit }}"
+grafana_alloy_container_privileged: "{{ omit }}"
+grafana_alloy_container_restart: true
+grafana_alloy_container_restart_policy: always
+grafana_alloy_container_recreate: false
+grafana_alloy_container_stop_timeout: "30"
+grafana_alloy_container_env: {}
+grafana_alloy_container_ports: []
+grafana_alloy_container_exposed_ports:
+  - "{{ grafana_alloy_http_port }}"
+grafana_alloy_container_default_volumes:
+  - "{{ grafana_alloy_config_file }}:/etc/alloy/config.alloy"
+  - "{{ grafana_alloy_data_dir }}:/var/lib/alloy/data"
+grafana_alloy_container_extra_volumes: []
+grafana_alloy_container_volumes: "{{ grafana_alloy_container_default_volumes + grafana_alloy_container_extra_volumes }}"
+grafana_alloy_container_networks: []
+grafana_alloy_container_command:
+  - run
+  - --server.http.listen-address=0.0.0.0:{{ grafana_alloy_http_port }}
+  - --storage.path=/var/lib/alloy/data
+  - /etc/alloy/config.alloy
+
+# Grafana Alloy can serve multiple purposes so no default config is provided.
+# This variable can be used to provide a custom config depending on the requirements.
+grafana_alloy_config_content: ""

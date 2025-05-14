@@ -1,0 +1,18 @@
+- name: Setup Grafana Alloy
+  ansible.builtin.include_role:
+    name: ethpandaops.general.grafana_alloy
+  vars:
+    grafana_alloy_config_content: "{{ ethereum_node_grafana_alloy_config_content }}"
+    grafana_alloy_container_name: "{{ ethereum_node_grafana_alloy_container_name }}"
+    grafana_alloy_container_networks: "{{ ethereum_node_grafana_alloy_container_networks }}"
+    grafana_alloy_container_pid_mode: "{{ ethereum_node_grafana_alloy_container_pid_mode }}"
+    grafana_alloy_container_privileged: "{{ ethereum_node_grafana_alloy_container_privileged }}"
+  when: ethereum_node_grafana_alloy_enabled
+
+- name: Cleanup Grafana Alloy
+  ansible.builtin.include_role:
+    name: ethpandaops.general.grafana_alloy
+  vars:
+    grafana_alloy_cleanup: true
+    grafana_alloy_container_name: "{{ ethereum_node_grafana_alloy_container_name }}"
+  when: not ethereum_node_grafana_alloy_enabled
