@@ -47,6 +47,11 @@ jobs:
 
       - uses: ./ansible_collections/ethpandaops/general/.github/actions/setup
 
+      - uses: ethpandaops/actions/docker-login@main
+        with:
+          username: ethpandaops
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
       - name: Run molecule
         working-directory: ansible_collections/ethpandaops/general/roles/${{ matrix.role }}
         run: molecule test
