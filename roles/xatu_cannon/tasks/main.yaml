@@ -1,0 +1,7 @@
+- name: Setup xatu cannon
+  ansible.builtin.import_tasks: setup.yaml
+  when: not xatu_cannon_cleanup
+
+- name: Cleanup xatu cannon
+  ansible.builtin.import_tasks: cleanup.yaml
+  when: xatu_cannon_cleanup
