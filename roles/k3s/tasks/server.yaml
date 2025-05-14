@@ -108,7 +108,7 @@
   when: not (is_docker | default(false))
 
 - name: Install Calico for k3s
-  when: k3s_calico
+  when: k3s_calico | bool
   block:
     - name: Create calico directory
       ansible.builtin.file:
@@ -447,7 +447,7 @@
         - name: Identify unavailable Calico components
           ansible.builtin.debug:
             msg: "Warning: Calico component {{ item.resource.kind }}/{{ item.resource.name }} is not available"
-          when: calico_status_json is defined and item.available is defined and item.available == false
+          when: calico_status_json is defined and item.available is defined and not item.available
           loop: "{{ calico_status_json.items | default([]) }}"
           loop_control:
             label: "{{ item.resource.kind }}/{{ item.resource.name }}"
@@ -464,6 +464,7 @@
         - name: Apply test pod manifest
           ansible.builtin.shell:
             cmd: |
+              set -o pipefail
               cat <<EOF | {{ k3s_kubectl_cmd | default('k3s kubectl') }} apply -f -
               apiVersion: v1
               kind: Pod
@@ -498,7 +499,9 @@
 
         - name: Verify pod has IP address
           ansible.builtin.debug:
-            msg: "{{ 'Calico CNI successfully assigned IP: ' + pod_ip.stdout if pod_ip is succeeded and pod_ip.stdout | length > 0 else 'Warning: Calico CNI failed to assign IP address to test pod' }}"
+            msg: >-
+              {{ 'Calico CNI successfully assigned IP: ' + pod_ip.stdout if pod_ip is succeeded and pod_ip.stdout | length > 0
+              else 'Warning: Calico CNI failed to assign IP address to test pod' }}
 
         - name: Perform DNS lookup from test pod
           ansible.builtin.command:
@@ -553,7 +556,7 @@
         - name: Display pods with high restart counts
           ansible.builtin.debug:
             msg: "Warning: Pod {{ pod_names[idx] }} has high restart count: {{ restart_counts[idx] }}"
-          loop: "{{ range(0, restart_counts|length) | list }}"
+          loop: "{{ range(0, restart_counts | length) | list }}"
           loop_control:
             loop_var: idx
             label: "{{ pod_names[idx] }}"
