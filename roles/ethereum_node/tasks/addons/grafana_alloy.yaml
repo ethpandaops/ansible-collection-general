@@ -1,4 +1,4 @@
-﻿- name: Setup Grafana Alloy
+- name: Setup Grafana Alloy
   ansible.builtin.include_role:
     name: ethpandaops.general.grafana_alloy
   vars:

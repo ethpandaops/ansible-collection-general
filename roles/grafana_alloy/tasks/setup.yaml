@@ -1,4 +1,4 @@
-﻿- name: Add grafana-alloy user
+- name: Add grafana-alloy user
   ansible.builtin.user:
     name: "{{ grafana_alloy_user }}"
   register: grafana_alloy_user_meta
