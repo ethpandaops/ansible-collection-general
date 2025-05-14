@@ -20,6 +20,11 @@
           vars:
             pip_install_packages:
               - name: docker
+        - name: Login to dockerhub
+          community.docker.docker_login:
+            username: ${DOCKERHUB_USERNAME}
+            password: ${DOCKERHUB_PASSWORD}
+          when: "${DOCKERHUB_USERNAME} != '' and ${DOCKERHUB_PASSWORD} != ''"
         - name: Run ethereum node
           ansible.builtin.import_role:
             name: ethereum_node
