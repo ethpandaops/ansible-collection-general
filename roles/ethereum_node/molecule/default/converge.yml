@@ -8,9 +8,6 @@
       ansible.builtin.apt:
         update_cache: true
         cache_valid_time: 3600
-  vars:
-    DOCKERHUB_USERNAME: ethpandaops
-    DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
   tasks:
     - name: Setup
       block:
