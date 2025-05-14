@@ -46,6 +46,9 @@ jobs:
           path: ansible_collections/ethpandaops/general
 
       - uses: ./ansible_collections/ethpandaops/general/.github/actions/setup
+        with:
+          dockerhub_username: ethpandaops
+          dockerhub_password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - uses: ethpandaops/actions/docker-login@main
         with:
