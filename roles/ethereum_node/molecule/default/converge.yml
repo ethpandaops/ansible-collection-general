@@ -8,6 +8,9 @@
       ansible.builtin.apt:
         update_cache: true
         cache_valid_time: 3600
+  vars:
+    DOCKERHUB_USERNAME: ethpandaops
+    DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
   tasks:
     - name: Setup
       block:
@@ -22,9 +25,9 @@
               - name: docker
         - name: Login to dockerhub
           community.docker.docker_login:
-            username: ${DOCKERHUB_USERNAME}
-            password: ${DOCKERHUB_PASSWORD}
-          when: "${DOCKERHUB_USERNAME} != '' and ${DOCKERHUB_PASSWORD} != ''"
+            username: "{{ DOCKERHUB_USERNAME }}"
+            password: "{{ DOCKERHUB_PASSWORD }}"
+          when: DOCKERHUB_USERNAME != '' and DOCKERHUB_PASSWORD != ''
         - name: Run ethereum node
           ansible.builtin.import_role:
             name: ethereum_node
