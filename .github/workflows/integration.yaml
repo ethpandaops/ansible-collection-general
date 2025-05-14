@@ -60,3 +60,5 @@ jobs:
         run: molecule test
         env:
           PY_COLORS: '1'
+          DOCKERHUB_USERNAME: ethpandaops
+          DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
