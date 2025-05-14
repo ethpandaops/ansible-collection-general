@@ -77,7 +77,7 @@
 
 - name: Replace https://localhost:6443 by https://master-ip:6443
   ansible.builtin.command: >
-    {{ k3s_kubectl_cmd | default('k3s kubectl') }} config set-cluster default
+    k3s kubectl config set-cluster default
       --server=https://{{ k3s_server_ip }}:6443
       --kubeconfig ~/{{ ansible_user }}/.kube/config
   changed_when: true
@@ -122,14 +122,14 @@
 
         - name: Check if legacy operator exists (pre-version tracking)
           ansible.builtin.command:
-            cmd: "{{ k3s_kubectl_cmd | default('k3s kubectl') }} get -n tigera-operator deployment/tigera-operator -o name"
+            cmd: "k3s kubectl get -n tigera-operator deployment/tigera-operator -o name"
           register: legacy_operator_check
           failed_when: false
           changed_when: false
 
         - name: Check if legacy resources exist (pre-version tracking)
           ansible.builtin.command:
-            cmd: "{{ k3s_kubectl_cmd | default('k3s kubectl') }} get installation default -o name"
+            cmd: "k3s kubectl get installation default -o name"
           register: legacy_install_check
           failed_when: false
           changed_when: false
@@ -162,7 +162,7 @@
         - name: Backup existing installation resource
           ansible.builtin.shell:
             cmd: >-
-              {{ k3s_kubectl_cmd | default('k3s kubectl') }} get installation default -o yaml >
+              k3s kubectl get installation default -o yaml >
               {{ k3s_server_location }}/server/calico/backup/installation-{{ ansible_date_time.iso8601 }}.yaml
           failed_when: false
           changed_when: true
@@ -170,7 +170,7 @@
         - name: Backup any NetworkPolicy objects
           ansible.builtin.shell:
             cmd: >-
-              {{ k3s_kubectl_cmd | default('k3s kubectl') }} get networkpolicies --all-namespaces -o yaml >
+              k3s kubectl get networkpolicies --all-namespaces -o yaml >
               {{ k3s_server_location }}/server/calico/backup/networkpolicies-{{ ansible_date_time.iso8601 }}.yaml
           when: network_policies.rc == 0 and network_policies.stdout | trim != ""
           failed_when: false
@@ -193,7 +193,7 @@
       block:
         - name: Check for NetworkPolicy objects before removal
           ansible.builtin.command:
-            cmd: "{{ k3s_kubectl_cmd | default('k3s kubectl') }} get networkpolicies --all-namespaces -o name"
+            cmd: "k3s kubectl get networkpolicies --all-namespaces -o name"
           register: network_policies
           failed_when: false
           changed_when: false
@@ -201,7 +201,7 @@
         - name: Backup any NetworkPolicy objects
           ansible.builtin.shell:
             cmd: >-
-              {{ k3s_kubectl_cmd | default('k3s kubectl') }} get networkpolicies --all-namespaces -o yaml >
+              k3s kubectl get networkpolicies --all-namespaces -o yaml >
               {{ k3s_server_location }}/server/calico/backup/networkpolicies-{{ ansible_date_time.iso8601 }}.yaml
           when: network_policies.rc == 0 and network_policies.stdout | trim != ""
           failed_when: false
@@ -210,28 +210,28 @@
         # Remove Rancher webhook finalizers that might block clean uninstallation
         - name: Check for Rancher mutating webhook configurations
           ansible.builtin.command:
-            cmd: "{{ k3s_kubectl_cmd | default('k3s kubectl') }} get mutatingwebhookconfiguration rancher.cattle.io -o name"
+            cmd: "k3s kubectl get mutatingwebhookconfiguration rancher.cattle.io -o name"
           register: rancher_mutating_webhook
           failed_when: false
           changed_when: false
 
         - name: Delete Rancher mutating webhook configurations
           ansible.builtin.command:
-            cmd: "{{ k3s_kubectl_cmd | default('k3s kubectl') }} delete mutatingwebhookconfiguration rancher.cattle.io"
+            cmd: "k3s kubectl delete mutatingwebhookconfiguration rancher.cattle.io"
           failed_when: false
           changed_when: rancher_mutating_webhook.rc == 0
           when: rancher_mutating_webhook.rc == 0
 
         - name: Check for Rancher validating webhook configurations
           ansible.builtin.command:
-            cmd: "{{ k3s_kubectl_cmd | default('k3s kubectl') }} get validatingwebhookconfiguration rancher.cattle.io -o name"
+            cmd: "k3s kubectl get validatingwebhookconfiguration rancher.cattle.io -o name"
           register: rancher_validating_webhook
           failed_when: false
           changed_when: false
 
         - name: Delete Rancher validating webhook configurations
           ansible.builtin.command:
-            cmd: "{{ k3s_kubectl_cmd | default('k3s kubectl') }} delete validatingwebhookconfiguration rancher.cattle.io"
+            cmd: "k3s kubectl delete validatingwebhookconfiguration rancher.cattle.io"
           failed_when: false
           changed_when: rancher_validating_webhook.rc == 0
           when: rancher_validating_webhook.rc == 0
@@ -240,7 +240,7 @@
         - name: Check for other webhook configurations
           ansible.builtin.shell:
             cmd: >
-              set -o pipefail && {{ k3s_kubectl_cmd | default('k3s kubectl') }} get
+              set -o pipefail && k3s kubectl get
               mutatingwebhookconfiguration,validatingwebhookconfiguration | grep -i calico | awk '{print $1}'
           register: other_webhooks
           failed_when: false
@@ -248,7 +248,7 @@
 
         - name: Delete any Calico-related webhook configurations
           ansible.builtin.command:
-            cmd: "{{ k3s_kubectl_cmd | default('k3s kubectl') }} delete {{ item }}"
+            cmd: "k3s kubectl delete {{ item }}"
           with_items: "{{ other_webhooks.stdout_lines }}"
           when: other_webhooks.stdout_lines | length > 0
           failed_when: false
@@ -256,35 +256,35 @@
 
         - name: Remove existing custom resources
           ansible.builtin.command:
-            cmd: "{{ k3s_kubectl_cmd | default('k3s kubectl') }} delete -f {{ calico_resources_file }}"
+            cmd: "k3s kubectl delete -f {{ calico_resources_file }}"
           failed_when: false
           register: delete_custom_resources
           changed_when: delete_custom_resources.rc == 0
 
         - name: Remove existing installation directly
           ansible.builtin.command:
-            cmd: "{{ k3s_kubectl_cmd | default('k3s kubectl') }} delete installation default"
+            cmd: "k3s kubectl delete installation default"
           failed_when: false
           when: legacy_calico_detected
           changed_when: legacy_calico_detected
 
         - name: Remove existing apiserver directly
           ansible.builtin.command:
-            cmd: "{{ k3s_kubectl_cmd | default('k3s kubectl') }} delete apiserver default"
+            cmd: "k3s kubectl delete apiserver default"
           failed_when: false
           when: legacy_calico_detected
           changed_when: legacy_calico_detected
 
         - name: Remove existing operator
           ansible.builtin.command:
-            cmd: "{{ k3s_kubectl_cmd | default('k3s kubectl') }} delete -f {{ calico_operator_file }}"
+            cmd: "k3s kubectl delete -f {{ calico_operator_file }}"
           failed_when: false
           when: delete_custom_resources is succeeded or delete_custom_resources is skipped
           changed_when: delete_custom_resources is succeeded or delete_custom_resources is skipped
 
         - name: Wait for Calico pods to be removed
           ansible.builtin.command:
-            cmd: "{{ k3s_kubectl_cmd | default('k3s kubectl') }} get pods -n calico-system -o name"
+            cmd: "k3s kubectl get pods -n calico-system -o name"
           register: calico_pods
           retries: 30
           delay: 10
@@ -297,7 +297,7 @@
           block:
             - name: Check for finalizers that might be stuck
               ansible.builtin.command:
-                cmd: "{{ k3s_kubectl_cmd | default('k3s kubectl') }} get installation default -o yaml"
+                cmd: "k3s kubectl get installation default -o yaml"
               register: stuck_installation
               failed_when: false
               changed_when: false
@@ -305,7 +305,7 @@
             - name: Patch stuck installation resources
               ansible.builtin.command:
                 cmd: >
-                  {{ k3s_kubectl_cmd | default('k3s kubectl') }} patch installation default -p '{"metadata":{"finalizers":[]}}' --type=merge
+                  k3s kubectl patch installation default -p '{"metadata":{"finalizers":[]}}' --type=merge
               when: stuck_installation.rc == 0
               failed_when: false
               changed_when: stuck_installation.rc == 0
@@ -314,7 +314,7 @@
     - name: Apply tigera-operator.yaml
       ansible.builtin.command:
         cmd: >
-          {{ k3s_kubectl_cmd | default('k3s kubectl') }} apply --server-side --force-conflicts -f {{ calico_operator_file }}
+          k3s kubectl apply --server-side --force-conflicts -f {{ calico_operator_file }}
       register: apply_tigera_operator
       retries: 5
       delay: 10
@@ -323,7 +323,7 @@
 
     - name: Wait for operator deployment to be ready
       ansible.builtin.command:
-        cmd: "{{ k3s_kubectl_cmd | default('k3s kubectl') }} -n tigera-operator wait --for=condition=available deployment/tigera-operator --timeout=300s"
+        cmd: "k3s kubectl -n tigera-operator wait --for=condition=available deployment/tigera-operator --timeout=300s"
       register: wait_operator
       retries: 3
       delay: 10
@@ -353,7 +353,7 @@
     - name: Apply custom-resources.yaml
       ansible.builtin.command:
         cmd: >
-          {{ k3s_kubectl_cmd | default('k3s kubectl') }} apply --server-side --force-conflicts -f {{ calico_resources_file }}
+          k3s kubectl apply --server-side --force-conflicts -f {{ calico_resources_file }}
       register: apply_custom_resources
       retries: 5
       delay: 10
@@ -370,7 +370,7 @@
     # Wait for Calico to be ready
     - name: Wait for Calico API server to be ready
       ansible.builtin.command:
-        cmd: "{{ k3s_kubectl_cmd | default('k3s kubectl') }} wait --for=condition=available apiservice v3.projectcalico.org --timeout=300s"
+        cmd: "k3s kubectl wait --for=condition=available apiservice v3.projectcalico.org --timeout=300s"
       register: wait_api
       retries: 10
       delay: 15
@@ -380,7 +380,7 @@
 
     - name: Ensure all calico-system pods are running
       ansible.builtin.command:
-        cmd: "{{ k3s_kubectl_cmd | default('k3s kubectl') }} -n calico-system wait --for=condition=Ready pods --all --timeout=300s"
+        cmd: "k3s kubectl -n calico-system wait --for=condition=Ready pods --all --timeout=300s"
       register: calico_pods_ready
       retries: 5
       delay: 30
@@ -394,7 +394,7 @@
         - name: Check for problematic calico pods
           ansible.builtin.shell:
             cmd: >
-              set -o pipefail && {{ k3s_kubectl_cmd | default('k3s kubectl') }} get pods -n calico-system |
+              set -o pipefail && k3s kubectl get pods -n calico-system |
               grep -E 'CrashLoop|Error|0/1' | awk '{print $1}'
           register: problematic_pods
           failed_when: false
@@ -402,7 +402,7 @@
 
         - name: Force restart problematic pods
           ansible.builtin.command:
-            cmd: "{{ k3s_kubectl_cmd | default('k3s kubectl') }} delete pod -n calico-system {{ item }}"
+            cmd: "k3s kubectl delete pod -n calico-system {{ item }}"
           with_items: "{{ problematic_pods.stdout_lines }}"
           when: problematic_pods.stdout_lines | length > 0
           failed_when: false
@@ -413,7 +413,7 @@
       block:
         - name: Check Calico controller status
           ansible.builtin.command:
-            cmd: "{{ k3s_kubectl_cmd | default('k3s kubectl') }} get tigerastatus -o json"
+            cmd: "k3s kubectl get tigerastatus -o json"
           register: calico_status
           failed_when: false
           changed_when: false
@@ -444,7 +444,7 @@
       block:
         - name: Create test namespace for CNI validation
           ansible.builtin.command:
-            cmd: "{{ k3s_kubectl_cmd | default('k3s kubectl') }} create namespace calico-test"
+            cmd: "k3s kubectl create namespace calico-test"
           failed_when: false
           changed_when: true
 
@@ -452,7 +452,7 @@
           ansible.builtin.shell:
             cmd: |
               set -o pipefail
-              cat <<EOF | {{ k3s_kubectl_cmd | default('k3s kubectl') }} apply -f -
+              cat <<EOF | k3s kubectl apply -f -
               apiVersion: v1
               kind: Pod
               metadata:
@@ -469,7 +469,7 @@
 
         - name: Wait for test pod to be ready
           ansible.builtin.command:
-            cmd: "{{ k3s_kubectl_cmd | default('k3s kubectl') }} -n calico-test wait --for=condition=Ready pod/calico-test-pod --timeout=120s"
+            cmd: "k3s kubectl -n calico-test wait --for=condition=Ready pod/calico-test-pod --timeout=120s"
           register: test_pod_ready
           retries: 3
           delay: 10
@@ -479,7 +479,7 @@
 
         - name: Get pod IP address
           ansible.builtin.command:
-            cmd: "{{ k3s_kubectl_cmd | default('k3s kubectl') }} -n calico-test get pod calico-test-pod -o jsonpath='{.status.podIP}'"
+            cmd: "k3s kubectl -n calico-test get pod calico-test-pod -o jsonpath='{.status.podIP}'"
           register: pod_ip
           failed_when: false
           changed_when: false
@@ -492,7 +492,7 @@
 
         - name: Perform DNS lookup from test pod
           ansible.builtin.command:
-            cmd: "{{ k3s_kubectl_cmd | default('k3s kubectl') }} -n calico-test exec calico-test-pod -- nslookup kubernetes.default.svc.cluster.local"
+            cmd: "k3s kubectl -n calico-test exec calico-test-pod -- nslookup kubernetes.default.svc.cluster.local"
           register: dns_test
           failed_when: false
           changed_when: false
@@ -503,7 +503,7 @@
 
         - name: Cleanup test resources
           ansible.builtin.command:
-            cmd: "{{ k3s_kubectl_cmd | default('k3s kubectl') }} delete namespace calico-test"
+            cmd: "k3s kubectl delete namespace calico-test"
           changed_when: true
           failed_when: false
 
@@ -512,7 +512,7 @@
       block:
         - name: Get Calico CNI pods
           ansible.builtin.command:
-            cmd: "{{ k3s_kubectl_cmd | default('k3s kubectl') }} get pods -n calico-system -o json"
+            cmd: "k3s kubectl get pods -n calico-system -o json"
           register: cni_pods
           failed_when: false
           changed_when: false
@@ -524,7 +524,7 @@
 
         - name: Check CNI pod resource consumption
           ansible.builtin.command:
-            cmd: "{{ k3s_kubectl_cmd | default('k3s kubectl') }} top pods -n calico-system"
+            cmd: "k3s kubectl top pods -n calico-system"
           register: cni_resource_usage
           failed_when: false
           changed_when: false
@@ -551,7 +551,7 @@
 
         - name: Validate connectivity between Calico components
           ansible.builtin.command:
-            cmd: "{{ k3s_kubectl_cmd | default('k3s kubectl') }} -n calico-system exec deployment/calico-typha -- calico-typha status"
+            cmd: "k3s kubectl -n calico-system exec deployment/calico-typha -- calico-typha status"
           register: typha_status
           failed_when: false
           changed_when: false
