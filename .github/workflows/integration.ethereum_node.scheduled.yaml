@@ -37,6 +37,8 @@ jobs:
           PY_COLORS: '1'
           EXECUTION_CLIENT: ${{ matrix.execution }}
           CONSENSUS_CLIENT: ${{ matrix.consensus }}
+          DOCKERHUB_USERNAME: ethpandaops
+          DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
   notify:
     name: Discord Notification
     runs-on: ubuntu-latest
