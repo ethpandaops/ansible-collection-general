@@ -16,6 +16,8 @@
     - name: Print whoami
       ansible.builtin.debug:
         var: whoami.stdout
+
+    # SSH key checks
     - name: Check authorized_keys
       ansible.builtin.command:
         cmd: cat ~/.ssh/authorized_keys
@@ -24,3 +26,28 @@
     - name: Print authorized_keys
       ansible.builtin.debug:
         var: authorized_keys.stdout
+    - name: Assert SSH keys are present
+      ansible.builtin.assert:
+        that:
+          - authorized_keys.stdout | length > 0
+        fail_msg: "SSH keys are not present"
+
+    # NTP checks
+    - name: Check chrony sources
+      ansible.builtin.command:
+        cmd: cat /etc/chrony/sources.d/local-ntp-server.sources
+      changed_when: false
+      register: chrony_sources
+    - name: Print chrony sources
+      ansible.builtin.debug:
+        var: chrony_sources.stdout
+    - name: Check chrony tracking
+      ansible.builtin.command:
+        cmd: chronyc tracking
+      changed_when: false
+      register: chrony_tracking
+    - name: Assert system clock is synchronized
+      ansible.builtin.assert:
+        that:
+          - chrony_tracking.stdout | regex_search('^System clock synchronized: yes$')
+        fail_msg: "Chrony is not synchronized"

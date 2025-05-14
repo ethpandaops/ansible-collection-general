@@ -36,13 +36,33 @@ bootstrap_default_common_packages:
   - curl
   - wget
   - screen
-  - chrony # enabled by default on Debian
   - bat
   - cron
   - nfs-common
   - rsync
   - tree
   - smartmontools
+
+bootstrap_ntp_enabled: true
+bootstrap_ntp_servers:
+  # Generic
+  - pool.ntp.org
+  - time.google.com
+  - time.cloudflare.com
+  - time.apple.com
+  - time.windows.com
+  - time.nist.gov
+  - 0.debian.pool.ntp.org
+  - 1.debian.pool.ntp.org
+  - 2.debian.pool.ntp.org
+  - 3.debian.pool.ntp.org
+  # OVH
+  - ntp0.ovh.net
+  # Hetzner
+  - ntp.hetzner.de
+  - ntp1.hetzner.de
+  - ntp2.hetzner.de
+  - ntp3.hetzner.de
 
 bootstrap_hostname_set: true
 bootstrap_harden_sshd_config: true

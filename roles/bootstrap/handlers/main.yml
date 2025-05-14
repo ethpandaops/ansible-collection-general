@@ -6,4 +6,9 @@
 - name: Disable SWAP
   ansible.builtin.command: swapoff -a
   changed_when: true
-  tags: ["swap"]
+  tags: ["bootstrap_swap"]
+
+- name: Reload chrony
+  ansible.builtin.command: chronyc reload sources
+  changed_when: true
+  tags: ["bootstrap_ntp"]
