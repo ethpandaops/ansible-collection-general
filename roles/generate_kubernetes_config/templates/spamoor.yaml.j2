@@ -43,5 +43,5 @@ spamoor:
   # Rpc
   - "{{ default_el_endpoint }}"
 {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
-  - "https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@rpc.{{ hostvars[host]['inventory_hostname'] }}.{{ network_subdomain }}"
+  - "https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@rpc.{{ hostvars[host]['inventory_hostname'] }}.{{ network_server_subdomain }}"
 {% endfor %}
