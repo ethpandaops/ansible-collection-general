@@ -1,4 +1,3 @@
-
 - name: Setup docker network
   ansible.builtin.include_role:
     name: ethpandaops.general.docker_network
@@ -11,13 +10,14 @@
     regexp: '^DNSStubListener='
     line: 'DNSStubListener=no'
     insertafter: '^\[Resolve\]'
-    create: yes
-    backup: yes
+    create: true
+    backup: true
+    mode: '0644'
   when: dns_server_disable_systemd_resolved | bool
   notify: Restart systemd-resolved
 
 - name: Immediately apply systemd-resolved changes
-  meta: flush_handlers
+  ansible.builtin.meta: flush_handlers
   when: dns_server_disable_systemd_resolved | bool
 
 - name: Create directories
