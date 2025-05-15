@@ -30,7 +30,7 @@ dns_server_container_command: ""
 
 dns_server_config: |
   options {
-    directory "/etc/bind/zones";
+    directory "/var/cache/bind";
     dnssec-validation auto;
     listen-on-v6 { any; };
     allow-query { 127.0.0.1; 172.16.0.0/12; };
