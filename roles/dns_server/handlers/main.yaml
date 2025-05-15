@@ -1,0 +1,9 @@
+- name: Restart systemd-resolved
+  ansible.builtin.systemd:
+    name: systemd-resolved
+    state: restarted
+- name: Restart dns server container
+  community.docker.docker_container:
+    name: "{{ dns_server_container_name }}"
+    state: started
+    restart: true

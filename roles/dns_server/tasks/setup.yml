@@ -1,0 +1,66 @@
+
+- name: Setup docker network
+  ansible.builtin.include_role:
+    name: ethpandaops.general.docker_network
+  vars:
+    docker_network_name: "{{ dns_server_docker_network_name }}"
+
+- name: Ensure DNSStubListener=no is set in resolved.conf
+  ansible.builtin.lineinfile:
+    path: /etc/systemd/resolved.conf
+    regexp: '^DNSStubListener='
+    line: 'DNSStubListener=no'
+    insertafter: '^\[Resolve\]'
+    create: yes
+    backup: yes
+  when: dns_server_disable_systemd_resolved | bool
+  notify: Restart systemd-resolved
+
+- name: Immediately apply systemd-resolved changes
+  meta: flush_handlers
+  when: dns_server_disable_systemd_resolved | bool
+
+- name: Create directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0750"
+    owner: "{{ dns_server_uid }}"
+    group: "{{ dns_server_uid }}"
+  loop:
+    - "{{ dns_server_configdir }}"
+    - "{{ dns_server_zonesdir }}"
+
+- name: Create dns server config file
+  ansible.builtin.copy:
+    content: "{{ dns_server_config }}"
+    dest: "{{ dns_server_configdir }}/named.conf"
+    owner: "{{ dns_server_uid }}"
+    group: "{{ dns_server_uid }}"
+    mode: '0644'
+  notify: Restart dns server container
+
+- name: Create dns server zone file
+  ansible.builtin.copy:
+    content: "{{ item.content }}"
+    dest: "{{ dns_server_zonesdir }}/{{ item.zone }}"
+    owner: "{{ dns_server_uid }}"
+    group: "{{ dns_server_uid }}"
+    mode: '0644'
+  loop: "{{ dns_server_zones }}"
+  notify: Restart dns server container
+
+- name: Setup dns server
+  community.docker.docker_container:
+    name: "{{ dns_server_container_name }}"
+    image: "{{ dns_server_container_image }}"
+    image_name_mismatch: recreate
+    state: 'started'
+    restart_policy: always
+    stop_timeout: "{{ dns_server_container_stop_timeout }}"
+    ports: "{{ dns_server_container_ports }}"
+    volumes: "{{ dns_server_container_volumes }}"
+    env: "{{ dns_server_container_env }}"
+    networks: "{{ dns_server_container_networks }}"
+    pull: "{{ dns_server_container_pull | bool }}"
+    command: "{{ dns_server_container_command }}"

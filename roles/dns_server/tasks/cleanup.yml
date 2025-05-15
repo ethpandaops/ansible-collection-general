@@ -1,0 +1,14 @@
+- name: Stop dns server containers
+  community.docker.docker_container:
+    name: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ dns_server_container_name }}"
+
+- name: Delete data directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ dns_server_zonesdir }}"
+    - "{{ dns_server_configdir }}"

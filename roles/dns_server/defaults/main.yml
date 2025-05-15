@@ -1,0 +1,47 @@
+---
+
+# Set this to true if you want to stop everything and wipe the databases
+dns_server_cleanup_all: false
+
+
+dns_server_uid: 101
+dns_server_zonesdir: "/data/dns_server/zones"
+dns_server_configdir: "/data/dns_server/config"
+dns_server_docker_network_name: shared
+dns_server_docker_networks:
+  - name: "{{ dns_server_docker_network_name }}"
+dns_server_disable_systemd_resolved: false
+
+# dns_server
+dns_server_enabled: true
+dns_server_container_name: dns_server
+dns_server_container_image: ubuntu/bind9:9.18-22.04_beta
+dns_server_container_env: {}
+dns_server_container_ports:
+  - "0.0.0.0:53:53/udp"
+  - "0.0.0.0:53:53/tcp"
+dns_server_container_volumes:
+  - "{{ dns_server_zonesdir }}:/etc/bind/zones"
+  - "{{ dns_server_configdir }}/named.conf:/etc/bind/named.conf"
+dns_server_container_stop_timeout: "600"
+dns_server_container_pull: false
+dns_server_container_networks: "{{ dns_server_docker_networks }}"
+dns_server_container_command: ""
+
+dns_server_config: |
+  options {
+    directory "/etc/bind/zones";
+    dnssec-validation auto;
+    listen-on-v6 { any; };
+    allow-query { 127.0.0.1; 172.16.0.0/12; };
+    allow-transfer { none; };
+  };
+  {% for zone in dns_server_zones %}
+  zone "{{ zone.zone }}" {
+    type master;
+    file "/etc/bind/zones/{{ zone.zone }}";
+    masterfile-format text;
+    allow-query { any; };
+  };
+  {% endfor %}
+dns_server_zones: []
