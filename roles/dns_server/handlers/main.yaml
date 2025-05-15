@@ -2,8 +2,6 @@
   ansible.builtin.systemd:
     name: systemd-resolved
     state: restarted
-- name: Restart dns server container
-  community.docker.docker_container:
-    name: "{{ dns_server_container_name }}"
-    state: started
-    restart: true
+- name: Reload DNS server container
+  ansible.builtin.command: "docker kill --signal=HUP {{ dns_server_container_name }}"
+  changed_when: true

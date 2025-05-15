@@ -31,6 +31,10 @@
     - "{{ dns_server_configdir }}"
     - "{{ dns_server_zonesdir }}"
 
+- name: Generate DNS zone serial
+  ansible.builtin.set_fact:
+    dns_zone_serial: "{{ ansible_date_time.date | regex_replace('-', '') }}01"
+
 - name: Create dns server config file
   ansible.builtin.copy:
     content: "{{ dns_server_config }}"
@@ -38,7 +42,7 @@
     owner: "{{ dns_server_uid }}"
     group: "{{ dns_server_uid }}"
     mode: '0644'
-  notify: Restart dns server container
+  notify: Reload DNS server container
 
 - name: Create dns server zone file
   ansible.builtin.copy:
@@ -48,7 +52,7 @@
     group: "{{ dns_server_uid }}"
     mode: '0644'
   loop: "{{ dns_server_zones }}"
-  notify: Restart dns server container
+  notify: Reload DNS server container
 
 - name: Setup dns server
   community.docker.docker_container:
