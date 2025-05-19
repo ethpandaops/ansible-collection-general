@@ -1,5 +1,12 @@
 name: Install deps
 description: Install deps
+inputs:
+  dockerhub_username:
+    required: false
+    default: ''
+  dockerhub_password:
+    required: false
+    default: ''
 runs:
   using: composite
   steps:
@@ -13,6 +20,12 @@ runs:
       uses: asdf-vm/actions/setup@05e0d2ed97b598bfce82fd30daf324ae0c4570e6 # v3.0.2
       with:
         asdf_branch: v0.15.0
+
+    - name: Docker login
+      uses: ethpandaops/actions/docker-login@a91b7a8dd6a264f5e845ac2aa52d2d6f24e6d01d
+      with:
+        username: ${{ inputs.dockerhub_username }}
+        password: ${{ inputs.dockerhub_password }}
 
     - name: Run setup
       shell: bash
