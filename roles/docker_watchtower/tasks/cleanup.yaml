@@ -1,0 +1,4 @@
+- name: Remove docker-watchtower container
+  community.docker.docker_container:
+    name: "{{ docker_watchtower_container_name }}"
+    state: absent

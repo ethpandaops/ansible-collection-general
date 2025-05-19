@@ -1,0 +1,7 @@
+- name: Setup docker-watchtower
+  ansible.builtin.import_tasks: setup.yaml
+  when: not docker_watchtower_cleanup
+
+- name: Cleanup docker-watchtower
+  ansible.builtin.import_tasks: cleanup.yaml
+  when: docker_watchtower_cleanup

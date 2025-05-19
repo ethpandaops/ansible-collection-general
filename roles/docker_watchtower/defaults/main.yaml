@@ -1,0 +1,21 @@
+docker_watchtower_cleanup: false
+
+docker_watchtower_user: "{{ docker_watchtower_container_name }}"
+
+docker_watchtower_container_name: "docker-watchtower"
+docker_watchtower_container_image: "containrrr/watchtower:latest"
+docker_watchtower_container_image_name_mismatch: recreate
+docker_watchtower_container_restart: true
+docker_watchtower_container_restart_policy: unless-stopped
+docker_watchtower_container_recreate: false
+docker_watchtower_container_stop_timeout: "30"
+docker_watchtower_container_env: {}
+docker_watchtower_container_ports: []
+docker_watchtower_container_exposed_ports: []
+docker_watchtower_container_volumes:
+  - "/var/run/docker.sock:/var/run/docker.sock"
+docker_watchtower_container_networks: "{{ omit }}" # use docker default
+docker_watchtower_container_command: "{{ docker_watchtower_containers_list + docker_watchtower_container_additional_args }}"
+
+docker_watchtower_containers_list: []
+docker_watchtower_container_additional_args: []
