@@ -129,3 +129,11 @@ ethereum_node_grafana_alloy_config_content: |
       "consensus_client" = "{{ ethereum_node_cl }}"
     }
   }
+
+# Ethereum node Docker Watchtower
+ethereum_node_docker_watchtower_enabled: false
+ethereum_node_docker_watchtower_container_name: "ethereum-node-docker-watchtower"
+ethereum_node_docker_watchtower_containers_list:
+  - "{{ ethereum_node_el }}"
+  - "{{ ethereum_node_cl }}"
+  - "{{ ethereum_node_cl }}-validator"
