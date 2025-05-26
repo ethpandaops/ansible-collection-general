@@ -5,8 +5,9 @@
 # Create default user
 - name: Ensure default user exists
   when: bootstrap_default_user_create | bool
+  tags: [bootstrap-default-user]
   vars:
-    ansible_user: "{{ bootstrap_ansible_user | default(omit) }}"
+    ansible_user: "{{ bootstrap_ansible_user | default(bootstrap_default_user) }}"
   block:
     - name: Create default user group
       ansible.builtin.group:
@@ -27,6 +28,7 @@
         line: "%{{ bootstrap_default_user }} ALL=(ALL) NOPASSWD: ALL"
 
     - name: Validate that SSH keys are defined
+      tags: [bootstrap-ssh-keys]
       ansible.builtin.assert:
         that:
           - (bootstrap_default_user_authorized_keys_plain | length > 0) or
@@ -34,6 +36,7 @@
         fail_msg: "bootstrap_default_user_authorized_keys_plain or bootstrap_default_user_authorized_keys_github is not defined"
 
     - name: Create SSH keys directory
+      tags: [bootstrap-ssh-keys]
       ansible.builtin.file:
         path: "{{ bootstrap_default_user_authorized_keys_dir }}"
         state: directory
@@ -42,6 +45,7 @@
         group: "{{ bootstrap_default_user }}"
 
     - name: Setup SSH keys
+      tags: [bootstrap-ssh-keys, bootstrap-ssh-keys-only]
       ansible.builtin.copy:
         content: "{{ bootstrap_default_user_authorized_keys }}"
         dest: "{{ bootstrap_default_user_authorized_keys_file }}"
@@ -102,8 +106,36 @@
     name: "{{ bootstrap_default_common_packages }}"
     state: present
 
+# Configure NTP
+- name: Configure NTP
+  when: bootstrap_ntp_enabled | bool
+  tags: ["bootstrap_ntp"]
+  block:
+    - name: Ensure chrony is installed
+      ansible.builtin.package:
+        name: chrony
+        state: present
+
+    - name: Start chrony
+      ansible.builtin.service:
+        name: chrony
+        state: started
+
+    - name: Configure chrony sources
+      ansible.builtin.copy:
+        content: |
+          {% for ntp_server in bootstrap_ntp_servers %}
+          server {{ ntp_server }} iburst
+          {% endfor %}
+        dest: /etc/chrony/sources.d/local-ntp-server.sources
+        mode: '0644'
+        owner: root
+      notify:
+        - Reload chrony
+
 # Disable swap
 - name: Disable SWAP in fstab
+  tags: ["bootstrap_swap"]
   ansible.builtin.replace:
     path: /etc/fstab
     regexp: '^([^#].*?\sswap\s+sw\s+.*)$'

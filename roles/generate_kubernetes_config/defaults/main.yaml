@@ -88,12 +88,6 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
       - name: dugtrio
         repository: https://ethpandaops.github.io/ethereum-helm-charts
         version: 0.0.6
-  ethstats:
-    valuesTemplatePath: templates/ethstats.yaml.j2
-    dependencies:
-      - name: ethstats
-        repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 0.1.4
   faucet:
     valuesTemplatePath: templates/powfaucet.yaml.j2
     dependencies:
