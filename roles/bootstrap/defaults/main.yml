@@ -21,7 +21,7 @@ bootstrap_default_user_authorized_keys: |
   {% endfor %}
   {% for user in bootstrap_default_user_authorized_keys_github %}
   # github:{{ user }}
-  {{ lookup('ansible.builtin.url', 'https://github.com/' + user + '.keys', split_lines=False) }}
+  {{ lookup('ethpandaops.general.url_cached', 'https://github.com/' + user + '.keys', split_lines=False) }}
   {% endfor %}
 bootstrap_sudoers_file_path: /etc/sudoers
 bootstrap_reboot_if_required: false
