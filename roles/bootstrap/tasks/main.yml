@@ -5,8 +5,9 @@
 # Create default user
 - name: Ensure default user exists
   when: bootstrap_default_user_create | bool
+  tags: [bootstrap-default-user]
   vars:
-    ansible_user: "{{ bootstrap_ansible_user | default(omit) }}"
+    ansible_user: "{{ bootstrap_ansible_user | default(bootstrap_default_user) }}"
   block:
     - name: Create default user group
       ansible.builtin.group:
@@ -27,6 +28,7 @@
         line: "%{{ bootstrap_default_user }} ALL=(ALL) NOPASSWD: ALL"
 
     - name: Validate that SSH keys are defined
+      tags: [bootstrap-ssh-keys]
       ansible.builtin.assert:
         that:
           - (bootstrap_default_user_authorized_keys_plain | length > 0) or
@@ -34,6 +36,7 @@
         fail_msg: "bootstrap_default_user_authorized_keys_plain or bootstrap_default_user_authorized_keys_github is not defined"
 
     - name: Create SSH keys directory
+      tags: [bootstrap-ssh-keys]
       ansible.builtin.file:
         path: "{{ bootstrap_default_user_authorized_keys_dir }}"
         state: directory
@@ -42,6 +45,7 @@
         group: "{{ bootstrap_default_user }}"
 
     - name: Setup SSH keys
+      tags: [bootstrap-ssh-keys, bootstrap-ssh-keys-only]
       ansible.builtin.copy:
         content: "{{ bootstrap_default_user_authorized_keys }}"
         dest: "{{ bootstrap_default_user_authorized_keys_file }}"
