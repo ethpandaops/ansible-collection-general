@@ -59,7 +59,7 @@ reth_container_command_default:
   - --discovery.v5.addr={{ reth_announced_ip }}
   - --discovery.v5.port={{ reth_ports_discv5 }}
 
-reth_container_command_v6: []
+reth_container_command_v6:
   - --discovery.v5.addr.ipv6={{ reth_announced_ipv6 }}
   - --discovery.v5.port.ipv6={{ reth_ports_discv5 }}
 
