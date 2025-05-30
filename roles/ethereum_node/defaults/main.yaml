@@ -121,12 +121,12 @@ ethereum_node_grafana_alloy_config_content: |
       url = "{{ ethereum_node_pyroscope_server_endpoint }}"
     }
     external_labels = {
-      "instance" = "{{ ethereum_network_name }}-{{ inventory_hostname }}"
-      "ip_address" = "{{ ansible_host }}"
-      "network" = "{{ ethereum_network_name }}"
-      "testnet" = "{{ ethereum_network_name }}"
-      "execution_client" = "{{ ethereum_node_el }}"
-      "consensus_client" = "{{ ethereum_node_cl }}"
+      "instance" = "{{ ethereum_network_name }}-{{ inventory_hostname }}",
+      "ip_address" = "{{ ansible_host }}",
+      "network" = "{{ ethereum_network_name }}",
+      "testnet" = "{{ ethereum_network_name }}",
+      "execution_client" = "{{ ethereum_node_el }}",
+      "consensus_client" = "{{ ethereum_node_cl }}",
     }
   }
 

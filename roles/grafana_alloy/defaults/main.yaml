@@ -23,6 +23,7 @@ grafana_alloy_container_ports: []
 grafana_alloy_container_exposed_ports:
   - "{{ grafana_alloy_http_port }}"
 grafana_alloy_container_default_volumes:
+  - "/var/run/docker.sock:/var/run/docker.sock"
   - "{{ grafana_alloy_config_file }}:/etc/alloy/config.alloy"
   - "{{ grafana_alloy_data_dir }}:/var/lib/alloy/data"
 grafana_alloy_container_extra_volumes: []
