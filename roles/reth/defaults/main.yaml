@@ -45,6 +45,8 @@ reth_container_command_default:
   - node
   - --datadir=/data
   - --log.file.directory=/data/logs
+  - --addr=0.0.0.0
+  - --port={{ reth_ports_p2p }}
   - --http
   - --http.addr=0.0.0.0
   - --http.port={{ reth_ports_http_rpc }}
