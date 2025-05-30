@@ -30,7 +30,7 @@ grafana_alloy_container_volumes: "{{ grafana_alloy_container_default_volumes + g
 grafana_alloy_container_networks: []
 grafana_alloy_container_command:
   - run
-  - --server.http.listen-address=0.0.0.0:{{ grafana_alloy_http_port }}
+  - --server.http.listen-addr=0.0.0.0:{{ grafana_alloy_http_port }}
   - --storage.path=/var/lib/alloy/data
   - /etc/alloy/config.alloy
 
