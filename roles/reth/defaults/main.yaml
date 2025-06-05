@@ -52,6 +52,7 @@ reth_container_command_default:
   - --authrpc.port={{ reth_ports_engine }}
   - --authrpc.jwtsecret=/execution-auth.jwt
   - --metrics=0.0.0.0:{{ reth_ports_metrics }}
+  - --enable-discv5-discovery
   - --discovery.addr={{ reth_announced_ip }}
   - --discovery.port={{ reth_ports_p2p }}
   - --discovery.v5.addr={{ reth_announced_ip }}
