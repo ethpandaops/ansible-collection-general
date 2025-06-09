@@ -26,9 +26,7 @@ xatu-mimicry:
         retryInterval: 60s
         nodeRecords:
 {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
-{% if ((hostvars[host]['inventory_hostname'] | string)[-2:]) == "-1" %}
-          - {{ hostvars[host]['ethereum_node_el_bootnode_enode'] }}
-{% endif %}
+          - {{ hostvars[host]['ethereum_node_fact_el_enode'] }}
 {% endfor %}
     outputs:
     - name: grpc
