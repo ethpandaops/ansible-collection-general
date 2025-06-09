@@ -161,3 +161,9 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
       - name: xatu-cannon
         repository: https://ethpandaops.github.io/ethereum-helm-charts
         version: 0.2.2
+  xatu-mimicry:
+    valuesTemplatePath: templates/xatu-mimicry.yaml.j2
+    dependencies:
+      - name: xatu-mimicry
+        repository: https://ethpandaops.github.io/ethereum-helm-charts
+        version: 0.0.7
