@@ -24,14 +24,12 @@ xatu-mimicry:
       type: static
       config:
         retryInterval: 60s
-{% if groups['bootnode'] | default([]) | length > 0 %}
         nodeRecords:
-{% for bootnode in groups['bootnode'] %}
-          - {{ hostvars[bootnode]['ethereum_node_el_bootnode_enode'] }}
-{% endfor %}
-{% else %}
-        nodeRecords: []
+{% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
+{% if ((hostvars[host]['inventory_hostname'] | string)[-2:]) == "-1" %}
+          - {{ hostvars[host]['ethereum_node_el_bootnode_enode'] }}
 {% endif %}
+{% endfor %}
     outputs:
     - name: grpc
       type: xatu
