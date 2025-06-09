@@ -13,6 +13,7 @@
 
 - name: Set permissions
   ansible.builtin.command: "chown -R {{ nimbus_user }}:{{ nimbus_user }} {{ nimbus_datadir }}" # noqa no-free-form
+  failed_when: false
   changed_when: false
 
 - name: Create validator data dir
@@ -30,6 +31,7 @@
 
 - name: Set permissions for validator data dir
   ansible.builtin.command: "chown -R {{ nimbus_user }}:{{ nimbus_user }} {{ nimbus_validator_datadir }}" # noqa no-free-form
+  failed_when: false
   changed_when: false
   when: nimbus_validator_enabled
 
