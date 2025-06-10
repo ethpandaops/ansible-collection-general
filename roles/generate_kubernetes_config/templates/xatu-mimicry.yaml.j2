@@ -14,15 +14,14 @@ xatu-mimicry:
       cpu: 100m
       memory: 256Mi
 
-  ethereum:
-    overrideNetworkName: "{{ ethereum_network_name }}"
-
   config:
     logging: "info"
     metricsAddr: ":9090"
     name: "{{ ethereum_network_name }}-xatu-mimicry"
     captureDelay: 3m
     ntpServer: time.google.com
+    ethereum:
+      overrideNetworkName: "{{ ethereum_network_name }}"
     coordinator:
       type: static
       config:
