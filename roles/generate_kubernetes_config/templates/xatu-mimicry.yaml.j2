@@ -20,6 +20,8 @@ xatu-mimicry:
     name: "{{ ethereum_network_name }}-xatu-mimicry"
     captureDelay: 3m
     ntpServer: time.google.com
+    ethereum:
+      overrideNetworkName: "{{ ethereum_network_name }}"
     coordinator:
       type: static
       config:
