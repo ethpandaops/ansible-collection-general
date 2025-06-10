@@ -16,6 +16,7 @@
 
 - name: Set permissions
   ansible.builtin.command: "chown -R {{ nethermind_user }}:{{ nethermind_user }} {{ nethermind_datadir }}" # noqa no-free-form
+  failed_when: false
   changed_when: false
 
 - name: Run nethermind container

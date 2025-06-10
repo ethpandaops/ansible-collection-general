@@ -35,6 +35,7 @@
 
 - name: Set permissions for blobber director
   ansible.builtin.command: "chown -R {{ blobber_user }}:{{ blobber_user }} {{ blobber_validator_remote_key_folder }}" # noqa no-free-form
+  failed_when: false
   changed_when: false
 
 - name: Run blobber container

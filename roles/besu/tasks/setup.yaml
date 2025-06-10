@@ -13,6 +13,7 @@
 
 - name: Set permissions
   ansible.builtin.command: "chown -R {{ besu_user }}:{{ besu_user }} {{ besu_datadir }}" # noqa no-free-form
+  failed_when: false
   changed_when: false
 
 - name: Run besu container
