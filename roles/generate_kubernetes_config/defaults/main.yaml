@@ -19,7 +19,7 @@ default_el_auth_endpoint: >- # noqa var-naming[no-role-prefix]
 
 gen_kubernetes_config_ethereum_node: # noqa var-naming[no-role-prefix]
   el: geth
-  cl: teku
+  cl: prysm
   value: "001"
 
 gen_kubernetes_domain: "{{ domain | default('ethpandaops.io') }}" # noqa var-naming[no-role-prefix]
@@ -167,3 +167,9 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
       - name: xatu-mimicry
         repository: https://ethpandaops.github.io/ethereum-helm-charts
         version: 0.0.7
+  xatu-cl-mimicry:
+    valuesTemplatePath: templates/xatu-cl-mimicry.yaml.j2
+    dependencies:
+      - name: xatu-cl-mimicry
+        repository: https://ethpandaops.github.io/ethereum-helm-charts
+        version: 0.0.2
