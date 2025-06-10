@@ -13,6 +13,7 @@
 
 - name: Set permissions
   ansible.builtin.command: "chown -R {{ geth_user }}:{{ geth_user }} {{ geth_datadir }}" # noqa no-free-form
+  failed_when: false
   changed_when: false
 
 - name: Init custom network

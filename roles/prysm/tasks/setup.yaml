@@ -16,6 +16,7 @@
 
     - name: Set permissions
       ansible.builtin.command: "chown -R {{ prysm_user }}:{{ prysm_user }} {{ prysm_datadir }}" # noqa no-free-form
+      failed_when: false
       changed_when: false
 
     - name: Run prysm container
@@ -57,6 +58,7 @@
 
     - name: Set permissions for validator data dir
       ansible.builtin.command: "chown -R {{ prysm_user }}:{{ prysm_user }} {{ prysm_validator_datadir }}" # noqa no-free-form
+      failed_when: false
       changed_when: false
 
     - name: Run prysm validator container

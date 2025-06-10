@@ -16,6 +16,7 @@
 
     - name: Set permissions
       ansible.builtin.command: "chown -R {{ lighthouse_user }}:{{ lighthouse_user }} {{ lighthouse_datadir }}" # noqa no-free-form
+      failed_when: false
       changed_when: false
 
     - name: Run lighthouse container
@@ -60,6 +61,7 @@
 
     - name: Set permissions for validator data dir
       ansible.builtin.command: "chown -R {{ lighthouse_user }}:{{ lighthouse_user }} {{ lighthouse_validator_datadir }}" # noqa no-free-form
+      failed_when: false
       changed_when: false
 
     - name: Run lighthouse validator container
