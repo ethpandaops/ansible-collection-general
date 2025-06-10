@@ -1,0 +1,123 @@
+xatu-cl-mimicry:
+  enabled: true
+  fullnameOverride: xatu-cl-mimicry
+  image:
+    repository: {{ default_tooling_images.xatu_cl_mimicry.split(':') | first }}
+    tag: {{ default_tooling_images.xatu_cl_mimicry.split(':') | last }}
+    pullPolicy: {% if "latest" in (default_tooling_images.xatu_cl_mimicry.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
+
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 2000Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+
+  config:
+    logging: "info"
+    metricsAddr: ":9095"
+    name: "{{ ethereum_network_name }}-xatu-cl-mimicry"
+    ethereum:
+      network: "{{ ethereum_network_name }}"
+    node:
+      prysmHost: prysm-geth-001
+      prysmPortHttp: 5052
+      prysmPortGrpc: 4000
+      prysmUseTls: true
+      subnets:
+        beacon_attestation:
+          type: "random"
+          count: 2
+    outputs:
+      - name: grpc
+        type: xatu
+        config:
+          address: server.xatu-experimental.ethpandaops.io:443
+          tls: true
+          headers:
+            authorization: "Basic <path:/secrets/services/services.enc.yaml#xatu | jsonPath {.experimental.event_ingester_auth}>"
+          maxExportBatchSize: 256
+          batchTimeout: 5s
+          maxQueueSize: 1000000
+          workers: 100
+          keepAlive:
+            enabled: true
+            time: 55s
+            timeout: 20s
+          retry:
+            enabled: false
+            scalar: 0.1s
+            maxAttempts: 3
+        filter:
+          eventNames:
+            - LIBP2P_TRACE_CONNECTED
+            - LIBP2P_TRACE_DISCONNECTED
+            - LIBP2P_TRACE_ADD_PEER
+            - LIBP2P_TRACE_REMOVE_PEER
+            - LIBP2P_TRACE_JOIN
+            - LIBP2P_TRACE_LEAVE
+            - LIBP2P_TRACE_GRAFT
+            - LIBP2P_TRACE_PRUNE
+            - LIBP2P_TRACE_REJECT_MESSAGE
+            - LIBP2P_TRACE_PUBLISH_MESSAGE
+            - LIBP2P_TRACE_DELIVER_MESSAGE
+            - LIBP2P_TRACE_DUPLICATE_MESSAGE
+            - LIBP2P_TRACE_HANDLE_METADATA
+            - LIBP2P_TRACE_HANDLE_STATUS
+            - LIBP2P_TRACE_GOSSIPSUB_BEACON_BLOCK
+            - LIBP2P_TRACE_GOSSIPSUB_BEACON_ATTESTATION
+            - LIBP2P_TRACE_GOSSIPSUB_BLOB_SIDECAR
+            - LIBP2P_TRACE_RECV_RPC
+            - LIBP2P_TRACE_SEND_RPC
+            - LIBP2P_TRACE_DROP_RPC
+            - LIBP2P_TRACE_RPC_META_CONTROL_IHAVE
+            - LIBP2P_TRACE_RPC_META_CONTROL_IWANT
+            - LIBP2P_TRACE_RPC_META_CONTROL_IDONTWANT
+            - LIBP2P_TRACE_RPC_META_CONTROL_GRAFT
+            - LIBP2P_TRACE_RPC_META_CONTROL_PRUNE
+            - LIBP2P_TRACE_RPC_META_SUBSCRIPTION
+            - LIBP2P_TRACE_RPC_META_MESSAGE
+    traces:
+      enabled: true
+      alwaysRecordRootRpcEvents: false
+      topics:
+        # High volume, sample 1/512
+        "(?i).*deliver_message.*":
+          totalShards: 512
+          activeShards: [0]
+        # High volume, sample 1/512
+        "(?i).*duplicate_message.*":
+          totalShards: 512
+          activeShards: [0]
+        # High volume, sample 1/512
+        "(?i).*rpc_meta_control_ihave.*":
+          totalShards: 512
+          activeShards: [0]
+        # High volume, sample 1/512
+        "(?i).*rpc_meta_control_iwant.*":
+          totalShards: 512
+          activeShards: [0]
+        # High volume, sample 1/512
+        "(?i).*rpc_meta_message.*":
+          totalShards: 512
+          activeShards: [0]
+    # Most events are enabled by default, enabling a few here that aren't.
+    events:
+      recvRpcEnabled: true
+      sendRpcEnabled: true
+      dropRpcEnabled: true
+      rpcMetaControlIHaveEnabled: true
+      rpcMetaControlIWantEnabled: true
+      rpcMetaControlIDontWantEnabled: true
+      rpcMetaControlGraftEnabled: true
+      rpcMetaControlPruneEnabled: true
+      rpcMetaSubscriptionEnabled: true
+      rpcMetaMessageEnabled: true
+      leaveEnabled: true
+      pruneEnabled: true
+      graftEnabled: true
+      rejectMessageEnabled: true
+      publishMessageEnabled: true
+      deliverMessageEnabled: true
+      duplicateMessageEnabled: true
