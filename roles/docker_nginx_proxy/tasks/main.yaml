@@ -85,8 +85,8 @@
     volumes_from: "{{ docker_nginx_proxy_docker_gen_container_volumes_from }}"
 
 - name: Create ACME monitor script
-  ansible.builtin.template:
-    src: acme-monitor.sh.j2
+  ansible.builtin.copy:
+    src: acme-monitor.sh
     dest: "{{ docker_nginx_proxy_datadir }}/acme-monitor.sh"
     owner: "{{ docker_nginx_proxy_user }}"
     group: "{{ docker_nginx_proxy_user }}"
