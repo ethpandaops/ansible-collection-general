@@ -95,3 +95,22 @@ docker_nginx_proxy_acme_companion_container_env:
   DEFAULT_EMAIL: "{{ docker_nginx_proxy_default_email }}"
   NGINX_PROXY_CONTAINER: "{{ docker_nginx_proxy_container_name }}"
   NGINX_DOCKER_GEN_CONTAINER: "{{ docker_nginx_proxy_docker_gen_container_name }}"
+
+############################################################################
+## ACME retry monitor sidecontainer
+############################################################################
+docker_nginx_proxy_acme_monitor_enabled: false
+docker_nginx_proxy_acme_monitor_container_image: alpine:latest
+docker_nginx_proxy_acme_monitor_container_name: nginx-proxy-acme-monitor
+docker_nginx_proxy_acme_monitor_container_restart_policy: always
+docker_nginx_proxy_acme_monitor_container_networks_cli_compatible: true
+docker_nginx_proxy_acme_monitor_container_network_mode: default
+docker_nginx_proxy_acme_monitor_container_networks: []
+docker_nginx_proxy_acme_monitor_wait_time: 900 # 15 minutes in seconds
+docker_nginx_proxy_acme_monitor_container_volumes:
+  - "{{ docker_nginx_proxy_datadir }}/certs:/etc/nginx/certs:rw"
+  - "{{ docker_nginx_proxy_datadir }}/acme:/etc/acme.sh:rw"
+  - /var/run/docker.sock:/var/run/docker.sock:rw
+docker_nginx_proxy_acme_monitor_container_env:
+  ACME_CONTAINER_NAME: "{{ docker_nginx_proxy_acme_companion_container_name }}"
+  WAIT_TIME: "{{ docker_nginx_proxy_acme_monitor_wait_time | string }}"

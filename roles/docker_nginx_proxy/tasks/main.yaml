@@ -83,3 +83,26 @@
     volumes: "{{ docker_nginx_proxy_acme_companion_container_volumes }}"
     env: "{{ docker_nginx_proxy_acme_companion_container_env }}"
     volumes_from: "{{ docker_nginx_proxy_docker_gen_container_volumes_from }}"
+
+- name: Create ACME monitor script
+  ansible.builtin.copy:
+    src: acme-monitor.sh
+    dest: "{{ docker_nginx_proxy_datadir }}/acme-monitor.sh"
+    owner: "{{ docker_nginx_proxy_user }}"
+    group: "{{ docker_nginx_proxy_user }}"
+    mode: "0750"
+  when: docker_nginx_proxy_acme_monitor_enabled
+
+- name: Run ACME retry monitor sidecontainer
+  community.general.docker_container:
+    name: "{{ docker_nginx_proxy_acme_monitor_container_name }}"
+    image: "{{ docker_nginx_proxy_acme_monitor_container_image }}"
+    image_name_mismatch: recreate
+    command: ["/acme-monitor.sh"]
+    restart_policy: "{{ docker_nginx_proxy_acme_monitor_container_restart_policy }}"
+    networks: "{{ docker_nginx_proxy_acme_monitor_container_networks }}"
+    networks_cli_compatible: "{{ docker_nginx_proxy_acme_monitor_container_networks_cli_compatible }}"
+    network_mode: "{{ docker_nginx_proxy_acme_monitor_container_network_mode }}"
+    volumes: "{{ docker_nginx_proxy_acme_monitor_container_volumes + [docker_nginx_proxy_datadir + '/acme-monitor.sh:/acme-monitor.sh:ro'] }}"
+    env: "{{ docker_nginx_proxy_acme_monitor_container_env }}"
+  when: docker_nginx_proxy_acme_monitor_enabled
