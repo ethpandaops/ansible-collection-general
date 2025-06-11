@@ -99,7 +99,7 @@ docker_nginx_proxy_acme_companion_container_env:
 ############################################################################
 ## ACME retry monitor sidecontainer
 ############################################################################
-docker_nginx_proxy_acme_monitor_enabled: true
+docker_nginx_proxy_acme_monitor_enabled: false
 docker_nginx_proxy_acme_monitor_container_image: alpine:latest
 docker_nginx_proxy_acme_monitor_container_name: nginx-proxy-acme-monitor
 docker_nginx_proxy_acme_monitor_container_restart_policy: always
