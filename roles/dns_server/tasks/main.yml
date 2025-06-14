@@ -1,0 +1,7 @@
+- name: Setup dns server
+  ansible.builtin.import_tasks: setup.yml
+  when: not dns_server_cleanup_all
+
+- name: Cleanup dns server
+  ansible.builtin.import_tasks: cleanup.yml
+  when: dns_server_cleanup_all
