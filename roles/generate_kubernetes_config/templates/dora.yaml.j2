@@ -32,7 +32,7 @@ dora:
       value: "true"
     - name: FRONTEND_SHOW_SENSITIVE_PEER_INFOS
       value: "true"
-{% if 'peerdas' in ethereum_network_name %}
+{% if ('fusaka' in ethereum_network_name) or ('berlinterop' in ethereum_network_name) %}
     - name: FRONTEND_SHOW_PEER_DAS_INFOS
       value: "true"
 {% endif %}
