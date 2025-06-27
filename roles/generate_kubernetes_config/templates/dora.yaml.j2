@@ -80,9 +80,6 @@ dora:
     name: rpc-{{ gen_kubernetes_config_ethereum_node_name }}
     archive: true
     priority: 1
-{% if gen_kubernetes_config_dora_execution_snooper_port %}
-    engineSnooperUrl: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@rpc.{{ hostvars[host]['inventory_hostname'] }}.{{ network_subdomain }}:{{ gen_kubernetes_config_dora_execution_snooper_port }}
-{% endif %}
 {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
   - url: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@rpc.{{ hostvars[host]['inventory_hostname'] }}.{{ network_subdomain }}
     name: {{ hostvars[host]['inventory_hostname'] }}
