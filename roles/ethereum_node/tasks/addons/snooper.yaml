@@ -5,6 +5,7 @@
     json_rpc_snooper_container_networks: "{{ ethereum_node_docker_networks }}"
     json_rpc_snooper_container_name: "{{ ethereum_node_json_rpc_snooper_engine_name }}"
     json_rpc_snooper_port: "{{ ethereum_node_json_rpc_snooper_engine_port }}"
+    json_rpc_snooper_public_port: "{{ ethereum_node_json_rpc_snooper_engine_public_port }}"
     json_rpc_snooper_target: "{{ ethereum_node_el_engine_endpoint }}"
   when: ethereum_node_json_rpc_snooper_engine_enabled
 
@@ -15,6 +16,7 @@
     json_rpc_snooper_container_networks: "{{ ethereum_node_docker_networks }}"
     json_rpc_snooper_container_name: "{{ ethereum_node_json_rpc_snooper_name }}"
     json_rpc_snooper_port: "{{ ethereum_node_json_rpc_snooper_port }}"
+    json_rpc_snooper_public_port: "{{ ethereum_node_json_rpc_snooper_public_port }}"
     json_rpc_snooper_target: "{{ ethereum_node_el_rpc_endpoint }}"
   when: ethereum_node_json_rpc_snooper_enabled
 
