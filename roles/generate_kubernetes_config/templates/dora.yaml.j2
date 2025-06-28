@@ -85,4 +85,7 @@ dora:
     name: {{ hostvars[host]['inventory_hostname'] }}
     priority: -1
     archive: false
+{% if gen_kubernetes_config_dora_execution_snooper_port %}
+    engineSnooperUrl: http://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@rpc.{{ hostvars[host]['inventory_hostname'] }}.{{ network_subdomain }}:{{ gen_kubernetes_config_dora_execution_snooper_port }}
+{% endif %}
 {% endfor %}

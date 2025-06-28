@@ -44,6 +44,7 @@ gen_kubernetes_config_dora_frontend_rainbowkit_id: "" # noqa var-naming[no-role-
 gen_kubernetes_config_dora_frontend_public_rpc: "https://rpc.{{ network_subdomain }}" # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_dora_frontend_with_submit_deposits: true # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_dora_frontend_with_submit_el_requests: true # noqa var-naming[no-role-prefix]
+gen_kubernetes_config_dora_execution_snooper_port: false # noqa var-naming[no-role-prefix]
 
 gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
   config:
@@ -105,7 +106,7 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
     dependencies:
       - name: dora
         repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 0.0.7
+        version: 0.0.9
   forky:
     valuesTemplatePath: templates/forky.yaml.j2
     dependencies:
