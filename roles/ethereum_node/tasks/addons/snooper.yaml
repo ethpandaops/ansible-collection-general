@@ -9,6 +9,8 @@
     json_rpc_snooper_container_env: "{{ ethereum_node_json_rpc_snooper_engine_container_env }}"
     json_rpc_snooper_target: "{{ ethereum_node_el_engine_endpoint }}"
   when: ethereum_node_json_rpc_snooper_engine_enabled
+  tags:
+    - snooper
 
 - name: Setup json_rpc_snooper on EL rpc
   ansible.builtin.include_role:
@@ -21,6 +23,8 @@
     json_rpc_snooper_container_env: "{{ ethereum_node_json_rpc_snooper_container_env }}"
     json_rpc_snooper_target: "{{ ethereum_node_el_rpc_endpoint }}"
   when: ethereum_node_json_rpc_snooper_enabled
+  tags:
+    - snooper
 
 - name: Cleanup json_rpc_snooper on EL engine
   ansible.builtin.include_role:
@@ -29,6 +33,8 @@
     json_rpc_snooper_cleanup: true
     json_rpc_snooper_container_name: "{{ ethereum_node_json_rpc_snooper_engine_name }}"
   when: not ethereum_node_json_rpc_snooper_engine_enabled
+  tags:
+    - snooper
 
 - name: Cleanup json_rpc_snooper on EL rpc
   ansible.builtin.include_role:
@@ -37,3 +43,5 @@
     json_rpc_snooper_cleanup: true
     json_rpc_snooper_container_name: "{{ ethereum_node_json_rpc_snooper_name }}"
   when: not ethereum_node_json_rpc_snooper_enabled
+  tags:
+    - snooper
