@@ -8,6 +8,8 @@
     grafana_alloy_container_pid_mode: "{{ ethereum_node_grafana_alloy_container_pid_mode }}"
     grafana_alloy_container_privileged: "{{ ethereum_node_grafana_alloy_container_privileged }}"
   when: ethereum_node_grafana_alloy_enabled
+  tags:
+    - grafana_alloy
 
 - name: Cleanup Grafana Alloy
   ansible.builtin.include_role:
@@ -16,3 +18,5 @@
     grafana_alloy_cleanup: true
     grafana_alloy_container_name: "{{ ethereum_node_grafana_alloy_container_name }}"
   when: not ethereum_node_grafana_alloy_enabled
+  tags:
+    - grafana_alloy
