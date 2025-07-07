@@ -32,6 +32,10 @@ dora:
       value: "true"
     - name: FRONTEND_SHOW_SENSITIVE_PEER_INFOS
       value: "true"
+    - name: API_ENABLED:
+      value: "true"
+    - name: API_CORS_ORIGINS
+      value: "*"
 {% if ('fusaka' in ethereum_network_name) or ('berlinterop' in ethereum_network_name) %}
     - name: FRONTEND_SHOW_PEER_DAS_INFOS
       value: "true"
