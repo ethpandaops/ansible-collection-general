@@ -44,7 +44,7 @@ gen_kubernetes_config_dora_frontend_rainbowkit_id: "" # noqa var-naming[no-role-
 gen_kubernetes_config_dora_frontend_public_rpc: "https://rpc.{{ network_subdomain }}" # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_dora_frontend_with_submit_deposits: true # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_dora_frontend_with_submit_el_requests: true # noqa var-naming[no-role-prefix]
-gen_kubernetes_config_dora_execution_snooper_port: false # noqa var-naming[no-role-prefix]
+gen_kubernetes_config_dora_execution_snooper_port: 8961 # noqa var-naming[no-role-prefix]
 
 gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
   config:
