@@ -6,7 +6,7 @@
     blobber_container_networks: "{{ ethereum_node_docker_networks }}"
   when: ethereum_node_blobber_enabled
   tags:
-    - blobber
+    - ethereum_node_blobber
 
 - name: Cleanup blobber
   ansible.builtin.include_role:
@@ -15,4 +15,4 @@
     blobber_cleanup: true
   when: not ethereum_node_blobber_enabled
   tags:
-    - blobber
+    - ethereum_node_blobber
