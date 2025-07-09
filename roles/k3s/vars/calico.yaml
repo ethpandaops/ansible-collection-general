@@ -1,0 +1,86 @@
+---
+# Calico-specific variables and paths
+k3s_calico_operator_file: "{{ k3s_server_location }}/server/calico/tigera-operator.{{ k3s_calico_version }}.yaml"
+k3s_calico_resources_file: "{{ k3s_server_location }}/server/calico/custom-resources.yaml"
+k3s_calico_version_file: "{{ k3s_server_location }}/server/calico/version.txt"
+k3s_calico_backup_dir: "{{ k3s_server_location }}/server/calico/backup"
+
+# Calico operator URL
+k3s_calico_operator_url: "https://raw.githubusercontent.com/projectcalico/calico/{{ k3s_calico_version }}/manifests/tigera-operator.yaml"
+
+# Resource comparison script for detecting changes
+resource_compare_script: |
+  FILE_PATH="${1}"
+  if [ -z "${FILE_PATH}" ]; then
+    echo "Error: File path not provided"
+    exit 2
+  fi
+  
+  normalize_resource() {
+    jq -S 'walk(
+      if type == "object" then
+        if has("metadata") then
+          .metadata |= {name: .name, namespace: .namespace}
+        else . end |
+        del(.status) |
+        del(.managedFields, .finalizers, .ownerReferences)
+      else . end
+    )'
+  }
+  
+  file_normalized=$(k3s kubectl create --dry-run=client -o json -f "${FILE_PATH}" | normalize_resource)
+  cluster_normalized=$(k3s kubectl get -f "${FILE_PATH}" -o json 2>/dev/null | normalize_resource || echo '{"items":[]}')
+  
+  if [ "$file_normalized" = "$cluster_normalized" ]; then
+    echo "No changes detected"
+    exit 0
+  else
+    echo "Changes detected in resources"
+    exit 1
+  fi
+
+# Script for backing up resources
+backup_resource_script: |
+  RESOURCE_TYPE=$1
+  RESOURCE_NAME=$2
+  BACKUP_FILE=$3
+  
+  if k3s kubectl get "$RESOURCE_TYPE" "$RESOURCE_NAME" -o yaml > "$BACKUP_FILE" 2>/dev/null; then
+    echo "Backed up $RESOURCE_TYPE/$RESOURCE_NAME to $BACKUP_FILE"
+  else
+    echo "Resource $RESOURCE_TYPE/$RESOURCE_NAME not found, skipping backup"
+  fi
+
+# Script for checking if a namespace has network policies
+check_network_policies_script: |
+  NAMESPACE=$1
+  COUNT=$(k3s kubectl get networkpolicy -n "$NAMESPACE" --no-headers 2>/dev/null | wc -l)
+  if [ "$COUNT" -gt 0 ]; then
+    echo "yes"
+  else
+    echo "no"
+  fi
+
+# Default Calico custom resources (base configuration)
+calico_default_custom_resources:
+  apiVersion: operator.tigera.io/v1
+  kind: Installation
+  metadata:
+    name: default
+  spec:
+    calicoNetwork:
+      bgp: Disabled
+      containerIPForwarding: Enabled
+      ipPools:
+      - blockSize: 26
+        cidr: 10.42.0.0/16
+        disableBGPExport: false
+        encapsulation: VXLAN
+        natOutgoing: Enabled
+        nodeSelector: all()
+      nodeAddressAutodetectionV4:
+        cidrs:
+        - 192.168.0.0/16
+        - 172.16.0.0/12
+        - 10.0.0.0/8
+    registry: quay.io

@@ -36,7 +36,7 @@ k3s_etcd_snapshot_folder: snapshots
 k3s_etcd_snapshot_insecure: false
 k3s_etcd_snapshot_timeout: 5m0s
 
-# Enable this if you want to install calico
+# Enable Calico CNI for k3s
 # https://docs.tigera.io/calico/latest/getting-started/kubernetes/k3s/multi-node-install#install-calico
 # NOTE: enabling this will add the following args to the k3s server node:
 #   --flannel-backend=none
@@ -44,9 +44,16 @@ k3s_etcd_snapshot_timeout: 5m0s
 # NOTE: If you run rancher webhook you may run into this issue:
 # https://ranchermanager.docs.rancher.com/reference-guides/rancher-webhook#eks-cluster-with-calico-cni
 k3s_calico: false
+
+# Calico version to install
+# https://github.com/projectcalico/calico/releases
 k3s_calico_version: "v3.29.1"
-# Change this if you want to use a different version of calico custom resources.
-# The default calico custom resources will be used when this is omitted.
+
+# Custom Calico resources (optional)
+# When not specified, default resources will be used with:
+# - CIDR: 10.42.0.0/16 (matching k3s default)
+# - Encapsulation: VXLAN
+# - BGP: Disabled
 # https://docs.tigera.io/calico/latest/getting-started/kubernetes/k3s/multi-node-install#install-calico
 # k3s_calico_custom_resources: |
 #   apiVersion: operator.tigera.io/v1
@@ -69,3 +76,6 @@ k3s_calico_version: "v3.29.1"
 #   metadata:
 #     name: default
 #   spec: {}
+
+# Run CNI functionality tests after Calico installation
+k3s_calico_run_tests: true

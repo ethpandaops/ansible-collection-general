@@ -1,0 +1,67 @@
+---
+- name: Starting Calico installation
+  ansible.builtin.debug:
+    msg: "Starting Calico installation for k3s"
+  tags:
+    - calico
+    - calico-check-version
+
+- name: Include Calico variables
+  ansible.builtin.include_vars: "{{ role_path }}/vars/calico.yaml"
+  tags:
+    - calico
+    - calico-check-version
+
+- name: Setup and version management
+  ansible.builtin.include_tasks:
+    file: setup.yaml
+    apply:
+      tags:
+        - calico
+        - calico-check-version
+  tags:
+    - calico
+    - calico-check-version
+
+- name: Manage Calico installation
+  ansible.builtin.include_tasks:
+    file: manage.yaml
+    apply:
+      tags:
+        - calico
+  tags:
+    - calico
+
+- name: Verify Calico installation
+  ansible.builtin.include_tasks:
+    file: verify.yaml
+    apply:
+      tags:
+        - calico
+  when: calico_install_required | default(false) or calico_version_changed | default(false)
+  tags:
+    - calico
+
+- name: Test Calico functionality
+  ansible.builtin.include_tasks:
+    file: test.yaml
+    apply:
+      tags:
+        - calico
+  when: 
+    - k3s_calico_run_tests | default(true)
+    - calico_install_required | default(false) or calico_version_changed | default(false)
+  tags:
+    - calico
+
+# Save version only after successful installation and verification
+- name: Save current Calico version to file
+  ansible.builtin.copy:
+    content: "{{ k3s_calico_version }}"
+    dest: "{{ k3s_calico_version_file }}"
+    mode: "0644"
+  when: 
+    - calico_install_required | default(false) or calico_version_changed | default(false)
+    - k3s_cni_tests_completed | default(true)
+  tags:
+    - calico
