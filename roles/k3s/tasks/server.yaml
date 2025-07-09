@@ -96,6 +96,8 @@
 
 - name: Install Calico for k3s
   when: k3s_calico | bool
+  tags:
+    - calico
   block:
     - name: Create calico directory
       ansible.builtin.file:
@@ -149,6 +151,16 @@
       ansible.builtin.set_fact:
         calico_version_changed: "{{ not version_file_stat.stat.exists or current_calico_version != k3s_calico_version or legacy_calico_detected }}"
 
+    - name: Debug Calico version comparison
+      ansible.builtin.debug:
+        msg:
+          - "Version file exists: {{ version_file_stat.stat.exists }}"
+          - "Current Calico version: {{ current_calico_version | default('Not installed') }}"
+          - "Expected Calico version: {{ k3s_calico_version }}"
+          - "Legacy Calico detected: {{ legacy_calico_detected }}"
+          - "Version change detected: {{ calico_version_changed }}"
+          - "Reason for change: {% if not version_file_stat.stat.exists %}Version file missing{% elif current_calico_version != k3s_calico_version %}Version mismatch ({{ current_calico_version }} != {{ k3s_calico_version }}){% elif legacy_calico_detected %}Legacy installation detected{% else %}No change needed{% endif %}"
+
     # Backup existing custom resources if legacy installation found
     - name: Backup existing custom resources
       when: legacy_calico_detected
@@ -177,6 +189,11 @@
           changed_when: true
 
     # Only download if version changed or file doesn't exist
+    - name: Check if tigera-operator file exists
+      ansible.builtin.stat:
+        path: "{{ calico_operator_file }}"
+      register: operator_file_stat
+
     - name: Download tigera-operator.yaml
       ansible.builtin.get_url:
         url: "https://raw.githubusercontent.com/projectcalico/calico/{{ k3s_calico_version }}/manifests/tigera-operator.yaml"
@@ -186,6 +203,14 @@
         mode: "0644"
         force: "{{ calico_version_changed }}"
       register: download_tigera_operator
+      when: calico_version_changed or not operator_file_stat.stat.exists
+
+    - name: Debug tigera-operator download result
+      ansible.builtin.debug:
+        msg:
+          - "Download changed: {{ download_tigera_operator.changed }}"
+          - "Force download: {{ calico_version_changed }}"
+          - "Destination file: {{ calico_operator_file }}"
 
     # Remove old calico resources when version changes
     - name: Remove existing Calico deployment
@@ -310,6 +335,56 @@
               failed_when: false
               changed_when: stuck_installation.rc == 0
 
+    # Check if operator needs to be applied
+    - name: Check if tigera-operator needs update
+      ansible.builtin.shell:
+        cmd: |
+          # Create a function to normalize resources for comparison
+          normalize_resource() {
+            jq -S 'walk(
+              if type == "object" then
+                # Remove all metadata except name and namespace
+                if has("metadata") then
+                  .metadata |= {name: .name, namespace: .namespace}
+                else . end |
+                # Remove status entirely
+                del(.status) |
+                # Remove other runtime fields
+                del(.managedFields, .finalizers, .ownerReferences)
+              else . end
+            )'
+          }
+          
+          # Get normalized version from file
+          file_normalized=$(k3s kubectl create --dry-run=client -o json -f {{ calico_operator_file }} | normalize_resource)
+          
+          # Get normalized version from cluster (if exists)
+          cluster_normalized=$(k3s kubectl get -f {{ calico_operator_file }} -o json 2>/dev/null | normalize_resource || echo '{"items":[]}')
+          
+          # Compare the normalized versions
+          if [ "$file_normalized" = "$cluster_normalized" ]; then
+            echo "No changes detected"
+            exit 0
+          else
+            echo "Changes detected in resources"
+            # Show what's different (optional)
+            diff -u <(echo "$cluster_normalized" | jq .) <(echo "$file_normalized" | jq .) || true
+            exit 1
+          fi
+      register: operator_diff
+      failed_when: false
+      changed_when: false
+      when: not calico_version_changed
+
+    - name: Debug tigera-operator diff result
+      ansible.builtin.debug:
+        msg:
+          - "Check result: {{ operator_diff.stdout_lines[0] | default('skipped') }}"
+          - "Changes detected: {{ operator_diff.rc | default(0) == 1 }}"
+          - "Calico version changed: {{ calico_version_changed }}"
+          - "Will apply operator: {{ calico_version_changed or (operator_diff.rc | default(0) == 1) }}"
+      when: operator_diff is not skipped or calico_version_changed
+
     # Apply operator with proper flags to handle updates
     - name: Apply tigera-operator.yaml
       ansible.builtin.command:
@@ -320,6 +395,7 @@
       delay: 10
       until: apply_tigera_operator is succeeded
       changed_when: apply_tigera_operator.stdout is defined and apply_tigera_operator.stdout != ""
+      when: calico_version_changed or (operator_diff.rc | default(0) == 1)
 
     - name: Wait for operator deployment to be ready
       ansible.builtin.command:
@@ -329,6 +405,7 @@
       delay: 10
       until: wait_operator is succeeded
       changed_when: false
+      when: apply_tigera_operator is not skipped
 
     # Handle custom resources
     - name: Write custom resources to file
@@ -350,6 +427,55 @@
       when: not custom_resources_defined
       register: download_custom_resources
 
+    - name: Check if custom-resources needs update
+      ansible.builtin.shell:
+        cmd: |
+          # Create a function to normalize resources for comparison
+          normalize_resource() {
+            jq -S 'walk(
+              if type == "object" then
+                # Remove all metadata except name and namespace
+                if has("metadata") then
+                  .metadata |= {name: .name, namespace: .namespace}
+                else . end |
+                # Remove status entirely
+                del(.status) |
+                # Remove other runtime fields
+                del(.managedFields, .finalizers, .ownerReferences)
+              else . end
+            )'
+          }
+          
+          # Get normalized version from file
+          file_normalized=$(k3s kubectl create --dry-run=client -o json -f {{ calico_resources_file }} | normalize_resource)
+          
+          # Get normalized version from cluster (if exists)
+          cluster_normalized=$(k3s kubectl get -f {{ calico_resources_file }} -o json 2>/dev/null | normalize_resource || echo '{"items":[]}')
+          
+          # Compare the normalized versions
+          if [ "$file_normalized" = "$cluster_normalized" ]; then
+            echo "No changes detected"
+            exit 0
+          else
+            echo "Changes detected in resources"
+            # Show what's different (optional)
+            diff -u <(echo "$cluster_normalized" | jq .) <(echo "$file_normalized" | jq .) || true
+            exit 1
+          fi
+      register: resources_diff
+      failed_when: false
+      changed_when: false
+      when: not calico_version_changed
+
+    - name: Debug custom-resources diff result
+      ansible.builtin.debug:
+        msg:
+          - "Check result: {{ resources_diff.stdout_lines[0] | default('skipped') }}"
+          - "Changes detected: {{ resources_diff.rc | default(0) == 1 }}"
+          - "Calico version changed: {{ calico_version_changed }}"
+          - "Will apply resources: {{ calico_version_changed or (resources_diff.rc | default(0) == 1) }}"
+      when: resources_diff is not skipped or calico_version_changed
+
     - name: Apply custom-resources.yaml
       ansible.builtin.command:
         cmd: >
@@ -359,6 +485,7 @@
       delay: 10
       until: apply_custom_resources is succeeded
       changed_when: apply_custom_resources.stdout is defined and apply_custom_resources.stdout != ""
+      when: calico_version_changed or (resources_diff.rc | default(0) == 1)
 
     # Save current version to file for future comparisons
     - name: Save current Calico version to file
