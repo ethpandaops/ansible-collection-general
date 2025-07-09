@@ -2,6 +2,10 @@
 
 set -xe
 
+# Uninstall previous asdf plugins that shouldn't be managed anymore under asdf
+asdf uninstall ansible || true
+asdf uninstall ansible-lint || true
+
 # Install required tools using asdf
 
 asdf plugin add shellcheck https://github.com/luizm/asdf-shellcheck.git || true
