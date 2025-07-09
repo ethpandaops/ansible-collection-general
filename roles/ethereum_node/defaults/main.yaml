@@ -36,10 +36,14 @@ ethereum_node_fact_discovery_enabled: true
 # Json RPC snooper
 ethereum_node_json_rpc_snooper_enabled: false
 ethereum_node_json_rpc_snooper_port: 8560
+ethereum_node_json_rpc_snooper_public_port: 0
+ethereum_node_json_rpc_snooper_container_env: {}
 ethereum_node_json_rpc_snooper_name: "snooper-rpc"
 
 ethereum_node_json_rpc_snooper_engine_enabled: false
 ethereum_node_json_rpc_snooper_engine_port: 8561
+ethereum_node_json_rpc_snooper_engine_public_port: 0
+ethereum_node_json_rpc_snooper_engine_container_env: {}
 ethereum_node_json_rpc_snooper_engine_name: "snooper-engine"
 
 # Blobber MITM tool
