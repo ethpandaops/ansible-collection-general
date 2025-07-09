@@ -48,7 +48,7 @@
     apply:
       tags:
         - calico
-  when: 
+  when:
     - k3s_calico_run_tests | default(true)
     - calico_install_required | default(false) or calico_version_changed | default(false)
   tags:
@@ -60,7 +60,7 @@
     content: "{{ k3s_calico_version }}"
     dest: "{{ k3s_calico_version_file }}"
     mode: "0644"
-  when: 
+  when:
     - calico_install_required | default(false) or calico_version_changed | default(false)
     - k3s_cni_tests_completed | default(true)
   tags:

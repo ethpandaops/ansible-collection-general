@@ -69,7 +69,13 @@
       - "Legacy Calico detected: {{ legacy_calico_detected }}"
       - "Version change detected: {{ calico_version_changed }}"
       - "Fresh install required: {{ calico_install_required }}"
-      - "Reason for change: {% if not version_file_stat.stat.exists and not legacy_calico_detected %}Fresh installation{% elif not version_file_stat.stat.exists %}Version file missing{% elif current_calico_version != k3s_calico_version %}Version mismatch ({{ current_calico_version }} != {{ k3s_calico_version }}){% elif legacy_calico_detected %}Legacy installation detected{% else %}No change needed{% endif %}"
+      - >-
+        Reason for change:
+        {% if not version_file_stat.stat.exists and not legacy_calico_detected %}Fresh installation
+        {% elif not version_file_stat.stat.exists %}Version file missing
+        {% elif current_calico_version != k3s_calico_version %}Version mismatch ({{ current_calico_version }} != {{ k3s_calico_version }})
+        {% elif legacy_calico_detected %}Legacy installation detected
+        {% else %}No change needed{% endif %}
   tags:
     - calico
     - calico-check-version
