@@ -74,7 +74,10 @@
 
     - name: Display Calico component availability
       ansible.builtin.debug:
-        msg: "Calico Component {{ item.kind | default('Unknown') }}/{{ item.metadata.name | default('Unknown') }} availability: {{ (item.status.conditions | selectattr('type', 'equalto', 'Available') | first).status | default('Unknown') if item.status.conditions is defined else 'Unknown' }}"
+        msg: >-
+          Calico Component {{ item.kind | default('Unknown') }}/{{ item.metadata.name | default('Unknown') }}
+          availability: {{ (item.status.conditions | selectattr('type', 'equalto', 'Available') | first).status | default('Unknown')
+          if item.status.conditions is defined else 'Unknown' }}
       loop: "{{ calico_status_json['items'] | default([]) }}"
       when: calico_status_json is defined
       loop_control:
@@ -149,7 +152,7 @@
       loop: "{{ pod_restart_counts.results | default([]) }}"
       loop_control:
         label: "{{ item.item | default('unknown') }}"
-      when: 
+      when:
         - item.stdout is defined
         - item.stdout | int > 5
 

@@ -15,6 +15,7 @@
 - name: Apply test pod manifest
   ansible.builtin.shell:
     cmd: |
+      set -o pipefail
       cat <<EOF | k3s kubectl apply -f -
       apiVersion: v1
       kind: Pod
@@ -35,7 +36,7 @@
 
 - name: Display pod creation result
   ansible.builtin.debug:
-    msg: 
+    msg:
       - "Pod creation output: {{ pod_creation.stdout | default('No output') }}"
       - "Pod creation stderr: {{ pod_creation.stderr | default('No errors') }}"
       - "Return code: {{ pod_creation.rc }}"
@@ -70,7 +71,7 @@
 
 - name: Display test pod details
   ansible.builtin.debug:
-    msg: 
+    msg:
       - "Pod Ready: {{ test_pod_ready is succeeded }}"
       - "Pod Status: {{ (test_pod_details.stdout | from_yaml).status.phase | default('Unknown') }}"
       - "Pod IP: {{ (test_pod_details.stdout | from_yaml).status.podIP | default('Not assigned') }}"
