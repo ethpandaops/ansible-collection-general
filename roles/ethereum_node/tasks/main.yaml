@@ -59,3 +59,6 @@
 
 - name: Configure Grafana Alloy
   ansible.builtin.import_tasks: addons/grafana_alloy.yaml
+
+- name: Configure Docker Watchtower
+  ansible.builtin.import_tasks: addons/docker_watchtower.yaml

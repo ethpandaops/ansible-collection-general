@@ -8,6 +8,7 @@
 
 - name: Set permissions
   ansible.builtin.command: "chown -R 1000:1000 {{ arbitrum_node_datadir }}" # noqa no-free-form
+  failed_when: false
   changed_when: false
 
 - name: Run arbitrum_node container

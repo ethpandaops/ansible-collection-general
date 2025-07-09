@@ -12,8 +12,12 @@ json_rpc_snooper_container_image: ethpandaops/json-rpc-snoop:1.1.0
 json_rpc_snooper_container_env: {}
 json_rpc_snooper_port: 8560
 json_rpc_snooper_target: http://jsonrpc-target:8888
-json_rpc_snooper_container_ports:
-  - "127.0.0.1:{{ json_rpc_snooper_port }}:{{ json_rpc_snooper_port }}"
+json_rpc_snooper_public_port: 0
+json_rpc_snooper_container_ports: >-
+  {{
+    ["127.0.0.1:" + json_rpc_snooper_port|string + ":" + json_rpc_snooper_port|string] +
+    ([json_rpc_snooper_public_port|string + ":" + json_rpc_snooper_public_port|string] if json_rpc_snooper_public_port|int > 0 else [])
+  }}
 
 json_rpc_snooper_container_networks: []
 json_rpc_snooper_container_volumes: []

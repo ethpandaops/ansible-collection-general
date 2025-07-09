@@ -1,0 +1,44 @@
+xatu-mimicry:
+  enabled: true
+  fullnameOverride: xatu-mimicry
+  image:
+    repository: {{ default_tooling_images.xatu_mimicry.split(':') | first }}
+    tag: {{ default_tooling_images.xatu_mimicry.split(':') | last }}
+    pullPolicy: {% if "latest" in (default_tooling_images.xatu_mimicry.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
+
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 2000Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+
+  config:
+    logging: "info"
+    metricsAddr: ":9090"
+    name: "{{ ethereum_network_name }}-xatu-mimicry"
+    captureDelay: 3m
+    ntpServer: time.google.com
+    ethereum:
+      overrideNetworkName: "{{ ethereum_network_name }}"
+    coordinator:
+      type: static
+      config:
+        retryInterval: 60s
+        nodeRecords:
+{% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
+          - {{ hostvars[host]['ethereum_node_fact_el_enode'] }}
+{% endfor %}
+    outputs:
+    - name: grpc
+      type: xatu
+      config:
+        address: server.xatu-experimental.ethpandaops.io:443
+        maxQueueSize: 51200
+        tls: true
+        headers:
+          authorization: "Basic <path:/secrets/services/services.enc.yaml#xatu | jsonPath {.experimental.event_ingester_auth}>"
+        batchTimeout: 5s
+        exportTimeout: 30s
+        maxExportBatchSize: 512

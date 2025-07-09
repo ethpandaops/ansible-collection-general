@@ -1,0 +1,19 @@
+- name: Setup Docker Watchtower
+  ansible.builtin.include_role:
+    name: ethpandaops.general.docker_watchtower
+  vars:
+    docker_watchtower_container_name: "{{ ethereum_node_docker_watchtower_container_name }}"
+    docker_watchtower_containers_list: "{{ ethereum_node_docker_watchtower_containers_list }}"
+  when: ethereum_node_docker_watchtower_enabled
+  tags:
+    - ethereum_node_watchtower
+
+- name: Cleanup Docker Watchtower
+  ansible.builtin.include_role:
+    name: ethpandaops.general.docker_watchtower
+  vars:
+    docker_watchtower_cleanup: true
+    docker_watchtower_container_name: "{{ ethereum_node_docker_watchtower_container_name }}"
+  when: not ethereum_node_docker_watchtower_enabled
+  tags:
+    - ethereum_node_watchtower
