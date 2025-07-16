@@ -8,7 +8,7 @@ blobber_cleanup: false # when set to "true" it will remove the container(s)
 ##
 ################################################################################
 blobber_container_name: blobber
-blobber_container_image: parithoshj/blobber:v0.0.1
+blobber_container_image: ethpandaops/blobber:latest
 blobber_container_env: {}
 blobber_log_level: info
 
