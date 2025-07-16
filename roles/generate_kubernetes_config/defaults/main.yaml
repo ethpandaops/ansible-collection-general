@@ -4,6 +4,11 @@ gen_kubernetes_config_default_output_dir: ../kubernetes/{{ ethereum_network_name
 
 cl_config_path: ../network-configs/{{ ethereum_network_name | replace(devnet_name + "-", '') }}/metadata/config.yaml # noqa var-naming[no-role-prefix]
 
+gen_kubernetes_config_ethereum_node: # noqa var-naming[no-role-prefix]
+  el: geth
+  cl: prysm
+  value: "001"
+
 default_cl_endpoint: >- # noqa var-naming[no-role-prefix]
   http://{{ gen_kubernetes_config_ethereum_node.cl + '-' + gen_kubernetes_config_ethereum_node.el + '-' +
   gen_kubernetes_config_ethereum_node.value + ':' + ethereum_node_cl_ports_http_beacon | string }}
@@ -16,11 +21,6 @@ default_el_ws_endpoint: >- # noqa var-naming[no-role-prefix]
 default_el_auth_endpoint: >- # noqa var-naming[no-role-prefix]
   http://{{ gen_kubernetes_config_ethereum_node.el + '-' + gen_kubernetes_config_ethereum_node.cl + '-' +
   gen_kubernetes_config_ethereum_node.value + ':' + ethereum_node_el_ports_engine | string }}
-
-gen_kubernetes_config_ethereum_node: # noqa var-naming[no-role-prefix]
-  el: geth
-  cl: prysm
-  value: "001"
 
 gen_kubernetes_domain: "{{ domain | default('ethpandaops.io') }}" # noqa var-naming[no-role-prefix]
 
