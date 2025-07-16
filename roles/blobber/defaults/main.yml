@@ -35,8 +35,8 @@ blobber_container_volumes:
 
 # Blobber specific configs
 blobber_beacon_api: beacon:5052
-blobber_slot_actions: []
-blobber_slot_action_frequency: 1
+blobber_proposal_actions: []
+blobber_proposal_action_frequency: 1
 
 blobber_container_command:
   - "./blobber"
@@ -45,8 +45,8 @@ blobber_container_command:
   - "--log-level={{ blobber_log_level }}"
   - "--external-ip={{ blobber_announced_ip }}"
   - "--validator-proxy-port-start={{ blobber_api_listen_port }}"
-  - "--slot-action={{ blobber_slot_actions | to_json }}"
-  - "--slot-action-frequency={{ blobber_slot_action_frequency }}"
+  - "--proposal-action={{ blobber_slot_actions | to_json }}"
+  - "--proposal-action-frequency={{ blobber_slot_action_frequency }}"
   - "--validator-key-folder=/data/validators"
 
 blobber_container_command_extra_args: []
