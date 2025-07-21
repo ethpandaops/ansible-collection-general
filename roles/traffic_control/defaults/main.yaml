@@ -28,6 +28,7 @@ traffic_control_ifb_interface_prefix: "tc-ifb-"
 #    jitter: 10ms
 #    loss: 0.1%
 #  - interface: eth1
+#    container: beacon
 #    rate_upload: 10mbit
 #    rate_download: 10mbit
 #  - interface: eth2
