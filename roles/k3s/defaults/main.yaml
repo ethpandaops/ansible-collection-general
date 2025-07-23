@@ -35,3 +35,47 @@ k3s_etcd_snapshot_region: us-east-1
 k3s_etcd_snapshot_folder: snapshots
 k3s_etcd_snapshot_insecure: false
 k3s_etcd_snapshot_timeout: 5m0s
+
+# Enable Calico CNI for k3s
+# https://docs.tigera.io/calico/latest/getting-started/kubernetes/k3s/multi-node-install#install-calico
+# NOTE: enabling this will add the following args to the k3s server node:
+#   --flannel-backend=none
+#   --disable-network-policy
+# NOTE: If you run rancher webhook you may run into this issue:
+# https://ranchermanager.docs.rancher.com/reference-guides/rancher-webhook#eks-cluster-with-calico-cni
+k3s_calico: false
+
+# Calico version to install
+# https://github.com/projectcalico/calico/releases
+k3s_calico_version: "v3.29.1"
+
+# Custom Calico resources (optional)
+# When not specified, default resources will be used with:
+# - CIDR: 10.42.0.0/16 (matching k3s default)
+# - Encapsulation: VXLAN
+# - BGP: Disabled
+# https://docs.tigera.io/calico/latest/getting-started/kubernetes/k3s/multi-node-install#install-calico
+# k3s_calico_custom_resources: |
+#   apiVersion: operator.tigera.io/v1
+#   kind: Installation
+#   metadata:
+#     name: default
+#   spec:
+#     # Configures Calico networking.
+#     calicoNetwork:
+#       # Note: The ipPools section cannot be modified post-install.
+#       ipPools:
+#       - blockSize: 26
+#         cidr: 192.168.0.0/16
+#         encapsulation: IPIP
+#         natOutgoing: Enabled
+#         nodeSelector: all()
+#   ---
+#   apiVersion: operator.tigera.io/v1
+#   kind: APIServer
+#   metadata:
+#     name: default
+#   spec: {}
+
+# Run CNI functionality tests after Calico installation
+k3s_calico_run_tests: true

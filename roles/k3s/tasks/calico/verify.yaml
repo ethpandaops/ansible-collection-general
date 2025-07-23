@@ -1,0 +1,175 @@
+---
+# Wait for Calico API to be ready
+- name: Wait for Calico API server to be ready
+  ansible.builtin.command:
+    cmd: "k3s kubectl wait --for=condition=available apiservice v3.projectcalico.org --timeout=300s"
+  register: wait_api
+  retries: 10
+  delay: 15
+  until: wait_api is succeeded
+  failed_when: false
+  changed_when: false
+
+# Ensure all pods are running
+- name: Ensure all calico-system pods are running
+  ansible.builtin.command:
+    cmd: "k3s kubectl -n calico-system wait --for=condition=Ready pods --all --timeout=300s"
+  register: calico_pods_ready
+  retries: 5
+  delay: 30
+  until: calico_pods_ready is succeeded
+  failed_when: false
+  changed_when: false
+
+# Handle problematic pods
+- name: Handle problematic pods (if any)
+  block:
+    - name: Check for problematic calico pods
+      ansible.builtin.shell:
+        cmd: >
+          set -o pipefail && k3s kubectl get pods -n calico-system |
+          grep -E 'CrashLoop|Error|0/1' | awk '{print $1}'
+      register: problematic_pods
+      failed_when: false
+      changed_when: false
+
+    - name: Force restart problematic pods
+      ansible.builtin.command:
+        cmd: "k3s kubectl delete pod -n calico-system {{ item }}"
+      with_items: "{{ problematic_pods.stdout_lines }}"
+      when: problematic_pods.stdout_lines | length > 0
+      failed_when: false
+      changed_when: problematic_pods.stdout_lines | length > 0
+
+    - name: Wait for pods to be recreated
+      ansible.builtin.pause:
+        seconds: 10
+      when: problematic_pods.stdout_lines | length > 0
+
+    - name: Re-check pod status after restart
+      ansible.builtin.command:
+        cmd: "k3s kubectl -n calico-system wait --for=condition=Ready pods --all --timeout=180s"
+      register: calico_pods_ready_retry
+      retries: 3
+      delay: 20
+      until: calico_pods_ready_retry is succeeded
+      failed_when: false
+      changed_when: false
+      when: problematic_pods.stdout_lines | length > 0
+
+# Verify Calico installation status
+- name: Verify Calico installation
+  block:
+    - name: Check Calico controller status
+      ansible.builtin.command:
+        cmd: "k3s kubectl get tigerastatus -o json"
+      register: calico_status
+      failed_when: false
+      changed_when: false
+
+    - name: Parse Calico status (when available)
+      ansible.builtin.set_fact:
+        calico_status_json: "{{ calico_status.stdout | from_json }}"
+      when: calico_status is succeeded and calico_status.stdout | length > 0
+
+    - name: Display Calico component availability
+      ansible.builtin.debug:
+        msg: >-
+          Calico Component {{ item.kind | default('Unknown') }}/{{ item.metadata.name | default('Unknown') }}
+          availability: {{ (item.status.conditions | selectattr('type', 'equalto', 'Available') | first).status | default('Unknown')
+          if item.status.conditions is defined else 'Unknown' }}
+      loop: "{{ calico_status_json['items'] | default([]) }}"
+      when: calico_status_json is defined
+      loop_control:
+        label: "{{ item.kind | default('Unknown') }}/{{ item.metadata.name | default('Unknown') }}"
+
+    - name: Identify unavailable Calico components
+      ansible.builtin.debug:
+        msg: "Warning: Calico component {{ item.kind | default('Unknown') }}/{{ item.metadata.name | default('Unknown') }} is not available"
+      when: |
+        calico_status_json is defined and
+        item.status is defined and
+        item.status.conditions is defined and
+        item.status.conditions | selectattr('type', 'equalto', 'Available') | list | length > 0 and
+        (item.status.conditions | selectattr('type', 'equalto', 'Available') | first).status != 'True'
+      loop: "{{ calico_status_json['items'] | default([]) }}"
+      loop_control:
+        label: "{{ item.kind | default('Unknown') }}/{{ item.metadata.name | default('Unknown') }}"
+
+# Health checks for CNI pods
+- name: Perform CNI pod health check validation
+  block:
+    - name: Get Calico CNI pods
+      ansible.builtin.command:
+        cmd: "k3s kubectl get pods -n calico-system -o json"
+      register: cni_pods
+      failed_when: false
+      changed_when: false
+
+    - name: Parse CNI pod data
+      ansible.builtin.set_fact:
+        cni_pods_json: "{{ cni_pods.stdout | from_json }}"
+      when: cni_pods is succeeded and cni_pods.stdout | length > 0
+
+    - name: Check CNI pod resource consumption
+      ansible.builtin.command:
+        cmd: "k3s kubectl top pods -n calico-system"
+      register: cni_resource_usage
+      failed_when: false
+      changed_when: false
+
+    - name: Display resource usage
+      ansible.builtin.debug:
+        msg: "{{ cni_resource_usage.stdout }}"
+      when: cni_resource_usage is succeeded
+
+    - name: Get pod names
+      ansible.builtin.command:
+        cmd: "k3s kubectl get pods -n calico-system -o name"
+      register: pod_list_raw
+      failed_when: false
+      changed_when: false
+
+    - name: Set pod names from raw command output
+      ansible.builtin.set_fact:
+        pod_names: "{{ pod_list_raw.stdout_lines | default([]) }}"
+      when: pod_list_raw is defined and pod_list_raw.stdout is defined
+
+    - name: Get restart count for each pod
+      ansible.builtin.command:
+        cmd: "k3s kubectl get {{ item }} -n calico-system -o jsonpath='{.status.containerStatuses[*].restartCount}'"
+      register: pod_restart_counts
+      loop: "{{ pod_names | default([]) }}"
+      loop_control:
+        label: "{{ item }}"
+      when: pod_names is defined and pod_names
+      failed_when: false
+      changed_when: false
+
+    - name: Display pods with high restart counts
+      ansible.builtin.debug:
+        msg: "Warning: {{ item.item }} has restart count: {{ item.stdout }}"
+      loop: "{{ pod_restart_counts.results | default([]) }}"
+      loop_control:
+        label: "{{ item.item | default('unknown') }}"
+      when:
+        - item.stdout is defined
+        - item.stdout | int > 5
+
+# Validate connectivity between Calico components
+- name: Validate connectivity between Calico components
+  ansible.builtin.command:
+    cmd: "k3s kubectl -n calico-system exec deployment/calico-typha -- calico-typha status"
+  register: typha_status
+  failed_when: false
+  changed_when: false
+
+- name: Display Typha status
+  ansible.builtin.debug:
+    msg: "Typha status: {{ typha_status.stdout | default('Unable to retrieve status') }}"
+  when: typha_status is defined
+
+# Summary of verification
+- name: Set verification complete fact
+  ansible.builtin.set_fact:
+    calico_verification_complete: true

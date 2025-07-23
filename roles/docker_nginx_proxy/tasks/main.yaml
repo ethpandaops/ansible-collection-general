@@ -62,6 +62,7 @@
     name: "{{ docker_nginx_proxy_docker_gen_container_name }}"
     image: "{{ docker_nginx_proxy_docker_gen_container_image }}"
     image_name_mismatch: recreate
+    platform: "{{ 'linux/arm/v7' if 'arm' in ansible_architecture else omit }}" # bug: There's no v8 arm image available
     command: "{{ docker_nginx_proxy_docker_gen_container_command }}"
     restart_policy: "{{ docker_nginx_proxy_docker_gen_container_restart_policy }}"
     networks: "{{ docker_nginx_proxy_acme_companion_container_networks }}"
@@ -76,6 +77,7 @@
     name: "{{ docker_nginx_proxy_acme_companion_container_name }}"
     image: "{{ docker_nginx_proxy_acme_companion_container_image }}"
     image_name_mismatch: recreate
+    platform: "{{ 'linux/arm/v7' if 'arm' in ansible_architecture else omit }}" # bug: There's no v8 arm image available
     restart_policy: "{{ docker_nginx_proxy_acme_companion_container_restart_policy }}"
     networks: "{{ docker_nginx_proxy_acme_companion_container_networks }}"
     networks_cli_compatible: "{{ docker_nginx_proxy_acme_companion_container_networks_cli_compatible }}"
