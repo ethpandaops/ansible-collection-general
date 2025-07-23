@@ -49,7 +49,6 @@
     name: "{{ docker_nginx_proxy_container_name }}"
     image: "{{ docker_nginx_proxy_container_image }}"
     image_name_mismatch: recreate
-    platform: "{{ 'linux/arm/v7' if 'arm' in ansible_architecture else omit }}"
     published_ports: "{{ docker_nginx_proxy_container_published_ports }}"
     restart_policy: "{{ docker_nginx_proxy_container_restart_policy }}"
     networks: "{{ docker_nginx_proxy_container_networks }}"
@@ -101,7 +100,6 @@
     name: "{{ docker_nginx_proxy_acme_monitor_container_name }}"
     image: "{{ docker_nginx_proxy_acme_monitor_container_image }}"
     image_name_mismatch: recreate
-    platform: "{{ 'linux/arm/v7' if 'arm' in ansible_architecture else omit }}"
     command: ["/acme-monitor.sh"]
     restart_policy: "{{ docker_nginx_proxy_acme_monitor_container_restart_policy }}"
     networks: "{{ docker_nginx_proxy_acme_monitor_container_networks }}"
