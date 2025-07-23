@@ -28,7 +28,7 @@ eth_inventory_web_content: # noqa var-naming[no-role-prefix]
     content: |
       {
         "ethereum_pairs": {
-          {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
+          {% for host in (groups['ethereum_node'] + groups['bootnode']) | difference(['localhost']) | reject('match', '^mev.*') | sort %}
             "{{ host }}": {
               "consensus": {
                 "client": "{{ hostvars[host]['ethereum_node_cl'] }}",
