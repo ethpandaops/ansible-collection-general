@@ -11,6 +11,9 @@ grandine_cleanup: false # when set to "true" it will remove the container
 grandine_ports_p2p_tcp: 9000
 grandine_ports_p2p_udp: 9000
 grandine_ports_quic: 9001
+grandine_ports_p2p_tcp_ipv6: 9050
+grandine_ports_p2p_udp_ipv6: 9050
+grandine_ports_quic_ipv6: 9051
 grandine_ports_http_beacon: 5051
 grandine_ports_metrics: 8008
 
@@ -38,10 +41,10 @@ grandine_container_ports_ipv4:
   - "0.0.0.0:{{ grandine_ports_quic }}:{{ grandine_ports_quic }}/udp"
 
 grandine_container_ports_ipv6:
-  - "[::]:{{ grandine_ports_p2p_tcp }}:{{ grandine_ports_p2p_tcp }}"
-  - "[::]:{{ grandine_ports_p2p_udp }}:{{ grandine_ports_p2p_udp }}/udp"
-  - "[::]:{{ grandine_ports_quic }}:{{ grandine_ports_quic }}"
-  - "[::]:{{ grandine_ports_quic }}:{{ grandine_ports_quic }}/udp"
+  - "[::]:{{ grandine_ports_p2p_tcp_ipv6 }}:{{ grandine_ports_p2p_tcp_ipv6 }}"
+  - "[::]:{{ grandine_ports_p2p_udp_ipv6 }}:{{ grandine_ports_p2p_udp_ipv6 }}/udp"
+  - "[::]:{{ grandine_ports_quic_ipv6 }}:{{ grandine_ports_quic_ipv6 }}"
+  - "[::]:{{ grandine_ports_quic_ipv6 }}:{{ grandine_ports_quic_ipv6 }}/udp"
 
 grandine_container_ports: >-
   {{ grandine_container_ports_ipv4 + (grandine_container_ports_ipv6 if grandine_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
@@ -72,13 +75,13 @@ grandine_container_command_default:
 
 grandine_container_command_v6:
   - --listen-address-ipv6={{ grandine_announced_ipv6 }}
-  - --libp2p-port-ipv6={{ grandine_ports_p2p_tcp }}
-  - --discovery-port-ipv6={{ grandine_ports_p2p_tcp }}
-  - --quic-port-ipv6={{ grandine_ports_quic }}
+  - --libp2p-port-ipv6={{ grandine_ports_p2p_tcp_ipv6 }}
+  - --discovery-port-ipv6={{ grandine_ports_p2p_udp_ipv6 }}
+  - --quic-port-ipv6={{ grandine_ports_quic_ipv6 }}
   - --enr-address-ipv6={{ grandine_announced_ipv6 }}
-  - --enr-udp-port-ipv6={{ grandine_ports_p2p_udp }}
-  - --enr-tcp-port-ipv6={{ grandine_ports_p2p_tcp }}
-  - --enr-quic-port-ipv6={{ grandine_ports_quic }}
+  - --enr-udp-port-ipv6={{ grandine_ports_p2p_udp_ipv6 }}
+  - --enr-tcp-port-ipv6={{ grandine_ports_p2p_tcp_ipv6 }}
+  - --enr-quic-port-ipv6={{ grandine_ports_quic_ipv6 }}
 
 grandine_container_supernode_command:
   - --subscribe-all-data-column-subnets
