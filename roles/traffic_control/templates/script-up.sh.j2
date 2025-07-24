@@ -29,17 +29,31 @@ tc class add dev {{ item.interface }} parent 1: classid 1:1 htb rate {{ item.rat
 {% if item.rate is defined or item.rate_download is defined %}
 tc class add dev {{ item.interface }} parent 1: classid 1:2 htb rate {{ item.rate_download | default(item.rate) }} ceil {{ item.rate_download | default(item.rate) }}
 {% endif %}
-{# Add filter to upload direction #}
+{# Add filter to upload direction - IPv4 #}
 tc filter add dev {{ item.interface }} protocol ip parent 1:0 prio 1 u32 match ip dst 0.0.0.0/0 flowid 1:1
+{# Add filter to upload direction - IPv6 (only if IPv6 is available) #}
+if [ -d /proc/sys/net/ipv6 ] && [ "$(cat /proc/sys/net/ipv6/conf/all/disable_ipv6 2>/dev/null || echo 1)" = "0" ]; then
+    tc filter add dev {{ item.interface }} protocol ipv6 parent 1:0 prio 2 u32 match ip6 dst ::/0 flowid 1:1 || true
+fi
 {# Redirect ingress traffic to ifb interface #}
 tc qdisc add dev {{ item.interface }} handle ffff: ingress
+{# Redirect ingress traffic to ifb interface - IPv4 #}
 tc filter add dev {{ item.interface }} parent ffff: protocol ip u32 match u32 0 0 action mirred egress redirect dev {{ ifb_interface }}
+{# Redirect ingress traffic to ifb interface - IPv6 (only if IPv6 is available) #}
+if [ -d /proc/sys/net/ipv6 ] && [ "$(cat /proc/sys/net/ipv6/conf/all/disable_ipv6 2>/dev/null || echo 1)" = "0" ]; then
+    tc filter add dev {{ item.interface }} parent ffff: protocol ipv6 u32 match u32 0 0 action mirred egress redirect dev {{ ifb_interface }} || true
+fi
 {# Add bandwith limits on ifb interface #}
 tc qdisc add dev {{ ifb_interface }} root handle 1: htb default 30
 {% if item.rate is defined or item.rate_download is defined %}
 tc class add dev {{ ifb_interface }} parent 1: classid 1:2 htb rate {{ item.rate_download | default(item.rate) }} ceil {{ item.rate_download | default(item.rate) }}
 {% endif %}
+{# Add filter on ifb interface - IPv4 #}
 tc filter add dev {{ ifb_interface }} protocol ip parent 1:0 prio 1 u32 match ip src 0.0.0.0/0 flowid 1:2
+{# Add filter on ifb interface - IPv6 (only if IPv6 is available) #}
+if [ -d /proc/sys/net/ipv6 ] && [ "$(cat /proc/sys/net/ipv6/conf/all/disable_ipv6 2>/dev/null || echo 1)" = "0" ]; then
+    tc filter add dev {{ ifb_interface }} protocol ipv6 parent 1:0 prio 2 u32 match ip6 src ::/0 flowid 1:2 || true
+fi
 
 {# Add latency #}
 {% if item.latency is defined or item.jitter is defined %}
