@@ -13,6 +13,7 @@
 
 - name: Set permissions
   ansible.builtin.command: "chown -R {{ nimbusel_user }}:{{ nimbusel_user }} {{ nimbusel_datadir }}" # noqa no-free-form
+  failed_when: false
   changed_when: false
 
 - name: Run nimbusel container

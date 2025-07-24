@@ -21,6 +21,7 @@
 
 - name: Set permissions
   ansible.builtin.command: "chown -R {{ mev_flood_user }}:{{ mev_flood_user }} {{ mev_flood_datadir }}" # noqa no-free-form
+  failed_when: false
   changed_when: false
 
 - name: Run mev_flood container

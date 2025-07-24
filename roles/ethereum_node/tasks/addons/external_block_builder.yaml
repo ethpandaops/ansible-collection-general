@@ -1,5 +1,7 @@
 - name: Setup external block builder
   when: ethereum_node_external_builder_enabled
+  tags:
+    - ethereum_node_external_block_builder
   block:
     - name: Setup mev_boost
       ansible.builtin.include_role:
@@ -27,6 +29,8 @@
 
 - name: Cleanup external block builder
   when: not ethereum_node_external_builder_enabled
+  tags:
+    - ethereum_node_external_block_builder
   block:
     - name: Cleanup mev_boost
       ansible.builtin.include_role:

@@ -32,7 +32,11 @@ dora:
       value: "true"
     - name: FRONTEND_SHOW_SENSITIVE_PEER_INFOS
       value: "true"
-{% if 'peerdas' in ethereum_network_name %}
+    - name: API_ENABLED
+      value: "true"
+    - name: API_CORS_ORIGINS
+      value: "*"
+{% if ('fusaka' in ethereum_network_name) or ('berlinterop' in ethereum_network_name) %}
     - name: FRONTEND_SHOW_PEER_DAS_INFOS
       value: "true"
 {% endif %}
@@ -85,4 +89,7 @@ dora:
     name: {{ hostvars[host]['inventory_hostname'] }}
     priority: -1
     archive: false
+{% if gen_kubernetes_config_dora_execution_snooper_port %}
+    engineSnooperUrl: http://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@rpc.{{ hostvars[host]['inventory_hostname'] }}.{{ network_subdomain }}:{{ gen_kubernetes_config_dora_execution_snooper_port }}
+{% endif %}
 {% endfor %}
