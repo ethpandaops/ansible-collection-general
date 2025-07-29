@@ -24,6 +24,7 @@
     owner: "{{ reth_user }}"
     group: "{{ reth_user }}"
   when: reth_rbuilder_enabled
+  notify: restart reth container
 
 - name: Run reth container
   community.docker.docker_container:
