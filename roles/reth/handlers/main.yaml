@@ -1,4 +1,4 @@
-- name: restart reth container
+- name: Restart reth container
   community.docker.docker_container:
     name: "{{ reth_container_name }}"
     state: started
