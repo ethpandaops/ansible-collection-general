@@ -2,28 +2,37 @@
 
 syncoor-server:
   fullnameOverride: syncoor-server
-  image:
-    repository: {{ default_tooling_images.syncoor_server.split(':') | first }}
-    tag: {{ default_tooling_images.syncoor_server.split(':') | last }}
-    pullPolicy: {% if "latest" in (default_tooling_images.syncoor_server.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
+  controllers:
+    main:
+      containers:
+        main:
+          image:
+            repository: {{ default_tooling_images.syncoor_server.split(':') | first }}
+            tag: {{ default_tooling_images.syncoor_server.split(':') | last }}
+            pullPolicy: {% if "latest" in (default_tooling_images.syncoor_server.split(':') | last) or "master" in (default_tooling_images.syncoor_server.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 400m
+              memory: 512Mi
 
-  resources:
-    requests:
-      cpu: 200m
-      memory: 256Mi
-    limits:
-      cpu: 400m
-      memory: 512Mi
+  secrets:
+    secretenv:
+      enabled: true
+      stringData:
+        AUTH_TOKEN: <path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.syncoor.auth_token}>
 
   ingress:
-    enabled: true
-    className: ingress-nginx-public
-    hosts:
-      - host: syncoor-api.{{ network_subdomain }}
-        paths:
-          - path: /
-            pathType: Prefix
-
-  secretEnv:
-    enabled: true
-    AUTH_TOKEN: <path:/secrets/services/services.enc.yaml#syncoor | jsonPath {.auth_token}>
+    main:
+      className: ingress-nginx-public
+      enabled: true
+      hosts:
+        - host: syncoor-api.{{ network_subdomain }}
+          paths:
+            - path: /
+              pathType: Prefix
+              service:
+                identifier: main
+                port: http

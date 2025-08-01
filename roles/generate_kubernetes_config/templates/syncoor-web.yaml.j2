@@ -2,33 +2,51 @@
 
 syncoor-web:
   fullnameOverride: syncoor-web
-  image:
-    repository: {{ default_tooling_images.syncoor_web.split(':') | first }}
-    tag: {{ default_tooling_images.syncoor_web.split(':') | last }}
-    pullPolicy: {% if "latest" in (default_tooling_images.syncoor_web.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
+  controllers:
+    main:
+      containers:
+        main:
+          image:
+            repository: {{ default_tooling_images.syncoor_web.split(':') | first }}
+            tag: {{ default_tooling_images.syncoor_web.split(':') | last }}
+            pullPolicy: {% if "latest" in (default_tooling_images.syncoor_web.split(':') | last) or "master" in (default_tooling_images.syncoor_web.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
 
-  resources:
-    requests:
-      cpu: 100m
-      memory: 128Mi
-    limits:
-      cpu: 200m
-      memory: 128Mi
+  configMaps:
+    config:
+      enabled: true
+      data:
+        config.json: |
+          {
+            "directories": [
+              {
+                "name": "{{ ethereum_network_name }}",
+                "url": "https://syncoor-data.{{ gen_kubernetes_domain }}/devnets/{{ ethereum_network_name }}"
+              }
+            ],
+            "syncoorApiEndpoints": [
+              {
+                "name": "Syncoor",
+                "url": "https://syncoor-api.{{ network_subdomain }}"
+              }
+            ]
+          }
 
   ingress:
-    enabled: true
-    className: ingress-nginx-public
-    hosts:
-      - host: syncoor.{{ network_subdomain }}
-        paths:
-          - path: /
-            pathType: Prefix
-
-  config:
-    directories:
-      - name: {{ ethereum_network_name }}
-        url: https://syncoor-data.{{ gen_kubernetes_domain }}/devnets/{{ ethereum_network_name }}
-    
-    syncoorApiEndpoints:
-      - name: Syncoor
-        url: https://syncoor-api.{{ network_subdomain }}
+    main:
+      className: ingress-nginx-public
+      enabled: true
+      hosts:
+        - host: syncoor.{{ network_subdomain }}
+          paths:
+            - path: /
+              pathType: Prefix
+              service:
+                identifier: main
+                port: http
