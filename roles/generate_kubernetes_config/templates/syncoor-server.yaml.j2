@@ -10,6 +10,7 @@ syncoor-server:
             repository: {{ default_tooling_images.syncoor_server.split(':') | first }}
             tag: {{ default_tooling_images.syncoor_server.split(':') | last }}
             pullPolicy: {% if "latest" in (default_tooling_images.syncoor_server.split(':') | last) or "master" in (default_tooling_images.syncoor_server.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
+
           resources:
             requests:
               cpu: 200m
@@ -22,7 +23,7 @@ syncoor-server:
     secretenv:
       enabled: true
       stringData:
-        AUTH_TOKEN: <path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.syncoor.auth_token}>
+        AUTH_TOKEN: "syncoor<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>"
 
   ingress:
     main:

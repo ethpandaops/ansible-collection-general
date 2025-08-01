@@ -10,6 +10,7 @@ syncoor-web:
             repository: {{ default_tooling_images.syncoor_web.split(':') | first }}
             tag: {{ default_tooling_images.syncoor_web.split(':') | last }}
             pullPolicy: {% if "latest" in (default_tooling_images.syncoor_web.split(':') | last) or "master" in (default_tooling_images.syncoor_web.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
+
           resources:
             requests:
               cpu: 100m
