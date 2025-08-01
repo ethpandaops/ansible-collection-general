@@ -1,0 +1,29 @@
+# {{ ansible_managed }}
+
+syncoor-server:
+  fullnameOverride: syncoor-server
+  image:
+    repository: {{ default_tooling_images.syncoor_server.split(':') | first }}
+    tag: {{ default_tooling_images.syncoor_server.split(':') | last }}
+    pullPolicy: {% if "latest" in (default_tooling_images.syncoor_server.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
+
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 400m
+      memory: 512Mi
+
+  ingress:
+    enabled: true
+    className: ingress-nginx-public
+    hosts:
+      - host: syncoor-api.{{ network_subdomain }}
+        paths:
+          - path: /
+            pathType: Prefix
+
+  secretEnv:
+    enabled: true
+    AUTH_TOKEN: <path:/secrets/services/services.enc.yaml#syncoor | jsonPath {.auth_token}>

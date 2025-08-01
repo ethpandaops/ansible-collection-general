@@ -174,3 +174,15 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
       - name: xatu-cl-mimicry
         repository: https://ethpandaops.github.io/ethereum-helm-charts
         version: 0.0.2
+  syncoor-server:
+    valuesTemplatePath: templates/syncoor-server.yaml.j2
+    dependencies:
+      - name: syncoor-server
+        repository: https://ethpandaops.github.io/ethereum-helm-charts
+        version: 0.0.1
+  syncoor-web:
+    valuesTemplatePath: templates/syncoor-web.yaml.j2
+    dependencies:
+      - name: syncoor-web
+        repository: https://ethpandaops.github.io/ethereum-helm-charts
+        version: 0.0.1
