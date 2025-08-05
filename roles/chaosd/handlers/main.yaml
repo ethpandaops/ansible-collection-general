@@ -1,0 +1,5 @@
+- name: Restart chaosd
+  systemd:
+    name: chaosd
+    state: restarted
+    daemon_reload: yes

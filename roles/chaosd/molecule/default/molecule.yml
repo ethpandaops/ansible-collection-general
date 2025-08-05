@@ -1,0 +1,11 @@
+dependency:
+  name: galaxy
+driver:
+  name: docker
+platforms:
+  - name: ubuntu2204
+    image: geerlingguy/docker-ubuntu2204-ansible
+provisioner:
+  name: ansible
+verifier:
+  name: ansible
