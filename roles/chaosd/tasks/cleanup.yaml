@@ -1,0 +1,22 @@
+- name: Stop and disable chaosd service
+  ansible.builtin.systemd:
+    name: chaosd
+    enabled: false
+    state: stopped
+  ignore_errors: true
+
+- name: Remove systemd service file
+  ansible.builtin.file:
+    path: /etc/systemd/system/chaosd.service
+    state: absent
+  notify: Reload systemd
+
+- name: Remove chaosd installation directory
+  ansible.builtin.file:
+    path: "{{ chaosd_install_dir }}"
+    state: absent
+
+- name: Clean up temporary files
+  ansible.builtin.file:
+    path: /tmp/chaosd.tar.gz
+    state: absent

@@ -1,5 +1,8 @@
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: true
+
 - name: Restart chaosd
-  systemd:
+  ansible.builtin.systemd:
     name: chaosd
     state: restarted
-    daemon_reload: yes

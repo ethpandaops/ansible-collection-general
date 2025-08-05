@@ -1,6 +1,13 @@
+# Chaosd configuration
 chaosd_version: "v1.4.0"
-chaosd_download_url: "https://mirrors.chaos-mesh.org/chaosd-{{ chaosd_version }}-linux-amd64.tar.gz"
 chaosd_sha256: "auto_fill_sha256_here"
 chaosd_port: 31767
 chaosd_install_dir: /opt/chaosd
-chaosd_iface: eth0          # primary NIC used by your droplets
+chaosd_state: present  # present or absent
+
+# Service configuration
+chaosd_service_enabled: true
+chaosd_service_restart_sec: 5
+
+# Network interface for network chaos experiments
+chaosd_iface: eth0

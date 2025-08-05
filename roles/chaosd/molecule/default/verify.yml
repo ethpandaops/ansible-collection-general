@@ -1,6 +1,0 @@
-- hosts: all
-  tasks:
-    - name: Query Chaosd health
-      uri:
-        url: "http://localhost:31767/version"
-        status_code: 200
