@@ -36,7 +36,6 @@
           {% for host in groups['bootnode'] | default([]) if not found_bootnode.value -%}
           {% if hostvars[host]['cl_bootnode_fact_enr'] is defined %}
           {{ hostvars[host]['cl_bootnode_fact_enr'] }}
-
           {% set found_bootnode.value = true %}
           {% endif %}
           {% endfor %}
