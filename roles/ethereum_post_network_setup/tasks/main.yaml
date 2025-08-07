@@ -19,7 +19,7 @@
     - name: Generate enodes.txt for EL clients
       ansible.builtin.copy:
         content: |-
-          {% for host in (groups['ethereum_node'] | sort | unique)[:20] -%}
+          {% for host in (groups['ethereum_node'] + groups['bootnode' | sort | unique)[:20] -%}
           {% if hostvars[host]['ethereum_node_fact_el_enode'] is defined %}
           {{ hostvars[host]['ethereum_node_fact_el_enode'] }}
           {%- if not loop.last %}
@@ -51,13 +51,13 @@
     - name: Generate "bootstrap_nodes.yaml" for Prysm
       ansible.builtin.copy:
         content: |-
-          {% for host in ((groups['ethereum_node'] + groups['bootnode']) | sort | unique)[:20] -%}
           {% if hostvars[host]['cl_bootnode_fact_enr'] is defined %}
           - {{ hostvars[host]['cl_bootnode_fact_enr'] }}
           {%- if not loop.last %}
 
           {% endif %}
           {% endif %}
+          {% for host in ((groups['ethereum_node'] + groups['bootnode']) | sort | unique)[:20] -%}
           {% if hostvars[host]['ethereum_node_fact_cl_enr'] is defined %}
           - {{ hostvars[host]['ethereum_node_fact_cl_enr'] }}
           {%- if not loop.last %}
