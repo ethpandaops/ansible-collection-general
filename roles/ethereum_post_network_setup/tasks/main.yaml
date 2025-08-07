@@ -51,12 +51,11 @@
     - name: Generate "bootstrap_nodes.yaml" for Prysm
       ansible.builtin.copy:
         content: |-
+          {% for host in groups['bootnode'] | default([]) -%}
           {% if hostvars[host]['cl_bootnode_fact_enr'] is defined %}
           - {{ hostvars[host]['cl_bootnode_fact_enr'] }}
-          {%- if not loop.last %}
-
           {% endif %}
-          {% endif %}
+          {% endfor %}
           {% for host in ((groups['ethereum_node'] + groups['bootnode']) | sort | unique)[:20] -%}
           {% if hostvars[host]['ethereum_node_fact_cl_enr'] is defined %}
           - {{ hostvars[host]['ethereum_node_fact_cl_enr'] }}
