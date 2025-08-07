@@ -19,7 +19,7 @@
     - name: Generate enodes.txt for EL clients
       ansible.builtin.copy:
         content: |-
-          {% for host in (groups['ethereum_node'] + groups['bootnode' | sort | unique)[:20] -%}
+          {% for host in ((groups['ethereum_node'] + groups['bootnode']) | sort | unique)[:20] -%}
           {% if hostvars[host]['ethereum_node_fact_el_enode'] is defined %}
           {{ hostvars[host]['ethereum_node_fact_el_enode'] }}
           {%- if not loop.last %}
