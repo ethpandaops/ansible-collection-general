@@ -32,13 +32,15 @@
     - name: Generate "bootstrap_nodes.txt" for CL clients
       ansible.builtin.copy:
         content: |-
-          {% for host in ((groups['ethereum_node'] + groups['bootnode']) | sort | unique)[:20] -%}
+          {% set found_bootnode = namespace(value=false) %}
+          {% for host in groups['bootnode'] | default([]) if not found_bootnode.value -%}
           {% if hostvars[host]['cl_bootnode_fact_enr'] is defined %}
           {{ hostvars[host]['cl_bootnode_fact_enr'] }}
-          {%- if not loop.last %}
 
+          {% set found_bootnode.value = true %}
           {% endif %}
-          {% endif %}
+          {% endfor %}
+          {% for host in ((groups['ethereum_node'] + groups['bootnode']) | sort | unique)[:20] -%}
           {% if hostvars[host]['ethereum_node_fact_cl_enr'] is defined %}
           {{ hostvars[host]['ethereum_node_fact_cl_enr'] }}
           {%- if not loop.last %}
