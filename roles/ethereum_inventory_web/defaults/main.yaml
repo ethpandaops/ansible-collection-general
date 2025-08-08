@@ -1,5 +1,4 @@
 eth_inventory_web_dir: /data/eth-inventory-web # noqa var-naming[no-role-prefix]
-eth_inventory_web_fact_cache_dir: tmp/devnet-4 # Path to Ansible fact cache directory # noqa var-naming[no-role-prefix]
 
 eth_inventory_web_container_image: nginx:alpine # noqa var-naming[no-role-prefix]
 eth_inventory_web_container_name: eth-inventory-web # noqa var-naming[no-role-prefix]
