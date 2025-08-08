@@ -36,8 +36,6 @@
   ansible.builtin.copy:
     content: "{{ eth_inventory_web_nginx_config }}"
     dest: "{{ eth_inventory_web_dir }}/nginx-conf/default.conf"
-    owner: "root"
-    group: "root"
     mode: "0644"
 
 - name: Create directories
@@ -51,8 +49,6 @@
   ansible.builtin.copy:
     content: "{{ item.content }}"
     dest: "{{ eth_inventory_web_dir }}/content/{{ item.file }}"
-    owner: "root"
-    group: "root"
     mode: "0644"
   loop: "{{ eth_inventory_web_content }}"
 
@@ -60,8 +56,6 @@
   ansible.builtin.copy:
     content: "{{ item.content | to_nice_yaml(sort_keys=true, indent=2) }}"
     dest: "{{ eth_inventory_web_dir }}/content/{{ item.file | replace('.json', '.yaml') }}"
-    owner: "root"
-    group: "root"
     mode: "0644"
   loop: "{{ eth_inventory_web_content }}"
   when: item.file is match('.*\.json$')
