@@ -106,6 +106,7 @@ testnet-homepage:
         chainName: "{{ ethereum_network_name }}"
         chainId: "{{ ethereum_genesis_chain_id }}"
         github: https://github.com/ethpandaops/{{ devnet_name }}-devnets/tree/master/network-configs/{{ ethereum_network_name  | replace(devnet_name + "-", '')}}/metadata
+        syncoorUrl: https://syncoor.{{ network_subdomain }}
       metamask:
         enabled: true
       logo:
@@ -129,22 +130,16 @@ testnet-homepage:
         dataLookup: explorerUrl
       - name: "Dora the Explorer"
         dataLookup: doraUrl
+      - name: "Syncoor"
+        dataLookup: syncoorUrl
       - name: "Assertoor"
         dataLookup: assertoorUrl
-      - name: "Beaconchain explorer"
-        dataLookup: "beaconexplorerUrl"
-      - name: "Blobscan"
-        dataLookup: blobscanUrl
-      - name: "Blobscan ethpanda edition"
-        dataLookup: blobscanethpandaUrl
       - name: "Checkpoint Sync"
         dataLookup: checkpointSyncUrl
       - name: "Faucet"
         dataLookup: faucetUrl
       - name: "Forkmon"
         dataLookup: forkmonUrl
-      - name: "Ethstats"
-        dataLookup: ethstatsUrl
     menu:
       main:
         - identifier: ethereum-website

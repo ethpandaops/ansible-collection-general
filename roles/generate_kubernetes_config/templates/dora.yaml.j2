@@ -64,6 +64,11 @@ dora:
     name: "dora-postgresql"
     fullnameOverride: "dora-postgresql"
 
+  mevRelays:
+    - index: 0
+      name: "Flashbots"
+      url: "http://mev-relay-1.{{ network_subdomain }}:9062/"
+
   endpoints:
   # Rpc
   - url: {{ default_cl_endpoint }}

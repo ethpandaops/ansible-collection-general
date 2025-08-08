@@ -35,8 +35,8 @@ cleanup_certs() {
     fi
 }
 
-restart_acme_container() {
-    log "Restarting ACME container: $ACME_CONTAINER_NAME"
+stop_acme_container() {
+    log "Stopping ACME container: $ACME_CONTAINER_NAME"
 
     # Check if docker is available
     if ! command -v docker >/dev/null 2>&1; then
@@ -50,11 +50,35 @@ restart_acme_container() {
         return 1
     fi
 
-    # Restart the container
-    if docker restart "$ACME_CONTAINER_NAME"; then
-        log "Successfully restarted $ACME_CONTAINER_NAME"
+    # Stop the container
+    if docker stop "$ACME_CONTAINER_NAME"; then
+        log "Successfully stopped $ACME_CONTAINER_NAME"
     else
-        log "Error: Failed to restart $ACME_CONTAINER_NAME"
+        log "Error: Failed to stop $ACME_CONTAINER_NAME"
+        return 1
+    fi
+}
+
+start_acme_container() {
+    log "Starting ACME container: $ACME_CONTAINER_NAME"
+
+    # Check if docker is available
+    if ! command -v docker >/dev/null 2>&1; then
+        log "Error: Docker command not found"
+        return 1
+    fi
+
+    # Check if container exists
+    if ! docker inspect "$ACME_CONTAINER_NAME" >/dev/null 2>&1; then
+        log "Error: Container '$ACME_CONTAINER_NAME' not found"
+        return 1
+    fi
+
+    # Start the container
+    if docker start "$ACME_CONTAINER_NAME"; then
+        log "Successfully started $ACME_CONTAINER_NAME"
+    else
+        log "Error: Failed to start $ACME_CONTAINER_NAME"
         return 1
     fi
 }
@@ -75,8 +99,9 @@ monitor_logs() {
 
                 sleep "$WAIT_TIME"
 
+                stop_acme_container
                 cleanup_certs
-                restart_acme_container
+                start_acme_container
 
                 log "Cleanup and restart completed. Resuming log monitoring..."
                 break  # Break from the logs loop to restart monitoring
