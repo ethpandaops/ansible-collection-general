@@ -28,20 +28,30 @@ eth_inventory_web_content: # noqa var-naming[no-role-prefix]
     content: |
       {
         "ethereum_pairs": {
-          {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
+          {% set all_hosts = (groups['ethereum_node'] | default([])) + (groups['bootnode'] | default([])) %}
+          {% set valid_hosts = [] %}
+          {% for host in all_hosts | sort %}
+            {% if hostvars[host]['ethereum_node_cl'] is defined 
+               and hostvars[host]['ethereum_node_el'] is defined 
+               and hostvars[host]['ethereum_node_fact_cl_enr'] is defined
+               and hostvars[host]['ethereum_node_fact_el_enode'] is defined %}
+              {% set _ = valid_hosts.append(host) %}
+            {% endif %}
+          {% endfor %}
+          {% for host in valid_hosts %}
             "{{ host }}": {
               "consensus": {
                 "client": "{{ hostvars[host]['ethereum_node_cl'] }}",
-                "image": "{{ hostvars[host][(hostvars[host]['ethereum_node_cl']) + '_container_image'] }}",
+                "image": "{{ hostvars[host][(hostvars[host]['ethereum_node_cl']) + '_container_image'] | default('') }}",
                 "enr": "{{ hostvars[host]['ethereum_node_fact_cl_enr'] }}",
-                "peer_id": "{{ hostvars[host]['ethereum_node_fact_cl_peer_id'] }}",
-                "beacon_uri": "https://{{ hostvars[host]['ethereum_node_beacon_hostname'] }}"
+                "peer_id": "{{ hostvars[host]['ethereum_node_fact_cl_peer_id'] | default('') }}",
+                "beacon_uri": "{{ 'https://' + hostvars[host]['ethereum_node_beacon_hostname'] if hostvars[host]['ethereum_node_beacon_hostname'] is defined else '' }}"
               },
               "execution": {
                 "client": "{{ hostvars[host]['ethereum_node_el'] }}",
-                "image": "{{ hostvars[host][(hostvars[host]['ethereum_node_el']) + '_container_image'] }}",
-                "enode": "{{ hostvars[host]['ethereum_node_fact_el_enode'] | default('') }}",
-                "rpc_uri": "https://{{ hostvars[host]['ethereum_node_rcp_hostname'] }}"
+                "image": "{{ hostvars[host][(hostvars[host]['ethereum_node_el']) + '_container_image'] | default('') }}",
+                "enode": "{{ hostvars[host]['ethereum_node_fact_el_enode'] }}",
+                "rpc_uri": "{{ 'https://' + hostvars[host]['ethereum_node_rcp_hostname'] if hostvars[host]['ethereum_node_rcp_hostname'] is defined else '' }}"
               }
             }{% if not loop.last %},{% endif %}
           {% endfor %}
