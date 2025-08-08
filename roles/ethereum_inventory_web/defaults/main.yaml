@@ -31,8 +31,8 @@ eth_inventory_web_content: # noqa var-naming[no-role-prefix]
           {% set all_hosts = (groups['ethereum_node'] | default([])) + (groups['bootnode'] | default([])) %}
           {% set valid_hosts = [] %}
           {% for host in all_hosts | sort %}
-            {% if hostvars[host]['ethereum_node_cl'] is defined 
-               and hostvars[host]['ethereum_node_el'] is defined 
+            {% if hostvars[host]['ethereum_node_cl'] is defined
+               and hostvars[host]['ethereum_node_el'] is defined
                and hostvars[host]['ethereum_node_fact_cl_enr'] is defined
                and hostvars[host]['ethereum_node_fact_el_enode'] is defined %}
               {% set _ = valid_hosts.append(host) %}
@@ -45,7 +45,8 @@ eth_inventory_web_content: # noqa var-naming[no-role-prefix]
                 "image": "{{ hostvars[host][(hostvars[host]['ethereum_node_cl']) + '_container_image'] | default('') }}",
                 "enr": "{{ hostvars[host]['ethereum_node_fact_cl_enr'] }}",
                 "peer_id": "{{ hostvars[host]['ethereum_node_fact_cl_peer_id'] | default('') }}",
-                "beacon_uri": "{{ 'https://' + hostvars[host]['ethereum_node_beacon_hostname'] if hostvars[host]['ethereum_node_beacon_hostname'] is defined else '' }}"
+                "beacon_uri": "{{ 'https://' + hostvars[host]['ethereum_node_beacon_hostname']
+                               if hostvars[host]['ethereum_node_beacon_hostname'] is defined else '' }}"
               },
               "execution": {
                 "client": "{{ hostvars[host]['ethereum_node_el'] }}",
