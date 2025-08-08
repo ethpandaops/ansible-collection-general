@@ -38,7 +38,6 @@
   loop: "{{ eth_inventory_web_content }}"
   when: item.file is match('.*\.json$')
 
-# Run nginx container that serves the json file
 - name: Run nginx container
   community.general.docker_container:
     name: "{{ eth_inventory_web_container_name }}"
