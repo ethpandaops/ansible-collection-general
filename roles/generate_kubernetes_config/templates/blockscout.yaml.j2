@@ -134,4 +134,4 @@ postgresql:
       max_connections = 1024
     persistence:
       enabled: true
-      size: "{{ gen_kubernetes_blockscout_postgres_size | default("100Gi") }}"
+      size: "{{ gen_kubernetes_blockscout_postgres_size | default("500Gi") }}"

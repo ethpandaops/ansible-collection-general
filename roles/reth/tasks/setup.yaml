@@ -13,6 +13,7 @@
 
 - name: Set permissions
   ansible.builtin.command: "chown -R {{ reth_user }}:{{ reth_user }} {{ reth_datadir }}" # noqa no-free-form
+  failed_when: false
   changed_when: false
 
 - name: Create rbuilder config file
@@ -23,6 +24,7 @@
     owner: "{{ reth_user }}"
     group: "{{ reth_user }}"
   when: reth_rbuilder_enabled
+  notify: Restart reth container
 
 - name: Run reth container
   community.docker.docker_container:

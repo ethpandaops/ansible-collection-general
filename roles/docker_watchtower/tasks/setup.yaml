@@ -1,0 +1,20 @@
+- name: Add docker-watchtower user
+  ansible.builtin.user:
+    name: "{{ docker_watchtower_user }}"
+  register: docker_watchtower_user_meta
+
+- name: Run docker-watchtower container
+  community.docker.docker_container:
+    name: "{{ docker_watchtower_container_name }}"
+    image: "{{ docker_watchtower_container_image }}"
+    image_name_mismatch: "{{ docker_watchtower_container_image_name_mismatch }}"
+    restart: "{{ docker_watchtower_container_restart }}"
+    restart_policy: "{{ docker_watchtower_container_restart_policy }}"
+    recreate: "{{ docker_watchtower_container_recreate }}"
+    stop_timeout: "{{ docker_watchtower_container_stop_timeout }}"
+    env: "{{ docker_watchtower_container_env }}"
+    ports: "{{ docker_watchtower_container_ports }}"
+    expose: "{{ docker_watchtower_container_exposed_ports }}"
+    volumes: "{{ docker_watchtower_container_volumes }}"
+    networks: "{{ docker_watchtower_container_networks }}"
+    command: "{{ docker_watchtower_container_command }}"

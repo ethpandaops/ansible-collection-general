@@ -36,10 +36,14 @@ ethereum_node_fact_discovery_enabled: true
 # Json RPC snooper
 ethereum_node_json_rpc_snooper_enabled: false
 ethereum_node_json_rpc_snooper_port: 8560
+ethereum_node_json_rpc_snooper_public_port: 0
+ethereum_node_json_rpc_snooper_container_env: {}
 ethereum_node_json_rpc_snooper_name: "snooper-rpc"
 
 ethereum_node_json_rpc_snooper_engine_enabled: false
 ethereum_node_json_rpc_snooper_engine_port: 8561
+ethereum_node_json_rpc_snooper_engine_public_port: 0
+ethereum_node_json_rpc_snooper_engine_container_env: {}
 ethereum_node_json_rpc_snooper_engine_name: "snooper-engine"
 
 # Blobber MITM tool
@@ -121,11 +125,19 @@ ethereum_node_grafana_alloy_config_content: |
       url = "{{ ethereum_node_pyroscope_server_endpoint }}"
     }
     external_labels = {
-      "instance" = "{{ ethereum_network_name }}-{{ inventory_hostname }}"
-      "ip_address" = "{{ ansible_host }}"
-      "network" = "{{ ethereum_network_name }}"
-      "testnet" = "{{ ethereum_network_name }}"
-      "execution_client" = "{{ ethereum_node_el }}"
-      "consensus_client" = "{{ ethereum_node_cl }}"
+      "instance" = "{{ ethereum_network_name }}-{{ inventory_hostname }}",
+      "ip_address" = "{{ ansible_host }}",
+      "network" = "{{ ethereum_network_name }}",
+      "testnet" = "{{ ethereum_network_name }}",
+      "execution_client" = "{{ ethereum_node_el }}",
+      "consensus_client" = "{{ ethereum_node_cl }}",
     }
   }
+
+# Ethereum node Docker Watchtower
+ethereum_node_docker_watchtower_enabled: false
+ethereum_node_docker_watchtower_container_name: "ethereum-node-docker-watchtower"
+ethereum_node_docker_watchtower_containers_list:
+  - "{{ ethereum_node_el }}"
+  - "{{ ethereum_node_cl }}"
+  - "{{ ethereum_node_cl }}-validator"

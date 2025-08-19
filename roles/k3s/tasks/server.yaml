@@ -76,7 +76,7 @@
     mode: "{{ p.stat.mode }}"
 
 - name: Replace https://localhost:6443 by https://master-ip:6443
-  ansible.builtin.command: >-
+  ansible.builtin.command: >
     k3s kubectl config set-cluster default
       --server=https://{{ k3s_server_ip }}:6443
       --kubeconfig ~/{{ ansible_user }}/.kube/config
@@ -93,3 +93,10 @@
     src: /usr/local/bin/k3s
     dest: /usr/local/bin/crictl
     state: link
+
+- name: Install Calico for k3s
+  ansible.builtin.include_tasks: calico/main.yaml
+  when: k3s_calico | bool
+  tags:
+    - calico
+    - calico-check-version
