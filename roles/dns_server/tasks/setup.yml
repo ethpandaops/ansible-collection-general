@@ -31,6 +31,39 @@
     - "{{ dns_server_configdir }}"
     - "{{ dns_server_zonesdir }}"
 
+- name: Create TSIG key directory
+  ansible.builtin.file:
+    path: "{{ dns_server_tsig_keysdir }}"
+    state: directory
+    mode: "0750"
+    owner: "{{ dns_server_uid }}"
+    group: "{{ dns_server_uid }}"
+
+- name: Check if TSIG key already exists
+  ansible.builtin.stat:
+    path: "{{ dns_server_tsig_keyfile }}"
+  register: tsig_key_stat
+  when: dns_server_tsig_enabled | bool
+
+- name: Generate TSIG key using bind9 container (tsig-keygen)
+  community.docker.docker_container:
+    name: "tsig-keygen-{{ dns_server_tsig_key_name }}"
+    image: "{{ dns_server_container_image }}"
+    command: >-
+      /bin/sh -c
+      "tsig-keygen -a {{ dns_server_tsig_algorithm }} {{ dns_server_tsig_key_name }}
+       > /keys/{{ dns_server_tsig_key_name }}.key &&
+       chown {{ dns_server_uid }}:{{ dns_server_uid }} /keys/{{ dns_server_tsig_key_name }}.key &&
+       chmod 0640 /keys/{{ dns_server_tsig_key_name }}.key"
+    auto_remove: true
+    detach: false
+    state: started
+    volumes:
+      - "{{ dns_server_tsig_keysdir }}:/keys"
+  when:
+    - dns_server_tsig_enabled | bool
+    - not tsig_key_stat.stat.exists
+
 - name: Generate DNS zone serial
   ansible.builtin.set_fact:
     dns_zone_serial: "{{ ansible_date_time.date | regex_replace('-', '') }}01"
@@ -52,6 +85,7 @@
     group: "{{ dns_server_uid }}"
     mode: '0644'
   loop: "{{ dns_server_zones }}"
+  when: dns_server_is_master | bool
   notify: Reload DNS server container
 
 - name: Setup dns server

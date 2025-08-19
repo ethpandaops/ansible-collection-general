@@ -12,6 +12,25 @@ dns_server_docker_networks:
   - name: "{{ dns_server_docker_network_name }}"
 dns_server_disable_systemd_resolved: false
 
+dns_server_tsig_enabled: true
+dns_server_tsig_keysdir: "/data/dns_server/keys"
+dns_server_tsig_key_name: "acme-wildcard"
+dns_server_tsig_algorithm: "hmac-sha256"
+dns_server_tsig_keyfile: "{{ dns_server_tsig_keysdir }}/{{ dns_server_tsig_key_name }}.key"
+
+# Zone to permit dynamic updates on for ACME DNS-01 (owner name is _acme-challenge.<zone>)
+# Set this to your wildcard zone, e.g. "s.<network-name>.ethpandaops.io"
+dns_server_acme_zone: ""
+
+# Flag this node as the primary (master) for the zones
+dns_server_is_master: true
+
+# List of primary IPs (for secondaries to pull from / accept notify from)
+dns_server_master: []             # e.g. ["10.0.0.10"]
+
+# List of secondary IPs (primaries will notify + allow-transfer to these)
+dns_server_slave: []              # e.g. ["10.0.0.11","10.0.0.12"]
+
 # dns_server
 dns_server_enabled: true
 dns_server_container_name: dns_server
@@ -23,6 +42,7 @@ dns_server_container_ports:
 dns_server_container_volumes:
   - "{{ dns_server_zonesdir }}:/etc/bind/zones"
   - "{{ dns_server_configdir }}/named.conf:/etc/bind/named.conf"
+  - "{{ dns_server_tsig_keysdir }}:/etc/bind/keys:ro"
 dns_server_container_stop_timeout: "600"
 dns_server_container_pull: false
 dns_server_container_networks: "{{ dns_server_docker_networks }}"
@@ -33,15 +53,59 @@ dns_server_config: |
     directory "/var/cache/bind";
     dnssec-validation auto;
     listen-on-v6 { any; };
-    allow-query { 127.0.0.1; 172.16.0.0/12; };
+    allow-query { any; };
+
+    // Global default — we’ll set per-zone allow-transfer/notify below
     allow-transfer { none; };
   };
+
+  {% if dns_server_tsig_enabled %}
+  // Include TSIG key used for ACME DNS-01 updates (primary only)
+  include "/etc/bind/keys/{{ dns_server_tsig_key_name }}.key";
+  {% endif %}
+
   {% for zone in dns_server_zones %}
+  {% if dns_server_is_master %}
+  // ===================== PRIMARY (master) =====================
   zone "{{ zone.zone }}" {
     type master;
     file "/etc/bind/zones/{{ zone.zone }}";
     masterfile-format text;
     allow-query { any; };
+
+    // Notify secondaries when the zone changes
+    notify yes;
+    {% if dns_server_slave | length > 0 %}
+    also-notify { {% for ip in dns_server_slave %}{{ ip }}; {% endfor %} };
+    allow-transfer { {% for ip in dns_server_slave %}{{ ip }}; {% endfor %} };
+    {% else %}
+    allow-transfer { none; };
+    {% endif %}
+
+    {% if dns_server_tsig_enabled and dns_server_acme_zone and zone.zone == dns_server_acme_zone %}
+    // Permit DNS-01 updates only for the exact owner name on primary
+    update-policy {
+      grant {{ dns_server_tsig_key_name }} name _acme-challenge.{{ dns_server_acme_zone }}. txt;
+    };
+    {% endif %}
   };
+
+  {% else %}
+  // ===================== SECONDARY (slave) =====================
+  zone "{{ zone.zone }}" {
+    type slave;
+    masters { {% for ip in dns_server_master %}{{ ip }}; {% endfor %} };
+    file "/etc/bind/zones/{{ zone.zone }}";
+    masterfile-format text;
+    allow-query { any; };
+
+    // Accept NOTIFY only from primaries
+    {% if dns_server_master | length > 0 %}
+    allow-notify { {% for ip in dns_server_master %}{{ ip }}; {% endfor %} };
+    {% endif %}
+
+    // No local dynamic updates on secondaries
+  };
+  {% endif %}
   {% endfor %}
 dns_server_zones: []
