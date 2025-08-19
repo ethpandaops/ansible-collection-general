@@ -4,8 +4,8 @@ wildcard_cert_issuer_enabled: true
 # Container basics
 wildcard_cert_issuer_container_name: cert_issuer
 wildcard_cert_issuer_image: certbot/dns-rfc2136:latest
-
 wildcard_cert_issuer_network_mode: host  # so certbot can reach bind on 127.0.0.1:53
+wildcard_cert_issuer_publish_port: 80
 
 # Persistent paths
 wildcard_cert_issuer_letsencrypt_dir: /data/cert_issuer/letsencrypt
