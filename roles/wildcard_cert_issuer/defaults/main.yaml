@@ -1,3 +1,5 @@
+# Enable/disable the role
+wildcard_cert_issuer_enabled: true
 
 # Container basics
 wildcard_cert_issuer_container_name: cert_issuer

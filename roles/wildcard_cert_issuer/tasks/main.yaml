@@ -1,140 +1,142 @@
-- name: Create issuer directories
-  ansible.builtin.file:
-    path: "{{ item }}"
-    state: directory
-    mode: "0750"
-  loop:
-    - "{{ wildcard_cert_issuer_letsencrypt_dir }}"
-    - "{{ wildcard_cert_issuer_work_dir }}"
-    - "{{ wildcard_cert_issuer_config_dir }}"
-    - "{{ wildcard_cert_issuer_publish_dir }}"
+- block:
+    - name: Create issuer directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: "0750"
+      loop:
+        - "{{ wildcard_cert_issuer_letsencrypt_dir }}"
+        - "{{ wildcard_cert_issuer_work_dir }}"
+        - "{{ wildcard_cert_issuer_config_dir }}"
+        - "{{ wildcard_cert_issuer_publish_dir }}"
 
-- name: Assert PSK is set when publishing is enabled
-  ansible.builtin.fail:
-    msg: "wildcard_cert_issuer_psk must be set (use Ansible Vault) when publishing is enabled."
-  when:
-    - wildcard_cert_issuer_publish_enabled | default(true)
-    - (wildcard_cert_issuer_psk is not defined or wildcard_cert_issuer_psk | length == 0)
+    - name: Assert PSK is set when publishing is enabled
+      ansible.builtin.fail:
+        msg: "wildcard_cert_issuer_psk must be set (use Ansible Vault) when publishing is enabled."
+      when:
+        - wildcard_cert_issuer_publish_enabled | default(true)
+        - (wildcard_cert_issuer_psk is not defined or wildcard_cert_issuer_psk | length == 0)
 
-- name: Read TSIG key file (bind key syntax)
-  ansible.builtin.slurp:
-    path: "{{ wildcard_cert_issuer_tsig_keyfile }}"
-  register: tsig_keyfile_slurp
+    - name: Read TSIG key file (bind key syntax)
+      ansible.builtin.slurp:
+        path: "{{ wildcard_cert_issuer_tsig_keyfile }}"
+      register: tsig_keyfile_slurp
 
-- name: Extract TSIG secret (base64) from key file
-  ansible.builtin.set_fact:
-    wildcard_cert_issuer_tsig_secret: >-
-      {{
-        (tsig_keyfile_slurp.content | b64decode)
-        | regex_search('secret\s+"([^"]+)"', '\1')
-      }}
+    - name: Extract TSIG secret (base64) from key file
+      ansible.builtin.set_fact:
+        wildcard_cert_issuer_tsig_secret: >-
+          {{
+            (tsig_keyfile_slurp.content | b64decode)
+            | regex_search('secret\s+"([^"]+)"', '\1')
+          }}
 
-- name: Fail if TSIG secret could not be parsed
-  ansible.builtin.fail:
-    msg: "Could not parse TSIG secret from {{ wildcard_cert_issuer_tsig_keyfile }}"
-  when: not wildcard_cert_issuer_tsig_secret
+    - name: Fail if TSIG secret could not be parsed
+      ansible.builtin.fail:
+        msg: "Could not parse TSIG secret from {{ wildcard_cert_issuer_tsig_keyfile }}"
+      when: not wildcard_cert_issuer_tsig_secret
 
-- name: Render RFC2136 credentials
-  ansible.builtin.copy:
-    dest: "{{ wildcard_cert_issuer_config_dir }}/rfc2136.ini"
-    mode: "0600"
-    content: |
-      dns_rfc2136_server = {{ wildcard_cert_issuer_rfc2136_server }}
-      dns_rfc2136_port = {{ wildcard_cert_issuer_rfc2136_port }}
-      dns_rfc2136_name = {{ wildcard_cert_issuer_tsig_name }}
-      dns_rfc2136_secret = {{ wildcard_cert_issuer_tsig_secret }}
-      dns_rfc2136_algorithm = {{ wildcard_cert_issuer_tsig_algorithm | upper }}
+    - name: Render RFC2136 credentials
+      ansible.builtin.copy:
+        dest: "{{ wildcard_cert_issuer_config_dir }}/rfc2136.ini"
+        mode: "0600"
+        content: |
+          dns_rfc2136_server = {{ wildcard_cert_issuer_rfc2136_server }}
+          dns_rfc2136_port = {{ wildcard_cert_issuer_rfc2136_port }}
+          dns_rfc2136_name = {{ wildcard_cert_issuer_tsig_name }}
+          dns_rfc2136_secret = {{ wildcard_cert_issuer_tsig_secret }}
+          dns_rfc2136_algorithm = {{ wildcard_cert_issuer_tsig_algorithm | upper }}
 
-- name: Install deploy-hook (package + encrypt with PSK var)
-  ansible.builtin.copy:
-    dest: "{{ wildcard_cert_issuer_config_dir }}/package_and_encrypt.sh"
-    mode: "0755"
-    content: |
-      #!/usr/bin/env sh
-      set -eu
+    - name: Install deploy-hook (package + encrypt with PSK var)
+      ansible.builtin.copy:
+        dest: "{{ wildcard_cert_issuer_config_dir }}/package_and_encrypt.sh"
+        mode: "0755"
+        content: |
+          #!/usr/bin/env sh
+          set -eu
 
-      BASE="{{ wildcard_cert_issuer_base_domain }}"
-      LE="/etc/letsencrypt/live/${BASE}"
-      OUT="/publish"
-      CIPHER="{{ wildcard_cert_issuer_openssl_cipher }}"
-      PSK="{{ wildcard_cert_issuer_psk }}"
-      TS="$(date +%Y%m%d%H%M%S)"
+          BASE="{{ wildcard_cert_issuer_base_domain }}"
+          LE="/etc/letsencrypt/live/${BASE}"
+          OUT="/publish"
+          CIPHER="{{ wildcard_cert_issuer_openssl_cipher }}"
+          PSK="{{ wildcard_cert_issuer_psk }}"
+          TS="$(date +%Y%m%d%H%M%S)"
 
-      # Ensure cert material is present
-      [ -f "${LE}/fullchain.pem" ] || exit 0
-      [ -f "${LE}/privkey.pem" ]   || exit 0
+          # Ensure cert material is present
+          [ -f "${LE}/fullchain.pem" ] || exit 0
+          [ -f "${LE}/privkey.pem" ]   || exit 0
 
-      # Prepare tarball with nginx-proxy friendly names
-      TMP="$(mktemp -d)"
-      trap 'rm -rf "${TMP}"' EXIT
-      cp "${LE}/fullchain.pem" "${TMP}/${BASE}.crt"
-      cp "${LE}/privkey.pem"   "${TMP}/${BASE}.key"
-      tar -C "${TMP}" -czf "${TMP}/${BASE}.tar.gz" "${BASE}.crt" "${BASE}.key"
+          # Prepare tarball with nginx-proxy friendly names
+          TMP="$(mktemp -d)"
+          trap 'rm -rf "${TMP}"' EXIT
+          cp "${LE}/fullchain.pem" "${TMP}/${BASE}.crt"
+          cp "${LE}/privkey.pem"   "${TMP}/${BASE}.key"
+          tar -C "${TMP}" -czf "${TMP}/${BASE}.tar.gz" "${BASE}.crt" "${BASE}.key"
 
-      # Encrypt using OpenSSL AEAD (AES-256-GCM) with PBKDF2
-      umask 0077
-      ENC="${OUT}/${BASE}-${TS}.tar.enc"
-      echo -n "$PSK" | \
-        openssl enc -${CIPHER} -pbkdf2 -pass stdin \
-          -in "${TMP}/${BASE}.tar.gz" -out "${ENC}"
+          # Encrypt using OpenSSL AEAD (AES-256-GCM) with PBKDF2
+          umask 0077
+          ENC="${OUT}/${BASE}-${TS}.tar.enc"
+          echo -n "$PSK" | \
+            openssl enc -${CIPHER} -pbkdf2 -pass stdin \
+              -in "${TMP}/${BASE}.tar.gz" -out "${ENC}"
 
-      # Maintain stable "latest" pointer
-      ln -sfn "${ENC}" "${OUT}/${BASE}-latest.tar.enc"
-      chmod 0600 "${ENC}"
-      chmod 0644 "${OUT}/${BASE}-latest.tar.enc}"
+          # Maintain stable "latest" pointer
+          ln -sfn "${ENC}" "${OUT}/${BASE}-latest.tar.enc"
+          chmod 0600 "${ENC}"
+          chmod 0644 "${OUT}/${BASE}-latest.tar.enc}"
 
-- name: Check if live cert already exists
-  ansible.builtin.stat:
-    path: "{{ wildcard_cert_issuer_letsencrypt_dir }}/live/{{ wildcard_cert_issuer_base_domain }}/fullchain.pem"
-  register: live_cert_stat
+    - name: Check if live cert already exists
+      ansible.builtin.stat:
+        path: "{{ wildcard_cert_issuer_letsencrypt_dir }}/live/{{ wildcard_cert_issuer_base_domain }}/fullchain.pem"
+      register: live_cert_stat
 
-- name: One-time initial issuance
-  community.docker.docker_container:
-    name: "{{ wildcard_cert_issuer_container_name }}-init"
-    image: "{{ wildcard_cert_issuer_image }}"
-    auto_remove: true
-    detach: false
-    network_mode: "{{ wildcard_cert_issuer_network_mode }}"
-    volumes:
-      - "{{ wildcard_cert_issuer_letsencrypt_dir }}:/etc/letsencrypt"
-      - "{{ wildcard_cert_issuer_work_dir }}:/var/lib/letsencrypt"
-      - "{{ wildcard_cert_issuer_config_dir }}:/config:ro"
-      - "{{ wildcard_cert_issuer_publish_dir }}:/publish"
-    command: >-
-      sh -c '
-      certbot certonly --non-interactive --agree-tos
-        --email {{ wildcard_cert_issuer_email | quote }}
-        --server {{ wildcard_cert_issuer_acme_directory | quote }}
-        --dns-rfc2136
-        --dns-rfc2136-credentials /config/rfc2136.ini
-        --dns-rfc2136-propagation-seconds {{ wildcard_cert_issuer_dns_propagation_seconds }}
-        --deploy-hook "/config/package_and_encrypt.sh"
-        {% for d in wildcard_cert_issuer_domains -%} -d {{ d }} {% endfor -%}
-      '
-  when: not live_cert_stat.stat.exists
+    - name: One-time initial issuance
+      community.docker.docker_container:
+        name: "{{ wildcard_cert_issuer_container_name }}-init"
+        image: "{{ wildcard_cert_issuer_image }}"
+        auto_remove: true
+        detach: false
+        network_mode: "{{ wildcard_cert_issuer_network_mode }}"
+        volumes:
+          - "{{ wildcard_cert_issuer_letsencrypt_dir }}:/etc/letsencrypt"
+          - "{{ wildcard_cert_issuer_work_dir }}:/var/lib/letsencrypt"
+          - "{{ wildcard_cert_issuer_config_dir }}:/config:ro"
+          - "{{ wildcard_cert_issuer_publish_dir }}:/publish"
+        command: >-
+          sh -c '
+          certbot certonly --non-interactive --agree-tos
+            --email {{ wildcard_cert_issuer_email | quote }}
+            --server {{ wildcard_cert_issuer_acme_directory | quote }}
+            --dns-rfc2136
+            --dns-rfc2136-credentials /config/rfc2136.ini
+            --dns-rfc2136-propagation-seconds {{ wildcard_cert_issuer_dns_propagation_seconds }}
+            --deploy-hook "/config/package_and_encrypt.sh"
+            {% for d in wildcard_cert_issuer_domains -%} -d {{ d }} {% endfor -%}
+          '
+      when: not live_cert_stat.stat.exists
 
-- name: Start renewal loop container (with deploy-hook)
-  community.docker.docker_container:
-    name: "{{ wildcard_cert_issuer_container_name }}"
-    image: "{{ wildcard_cert_issuer_image }}"
-    state: started
-    restart_policy: always
-    network_mode: "{{ wildcard_cert_issuer_network_mode }}"
-    volumes:
-      - "{{ wildcard_cert_issuer_letsencrypt_dir }}:/etc/letsencrypt"
-      - "{{ wildcard_cert_issuer_work_dir }}:/var/lib/letsencrypt"
-      - "{{ wildcard_cert_issuer_config_dir }}:/config:ro"
-      - "{{ wildcard_cert_issuer_publish_dir }}:{{ wildcard_cert_issuer_publish_dir }}"
-    command: >-
-      sh -c '
-      while true; do
-        certbot renew
-          --server {{ wildcard_cert_issuer_acme_directory | quote }}
-          --dns-rfc2136
-          --dns-rfc2136-credentials /config/rfc2136.ini
-          --dns-rfc2136-propagation-seconds {{ wildcard_cert_issuer_dns_propagation_seconds }}
-          --deploy-hook "/config/package_and_encrypt.sh"
-        ;
-        sleep {{ wildcard_cert_issuer_renew_interval }};
-      done
-      '
+    - name: Start renewal loop container (with deploy-hook)
+      community.docker.docker_container:
+        name: "{{ wildcard_cert_issuer_container_name }}"
+        image: "{{ wildcard_cert_issuer_image }}"
+        state: started
+        restart_policy: always
+        network_mode: "{{ wildcard_cert_issuer_network_mode }}"
+        volumes:
+          - "{{ wildcard_cert_issuer_letsencrypt_dir }}:/etc/letsencrypt"
+          - "{{ wildcard_cert_issuer_work_dir }}:/var/lib/letsencrypt"
+          - "{{ wildcard_cert_issuer_config_dir }}:/config:ro"
+          - "{{ wildcard_cert_issuer_publish_dir }}:{{ wildcard_cert_issuer_publish_dir }}"
+        command: >-
+          sh -c '
+          while true; do
+            certbot renew
+              --server {{ wildcard_cert_issuer_acme_directory | quote }}
+              --dns-rfc2136
+              --dns-rfc2136-credentials /config/rfc2136.ini
+              --dns-rfc2136-propagation-seconds {{ wildcard_cert_issuer_dns_propagation_seconds }}
+              --deploy-hook "/config/package_and_encrypt.sh"
+            ;
+            sleep {{ wildcard_cert_issuer_renew_interval }};
+          done
+          '
+  when: wildcard_cert_issuer_enabled | bool
