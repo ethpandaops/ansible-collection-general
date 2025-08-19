@@ -1,8 +1,3 @@
-- name: Setup docker network
-  ansible.builtin.include_role:
-    name: ethpandaops.general.docker_network
-  vars:
-    docker_network_name: "{{ dns_server_docker_network_name }}"
 
 - name: Ensure DNSStubListener=no is set in resolved.conf
   ansible.builtin.lineinfile:
@@ -99,5 +94,6 @@
     volumes: "{{ dns_server_container_volumes }}"
     env: "{{ dns_server_container_env }}"
     networks: "{{ dns_server_container_networks }}"
+    network_mode: "{{ dns_server_container_network_mode }}"
     pull: "{{ dns_server_container_pull | bool }}"
     command: "{{ dns_server_container_command }}"

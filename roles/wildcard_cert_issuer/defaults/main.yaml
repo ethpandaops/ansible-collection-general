@@ -52,4 +52,5 @@ wildcard_cert_issuer_openssl_cipher: aes-256-gcm
 wildcard_cert_issuer_dns_propagation_seconds: 15
 
 wildcard_cert_issuer_container_networks: []
+wildcard_cert_issuer_container_ports: []
 wildcard_cert_issuer_container_env: {}

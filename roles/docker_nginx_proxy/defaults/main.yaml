@@ -81,6 +81,7 @@ docker_nginx_proxy_docker_gen_container_volumes:
 ############################################################################
 ## ACME companion
 ############################################################################
+docker_nginx_proxy_acme_companion_enabled: true
 docker_nginx_proxy_acme_companion_container_image: nginxproxy/acme-companion
 docker_nginx_proxy_acme_companion_container_name: nginx-proxy-acme
 docker_nginx_proxy_acme_companion_container_restart_policy: always
@@ -147,4 +148,3 @@ docker_nginx_proxy_wildcard_symlinker_enabled: "{{ docker_nginx_proxy_wildcard_e
 docker_nginx_proxy_wildcard_symlinker_container_name: nginx-proxy-wildcard-symlinker
 docker_nginx_proxy_wildcard_symlinker_container_image: nginxproxy/docker-gen:latest
 docker_nginx_proxy_templates_dir: "{{ docker_nginx_proxy_datadir }}/templates"
-docker_nginx_proxy_wildcard_template_name: wildcard-symlinks.tmpl

@@ -121,6 +121,7 @@
         network_mode: "{{ wildcard_cert_issuer_network_mode }}"
         networks: "{{ wildcard_cert_issuer_container_networks }}"
         env: "{{ wildcard_cert_issuer_container_env }}"
+        ports: "{{ wildcard_cert_issuer_container_ports }}"
         volumes:
           - "{{ wildcard_cert_issuer_letsencrypt_dir }}:/etc/letsencrypt"
           - "{{ wildcard_cert_issuer_work_dir }}:/var/lib/letsencrypt"
