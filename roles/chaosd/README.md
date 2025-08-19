@@ -39,6 +39,13 @@ Default variables are defined in [defaults/main.yaml](defaults/main.yaml)
 
 - `chaosd_sha256`: SHA256 checksum for download verification (default: `auto_fill_sha256_here`)
 
+### Docker Nginx Proxy Integration
+
+- `chaosd_nginx_proxy_enabled`: Enable integration with docker_nginx_proxy role (default: `false`)
+- `chaosd_nginx_proxy_hostname`: Hostname for proxy routing (default: `"chaos.{{ inventory_hostname }}"`)
+
+**Note**: This integration adds nginx configuration files directly to the existing `docker_nginx_proxy` infrastructure to route traffic to the chaosd systemd service. The `docker_nginx_proxy` role must be deployed first.
+
 ## Dependencies
 
 None
@@ -65,6 +72,29 @@ None
         chaosd_port: 8080
         chaosd_iface: ens3
         chaosd_version: v1.4.0
+```
+
+### With Docker Nginx Proxy Integration
+
+First deploy the docker_nginx_proxy role, then chaosd:
+
+```yaml
+- hosts: chaos_nodes
+  become: true
+  roles:
+    - role: ethpandaops.general.docker_nginx_proxy
+      vars:
+        docker_nginx_proxy_default_email: "admin@yourdomain.com"
+    - role: ethpandaops.general.chaosd
+      vars:
+        chaosd_nginx_proxy_enabled: true
+        chaosd_nginx_proxy_hostname: "chaos.{{ inventory_hostname }}.yourdomain.com"
+        chaosd_nginx_proxy_container_env:
+          VIRTUAL_HOST: "chaos.{{ inventory_hostname }}.yourdomain.com"
+          VIRTUAL_PORT: "80"
+          VIRTUAL_PROTO: "http"
+          LETSENCRYPT_HOST: "chaos.{{ inventory_hostname }}.yourdomain.com"
+          LETSENCRYPT_EMAIL: "admin@yourdomain.com"
 ```
 
 ### Removal

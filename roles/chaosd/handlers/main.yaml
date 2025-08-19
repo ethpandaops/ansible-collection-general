@@ -6,3 +6,9 @@
   ansible.builtin.systemd:
     name: chaosd
     state: restarted
+
+- name: Reload nginx-proxy
+  community.docker.docker_container:
+    name: "{{ docker_nginx_proxy_container_name | default('nginx-proxy') }}"
+    restart: true
+  ignore_errors: true

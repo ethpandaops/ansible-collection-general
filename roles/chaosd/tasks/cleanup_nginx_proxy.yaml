@@ -1,0 +1,11 @@
+- name: Remove chaosd nginx location configuration file
+  ansible.builtin.file:
+    path: "{{ docker_nginx_proxy_datadir | default('/opt/nginx-proxy') }}/vhost/{{ chaosd_nginx_proxy_hostname | default(ansible_fqdn) }}.chaosd.conf"
+    state: absent
+
+- name: Remove include directive for chaosd config from main vhost location file
+  ansible.builtin.lineinfile:
+    path: "{{ docker_nginx_proxy_datadir | default('/opt/nginx-proxy') }}/vhost/{{ chaosd_nginx_proxy_hostname | default(ansible_fqdn) }}_location"
+    line: "include /etc/nginx/vhost.d/{{ chaosd_nginx_proxy_hostname | default(ansible_fqdn) }}.chaosd.conf;"
+    state: absent
+  notify: Reload nginx-proxy

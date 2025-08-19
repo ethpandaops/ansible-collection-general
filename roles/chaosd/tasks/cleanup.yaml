@@ -20,3 +20,8 @@
   ansible.builtin.file:
     path: /tmp/chaosd.tar.gz
     state: absent
+
+- name: Cleanup nginx proxy for chaosd
+  ansible.builtin.include_tasks:
+    file: cleanup_nginx_proxy.yaml
+  when: chaosd_nginx_proxy_enabled | bool
