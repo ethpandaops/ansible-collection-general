@@ -1,0 +1,90 @@
+- name: Create issuer directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0750"
+  loop:
+    - "{{ wildcard_cert_issuer_letsencrypt_dir }}"
+    - "{{ wildcard_cert_issuer_work_dir }}"
+    - "{{ wildcard_cert_issuer_config_dir }}"
+
+- name: Read TSIG key file (bind key syntax)
+  ansible.builtin.slurp:
+    path: "{{ wildcard_cert_issuer_tsig_keyfile }}"
+  register: tsig_keyfile_slurp
+
+- name: Extract TSIG secret (base64) from key file
+  ansible.builtin.set_fact:
+    wildcard_cert_issuer_tsig_secret: >-
+      {{
+        (tsig_keyfile_slurp.content | b64decode)
+        | regex_search('secret\s+"([^"]+)"', '\1')
+      }}
+
+- name: Fail if TSIG secret could not be parsed
+  ansible.builtin.fail:
+    msg: "Could not parse TSIG secret from {{ wildcard_cert_issuer_tsig_keyfile }}"
+  when: not wildcard_cert_issuer_tsig_secret
+
+- name: Render RFC2136 credentials
+  ansible.builtin.copy:
+    dest: "{{ wildcard_cert_issuer_config_dir }}/rfc2136.ini"
+    mode: "0600"
+    content: |
+      dns_rfc2136_server = {{ wildcard_cert_issuer_rfc2136_server }}
+      dns_rfc2136_port = {{ wildcard_cert_issuer_rfc2136_port }}
+      dns_rfc2136_name = {{ wildcard_cert_issuer_tsig_name }}
+      dns_rfc2136_secret = {{ wildcard_cert_issuer_tsig_secret }}
+      dns_rfc2136_algorithm = {{ wildcard_cert_issuer_tsig_algorithm | upper }}
+
+- name: Check if live cert already exists
+  ansible.builtin.stat:
+    path: "{{ wildcard_cert_issuer_letsencrypt_dir }}/live/{{ wildcard_cert_issuer_base_domain }}/fullchain.pem"
+  register: live_cert_stat
+
+- name: One-time initial issuance
+  community.docker.docker_container:
+    name: "{{ wildcard_cert_issuer_container_name }}-init"
+    image: "{{ wildcard_cert_issuer_image }}"
+    auto_remove: true
+    detach: false
+    network_mode: "{{ wildcard_cert_issuer_network_mode }}"
+    volumes:
+      - "{{ wildcard_cert_issuer_letsencrypt_dir }}:/etc/letsencrypt"
+      - "{{ wildcard_cert_issuer_work_dir }}:/var/lib/letsencrypt"
+      - "{{ wildcard_cert_issuer_config_dir }}:/config:ro"
+    command: >-
+      sh -c '
+      certbot certonly --non-interactive --agree-tos
+        --email {{ wildcard_cert_issuer_email | quote }}
+        --server {{ wildcard_cert_issuer_acme_directory | quote }}
+        --dns-rfc2136
+        --dns-rfc2136-credentials /config/rfc2136.ini
+        --dns-rfc2136-propagation-seconds 15
+        {% for d in wildcard_cert_issuer_domains -%} -d {{ d }} {% endfor -%}
+      '
+  when: not live_cert_stat.stat.exists
+
+- name: Start renewal loop container
+  community.docker.docker_container:
+    name: "{{ wildcard_cert_issuer_container_name }}"
+    image: "{{ wildcard_cert_issuer_image }}"
+    state: started
+    restart_policy: always
+    network_mode: "{{ wildcard_cert_issuer_network_mode }}"
+    volumes:
+      - "{{ wildcard_cert_issuer_letsencrypt_dir }}:/etc/letsencrypt"
+      - "{{ wildcard_cert_issuer_work_dir }}:/var/lib/letsencrypt"
+      - "{{ wildcard_cert_issuer_config_dir }}:/config:ro"
+    command: >-
+      sh -c '
+      while true; do
+        certbot renew
+          --server {{ wildcard_cert_issuer_acme_directory | quote }}
+          --dns-rfc2136
+          --dns-rfc2136-credentials /config/rfc2136.ini
+          --dns-rfc2136-propagation-seconds 15
+        ;
+        sleep {{ wildcard_cert_issuer_renew_interval }};
+      done
+      '

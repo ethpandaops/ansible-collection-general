@@ -1,0 +1,31 @@
+
+# Container basics
+wildcard_cert_issuer_container_name: cert_issuer
+wildcard_cert_issuer_image: certbot/dns-rfc2136:latest
+
+wildcard_cert_issuer_network_mode: host  # so certbot can reach bind on 127.0.0.1:53
+
+# Persistent paths
+wildcard_cert_issuer_letsencrypt_dir: /data/cert_issuer/letsencrypt
+wildcard_cert_issuer_work_dir: /data/cert_issuer/work
+wildcard_cert_issuer_config_dir: /data/cert_issuer/config
+
+# ACME
+wildcard_cert_issuer_email: "ops@example.com"
+wildcard_cert_issuer_acme_directory: "https://acme-v02.api.letsencrypt.org/directory"
+
+# Domains to request (base + wildcard)
+wildcard_cert_issuer_base_domain: ""
+wildcard_cert_issuer_domains:
+  - "{{ wildcard_cert_issuer_base_domain }}"
+  - "*.{{ wildcard_cert_issuer_base_domain }}"
+
+# RFC2136 (BIND TSIG)
+wildcard_cert_issuer_rfc2136_server: "127.0.0.1"
+wildcard_cert_issuer_rfc2136_port: 53
+wildcard_cert_issuer_tsig_name: "acme-wildcard"
+wildcard_cert_issuer_tsig_algorithm: "hmac-sha256"
+wildcard_cert_issuer_tsig_keyfile: "/data/dns_server/keys/acme-wildcard.key"
+
+# Renewal interval in seconds
+wildcard_cert_issuer_renew_interval: 43200   # 12h

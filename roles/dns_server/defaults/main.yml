@@ -46,6 +46,7 @@ dns_server_container_volumes:
 dns_server_container_stop_timeout: "600"
 dns_server_container_pull: false
 dns_server_container_networks: "{{ dns_server_docker_networks }}"
+dns_server_container_network_mode: "host"
 dns_server_container_command: ""
 
 dns_server_config: |
