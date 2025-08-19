@@ -116,3 +116,35 @@ docker_nginx_proxy_acme_monitor_container_volumes:
 docker_nginx_proxy_acme_monitor_container_env:
   ACME_CONTAINER_NAME: "{{ docker_nginx_proxy_acme_companion_container_name }}"
   WAIT_TIME: "{{ docker_nginx_proxy_acme_monitor_wait_time | string }}"
+
+############################################################################
+## Wildcard loader
+############################################################################
+# Enable automatically when all three are set (leave unset to disable)
+# docker_nginx_proxy_wildcard_cert: "s.pk-devnet-0.ethpandaops.io"
+# docker_nginx_proxy_wildcard_cert_url: "http://cert.s.template-devnet-0.ethpandaops.io/s.template-devnet-0.ethpandaops.io-latest.tar.enc"
+# docker_nginx_proxy_wildcard_cert_psk: "USE-ANSIBLE-VAULT"
+docker_nginx_proxy_wildcard_cert: ""
+docker_nginx_proxy_wildcard_cert_url: ""
+docker_nginx_proxy_wildcard_cert_psk: ""
+
+# Derived flag: true iff all three are set
+docker_nginx_proxy_wildcard_enabled: >-
+  {{
+    (docker_nginx_proxy_wildcard_cert is defined) and
+    (docker_nginx_proxy_wildcard_cert_url is defined) and
+    (docker_nginx_proxy_wildcard_cert_psk is defined)
+  }}
+
+# Fetcher sidecar
+docker_nginx_proxy_wildcard_fetcher_enabled: "{{ docker_nginx_proxy_wildcard_enabled | bool }}"
+docker_nginx_proxy_wildcard_fetcher_container_name: nginx-proxy-wildcard-fetcher
+docker_nginx_proxy_wildcard_fetcher_container_image: alpine:3.20
+docker_nginx_proxy_wildcard_fetch_interval: 14400    # seconds (4h)
+
+# Symlinker (docker-gen) sidecar
+docker_nginx_proxy_wildcard_symlinker_enabled: "{{ docker_nginx_proxy_wildcard_enabled | bool }}"
+docker_nginx_proxy_wildcard_symlinker_container_name: nginx-proxy-wildcard-symlinker
+docker_nginx_proxy_wildcard_symlinker_container_image: nginxproxy/docker-gen:latest
+docker_nginx_proxy_templates_dir: "{{ docker_nginx_proxy_datadir }}/templates"
+docker_nginx_proxy_wildcard_template_name: wildcard-symlinks.tmpl

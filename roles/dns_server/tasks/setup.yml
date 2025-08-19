@@ -51,8 +51,7 @@
     image: "{{ dns_server_container_image }}"
     command: >-
       /bin/sh -c
-      "tsig-keygen -a {{ dns_server_tsig_algorithm }} {{ dns_server_tsig_key_name }}
-       > /keys/{{ dns_server_tsig_key_name }}.key &&
+      "tsig-keygen -a {{ dns_server_tsig_algorithm }} {{ dns_server_tsig_key_name }} 2> /keys/{{ dns_server_tsig_key_name }}.key &&
        chown {{ dns_server_uid }}:{{ dns_server_uid }} /keys/{{ dns_server_tsig_key_name }}.key &&
        chmod 0640 /keys/{{ dns_server_tsig_key_name }}.key"
     auto_remove: true

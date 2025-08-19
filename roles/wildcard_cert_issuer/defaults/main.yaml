@@ -16,6 +16,8 @@ wildcard_cert_issuer_publish_dir: /data/cert_issuer/publish
 # ACME
 wildcard_cert_issuer_email: "ops@example.com"
 wildcard_cert_issuer_acme_directory: "https://acme-v02.api.letsencrypt.org/directory"
+wildcard_cert_issuer_acme_eab_kid: ""
+wildcard_cert_issuer_acme_eab_hmac_key: ""
 
 # Domains to request (base + wildcard)
 wildcard_cert_issuer_base_domain: ""
