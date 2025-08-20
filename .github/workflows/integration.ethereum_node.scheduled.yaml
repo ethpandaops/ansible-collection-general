@@ -18,8 +18,12 @@ jobs:
       fail-fast: false
       matrix:
         consensus: [teku, prysm, lighthouse, nimbus, lodestar, grandine]
-        execution: [geth, nethermind, erigon, besu, ethereumjs, reth, nimbusel]
     runs-on: self-hosted-ghr-size-m-x64
+    env:
+      PY_COLORS: '1'
+      CONSENSUS_CLIENT: ${{ matrix.consensus }}
+      DOCKERHUB_USERNAME: ethpandaops
+      DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -30,15 +34,16 @@ jobs:
           dockerhub_username: ethpandaops
           dockerhub_password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Run molecule
+      - name: Test ${{ matrix.consensus }} with all execution clients
         working-directory: ansible_collections/ethpandaops/general/roles/ethereum_node
-        run: molecule test
-        env:
-          PY_COLORS: '1'
-          EXECUTION_CLIENT: ${{ matrix.execution }}
-          CONSENSUS_CLIENT: ${{ matrix.consensus }}
-          DOCKERHUB_USERNAME: ethpandaops
-          DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          execution_clients=(geth nethermind erigon besu ethereumjs reth nimbusel)
+
+          for execution_client in "${execution_clients[@]}"; do
+            echo "::group::Testing ${{ matrix.consensus }} with $execution_client"
+            EXECUTION_CLIENT=$execution_client molecule test
+            echo "::endgroup::"
+          done
   notify:
     name: Discord Notification
     runs-on: ubuntu-latest
