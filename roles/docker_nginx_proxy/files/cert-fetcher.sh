@@ -40,7 +40,7 @@ while true; do
 
       mv -f "$NEWCRT" "$CURCRT"
       mv -f "$NEWKEY" "$CURKEY"
-      [ -s "$NEWCHN" ] && mv -f "$NEWCHN" "$CURCHN" || true
+      mv -f "$NEWCHN" "$CURCHN" || true
 
       if command -v docker >/dev/null 2>&1; then
         docker kill -s HUP "${NGINX_PROXY_NAME}" >/dev/null 2>&1 || true
