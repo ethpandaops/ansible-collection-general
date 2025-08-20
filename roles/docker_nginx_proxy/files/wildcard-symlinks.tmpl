@@ -5,6 +5,7 @@ set -eu
 CERTSDIR="/etc/nginx/certs"
 WCRT="{{ env "WILDCARD_CERT_NAME" }}.crt"
 WKEY="{{ env "WILDCARD_CERT_NAME" }}.key"
+WCHN="{{ env "WILDCARD_CERT_NAME" }}.chain.pem"
 
 if [ ! -s "$CERTSDIR/$WCRT" ] || [ ! -s "$CERTSDIR/$WKEY" ]; then
   echo "Wildcard cert/key not present: $CERTSDIR/$WCRT / $CERTSDIR/$WKEY" >&2
