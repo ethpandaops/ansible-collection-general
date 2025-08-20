@@ -1,7 +1,6 @@
 # Chaosd configuration
 chaosd_version: "v1.4.0"
 chaosd_sha256: "auto_fill_sha256_here"
-chaosd_port: 31767  # External port (with nginx-proxy auth)
 chaosd_internal_port: 31768  # Internal port where chaosd actually runs
 chaosd_install_dir: /opt/chaosd
 chaosd_state: present  # present or absent
@@ -16,4 +15,3 @@ chaosd_iface: eth0
 # nginx-proxy integration
 chaosd_nginx_proxy_enabled: false
 chaosd_nginx_proxy_hostname: "{{ ansible_fqdn }}"
-docker_nginx_proxy_container: "nginx-proxy"

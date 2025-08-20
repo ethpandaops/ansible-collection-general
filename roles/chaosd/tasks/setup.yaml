@@ -6,6 +6,13 @@
     owner: root
     group: root
 
+- name: Install ipset package for network chaos experiments
+  ansible.builtin.apt:
+    name: ipset
+    state: present
+    update_cache: true
+  when: ansible_os_family == "Debian"
+
 - name: Set architecture suffix
   ansible.builtin.set_fact:
     chaosd_arch: "{{ 'amd64' if ansible_facts.architecture == 'x86_64' else 'arm64' }}"

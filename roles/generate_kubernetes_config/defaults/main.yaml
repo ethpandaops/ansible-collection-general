@@ -46,6 +46,10 @@ gen_kubernetes_config_dora_frontend_with_submit_deposits: true # noqa var-naming
 gen_kubernetes_config_dora_frontend_with_submit_el_requests: true # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_dora_execution_snooper_port: false # noqa var-naming[no-role-prefix]
 
+# Chaos Mesh configuration  
+gen_kubernetes_config_chaos_mesh_dashboard_security_mode: false # noqa var-naming[no-role-prefix]
+gen_kubernetes_config_chaos_mesh_chaosd_security_mode: false # noqa var-naming[no-role-prefix]
+
 gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
   config:
     valuesTemplatePath: templates/config.yaml.j2
@@ -174,3 +178,9 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
       - name: xatu-cl-mimicry
         repository: https://ethpandaops.github.io/ethereum-helm-charts
         version: 0.0.2
+  chaos-mesh:
+    valuesTemplatePath: templates/chaos-mesh.yaml.j2
+    dependencies:
+      - name: chaos-mesh
+        repository: https://ethpandaops.github.io/general-helm-charts
+        version: 0.1.0
