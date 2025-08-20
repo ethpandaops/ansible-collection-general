@@ -3,5 +3,5 @@
     name: systemd-resolved
     state: restarted
 - name: Reload DNS server container
-  ansible.builtin.command: "docker kill --signal=HUP {{ dns_server_container_name }}"
+  ansible.builtin.command: "docker restart {{ dns_server_container_name }}"
   changed_when: true

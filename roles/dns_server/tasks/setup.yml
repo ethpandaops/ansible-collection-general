@@ -60,7 +60,7 @@
 
 - name: Generate DNS zone serial
   ansible.builtin.set_fact:
-    dns_zone_serial: "{{ ansible_date_time.date | regex_replace('-', '') }}01"
+    dns_server_serial_min_base: "{{ ansible_date_time.date | regex_replace('-', '') }}01"
 
 - name: Create dns server config file
   ansible.builtin.copy:
@@ -71,16 +71,13 @@
     mode: '0644'
   notify: Reload DNS server container
 
-- name: Create dns server zone file
-  ansible.builtin.copy:
-    content: "{{ item.content }}"
-    dest: "{{ dns_server_zonesdir }}/{{ item.zone }}"
-    owner: "{{ dns_server_uid }}"
-    group: "{{ dns_server_uid }}"
-    mode: '0644'
+- name: Build and install zones with monotonic serials (master only)
+  ansible.builtin.include_tasks: "{{ role_path }}/tasks/zone_update.yml"
   loop: "{{ dns_server_zones }}"
+  loop_control:
+    loop_var: zone_item
+    label: "{{ zone_item.zone }}"
   when: dns_server_is_master | bool
-  notify: Reload DNS server container
 
 - name: Setup dns server
   community.docker.docker_container:
