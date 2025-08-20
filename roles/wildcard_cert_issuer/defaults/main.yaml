@@ -103,7 +103,7 @@ wildcard_cert_issuer_deploy_hook: |
   trap 'rm -rf "${TMP}"' EXIT
   cp "${LE}/fullchain.pem" "${TMP}/${BASE}.crt"
   cp "${LE}/privkey.pem"   "${TMP}/${BASE}.key"
-  awk 'BEGIN{b=0} /BEGIN CERTIFICATE/{b++} b>=2{print}' "${LE}/fullchain.pem" > "${TMP}/${BASE}.chain.pem"
+  cp "${LE}/chain.pem"     "${TMP}/${BASE}.chain.pem"
 
   tar -C "${TMP}" -czf "${TMP}/${BASE}.tar.gz" "${BASE}.crt" "${BASE}.key" "${BASE}.chain.pem"
 
