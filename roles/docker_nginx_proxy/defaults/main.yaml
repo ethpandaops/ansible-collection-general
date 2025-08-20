@@ -182,6 +182,8 @@ docker_nginx_proxy_cert_linker_container_image: nginxproxy/docker-gen:latest
 docker_nginx_proxy_cert_linker_container_restart_policy: always
 docker_nginx_proxy_cert_linker_container_network_mode: default
 docker_nginx_proxy_cert_linker_container_networks: []
+docker_nginx_proxy_cert_linker_container_volumes_from:
+  - "{{ docker_nginx_proxy_container_name }}"
 docker_nginx_proxy_cert_linker_container_base_volumes:
   - "/var/run/docker.sock:/tmp/docker.sock:ro"
   - "{{ docker_nginx_proxy_templates_dir }}/wildcard-symlinks.tmpl:/etc/docker-gen/templates/wildcard-symlinks.tmpl:ro"
