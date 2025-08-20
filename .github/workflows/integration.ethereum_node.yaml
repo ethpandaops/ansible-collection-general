@@ -110,12 +110,6 @@ jobs:
       matrix:
         consensus: ${{ fromJSON(needs.vars.outputs.CONSENSUS_CLIENTS) }}
     runs-on: self-hosted-ghr-size-s-x64
-    env:
-      PY_COLORS: '1'
-      ANSIBLE_DOCKER_TIMEOUT: '120'
-      CONSENSUS_CLIENT: ${{ matrix.consensus }}
-      DOCKERHUB_USERNAME: ethpandaops
-      DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -128,6 +122,12 @@ jobs:
 
       - name: Test ${{ matrix.consensus }} with all execution clients
         working-directory: ansible_collections/ethpandaops/general/roles/ethereum_node
+        env:
+          PY_COLORS: '1'
+          ANSIBLE_DOCKER_TIMEOUT: '120'
+          CONSENSUS_CLIENT: ${{ matrix.consensus }}
+          DOCKERHUB_USERNAME: ethpandaops
+          DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
         run: |
           execution_clients_json='${{ needs.vars.outputs.EXECUTION_CLIENTS }}'
           execution_clients=($(echo $execution_clients_json | jq -r '.[]'))
