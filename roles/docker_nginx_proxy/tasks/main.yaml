@@ -134,62 +134,41 @@
     mode: "0644"
   when: docker_nginx_proxy_wildcard_enabled | bool
 
-- name: Create certificate fetcher script
+- name: Create certificate loader script
   ansible.builtin.copy:
-    src: cert-fetcher.sh
-    dest: "{{ docker_nginx_proxy_datadir }}/cert-fetcher.sh"
+    src: cert-loader.sh
+    dest: "{{ docker_nginx_proxy_datadir }}/cert-loader.sh"
     owner: "{{ docker_nginx_proxy_user }}"
     group: "{{ docker_nginx_proxy_user }}"
     mode: "0750"
   when: docker_nginx_proxy_wildcard_enabled | bool
 
-# --- wildcard: fetcher (curl+openssl+tar) to pull bundle and reload proxy
-- name: Run wildcard cert fetcher sidecar
+# --- wildcard: certificate loader to pull bundle and reload proxy
+- name: Run certificate loader sidecar
   community.general.docker_container:
-    name: "{{ docker_nginx_proxy_wildcard_fetcher_container_name }}"
-    image: "{{ docker_nginx_proxy_wildcard_fetcher_container_image }}"
+    name: "{{ docker_nginx_proxy_cert_loader_container_name }}"
+    image: "{{ docker_nginx_proxy_cert_loader_container_image }}"
     image_name_mismatch: recreate
-    restart_policy: always
-    volumes:
-      - /var/run/docker.sock:/tmp/docker.sock:ro
-      - "{{ docker_nginx_proxy_datadir }}/certs:/etc/nginx/certs"
-      - "{{ docker_nginx_proxy_datadir }}/cert-fetcher.sh:/cert-fetcher.sh:ro"
-    env:
-      WILDCARD_CERT_URL: "{{ docker_nginx_proxy_wildcard_cert_url }}"
-      WILDCARD_CERT_PSK: "{{ docker_nginx_proxy_wildcard_cert_psk }}"
-      WILDCARD_CERT_NAME: "{{ docker_nginx_proxy_wildcard_cert }}"
-      FETCH_INTERVAL: "{{ docker_nginx_proxy_wildcard_fetch_interval | string }}"
-      NGINX_PROXY_NAME: "{{ docker_nginx_proxy_container_name }}"
-      CERT_UID: "{{ docker_nginx_proxy_user_meta.uid | string }}"
-      CERT_GID: "{{ docker_nginx_proxy_gid_cmd.stdout | trim }}"
-    command:
-      - "/cert-fetcher.sh"
-      
+    restart_policy: "{{ docker_nginx_proxy_cert_loader_container_restart_policy }}"
+    networks: "{{ docker_nginx_proxy_cert_loader_container_networks }}"
+    network_mode: "{{ docker_nginx_proxy_cert_loader_container_network_mode }}"
+    volumes: "{{ docker_nginx_proxy_cert_loader_container_volumes }}"
+    volumes_from: "{{ docker_nginx_proxy_cert_loader_container_volumes_from }}"
+    env: "{{ docker_nginx_proxy_cert_loader_container_env }}"
+    command: "{{ docker_nginx_proxy_cert_loader_container_command }}"
   when: docker_nginx_proxy_wildcard_enabled | bool
 
 # --- wildcard: docker-gen watcher to create per-vhost symlinks & HUP nginx-proxy
 - name: Run docker-gen symlinker for wildcard cert
   community.general.docker_container:
-    name: "{{ docker_nginx_proxy_wildcard_symlinker_container_name }}"
-    image: "{{ docker_nginx_proxy_wildcard_symlinker_container_image }}"
+    name: "{{ docker_nginx_proxy_cert_linker_container_name }}"
+    image: "{{ docker_nginx_proxy_cert_linker_container_image }}"
     image_name_mismatch: recreate
-    restart_policy: always
-    # share volumes with nginx-proxy for /etc/nginx/certs
-    volumes_from:
-      - "{{ docker_nginx_proxy_container_name }}"
-    volumes:
-      - "/var/run/docker.sock:/tmp/docker.sock:ro"
-      - "{{ docker_nginx_proxy_templates_dir }}/wildcard-symlinks.tmpl:/etc/docker-gen/templates/wildcard-symlinks.tmpl:ro"
-      - "{{ docker_nginx_proxy_datadir }}/certs:/etc/nginx/certs"
-    env:
-      WILDCARD_CERT_NAME: "{{ docker_nginx_proxy_wildcard_cert }}"
-    command:
-      - /usr/local/bin/docker-gen
-      - -watch
-      - -notify
-      - /bin/sh /etc/nginx/certs/wildcard-symlinks.sh
-      - -notify-sighup
-      - "{{ docker_nginx_proxy_container_name }}"
-      - /etc/docker-gen/templates/wildcard-symlinks.tmpl
-      - /etc/nginx/certs/wildcard-symlinks.sh
+    restart_policy: "{{ docker_nginx_proxy_cert_linker_container_restart_policy }}"
+    networks: "{{ docker_nginx_proxy_cert_linker_container_networks }}"
+    network_mode: "{{ docker_nginx_proxy_cert_linker_container_network_mode }}"
+    volumes_from: "{{ docker_nginx_proxy_cert_linker_container_volumes_from }}"
+    volumes: "{{ docker_nginx_proxy_cert_linker_container_volumes }}"
+    env: "{{ docker_nginx_proxy_cert_linker_container_env }}"
+    command: "{{ docker_nginx_proxy_cert_linker_container_command }}"
   when: docker_nginx_proxy_wildcard_enabled | bool
