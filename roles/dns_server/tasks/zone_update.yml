@@ -16,24 +16,28 @@
     mode: "0644"
   register: staged_copy
 
+- name: Check if zone was changed
+  ansible.builtin.set_fact:
+    need_zone_update: "{{ staged_copy.changed }}"
+
 - name: Slurp existing productive zone (if present)
   ansible.builtin.slurp:
     path: "{{ dest_zone }}"
   register: existing_zone_b64
   ignore_errors: true
-  when: staged_copy.changed
+  when: need_zone_update
 
 - name: Slurp staged zone
   ansible.builtin.slurp:
     path: "{{ stage_zone }}"
   register: staged_zone_b64
-  when: staged_copy.changed
+  when: need_zone_update
 
 - name: Decode zone contents
   ansible.builtin.set_fact:
     existing_zone_content: "{{ (existing_zone_b64.content | default('') | b64decode) | default('') }}"
-    staged_zone_content:   "{{ (staged_zone_b64.content   | b64decode) }}"
-  when: staged_copy.changed
+    staged_zone_content: "{{ (staged_zone_b64.content | b64decode) }}"
+  when: need_zone_update
 
 - name: Extract current serial from existing zone
   ansible.builtin.set_fact:
@@ -44,7 +48,7 @@
           | default(['0']))
         | first
       }}
-  when: staged_copy.changed
+  when: need_zone_update
 
 - name: Compute next serial (monotonic)
   ansible.builtin.set_fact:
@@ -55,7 +59,7 @@
           (dns_server_serial_min_base | int)
         ] | max
       }}
-  when: staged_copy.changed
+  when: need_zone_update
 
 - name: Build final productive zone content (with correct serial)
   ansible.builtin.set_fact:
@@ -64,14 +68,15 @@
         staged_zone_content
         | regex_replace('(?m)^\s*\d+(?=\s*;\s*Serial)', next_serial|string)
       }}
-  when: staged_copy.changed
+  when: need_zone_update
 
-- debug:
+- name: Show zone update details
+  ansible.builtin.debug:
     msg:
       - "zone name:  {{ zone_name }}"
       - "old serial: {{ existing_serial }}"
       - "new serial: {{ next_serial }}"
-  when: staged_copy.changed
+  when: need_zone_update
 
 - name: Install productive zone when changed or missing
   ansible.builtin.copy:
@@ -80,5 +85,5 @@
     owner: "{{ dns_server_uid }}"
     group: "{{ dns_server_uid }}"
     mode: "0644"
-  when: staged_copy.changed
+  when: need_zone_update
   notify: Reload DNS server container

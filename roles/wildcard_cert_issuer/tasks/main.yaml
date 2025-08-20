@@ -1,4 +1,6 @@
-- block:
+- name: Create issuer directories
+  when: wildcard_cert_issuer_enabled | bool
+  block:
     - name: Create issuer directories
       ansible.builtin.file:
         path: "{{ item }}"
@@ -85,4 +87,3 @@
         volumes: "{{ wildcard_cert_issuer_container_volumes }}"
         entrypoint: ["/bin/sh", "-c"]
         command: ["{{ wildcard_cert_issuer_container_renew_command }}"]
-  when: wildcard_cert_issuer_enabled | bool

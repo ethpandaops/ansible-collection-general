@@ -149,7 +149,8 @@ docker_nginx_proxy_cert_loader_container_base_volumes:
 docker_nginx_proxy_cert_loader_container_extra_volumes: []
 docker_nginx_proxy_cert_loader_container_volumes_from:
   - "{{ docker_nginx_proxy_container_name }}"
-docker_nginx_proxy_cert_loader_container_volumes: "{{ docker_nginx_proxy_cert_loader_container_base_volumes + docker_nginx_proxy_cert_loader_container_extra_volumes }}"
+docker_nginx_proxy_cert_loader_container_volumes: |
+  {{ docker_nginx_proxy_cert_loader_container_base_volumes + docker_nginx_proxy_cert_loader_container_extra_volumes }}
 docker_nginx_proxy_cert_loader_container_base_env:
   WILDCARD_CERT_URL: "{{ docker_nginx_proxy_wildcard_cert_url }}"
   WILDCARD_CERT_PSK: "{{ docker_nginx_proxy_wildcard_cert_psk }}"
@@ -159,14 +160,16 @@ docker_nginx_proxy_cert_loader_container_base_env:
   CERT_UID: "{{ docker_nginx_proxy_user_meta.uid | string }}"
   CERT_GID: "{{ docker_nginx_proxy_gid_cmd.stdout | trim }}"
 docker_nginx_proxy_cert_loader_container_extra_env: {}
-docker_nginx_proxy_cert_loader_container_env: "{{ docker_nginx_proxy_cert_loader_container_base_env + docker_nginx_proxy_cert_loader_container_extra_env }}"
+docker_nginx_proxy_cert_loader_container_env: |
+  {{ docker_nginx_proxy_cert_loader_container_base_env + docker_nginx_proxy_cert_loader_container_extra_env }}
 docker_nginx_proxy_cert_loader_container_restart_policy: always
 docker_nginx_proxy_cert_loader_container_network_mode: default
 docker_nginx_proxy_cert_loader_container_networks: []
 docker_nginx_proxy_cert_loader_container_base_command:
   - "/cert-loader.sh"
 docker_nginx_proxy_cert_loader_container_extra_command: []
-docker_nginx_proxy_cert_loader_container_command: "{{ docker_nginx_proxy_cert_loader_container_base_command + docker_nginx_proxy_cert_loader_container_extra_command }}"
+docker_nginx_proxy_cert_loader_container_command: |
+  {{ docker_nginx_proxy_cert_loader_container_base_command + docker_nginx_proxy_cert_loader_container_extra_command }}
 
 # Symlinker (docker-gen) sidecar
 docker_nginx_proxy_cert_linker_enabled: "{{ docker_nginx_proxy_wildcard_enabled | bool }}"
@@ -180,11 +183,13 @@ docker_nginx_proxy_cert_linker_container_base_volumes:
   - "{{ docker_nginx_proxy_templates_dir }}/wildcard-symlinks.tmpl:/etc/docker-gen/templates/wildcard-symlinks.tmpl:ro"
   - "{{ docker_nginx_proxy_datadir }}/certs:/etc/nginx/certs"
 docker_nginx_proxy_cert_linker_container_extra_volumes: []
-docker_nginx_proxy_cert_linker_container_volumes: "{{ docker_nginx_proxy_cert_linker_container_base_volumes + docker_nginx_proxy_cert_linker_container_extra_volumes }}"
+docker_nginx_proxy_cert_linker_container_volumes: |
+  {{ docker_nginx_proxy_cert_linker_container_base_volumes + docker_nginx_proxy_cert_linker_container_extra_volumes }}
 docker_nginx_proxy_cert_linker_container_base_env:
   WILDCARD_CERT_NAME: "{{ docker_nginx_proxy_wildcard_cert }}"
 docker_nginx_proxy_cert_linker_container_extra_env: {}
-docker_nginx_proxy_cert_linker_container_env: "{{ docker_nginx_proxy_cert_linker_container_base_env + docker_nginx_proxy_cert_linker_container_extra_env }}"
+docker_nginx_proxy_cert_linker_container_env: |
+  {{ docker_nginx_proxy_cert_linker_container_base_env + docker_nginx_proxy_cert_linker_container_extra_env }}
 docker_nginx_proxy_cert_linker_container_base_command:
   - /usr/local/bin/docker-gen
   - -watch
@@ -195,5 +200,5 @@ docker_nginx_proxy_cert_linker_container_base_command:
   - /etc/docker-gen/templates/wildcard-symlinks.tmpl
   - /etc/nginx/certs/wildcard-symlinks.sh
 docker_nginx_proxy_cert_linker_container_extra_command: []
-docker_nginx_proxy_cert_linker_container_command: "{{ docker_nginx_proxy_cert_linker_container_base_command + docker_nginx_proxy_cert_linker_container_extra_command }}"
-
+docker_nginx_proxy_cert_linker_container_command: |
+  {{ docker_nginx_proxy_cert_linker_container_base_command + docker_nginx_proxy_cert_linker_container_extra_command }}

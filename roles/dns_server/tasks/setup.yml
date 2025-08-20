@@ -1,4 +1,3 @@
-
 - name: Ensure DNSStubListener=no is set in resolved.conf
   ansible.builtin.lineinfile:
     path: /etc/systemd/resolved.conf
