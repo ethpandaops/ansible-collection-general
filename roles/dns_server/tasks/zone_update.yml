@@ -20,12 +20,19 @@
   ansible.builtin.set_fact:
     need_zone_update: "{{ staged_copy.changed }}"
 
+# Check whether the productive zone exists
+- name: Stat productive zone file
+  ansible.builtin.stat:
+    path: "{{ dest_zone }}"
+  register: dest_zone_stat
+  when: need_zone_update
+
 - name: Slurp existing productive zone (if present)
   ansible.builtin.slurp:
     path: "{{ dest_zone }}"
   register: existing_zone_b64
   ignore_errors: true
-  when: need_zone_update
+  when: need_zone_update and dest_zone_stat.stat.exists
 
 - name: Slurp staged zone
   ansible.builtin.slurp:
@@ -36,7 +43,7 @@
 - name: Decode zone contents
   ansible.builtin.set_fact:
     existing_zone_content: "{{ (existing_zone_b64.content | default('') | b64decode) | default('') }}"
-    staged_zone_content: "{{ (staged_zone_b64.content | b64decode) }}"
+    staged_zone_content:   "{{ (staged_zone_b64.content   | b64decode) }}"
   when: need_zone_update
 
 - name: Extract current serial from existing zone
@@ -44,9 +51,8 @@
     existing_serial: >-
       {{
         (existing_zone_content
-          | regex_search('\(\s*(\d+)\s*;\s*Serial', '\1')
-          | default(['0']))
-        | first
+         | regex_search('\(\s*(\d+)\s*;\s*Serial', '\1'))
+         | default('0', true)
       }}
   when: need_zone_update
 
