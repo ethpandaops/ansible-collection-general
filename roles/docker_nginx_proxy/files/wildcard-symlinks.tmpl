@@ -24,7 +24,7 @@ fi
 # relative symlinks so absolute mount paths don't matter
 ln -sf "./$WCRT" "$CERTSDIR/{{ $host }}.crt"
 ln -sf "./$WKEY" "$CERTSDIR/{{ $host }}.key"
-ln -sf "./$WCHN" "$CERTSDIR/{{ $host }}.chain.pem"
+ln -sf "./$WCHN" "$CERTSDIR/{{ $host }}.chain.pem" || true
     {{ end }}
   {{ end }}
 {{ end }}
