@@ -53,7 +53,7 @@ dns_server_config: |
     listen-on-v6 { any; };
     allow-query { any; };
 
-    // Global default — we’ll set per-zone allow-transfer/notify below
+    // Global default — we'll set per-zone allow-transfer/notify below
     allow-transfer { none; };
   };
 
