@@ -58,12 +58,12 @@ wildcard_cert_issuer_container_init_command: >-
   --non-interactive --agree-tos
   --email {{ wildcard_cert_issuer_email | quote }}
   --server {{ wildcard_cert_issuer_acme_directory | quote }}
-  {%- if wildcard_cert_issuer_acme_eab_kid %} --eab-kid {{ wildcard_cert_issuer_acme_eab_kid | quote }}{% endif -%}
-  {%- if wildcard_cert_issuer_acme_eab_hmac_key %} --eab-hmac-key {{ wildcard_cert_issuer_acme_eab_hmac_key | quote }}{% endif %}
+  {% if wildcard_cert_issuer_acme_eab_kid %} --eab-kid {{ wildcard_cert_issuer_acme_eab_kid | quote }}{% endif %}
+  {% if wildcard_cert_issuer_acme_eab_hmac_key %} --eab-hmac-key {{ wildcard_cert_issuer_acme_eab_hmac_key | quote }}{% endif %}
   --dns-rfc2136
   --dns-rfc2136-credentials /config/rfc2136.ini
   --dns-rfc2136-propagation-seconds {{ wildcard_cert_issuer_dns_propagation_seconds }}
-  {%- if wildcard_cert_issuer_publish_enabled | bool %} --deploy-hook "/config/package_and_encrypt.sh"{% endif %}
+  {% if wildcard_cert_issuer_publish_enabled | bool %} --deploy-hook "/config/package_and_encrypt.sh"{% endif %}
   {{ wildcard_cert_issuer_container_init_extra_args | join(' ') }} {% for d in wildcard_cert_issuer_domains -%} -d {{ d }} {% endfor -%}
 wildcard_cert_issuer_container_renew_extra_args: []
 wildcard_cert_issuer_container_renew_command: |
@@ -79,7 +79,7 @@ wildcard_cert_issuer_container_renew_command: |
       {% if wildcard_cert_issuer_acme_eab_hmac_key %}--eab-hmac-key {{ wildcard_cert_issuer_acme_eab_hmac_key | quote }}{% endif %} \
       --dns-rfc2136 --dns-rfc2136-credentials /config/rfc2136.ini \
       --dns-rfc2136-propagation-seconds {{ wildcard_cert_issuer_dns_propagation_seconds }} \
-{%- if wildcard_cert_issuer_publish_enabled | bool %} --deploy-hook /config/package_and_encrypt.sh{% endif %} \
+  {%- if wildcard_cert_issuer_publish_enabled | bool %} --deploy-hook /config/package_and_encrypt.sh{% endif %} \
       {{ wildcard_cert_issuer_container_renew_extra_args | join(' ') }}
     sleep {{ wildcard_cert_issuer_renew_interval }}
   done
