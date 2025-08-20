@@ -161,8 +161,11 @@ docker_nginx_proxy_cert_loader_container_base_env:
   CERT_UID: "{{ docker_nginx_proxy_user_meta.uid | string }}"
   CERT_GID: "{{ docker_nginx_proxy_gid_cmd.stdout | trim }}"
 docker_nginx_proxy_cert_loader_container_extra_env: {}
-docker_nginx_proxy_cert_loader_container_env: |
-  {{ docker_nginx_proxy_cert_loader_container_base_env + docker_nginx_proxy_cert_loader_container_extra_env }}
+docker_nginx_proxy_cert_loader_container_env: >-
+  {{
+    (docker_nginx_proxy_cert_loader_container_base_env  | default({}))
+    | combine(docker_nginx_proxy_cert_loader_container_extra_env | default({}), recursive=True)
+  }}
 docker_nginx_proxy_cert_loader_container_restart_policy: always
 docker_nginx_proxy_cert_loader_container_network_mode: default
 docker_nginx_proxy_cert_loader_container_networks: []
@@ -189,8 +192,11 @@ docker_nginx_proxy_cert_linker_container_volumes: |
 docker_nginx_proxy_cert_linker_container_base_env:
   WILDCARD_CERT_NAME: "{{ docker_nginx_proxy_wildcard_cert }}"
 docker_nginx_proxy_cert_linker_container_extra_env: {}
-docker_nginx_proxy_cert_linker_container_env: |
-  {{ docker_nginx_proxy_cert_linker_container_base_env + docker_nginx_proxy_cert_linker_container_extra_env }}
+docker_nginx_proxy_cert_linker_container_env: >-
+  {{
+    (docker_nginx_proxy_cert_linker_container_base_env  | default({}))
+    | combine(docker_nginx_proxy_cert_linker_container_extra_env | default({}), recursive=True)
+  }}
 docker_nginx_proxy_cert_linker_container_base_command:
   - /usr/local/bin/docker-gen
   - -watch
