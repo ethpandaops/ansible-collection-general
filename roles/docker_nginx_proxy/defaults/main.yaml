@@ -3,6 +3,7 @@ docker_nginx_proxy_datadir: /opt/nginx-proxy
 docker_nginx_proxy_default_email: "mail@yourdomain.tld"
 docker_nginx_proxy_conf_tmpl: >-
   {{ lookup('ansible.builtin.url', 'https://raw.githubusercontent.com/nginx-proxy/nginx-proxy/main/nginx.tmpl', split_lines=False) }}
+docker_nginx_proxy_templates_dir: "{{ docker_nginx_proxy_datadir }}/templates"
 
 ############################################################################
 ## Nginx
