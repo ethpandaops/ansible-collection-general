@@ -12,18 +12,20 @@ You can choose and switch between client you want to run by changing the followi
 It uses the following underyling roles:
 
 ### Consensus layer clients
-- [ethpandaops.general.teku](../teku)
-- [ethpandaops.general.prysm](../prysm)
-- [ethpandaops.general.nimbus](../nimbus)
-- [ethpandaops.general.lodestar](../lodestar)
+- [ethpandaops.general.grandine](../grandine)
 - [ethpandaops.general.lighthouse](../lighthouse)
+- [ethpandaops.general.lodestar](../lodestar)
+- [ethpandaops.general.nimbus](../nimbus)
+- [ethpandaops.general.prysm](../prysm)
+- [ethpandaops.general.teku](../teku)
 
 ### Execution layer clients
 - [ethpandaops.general.besu](../besu)
-- [ethpandaops.general.geth](../geth)
 - [ethpandaops.general.erigon](../erigon)
+- [ethpandaops.general.geth](../geth)
 - [ethpandaops.general.nethermind](../nethermind)
-- [ethpandaops.general.ethereumjs](../ethereumjs)
+- [ethpandaops.general.nimbusel](../nimbusel)
+- [ethpandaops.general.reth](../reth)
 
 ### Facts discovery
 - [ethpandaops.general.ethereum_node_fact_discovery](../ethereum_node_fact_discovery)
