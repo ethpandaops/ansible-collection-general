@@ -50,39 +50,7 @@
       ansible.builtin.copy:
         dest: "{{ wildcard_cert_issuer_config_dir }}/package_and_encrypt.sh"
         mode: "0755"
-        content: |
-          #!/usr/bin/env sh
-          set -eu
-
-          BASE="{{ wildcard_cert_issuer_base_domain }}"
-          LE="/etc/letsencrypt/live/${BASE}"
-          OUT="/publish"
-          CIPHER="{{ wildcard_cert_issuer_publish_cipher }}"
-          PSK="{{ wildcard_cert_issuer_publish_psk }}"
-          TS="$(date +%Y%m%d%H%M%S)"
-
-          [ -f "${LE}/fullchain.pem" ] || exit 0
-          [ -f "${LE}/privkey.pem" ]   || exit 0
-
-          TMP="$(mktemp -d)"
-          trap 'rm -rf "${TMP}"' EXIT
-          cp "${LE}/fullchain.pem" "${TMP}/${BASE}.crt"
-          cp "${LE}/privkey.pem"   "${TMP}/${BASE}.key"
-          awk 'BEGIN{b=0} /BEGIN CERTIFICATE/{b++} b>=2{print}' "${LE}/fullchain.pem" > "${TMP}/${BASE}.chain.pem"
-
-          tar -C "${TMP}" -czf "${TMP}/${BASE}.tar.gz" "${BASE}.crt" "${BASE}.key" "${BASE}.chain.pem"
-
-          umask 0077
-          ENC="${OUT}/${BASE}-${TS}.tar.enc"
-
-          # Encrypt with PSK
-          echo -n "$PSK" | \
-            openssl enc -${CIPHER} -salt -pass stdin \
-              -in "${TMP}/${BASE}.tar.gz" -out "${ENC}"
-
-          cp "${ENC}" "${OUT}/${BASE}-latest.tar.enc"
-          chmod 0644 "${ENC}"
-          chmod 0644 "${OUT}/${BASE}-latest.tar.enc"
+        content: "{{ wildcard_cert_issuer_deploy_hook }}"
       when: wildcard_cert_issuer_publish_enabled | bool
 
     - name: Check if live cert already exists
@@ -94,25 +62,14 @@
       community.docker.docker_container:
         name: "{{ wildcard_cert_issuer_container_name }}-init"
         image: "{{ wildcard_cert_issuer_image }}"
-        auto_remove: false
+        auto_remove: true
         detach: false
-        network_mode: "{{ wildcard_cert_issuer_network_mode }}"
-        volumes:
-          - "{{ wildcard_cert_issuer_letsencrypt_dir }}:/etc/letsencrypt"
-          - "{{ wildcard_cert_issuer_work_dir }}:/var/lib/letsencrypt"
-          - "{{ wildcard_cert_issuer_config_dir }}:/config:ro"
-          - "{{ wildcard_cert_issuer_publish_dir }}:/publish"
-        command: >-
-          certonly --non-interactive --agree-tos
-            --email {{ wildcard_cert_issuer_email | quote }}
-            --server {{ wildcard_cert_issuer_acme_directory | quote }}
-            {% if wildcard_cert_issuer_acme_eab_kid %}--eab-kid {{ wildcard_cert_issuer_acme_eab_kid | quote }}{% endif %}
-            {% if wildcard_cert_issuer_acme_eab_hmac_key %}--eab-hmac-key {{ wildcard_cert_issuer_acme_eab_hmac_key | quote }}{% endif %}
-            --dns-rfc2136
-            --dns-rfc2136-credentials /config/rfc2136.ini
-            --dns-rfc2136-propagation-seconds {{ wildcard_cert_issuer_dns_propagation_seconds }}
-            {% if wildcard_cert_issuer_publish_enabled | bool %}--deploy-hook "/config/package_and_encrypt.sh"{% endif %}
-            {% for d in wildcard_cert_issuer_domains -%} -d {{ d }} {% endfor -%}
+        network_mode: "{{ wildcard_cert_issuer_container_network_mode }}"
+        networks: "{{ wildcard_cert_issuer_container_networks }}"
+        env: "{{ wildcard_cert_issuer_container_env }}"
+        ports: "{{ wildcard_cert_issuer_container_ports }}"
+        volumes: "{{ wildcard_cert_issuer_container_volumes }}"
+        command: "{{ wildcard_cert_issuer_container_init_command }}"
       when: not live_cert_stat.stat.exists
 
     - name: Start renewal loop container (with deploy-hook)
@@ -121,33 +78,11 @@
         image: "{{ wildcard_cert_issuer_image }}"
         state: started
         restart_policy: always
-        network_mode: "{{ wildcard_cert_issuer_network_mode }}"
+        network_mode: "{{ wildcard_cert_issuer_container_network_mode }}"
         networks: "{{ wildcard_cert_issuer_container_networks }}"
         env: "{{ wildcard_cert_issuer_container_env }}"
         ports: "{{ wildcard_cert_issuer_container_ports }}"
-        volumes:
-          - "{{ wildcard_cert_issuer_letsencrypt_dir }}:/etc/letsencrypt"
-          - "{{ wildcard_cert_issuer_work_dir }}:/var/lib/letsencrypt"
-          - "{{ wildcard_cert_issuer_config_dir }}:/config:ro"
-          - "{{ wildcard_cert_issuer_publish_dir }}:/publish"
+        volumes: "{{ wildcard_cert_issuer_container_volumes }}"
         entrypoint: ["/bin/sh", "-c"]
-        command: ['
-          {% if wildcard_cert_issuer_publish_enabled | bool %}
-          cd /publish &&
-            (python3 -m http.server {{ wildcard_cert_issuer_publish_port }} ||
-            python  -m SimpleHTTPServer {{ wildcard_cert_issuer_publish_port }}) &
-          {% endif %}
-          while true; do
-            certbot renew
-              --server {{ wildcard_cert_issuer_acme_directory | quote }}
-              {% if wildcard_cert_issuer_acme_eab_kid %}--eab-kid {{ wildcard_cert_issuer_acme_eab_kid | quote }}{% endif %}
-              {% if wildcard_cert_issuer_acme_eab_hmac_key %}--eab-hmac-key {{ wildcard_cert_issuer_acme_eab_hmac_key | quote }}{% endif %}
-              --dns-rfc2136
-              --dns-rfc2136-credentials /config/rfc2136.ini
-              --dns-rfc2136-propagation-seconds {{ wildcard_cert_issuer_dns_propagation_seconds }}
-              {% if wildcard_cert_issuer_publish_enabled | bool %}--deploy-hook /config/package_and_encrypt.sh{% endif %}
-            ;
-            sleep {{ wildcard_cert_issuer_renew_interval }};
-          done
-          ']
+        command: ["{{ wildcard_cert_issuer_container_renew_command }}"]
   when: wildcard_cert_issuer_enabled | bool

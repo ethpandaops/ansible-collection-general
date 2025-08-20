@@ -4,7 +4,6 @@ wildcard_cert_issuer_enabled: true
 # Container basics
 wildcard_cert_issuer_container_name: cert_issuer
 wildcard_cert_issuer_image: certbot/dns-rfc2136:latest
-wildcard_cert_issuer_network_mode: host  # so certbot can reach bind on 127.0.0.1:53
 
 # Persistent paths
 wildcard_cert_issuer_letsencrypt_dir: /data/cert_issuer/letsencrypt
@@ -42,6 +41,80 @@ wildcard_cert_issuer_publish_psk: "CHANGEME-SET-A-RANDOM-SECRET"
 wildcard_cert_issuer_publish_cipher: aes-256-cbc
 
 # Container properties
+wildcard_cert_issuer_container_network_mode: "default"
 wildcard_cert_issuer_container_networks: []
 wildcard_cert_issuer_container_ports: []
 wildcard_cert_issuer_container_env: {}
+wildcard_cert_issuer_container_extra_volumes: []
+wildcard_cert_issuer_container_base_volumes:
+  - "{{ wildcard_cert_issuer_letsencrypt_dir }}:/etc/letsencrypt"
+  - "{{ wildcard_cert_issuer_work_dir }}:/var/lib/letsencrypt"
+  - "{{ wildcard_cert_issuer_config_dir }}:/config:ro"
+  - "{{ wildcard_cert_issuer_publish_dir }}:/publish"
+wildcard_cert_issuer_container_volumes: "{{ wildcard_cert_issuer_container_base_volumes + wildcard_cert_issuer_container_extra_volumes }}"
+wildcard_cert_issuer_container_init_extra_args: []
+wildcard_cert_issuer_container_init_command: >-
+  certonly 
+    --non-interactive --agree-tos
+    --email {{ wildcard_cert_issuer_email | quote }}
+    --server {{ wildcard_cert_issuer_acme_directory | quote }}
+    {% if wildcard_cert_issuer_acme_eab_kid %}--eab-kid {{ wildcard_cert_issuer_acme_eab_kid | quote }}{% endif %}
+    {% if wildcard_cert_issuer_acme_eab_hmac_key %}--eab-hmac-key {{ wildcard_cert_issuer_acme_eab_hmac_key | quote }}{% endif %}
+    --dns-rfc2136
+    --dns-rfc2136-credentials /config/rfc2136.ini
+    --dns-rfc2136-propagation-seconds {{ wildcard_cert_issuer_dns_propagation_seconds }}
+    {% if wildcard_cert_issuer_publish_enabled | bool %}--deploy-hook "/config/package_and_encrypt.sh"{% endif %} {{ wildcard_cert_issuer_container_init_extra_args | join(' ') }}
+    {% for d in wildcard_cert_issuer_domains -%} -d {{ d }} {% endfor -%}
+wildcard_cert_issuer_container_renew_extra_args: []
+wildcard_cert_issuer_container_renew_command: |
+  {% if wildcard_cert_issuer_publish_enabled | bool %}
+  cd /publish &&
+    (python3 -m http.server {{ wildcard_cert_issuer_publish_port }} ||
+    python  -m SimpleHTTPServer {{ wildcard_cert_issuer_publish_port }}) &
+  {% endif %}
+  while true; do
+    certbot renew \
+      --server {{ wildcard_cert_issuer_acme_directory | quote }} \
+      {% if wildcard_cert_issuer_acme_eab_kid %}--eab-kid {{ wildcard_cert_issuer_acme_eab_kid | quote }}{% endif %} \
+      {% if wildcard_cert_issuer_acme_eab_hmac_key %}--eab-hmac-key {{ wildcard_cert_issuer_acme_eab_hmac_key | quote }}{% endif %} \
+      --dns-rfc2136 --dns-rfc2136-credentials /config/rfc2136.ini \
+      --dns-rfc2136-propagation-seconds {{ wildcard_cert_issuer_dns_propagation_seconds }} \
+      {% if wildcard_cert_issuer_publish_enabled | bool %}--deploy-hook /config/package_and_encrypt.sh{% endif %} \
+      {{ wildcard_cert_issuer_container_renew_extra_args | join(' ') }}
+    sleep {{ wildcard_cert_issuer_renew_interval }}
+  done
+
+# deploy-hook script
+wildcard_cert_issuer_deploy_hook: |
+  #!/usr/bin/env sh
+  set -eu
+
+  BASE="{{ wildcard_cert_issuer_base_domain }}"
+  LE="/etc/letsencrypt/live/${BASE}"
+  OUT="/publish"
+  CIPHER="{{ wildcard_cert_issuer_publish_cipher }}"
+  PSK="{{ wildcard_cert_issuer_publish_psk }}"
+  TS="$(date +%Y%m%d%H%M%S)"
+
+  [ -f "${LE}/fullchain.pem" ] || exit 0
+  [ -f "${LE}/privkey.pem" ]   || exit 0
+
+  TMP="$(mktemp -d)"
+  trap 'rm -rf "${TMP}"' EXIT
+  cp "${LE}/fullchain.pem" "${TMP}/${BASE}.crt"
+  cp "${LE}/privkey.pem"   "${TMP}/${BASE}.key"
+  awk 'BEGIN{b=0} /BEGIN CERTIFICATE/{b++} b>=2{print}' "${LE}/fullchain.pem" > "${TMP}/${BASE}.chain.pem"
+
+  tar -C "${TMP}" -czf "${TMP}/${BASE}.tar.gz" "${BASE}.crt" "${BASE}.key" "${BASE}.chain.pem"
+
+  umask 0077
+  ENC="${OUT}/${BASE}-${TS}.tar.enc"
+
+  # Encrypt with PSK
+  echo -n "$PSK" | \
+    openssl enc -${CIPHER} -salt -pass stdin \
+      -in "${TMP}/${BASE}.tar.gz" -out "${ENC}"
+
+  cp "${ENC}" "${OUT}/${BASE}-latest.tar.enc"
+  chmod 0644 "${ENC}"
+  chmod 0644 "${OUT}/${BASE}-latest.tar.enc"
