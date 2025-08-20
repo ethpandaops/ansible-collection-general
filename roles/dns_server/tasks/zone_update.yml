@@ -43,7 +43,7 @@
 - name: Decode zone contents
   ansible.builtin.set_fact:
     existing_zone_content: "{{ (existing_zone_b64.content | default('') | b64decode) | default('') }}"
-    staged_zone_content:   "{{ (staged_zone_b64.content   | b64decode) }}"
+    staged_zone_content: "{{ (staged_zone_b64.content | b64decode) }}"
   when: need_zone_update
 
 - name: Extract current serial from existing zone
