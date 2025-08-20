@@ -76,7 +76,7 @@ dora:
     archive: true
     priority: 1
 {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
-  - url: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@bn.{{ hostvars[host]['inventory_hostname'] }}.{{ network_server_subdomain }}
+  - url: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_beacon_prefix }}{{ hostvars[host]['inventory_hostname'] }}.{{ network_server_subdomain }}
     name: {{ hostvars[host]['inventory_hostname'] }}
     priority: -1
 {% if 'lighthouse' in hostvars[host]['inventory_hostname'] %}
@@ -90,11 +90,11 @@ dora:
     archive: true
     priority: 1
 {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
-  - url: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@rpc.{{ hostvars[host]['inventory_hostname'] }}.{{ network_server_subdomain }}
+  - url: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_rpc_prefix }}{{ hostvars[host]['inventory_hostname'] }}.{{ network_server_subdomain }}
     name: {{ hostvars[host]['inventory_hostname'] }}
     priority: -1
     archive: false
 {% if gen_kubernetes_config_dora_execution_snooper_port %}
-    engineSnooperUrl: http://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@rpc.{{ hostvars[host]['inventory_hostname'] }}.{{ network_subdomain }}:{{ gen_kubernetes_config_dora_execution_snooper_port }}
+    engineSnooperUrl: http://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_rpc_prefix }}{{ hostvars[host]['inventory_hostname'] }}.{{ network_server_subdomain }}:{{ gen_kubernetes_config_dora_execution_snooper_port }}
 {% endif %}
 {% endfor %}

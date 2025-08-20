@@ -5,7 +5,6 @@ wildcard_cert_issuer_enabled: true
 wildcard_cert_issuer_container_name: cert_issuer
 wildcard_cert_issuer_image: certbot/dns-rfc2136:latest
 wildcard_cert_issuer_network_mode: host  # so certbot can reach bind on 127.0.0.1:53
-wildcard_cert_issuer_publish_port: 80
 
 # Persistent paths
 wildcard_cert_issuer_letsencrypt_dir: /data/cert_issuer/letsencrypt
@@ -13,17 +12,17 @@ wildcard_cert_issuer_work_dir: /data/cert_issuer/work
 wildcard_cert_issuer_config_dir: /data/cert_issuer/config
 wildcard_cert_issuer_publish_dir: /data/cert_issuer/publish
 
-# ACME
-wildcard_cert_issuer_email: "ops@example.com"
-wildcard_cert_issuer_acme_directory: "https://acme-v02.api.letsencrypt.org/directory"
-wildcard_cert_issuer_acme_eab_kid: ""
-wildcard_cert_issuer_acme_eab_hmac_key: ""
-
 # Domains to request (base + wildcard)
 wildcard_cert_issuer_base_domain: ""
 wildcard_cert_issuer_domains:
   - "{{ wildcard_cert_issuer_base_domain }}"
   - "*.{{ wildcard_cert_issuer_base_domain }}"
+
+# ACME
+wildcard_cert_issuer_email: "ops@example.com"
+wildcard_cert_issuer_acme_directory: "https://acme-v02.api.letsencrypt.org/directory"
+wildcard_cert_issuer_acme_eab_kid: ""
+wildcard_cert_issuer_acme_eab_hmac_key: ""
 
 # RFC2136 (BIND TSIG)
 wildcard_cert_issuer_rfc2136_server: "127.0.0.1"
@@ -31,26 +30,18 @@ wildcard_cert_issuer_rfc2136_port: 53
 wildcard_cert_issuer_tsig_name: "acme-wildcard"
 wildcard_cert_issuer_tsig_algorithm: "hmac-sha256"
 wildcard_cert_issuer_tsig_keyfile: "/data/dns_server/keys/acme-wildcard.key"
+wildcard_cert_issuer_dns_propagation_seconds: 15
 
 # Renewal interval in seconds
 wildcard_cert_issuer_renew_interval: 43200   # 12h
 
-# --- Packaging / publishing ---
+# Publishing (serve issued wildcard cert via HTTP, encrypted with PSK)
 wildcard_cert_issuer_publish_enabled: true
+wildcard_cert_issuer_publish_port: 80
+wildcard_cert_issuer_publish_psk: "CHANGEME-SET-A-RANDOM-SECRET"
+wildcard_cert_issuer_publish_cipher: aes-256-cbc
 
-# Pre-shared key (same value across all nodes)
-# Example: "2c0bfc9f1e0f7f67a5b9234c2e34..."
-wildcard_cert_issuer_psk: "CHANGEME-SET-A-RANDOM-SECRET"
-
-# Output filename pattern: <base-domain>-<timestamp>.tar.enc and symlink to latest
-wildcard_cert_issuer_publish_latest_symlink: true
-
-# OpenSSL cipher (authenticated encryption)
-wildcard_cert_issuer_openssl_cipher: aes-256-gcm
-
-# Extra seconds to wait for DNS propagation (can be tuned)
-wildcard_cert_issuer_dns_propagation_seconds: 15
-
+# Container properties
 wildcard_cert_issuer_container_networks: []
 wildcard_cert_issuer_container_ports: []
 wildcard_cert_issuer_container_env: {}

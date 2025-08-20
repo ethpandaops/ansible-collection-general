@@ -12,10 +12,10 @@
 
     - name: Assert PSK is set when publishing is enabled
       ansible.builtin.fail:
-        msg: "wildcard_cert_issuer_psk must be set (use Ansible Vault) when publishing is enabled."
+        msg: "wildcard_cert_issuer_publish_psk must be set (use Ansible Vault) when publishing is enabled."
       when:
-        - wildcard_cert_issuer_publish_enabled | default(true)
-        - (wildcard_cert_issuer_psk is not defined or wildcard_cert_issuer_psk | length == 0)
+        - wildcard_cert_issuer_publish_enabled | bool
+        - (wildcard_cert_issuer_publish_psk is not defined or wildcard_cert_issuer_publish_psk | length == 0)
 
     - name: Read TSIG key file (bind key syntax)
       ansible.builtin.slurp:
@@ -57,8 +57,8 @@
           BASE="{{ wildcard_cert_issuer_base_domain }}"
           LE="/etc/letsencrypt/live/${BASE}"
           OUT="/publish"
-          CIPHER="aes-256-cbc"
-          PSK="{{ wildcard_cert_issuer_psk }}"
+          CIPHER="{{ wildcard_cert_issuer_publish_cipher }}"
+          PSK="{{ wildcard_cert_issuer_publish_psk }}"
           TS="$(date +%Y%m%d%H%M%S)"
 
           [ -f "${LE}/fullchain.pem" ] || exit 0
@@ -83,6 +83,7 @@
           cp "${ENC}" "${OUT}/${BASE}-latest.tar.enc"
           chmod 0644 "${ENC}"
           chmod 0644 "${OUT}/${BASE}-latest.tar.enc"
+      when: wildcard_cert_issuer_publish_enabled | bool
 
     - name: Check if live cert already exists
       ansible.builtin.stat:
@@ -110,7 +111,7 @@
             --dns-rfc2136
             --dns-rfc2136-credentials /config/rfc2136.ini
             --dns-rfc2136-propagation-seconds {{ wildcard_cert_issuer_dns_propagation_seconds }}
-            --deploy-hook "/config/package_and_encrypt.sh"
+            {% if wildcard_cert_issuer_publish_enabled | bool %}--deploy-hook "/config/package_and_encrypt.sh"{% endif %}
             {% for d in wildcard_cert_issuer_domains -%} -d {{ d }} {% endfor -%}
       when: not live_cert_stat.stat.exists
 
@@ -131,9 +132,11 @@
           - "{{ wildcard_cert_issuer_publish_dir }}:/publish"
         entrypoint: ["/bin/sh", "-c"]
         command: ['
+          {% if wildcard_cert_issuer_publish_enabled | bool %}
           cd /publish &&
             (python3 -m http.server {{ wildcard_cert_issuer_publish_port }} ||
             python  -m SimpleHTTPServer {{ wildcard_cert_issuer_publish_port }}) &
+          {% endif %}
           while true; do
             certbot renew
               --server {{ wildcard_cert_issuer_acme_directory | quote }}
@@ -142,7 +145,7 @@
               --dns-rfc2136
               --dns-rfc2136-credentials /config/rfc2136.ini
               --dns-rfc2136-propagation-seconds {{ wildcard_cert_issuer_dns_propagation_seconds }}
-              --deploy-hook /config/package_and_encrypt.sh
+              {% if wildcard_cert_issuer_publish_enabled | bool %}--deploy-hook /config/package_and_encrypt.sh{% endif %}
             ;
             sleep {{ wildcard_cert_issuer_renew_interval }};
           done

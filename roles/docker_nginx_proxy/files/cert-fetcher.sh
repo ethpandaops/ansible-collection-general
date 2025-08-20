@@ -1,5 +1,6 @@
 #!/bin/sh
 set -eu
+sleep 10
 while true; do
   TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' INT TERM EXIT
   echo "Fetching ${WILDCARD_CERT_URL}"
@@ -45,6 +46,8 @@ while true; do
         docker kill -s HUP "${NGINX_PROXY_NAME}" >/dev/null 2>&1 || true
       fi
     fi
+
+    rm -rf "$EXTD"
   fi
   sleep "${FETCH_INTERVAL}"
 done
