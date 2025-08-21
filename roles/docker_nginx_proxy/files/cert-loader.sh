@@ -1,10 +1,17 @@
 #!/bin/sh
 set -eu
 sleep 10
+
+# Exponential backoff configuration
+BACKOFF_DELAY=30       # Start with 30 seconds
+MAX_BACKOFF_DELAY=300  # Max 5 minutes
+
 while true; do
   TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' INT TERM EXIT
   echo "Fetching ${WILDCARD_CERT_URL}"
   if curl -fsS -o "${TMP}/bundle.enc" "${WILDCARD_CERT_URL}"; then
+    BACKOFF_DELAY=30
+    
     # decrypt (matches issuer's openssl enc -aes-256-cbc -salt)
     openssl enc -d -aes-256-cbc -pass env:WILDCARD_CERT_PSK \
       -in "${TMP}/bundle.enc" -out "${TMP}/bundle.tar.gz"
@@ -48,6 +55,17 @@ while true; do
     fi
 
     rm -rf "$EXTD"
+    
+    sleep "${FETCH_INTERVAL}"
+  else
+    # Request failed, use exponential backoff
+    echo "Failed to fetch certificate, waiting ${BACKOFF_DELAY} seconds before retry..."
+    sleep "${BACKOFF_DELAY}"
+    
+    # Double the delay for next failure, up to max
+    BACKOFF_DELAY=$((BACKOFF_DELAY * 2))
+    if [ "${BACKOFF_DELAY}" -gt "${MAX_BACKOFF_DELAY}" ]; then
+      BACKOFF_DELAY="${MAX_BACKOFF_DELAY}"
+    fi
   fi
-  sleep "${FETCH_INTERVAL}"
 done
