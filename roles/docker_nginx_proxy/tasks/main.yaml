@@ -2,6 +2,10 @@
   ansible.builtin.user:
     name: "{{ docker_nginx_proxy_user }}"
   register: docker_nginx_proxy_user_meta
+- name: Get primary GID of nginx-proxy user
+  ansible.builtin.command: id -g {{ docker_nginx_proxy_user }}
+  register: docker_nginx_proxy_gid_cmd
+  changed_when: false
 
 - name: Create required directories
   ansible.builtin.file:
@@ -85,6 +89,7 @@
     volumes: "{{ docker_nginx_proxy_acme_companion_container_volumes }}"
     env: "{{ docker_nginx_proxy_acme_companion_container_env }}"
     volumes_from: "{{ docker_nginx_proxy_docker_gen_container_volumes_from }}"
+  when: docker_nginx_proxy_acme_companion_enabled | bool
 
 - name: Create ACME monitor script
   ansible.builtin.copy:
@@ -108,3 +113,62 @@
     volumes: "{{ docker_nginx_proxy_acme_monitor_container_volumes + [docker_nginx_proxy_datadir + '/acme-monitor.sh:/acme-monitor.sh:ro'] }}"
     env: "{{ docker_nginx_proxy_acme_monitor_container_env }}"
   when: docker_nginx_proxy_acme_monitor_enabled
+
+# --- wildcard: ensure templates dir
+- name: Create docker-gen templates dir (wildcard)
+  ansible.builtin.file:
+    path: "{{ docker_nginx_proxy_templates_dir }}"
+    state: directory
+    owner: "{{ docker_nginx_proxy_user }}"
+    group: "{{ docker_nginx_proxy_user }}"
+    mode: "0750"
+  when: docker_nginx_proxy_wildcard_enabled | bool
+
+# --- wildcard: install symlink template
+- name: Create wildcard symlink template
+  ansible.builtin.copy:
+    src: wildcard-symlinks.tmpl
+    dest: "{{ docker_nginx_proxy_templates_dir }}/wildcard-symlinks.tmpl"
+    owner: "{{ docker_nginx_proxy_user }}"
+    group: "{{ docker_nginx_proxy_user }}"
+    mode: "0644"
+  when: docker_nginx_proxy_wildcard_enabled | bool
+
+- name: Create certificate loader script
+  ansible.builtin.copy:
+    src: cert-loader.sh
+    dest: "{{ docker_nginx_proxy_datadir }}/cert-loader.sh"
+    owner: "{{ docker_nginx_proxy_user }}"
+    group: "{{ docker_nginx_proxy_user }}"
+    mode: "0750"
+  when: docker_nginx_proxy_wildcard_enabled | bool
+
+# --- wildcard: certificate loader to pull bundle and reload proxy
+- name: Run certificate loader sidecar
+  community.general.docker_container:
+    name: "{{ docker_nginx_proxy_cert_loader_container_name }}"
+    image: "{{ docker_nginx_proxy_cert_loader_container_image }}"
+    image_name_mismatch: recreate
+    restart_policy: "{{ docker_nginx_proxy_cert_loader_container_restart_policy }}"
+    networks: "{{ docker_nginx_proxy_cert_loader_container_networks }}"
+    network_mode: "{{ docker_nginx_proxy_cert_loader_container_network_mode }}"
+    volumes: "{{ docker_nginx_proxy_cert_loader_container_volumes }}"
+    volumes_from: "{{ docker_nginx_proxy_cert_loader_container_volumes_from }}"
+    env: "{{ docker_nginx_proxy_cert_loader_container_env }}"
+    command: "{{ docker_nginx_proxy_cert_loader_container_command }}"
+  when: docker_nginx_proxy_wildcard_enabled | bool
+
+# --- wildcard: docker-gen watcher to create per-vhost symlinks & HUP nginx-proxy
+- name: Run docker-gen symlinker for wildcard cert
+  community.general.docker_container:
+    name: "{{ docker_nginx_proxy_cert_linker_container_name }}"
+    image: "{{ docker_nginx_proxy_cert_linker_container_image }}"
+    image_name_mismatch: recreate
+    restart_policy: "{{ docker_nginx_proxy_cert_linker_container_restart_policy }}"
+    networks: "{{ docker_nginx_proxy_cert_linker_container_networks }}"
+    network_mode: "{{ docker_nginx_proxy_cert_linker_container_network_mode }}"
+    volumes_from: "{{ docker_nginx_proxy_cert_linker_container_volumes_from }}"
+    volumes: "{{ docker_nginx_proxy_cert_linker_container_volumes }}"
+    env: "{{ docker_nginx_proxy_cert_linker_container_env }}"
+    command: "{{ docker_nginx_proxy_cert_linker_container_command }}"
+  when: docker_nginx_proxy_wildcard_enabled | bool

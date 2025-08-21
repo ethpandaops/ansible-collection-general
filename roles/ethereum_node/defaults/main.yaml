@@ -68,6 +68,10 @@ ethereum_node_metrics_exporter_enabled: false
 # Xatu sentry
 ethereum_node_xatu_sentry_enabled: false
 
+# RPC/Beacon URL prefix
+ethereum_node_rpc_prefix: "rpc."
+ethereum_node_beacon_prefix: "bn."
+
 # Generated RPC/Engine/Beacon endpoints
 ethereum_node_el_engine_endpoint: >-
   http://{{ vars[ethereum_node_el + '_container_name'] | default(ethereum_node_el) }}:{{ ethereum_node_el_ports_engine }}

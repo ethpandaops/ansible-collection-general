@@ -21,7 +21,7 @@ forkmon:
   - addr: {{ default_el_endpoint }}
     name: rpc-{{ gen_kubernetes_config_ethereum_node_name }}
 {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
-  - addr: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@rpc.{{ hostvars[host]['inventory_hostname'] }}.{{ network_subdomain }}
+  - addr: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_rpc_prefix }}{{ hostvars[host]['inventory_hostname'] }}.{{ network_server_subdomain }}
     name: {{ hostvars[host]['inventory_hostname'] }}
 {% endfor %}
 {% raw %}

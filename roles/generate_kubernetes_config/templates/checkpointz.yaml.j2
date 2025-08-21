@@ -53,7 +53,7 @@ checkpointz:
 {% if ((hostvars[host]['inventory_hostname'] | string)[-2:]) == "-1" %}
 {% if hostvars[host]['ethereum_node_cl_supernode_enabled'] is not defined or hostvars[host]['ethereum_node_cl_supernode_enabled'] == True %}
         - name: {{ hostvars[host]['inventory_hostname'] }}
-          address: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@bn.{{ hostvars[host]['inventory_hostname'] }}.{{ network_subdomain }}
+          address: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@bn.{{ hostvars[host]['inventory_hostname'] }}.{{ network_server_subdomain }}
           dataProvider: true
 {% endif %}
 {% endif %}

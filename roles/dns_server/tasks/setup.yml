@@ -1,0 +1,95 @@
+- name: Ensure DNSStubListener=no is set in resolved.conf
+  ansible.builtin.lineinfile:
+    path: /etc/systemd/resolved.conf
+    regexp: '^DNSStubListener='
+    line: 'DNSStubListener=no'
+    insertafter: '^\[Resolve\]'
+    create: true
+    backup: true
+    mode: '0644'
+  when: dns_server_disable_systemd_resolved | bool
+  notify: Restart systemd-resolved
+
+- name: Immediately apply systemd-resolved changes
+  ansible.builtin.meta: flush_handlers
+  when: dns_server_disable_systemd_resolved | bool
+
+- name: Create directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0750"
+    owner: "{{ dns_server_uid }}"
+    group: "{{ dns_server_uid }}"
+  loop:
+    - "{{ dns_server_configdir }}"
+    - "{{ dns_server_zonesdir }}"
+
+- name: Create TSIG key directory
+  ansible.builtin.file:
+    path: "{{ dns_server_tsig_keysdir }}"
+    state: directory
+    mode: "0750"
+    owner: "{{ dns_server_uid }}"
+    group: "{{ dns_server_uid }}"
+
+- name: Check if TSIG key already exists
+  ansible.builtin.stat:
+    path: "{{ dns_server_tsig_keyfile }}"
+  register: tsig_key_stat
+  when: dns_server_tsig_enabled | bool
+
+- name: Generate TSIG key using bind9 container (tsig-keygen)
+  community.docker.docker_container:
+    name: "tsig-keygen-{{ dns_server_tsig_key_name }}"
+    image: "{{ dns_server_container_image }}"
+    command: >-
+      /bin/sh -c
+      "tsig-keygen -a {{ dns_server_tsig_algorithm }} {{ dns_server_tsig_key_name }} > /keys/{{ dns_server_tsig_key_name }}.key &&
+       chown {{ dns_server_uid }}:{{ dns_server_uid }} /keys/{{ dns_server_tsig_key_name }}.key &&
+       chmod 0640 /keys/{{ dns_server_tsig_key_name }}.key"
+    auto_remove: true
+    detach: false
+    state: started
+    volumes:
+      - "{{ dns_server_tsig_keysdir }}:/keys"
+  when:
+    - dns_server_tsig_enabled | bool
+    - not tsig_key_stat.stat.exists
+
+- name: Generate DNS zone serial
+  ansible.builtin.set_fact:
+    dns_server_serial_min_base: "{{ ansible_date_time.date | regex_replace('-', '') }}01"
+
+- name: Create dns server config file
+  ansible.builtin.copy:
+    content: "{{ dns_server_config }}"
+    dest: "{{ dns_server_configdir }}/named.conf"
+    owner: "{{ dns_server_uid }}"
+    group: "{{ dns_server_uid }}"
+    mode: '0644'
+  notify: Reload DNS server container
+
+- name: Build and install zones with monotonic serials (master only)
+  ansible.builtin.include_tasks: "{{ role_path }}/tasks/zone_update.yml"
+  loop: "{{ dns_server_zones }}"
+  loop_control:
+    loop_var: zone_item
+    label: "{{ zone_item.zone }}"
+  when: dns_server_is_master | bool
+
+- name: Setup dns server
+  community.docker.docker_container:
+    name: "{{ dns_server_container_name }}"
+    image: "{{ dns_server_container_image }}"
+    image_name_mismatch: recreate
+    state: 'started'
+    restart_policy: always
+    stop_timeout: "{{ dns_server_container_stop_timeout }}"
+    ports: "{{ dns_server_container_ports }}"
+    volumes: "{{ dns_server_container_volumes }}"
+    env: "{{ dns_server_container_env }}"
+    networks: "{{ dns_server_container_networks }}"
+    network_mode: "{{ dns_server_container_network_mode }}"
+    pull: "{{ dns_server_container_pull | bool }}"
+    command: "{{ dns_server_container_command }}"

@@ -1,0 +1,7 @@
+- name: Restart systemd-resolved
+  ansible.builtin.systemd:
+    name: systemd-resolved
+    state: restarted
+- name: Reload DNS server container
+  ansible.builtin.command: "docker restart {{ dns_server_container_name }}"
+  changed_when: true
