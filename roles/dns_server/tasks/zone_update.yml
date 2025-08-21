@@ -50,9 +50,10 @@
   ansible.builtin.set_fact:
     existing_serial: >-
       {{
-        (existing_zone_content
-         | regex_search('\(\s*(\d+)\s*;\s*Serial', '\1'))
-         | default('0', true)
+        ((existing_zone_content
+         | regex_search('(?i)\(\s*(\d+)\s*;\s*Serial', '\1'))
+         | default(['0'], true))
+         | first
       }}
   when: need_zone_update
 
@@ -72,7 +73,7 @@
     final_zone_content: >-
       {{
         staged_zone_content
-        | regex_replace('(?m)^\s*\d+(?=\s*;\s*Serial)', next_serial|string)
+        | regex_replace('(?mi)^\s*\d+(?=\s*;\s*Serial)', next_serial|string)
       }}
   when: need_zone_update
 
