@@ -7,6 +7,11 @@
     name: chaosd
     state: restarted
 
+- name: Restart chaos-iptables-bridge
+  ansible.builtin.systemd:
+    name: chaos-iptables-bridge
+    state: restarted
+
 - name: Reload nginx-proxy
   community.docker.docker_container:
     name: "{{ docker_nginx_proxy_container_name | default('nginx-proxy') }}"

@@ -47,6 +47,32 @@
     - ansible_virtualization_type != "docker"
   ignore_errors: true
 
+- name: Copy chaos iptables bridge script
+  ansible.builtin.template:
+    src: chaos-iptables-bridge.sh.j2
+    dest: /usr/local/sbin/chaos-iptables-bridge.sh
+    mode: "0755"
+    owner: root
+    group: root
+
+- name: Copy chaos iptables bridge systemd service
+  ansible.builtin.template:
+    src: chaos-iptables-bridge.service.j2
+    dest: /etc/systemd/system/chaos-iptables-bridge.service
+    mode: "0644"
+    owner: root
+    group: root
+  notify:
+    - Reload systemd
+    - Restart chaos-iptables-bridge
+
+- name: Enable and start chaos iptables bridge service
+  ansible.builtin.systemd:
+    name: chaos-iptables-bridge
+    enabled: true
+    state: started
+    daemon_reload: true
+
 - name: Copy systemd service file
   ansible.builtin.template:
     src: chaosd.service.j2

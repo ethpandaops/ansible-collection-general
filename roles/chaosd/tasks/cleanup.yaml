@@ -5,11 +5,26 @@
     state: stopped
   ignore_errors: true
 
-- name: Remove systemd service file
+- name: Stop and disable chaos iptables bridge service
+  ansible.builtin.systemd:
+    name: chaos-iptables-bridge
+    enabled: false
+    state: stopped
+  ignore_errors: true
+
+- name: Remove systemd service files
   ansible.builtin.file:
-    path: /etc/systemd/system/chaosd.service
+    path: "{{ item }}"
     state: absent
+  loop:
+    - /etc/systemd/system/chaosd.service
+    - /etc/systemd/system/chaos-iptables-bridge.service
   notify: Reload systemd
+
+- name: Remove chaos iptables bridge script
+  ansible.builtin.file:
+    path: /usr/local/sbin/chaos-iptables-bridge.sh
+    state: absent
 
 - name: Remove chaosd installation directory
   ansible.builtin.file:

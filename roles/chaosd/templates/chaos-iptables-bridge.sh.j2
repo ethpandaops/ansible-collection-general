@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# {{ ansible_managed }}
+set -euo pipefail
+
+# Ensure bridged packets traverse iptables (good practice on Docker hosts)
+sysctl -w net.bridge.bridge-nf-call-iptables=1 >/dev/null 2>&1 || true
+sysctl -w net.bridge.bridge-nf-call-ip6tables=1 >/dev/null 2>&1 || true
+
+# Helper: add a jump if not present
+add_jump() {
+  local table="$1" from="$2" to="$3" pos="${4:-1}"
+  iptables -t "$table" -C "$from" -j "$to" 2>/dev/null || iptables -t "$table" -I "$from" "$pos" -j "$to"
+}
+
+# Reuse Chaos Mesh chains if they exist
+has_chain() { iptables -t filter -nL "$1" >/dev/null 2>&1; }
+
+# 1) Container egress: DOCKER-USER -> CHAOS-OUTPUT
+if has_chain CHAOS-OUTPUT; then
+  add_jump filter DOCKER-USER CHAOS-OUTPUT 1
+fi
+
+# 2) Container ingress prep: DOCKER-USER -> CHAOS-INPUT
+# (This lets CHAOS-INPUT rules, when present, also run for FORWARDed traffic to containers.)
+if has_chain CHAOS-INPUT; then
+  add_jump filter DOCKER-USER CHAOS-INPUT 1
+fi
