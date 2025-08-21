@@ -15,7 +15,7 @@ prysm_ports_p2p_udp: 12000
 prysm_ports_http_beacon: 3500
 prysm_ports_metrics: 8080
 prysm_ports_grpc: 4000
-prysm_ports_pprof: 6060
+prysm_ports_pprof: 6061
 
 prysm_ipv6_enabled: false
 prysm_supernode_enabled: false
