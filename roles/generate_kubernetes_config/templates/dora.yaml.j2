@@ -69,15 +69,23 @@ dora:
       name: "Flashbots"
       url: "http://mev-relay-1.{{ network_subdomain }}:9062/"
 
+  authGroups:
+    pandaops:
+      credentials:
+        username: ""
+        password: "<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>"
+
   endpoints:
   # Rpc
   - url: {{ default_cl_endpoint }}
     name: rpc-{{ gen_kubernetes_config_ethereum_node_name }}
+    authGroup: pandaops
     archive: true
     priority: 1
 {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
-  - url: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_beacon_prefix }}{{ hostvars[host]['inventory_hostname'] }}.{{ network_server_subdomain }}
+  - url: https://{{ ethereum_node_beacon_prefix }}{{ hostvars[host]['inventory_hostname'] }}.{{ network_server_subdomain }}
     name: {{ hostvars[host]['inventory_hostname'] }}
+    authGroup: pandaops
     priority: -1
 {% if 'lighthouse' in hostvars[host]['inventory_hostname'] %}
     archive: true
@@ -87,11 +95,13 @@ dora:
   # Rpc
   - url: {{ default_el_endpoint }}
     name: rpc-{{ gen_kubernetes_config_ethereum_node_name }}
+    authGroup: pandaops
     archive: true
     priority: 1
 {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
   - url: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_rpc_prefix }}{{ hostvars[host]['inventory_hostname'] }}.{{ network_server_subdomain }}
     name: {{ hostvars[host]['inventory_hostname'] }}
+    authGroup: pandaops
     priority: -1
     archive: false
 {% if gen_kubernetes_config_dora_execution_snooper_port %}
