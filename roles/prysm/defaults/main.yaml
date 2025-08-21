@@ -48,7 +48,11 @@ prysm_container_ports_ipv6:
   - "[::]:{{ prysm_ports_p2p_udp }}:{{ prysm_ports_p2p_udp }}/udp"
 
 prysm_container_ports: >-
-  {{ prysm_container_ports_ipv4 + (prysm_container_ports_ipv6 if prysm_ipv6_enabled and ansible_default_ipv6.address is defined else []) + (prysm_container_ports_pprof if prysm_pprof_enabled else []) }}
+  {{
+    prysm_container_ports_ipv4 +
+    (prysm_container_ports_ipv6 if prysm_ipv6_enabled and ansible_default_ipv6.address is defined else []) +
+    (prysm_container_ports_pprof if prysm_pprof_enabled else [])
+  }}
 
 prysm_container_volumes:
   - "{{ prysm_datadir }}:/data"
