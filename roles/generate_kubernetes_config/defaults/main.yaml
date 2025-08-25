@@ -183,4 +183,4 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
     dependencies:
       - name: chaos-mesh
         repository: https://ethpandaops.github.io/general-helm-charts
-        version: 0.1.0
+        version: 0.0.1

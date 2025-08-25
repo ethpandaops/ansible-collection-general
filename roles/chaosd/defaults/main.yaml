@@ -1,6 +1,5 @@
 # Chaosd configuration
 chaosd_version: "v1.4.0"
-chaosd_sha256: "auto_fill_sha256_here"
 chaosd_internal_port: 31768  # Internal port where chaosd actually runs
 chaosd_install_dir: /opt/chaosd
 chaosd_state: present  # present or absent

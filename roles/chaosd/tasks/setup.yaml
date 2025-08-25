@@ -24,7 +24,6 @@
     owner: root
     group: root
     mode: "0644"
-    checksum: "{{ 'sha256:' + chaosd_sha256 if chaosd_sha256 != 'auto_fill_sha256_here' else omit }}"
   vars:
     chaosd_download_url: "https://mirrors.chaos-mesh.org/chaosd-{{ chaosd_version }}-linux-{{ chaosd_arch }}.tar.gz"
 
@@ -47,6 +46,24 @@
     - ansible_virtualization_type != "docker"
   ignore_errors: true
 
+- name: Copy systemd service file
+  ansible.builtin.template:
+    src: chaosd.service.j2
+    dest: /etc/systemd/system/chaosd.service
+    mode: "0644"
+    owner: root
+    group: root
+  notify:
+    - Reload systemd
+    - Restart chaosd
+
+- name: Enable and start chaosd service
+  ansible.builtin.systemd:
+    name: chaosd
+    enabled: true
+    state: started
+    daemon_reload: true
+
 - name: Copy chaos iptables bridge script
   ansible.builtin.template:
     src: chaos-iptables-bridge.sh.j2
@@ -54,6 +71,7 @@
     mode: "0755"
     owner: root
     group: root
+  notify: Restart chaos-iptables-bridge
 
 - name: Copy chaos iptables bridge systemd service
   ansible.builtin.template:
@@ -69,24 +87,6 @@
 - name: Enable and start chaos iptables bridge service
   ansible.builtin.systemd:
     name: chaos-iptables-bridge
-    enabled: true
-    state: started
-    daemon_reload: true
-
-- name: Copy systemd service file
-  ansible.builtin.template:
-    src: chaosd.service.j2
-    dest: /etc/systemd/system/chaosd.service
-    mode: "0644"
-    owner: root
-    group: root
-  notify:
-    - Reload systemd
-    - Restart chaosd
-
-- name: Enable and start chaosd service
-  ansible.builtin.systemd:
-    name: chaosd
     enabled: true
     state: started
     daemon_reload: true

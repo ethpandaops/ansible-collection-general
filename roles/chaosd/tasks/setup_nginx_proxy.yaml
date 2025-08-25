@@ -47,12 +47,3 @@
   register: chaosd_proxy_test
   failed_when: false
   delegate_to: localhost
-
-- name: Display chaosd path-based proxy test results
-  ansible.builtin.debug:
-    msg:
-      - "Chaosd path-based proxy status: {{ 'SUCCESS (needs auth)' if chaosd_proxy_test.status == 401 else 'FAILED' }}"
-      - "URL: https://{{ chaosd_nginx_proxy_hostname | default(ansible_fqdn) }}/chaosd/api/experiments/"
-      - "Status: {{ chaosd_proxy_test.status | default('No response') }}"
-      - "Note: Status 401 means authentication is working correctly"
-  when: chaosd_proxy_test is defined
