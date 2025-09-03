@@ -1,0 +1,66 @@
+xatu-relay-monitor:
+  enabled: false
+  fullnameOverride: xatu-relay-monitor
+  image:
+    repository: {{ default_tooling_images.xatu.split(':') | first }}
+    tag: {{ default_tooling_images.xatu.split(':') | last }}
+    pullPolicy: {% if "latest" in (default_tooling_images.xatu.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
+
+  resources:
+    limits:
+      cpu: 1024m
+      memory: 1536Mi
+    requests:
+      cpu: 512m
+      memory: 512Mi
+
+  terminationGracePeriodSeconds: 300
+
+  serviceMonitor:
+    enabled: true
+    labels:
+      vmagent: common
+  config:
+    logging: "info"
+    metricsAddr: ":9090"
+    pprofAddr: ":6060"
+    probeAddr: ":8080"
+    name: {{ ethereum_network_name }}-xatu-relay-monitor
+    ethereum:
+      network: {{ ethereum_network_name }}
+      beaconNodeUrl: https://beacon.{{ ethereum_network_name }}.ethpandaops.io
+    schedule:
+      atSlotTimes:
+        - "1s"
+        - "4s"
+    relays:
+      - name: "mev-relay-1"
+        url: http://0xa55c1285d84ba83a5ad26420cd5ad3091e49c55a813eee651cd467db38a8c8e63192f47955e9376f6b42f6d190571cb5@mev-relay-1.{{ ethereum_network_name }}.ethpandaops.io:9062
+
+    coordinator:
+      address: server.xatu-experimental.ethpandaops.io:443
+      tls: true
+      headers:
+        authorization: "Bearer <path:/secrets/services/services.enc.yaml#xatu | jsonPath {.experimental.coordinator_secret}>"
+    consistency:
+      enabled: true
+      checkEveryDuration: 1s
+      rateLimitPerRelay: 2
+      backfill:
+        enabled: true
+        toSlot: 0 # Genesis
+      forwardFill:
+        enabled: true
+
+    validatorRegistrations:
+      enabled: false
+      targetSweepDuration: 6h
+    outputs:
+    - name: grpc
+      type: xatu
+      config:
+        address: server.xatu-experimental.ethpandaops.io:443
+        tls: true
+        headers:
+          authorization: "Basic <path:/secrets/services/services.enc.yaml#xatu | jsonPath {.experimental.event_ingester_auth}>"
+        maxExportBatchSize: 32
