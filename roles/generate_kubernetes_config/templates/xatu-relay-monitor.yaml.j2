@@ -3,7 +3,7 @@ xatu-relay-monitor:
   fullnameOverride: xatu-relay-monitor
   image:
     repository: {{ default_tooling_images.xatu_relay_monitor.split(':') | first }}
-    tag: {{ default_tooling_images.xatu.split(':') | last }}
+    tag: {{ default_tooling_images.xatu_relay_monitor.split(':') | last }}
     pullPolicy: {% if "latest" in (default_tooling_images.xatu_relay_monitor.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
 
   resources:
