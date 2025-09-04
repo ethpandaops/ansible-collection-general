@@ -1,8 +1,37 @@
+- name: Add ethereum_metrics_exporter user
+  ansible.builtin.user:
+    name: "{{ ethereum_metrics_exporter_user }}"
+    shell: /bin/nologin
+
+- name: Get ethereum_metrics_exporter uid
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ ethereum_metrics_exporter_user }}"
+  register: ethereum_metrics_exporter_user_getent
+
+- name: Create ethereum_metrics_exporter dirs
+  ansible.builtin.file:
+    path: "{{ ethereum_metrics_exporter_dir_config }}"
+    state: directory
+    mode: '0777'
+    owner: "{{ ethereum_metrics_exporter_user }}"
+    group: "{{ ethereum_metrics_exporter_user }}"
+
+- name: Create ethereum_metrics_exporter config file
+  ansible.builtin.copy:
+    content: "{{ ethereum_metrics_exporter_config }}"
+    dest: "{{ ethereum_metrics_exporter_dir_config }}/ethereum-metrics-exporter.yaml"
+    owner: "{{ ethereum_metrics_exporter_user }}"
+    group: "{{ ethereum_metrics_exporter_user }}"
+    mode: '0640'
+  notify: Restart ethereum_metrics_exporter container
+
 - name: Run ethereum_metrics_exporter container
   community.docker.docker_container:
     name: "{{ ethereum_metrics_exporter_container_name }}"
     image: "{{ ethereum_metrics_exporter_container_image }}"
     image_name_mismatch: recreate
+    user: "{{ ethereum_metrics_exporter_user_getent.ansible_facts.getent_passwd[ethereum_metrics_exporter_user][1] }}"
     state: started
     restart_policy: always
     stop_timeout: "{{ ethereum_metrics_exporter_container_stop_timeout }}"
