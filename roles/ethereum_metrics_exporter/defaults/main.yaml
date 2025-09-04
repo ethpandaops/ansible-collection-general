@@ -1,16 +1,35 @@
 ethereum_metrics_exporter_cleanup: false
 
+ethereum_metrics_exporter_user: ethereum-metrics-exporter
+ethereum_metrics_exporter_dir_config: /data/ethereum-metrics-exporter/
+
 ethereum_metrics_exporter_el_endpoint: http://your-el-node:8545
 ethereum_metrics_exporter_cl_endpoint: http://your-cl-node:4000
 
 ethereum_metrics_exporter_container_name: "ethereum-metrics-exporter"
 ethereum_metrics_exporter_container_image: "samcm/ethereum-metrics-exporter:latest"
+# ethereum_metrics_exporter_container_user: "root"
 ethereum_metrics_exporter_container_env: {}
 ethereum_metrics_exporter_container_ports: []
-ethereum_metrics_exporter_container_volumes: []
+ethereum_metrics_exporter_container_volumes:
+  - "{{ ethereum_metrics_exporter_dir_config }}:/config:ro"
 ethereum_metrics_exporter_container_stop_timeout: "30"
 ethereum_metrics_exporter_container_networks: []
 ethereum_metrics_exporter_container_command:
-  - --execution-url={{ ethereum_metrics_exporter_el_endpoint }}
-  - --consensus-url={{ ethereum_metrics_exporter_cl_endpoint }}
   - --metrics-port=9090
+  - --config=/config/ethereum-metrics-exporter.yaml
+
+ethereum_metrics_exporter_config: |
+  consensus:
+    enabled: true
+    url: "{{ ethereum_metrics_exporter_cl_endpoint }}"
+    name: "consensus-client"
+  execution:
+    enabled: true
+    url: "{{ ethereum_metrics_exporter_el_endpoint }}"
+    name: "execution-client"
+    modules:
+      - "eth"
+      - "net"
+      - "web3"
+      - "txpool"
