@@ -10,6 +10,7 @@ docker_watchtower_container_restart_policy: unless-stopped
 docker_watchtower_container_recreate: false
 docker_watchtower_container_stop_timeout: "30"
 docker_watchtower_container_env: {}
+docker_watchtower_container_labels: {}
 docker_watchtower_container_ports: []
 docker_watchtower_container_exposed_ports: []
 docker_watchtower_container_volumes:
