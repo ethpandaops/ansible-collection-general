@@ -12,12 +12,12 @@ ethereum_metrics_exporter_container_image: "samcm/ethereum-metrics-exporter:late
 ethereum_metrics_exporter_container_env: {}
 ethereum_metrics_exporter_container_ports: []
 ethereum_metrics_exporter_container_volumes:
-  - "{{ ethereum_metrics_exporter_dir_config }}:/config"
+  - "{{ ethereum_metrics_exporter_dir_config }}:/config:ro"
 ethereum_metrics_exporter_container_stop_timeout: "30"
 ethereum_metrics_exporter_container_networks: []
 ethereum_metrics_exporter_container_command:
   - --metrics-port=9090
-  - --config=ethereum-metrics-exporter.yaml
+  - --config=/config/ethereum-metrics-exporter.yaml
 
 ethereum_metrics_exporter_config: |
   consensus:
