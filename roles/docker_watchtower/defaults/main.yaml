@@ -16,7 +16,15 @@ docker_watchtower_container_exposed_ports: []
 docker_watchtower_container_volumes:
   - "/var/run/docker.sock:/var/run/docker.sock"
 docker_watchtower_container_networks: "{{ omit }}" # use docker default
-docker_watchtower_container_command: "{{ docker_watchtower_containers_list + docker_watchtower_container_additional_args }}"
+docker_watchtower_container_command: >-
+  {{
+    docker_watchtower_container_args + 
+    docker_watchtower_containers_list + 
+    docker_watchtower_container_additional_args 
+  }}
 
+docker_watchtower_container_args:
+  - --include-restarting
+  - --include-stopped
 docker_watchtower_containers_list: []
 docker_watchtower_container_additional_args: []
