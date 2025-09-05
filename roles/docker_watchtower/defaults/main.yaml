@@ -25,6 +25,5 @@ docker_watchtower_container_command: >-
 
 docker_watchtower_container_args:
   - --include-restarting
-  - --include-stopped
 docker_watchtower_containers_list: []
 docker_watchtower_container_additional_args: []
