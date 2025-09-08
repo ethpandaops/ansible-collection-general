@@ -62,6 +62,10 @@ dora:
     - name: FRONTEND_SHOW_SUBMIT_EL_REQUESTS
       value: "true"
 {% endif %}
+{% if gen_kubernetes_config_dora_execution_genesis_config %}
+    - name: EXECUTIONAPI_GENESIS_CONFIG
+      value: "{{ gen_kubernetes_config_dora_execution_genesis_config }}"
+{% endif %}
   postgresql:
     name: "dora-postgresql"
     fullnameOverride: "dora-postgresql"
