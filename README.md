@@ -56,6 +56,7 @@ A collection of reusable ansible components used by the EthPandaOps team.
 
 ### General purpose tooling
 - [bootstrap](roles/bootstrap)
+- [brakebear](roles/brakebear)
 - [docker_cleanup](roles/docker_cleanup)
 - [docker_network](roles/docker_network)
 - [docker_nginx_proxy](roles/docker_nginx_proxy)
