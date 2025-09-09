@@ -13,6 +13,7 @@ brakebear_container_networks:
 brakebear_container_ports: []
 brakebear_container_volumes:
   - "{{ brakebear_dir_config }}:/config:ro"
+  - "/var/run/docker.sock:/var/run/docker.sock:ro"
 brakebear_container_stop_timeout: "30"
 brakebear_container_command:
   - run
