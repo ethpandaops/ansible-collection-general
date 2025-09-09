@@ -3,7 +3,7 @@ docker_watchtower_cleanup: false
 docker_watchtower_user: "{{ docker_watchtower_container_name }}"
 
 docker_watchtower_container_name: "docker-watchtower"
-docker_watchtower_container_image: "containrrr/watchtower:latest"
+docker_watchtower_container_image: "nickfedor/watchtower:latest"
 docker_watchtower_container_image_name_mismatch: recreate
 docker_watchtower_container_restart: true
 docker_watchtower_container_restart_policy: unless-stopped
