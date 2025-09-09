@@ -7,7 +7,7 @@
   ansible.builtin.systemd:
     name: "{{ traffic_control_service_name }}"
     enabled: false
-    state: absent
+    state: stopped
 
 - name: Remove traffic control scripts
   ansible.builtin.file:

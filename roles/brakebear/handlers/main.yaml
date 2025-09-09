@@ -1,0 +1,5 @@
+- name: Restart brakebear container
+  community.docker.docker_container:
+    name: "{{ brakebear_container_name }}"
+    state: started
+    restart: true

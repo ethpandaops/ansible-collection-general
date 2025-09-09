@@ -1,0 +1,32 @@
+brakebear_cleanup: false
+
+brakebear_dir_config: /opt/brakebear/
+brakebear_user: brakebear
+brakebear_el_endpoint: http://your-el-node:8545
+brakebear_cl_endpoint: http://your-cl-node:4000
+
+brakebear_container_name: "brakebear"
+brakebear_container_image: "ghcr.io/ethpandaops/brakebear:latest"
+brakebear_container_env: {}
+brakebear_container_networks:
+  - name: "host"
+brakebear_container_ports: []
+brakebear_container_volumes:
+  - "{{ brakebear_dir_config }}:/config:ro"
+  - "/var/run/docker.sock:/var/run/docker.sock:ro"
+brakebear_container_stop_timeout: "30"
+brakebear_container_command:
+  - run
+  - --config=/config/brakebear.yaml
+
+brakebear_config: |
+  log_level: "info"
+  docker_containers: []
+    # - name: "my-container"
+    #   download_rate: 1mbps
+    #   upload_rate: 500kbps
+    #   latency: 50ms
+    #   jitter: 10ms
+    #   loss: 0.1%
+    #   exclusions:
+    #     private-networks: true
