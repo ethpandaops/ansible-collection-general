@@ -1,0 +1,18 @@
+# {{ ansible_managed }}
+# Consensus layer endpoints
+
+- url: {{ default_cl_endpoint }}
+  name: rpc-{{ gen_kubernetes_config_ethereum_node_name }}
+  authGroup: pandaops
+  archive: true
+  priority: 1
+{% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
+- url: https://{{ ethereum_node_beacon_prefix }}{{ hostvars[host]['inventory_hostname'] }}.{{ network_server_subdomain }}
+  name: {{ hostvars[host]['inventory_hostname'] }}
+  authGroup: pandaops
+  priority: -1
+{% if 'lighthouse' in hostvars[host]['inventory_hostname'] %}
+  archive: true
+{% endif %}
+{% endfor %}
+
