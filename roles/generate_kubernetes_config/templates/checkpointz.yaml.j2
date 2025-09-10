@@ -50,11 +50,9 @@ checkpointz:
           address: {{ default_cl_endpoint }}
           dataProvider: true
 {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
-{% if ((hostvars[host]['inventory_hostname'] | string)[-2:]) == "-1" %}
-{% if hostvars[host]['ethereum_node_cl_supernode_enabled'] is not defined or hostvars[host]['ethereum_node_cl_supernode_enabled'] == True %}
+{% if "-super-" in (hostvars[host]['inventory_hostname'] | string) and ((hostvars[host]['inventory_hostname'] | string)[-2:]) == "-1" %}
         - name: {{ hostvars[host]['inventory_hostname'] }}
           address: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@bn.{{ hostvars[host]['inventory_hostname'] }}.{{ network_server_subdomain }}
           dataProvider: true
-{% endif %}
 {% endif %}
 {% endfor %}
