@@ -55,7 +55,7 @@
 - name: Generate additional templates for {{ item.key }}
   ansible.builtin.template:
     src: "{{ template_item.value }}"
-    dest: "{{ gen_kubernetes_config_default_output_dir }}/{{ item.key }}/templates/{{ template_item.key }}"
+    dest: "{{ gen_kubernetes_config_default_output_dir }}/{{ item.key }}/{{ template_item.key }}"
     mode: "0644"
   loop: "{{ item.value.additionalTemplates | default({}) | dict2items }}"
   loop_control:
