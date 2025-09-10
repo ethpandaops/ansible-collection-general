@@ -42,10 +42,10 @@ gen_kubernetes_config_ethereum_node_name: >- # noqa var-naming[no-role-prefix] y
 gen_kubernetes_config_dora_frontend_explorer_link: "https://explorer.{{ network_subdomain }}" # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_dora_frontend_rainbowkit_id: "" # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_dora_frontend_public_rpc: "https://rpc.{{ network_subdomain }}" # noqa var-naming[no-role-prefix]
-gen_kubernetes_config_dora_frontend_with_submit_deposits: true # noqa var-naming[no-role-prefix]
-gen_kubernetes_config_dora_frontend_with_submit_el_requests: true # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_dora_execution_snooper_port: false # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_dora_execution_genesis_config: "https://config.{{ network_subdomain }}/el/genesis.json" # noqa var-naming[no-role-prefix]
+gen_kubernetes_config_dora_execution_endpoints_url: "" # noqa var-naming[no-role-prefix]
+gen_kubernetes_config_dora_consensus_endpoints_url: "" # noqa var-naming[no-role-prefix]
 
 gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
   config:
@@ -104,10 +104,13 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
         version: 0.1.5
   dora:
     valuesTemplatePath: templates/dora.yaml.j2
+    additionalTemplates:
+      "endpoints-cl.yaml": templates/dora-endpoints-cl.yaml.j2
+      "endpoints-el.yaml": templates/dora-endpoints-el.yaml.j2
     dependencies:
       - name: dora
         repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 1.0.0
+        version: 1.0.1
   forky:
     valuesTemplatePath: templates/forky.yaml.j2
     dependencies:

@@ -26,46 +26,18 @@ dora:
   name: {{ ethereum_network_name }}
   configPath: "https://config.{{ network_subdomain }}/cl/config.yaml"
   validatorNamesInventory: "https://config.{{ network_subdomain }}/api/v1/nodes/validator-ranges"
+  ethExplorerLink: "{{ gen_kubernetes_config_dora_frontend_explorer_link }}"
+  publicRpcUrl: "{{ gen_kubernetes_config_dora_frontend_public_rpc }}"
+  rainbowkitProjectId: "{{ gen_kubernetes_config_dora_frontend_rainbowkit_id }}"
+  executionGenesisConfig: "{{ gen_kubernetes_config_dora_execution_genesis_config }}"
   proxyCount: 2
   extraEnv:
     - name: FRONTEND_PPROF
       value: "true"
     - name: FRONTEND_SHOW_SENSITIVE_PEER_INFOS
       value: "true"
-    - name: FRONTEND_SHOW_VALIDATOR_SUMMARY
-      value: "true"
-    - name: API_ENABLED
-      value: "true"
     - name: API_CORS_ORIGINS
       value: "*"
-{% if ('fusaka' in ethereum_network_name) or ('berlinterop' in ethereum_network_name) %}
-    - name: FRONTEND_SHOW_PEER_DAS_INFOS
-      value: "true"
-{% endif %}
-{% if gen_kubernetes_config_dora_frontend_explorer_link %}
-    - name: FRONTEND_ETH_EXPLORER_LINK
-      value: "{{ gen_kubernetes_config_dora_frontend_explorer_link }}"
-{% endif %}
-{% if gen_kubernetes_config_dora_frontend_public_rpc %}
-    - name: FRONTEND_PUBLIC_RPC_URL
-      value: "{{ gen_kubernetes_config_dora_frontend_public_rpc }}"
-{% endif %}
-{% if gen_kubernetes_config_dora_frontend_rainbowkit_id %}
-    - name: FRONTEND_RAINBOWKIT_PROJECT_ID
-      value: "{{ gen_kubernetes_config_dora_frontend_rainbowkit_id }}"
-{% endif %}
-{% if gen_kubernetes_config_dora_frontend_with_submit_deposits %}
-    - name: FRONTEND_SHOW_SUBMIT_DEPOSIT
-      value: "true"
-{% endif %}
-{% if gen_kubernetes_config_dora_frontend_with_submit_el_requests %}
-    - name: FRONTEND_SHOW_SUBMIT_EL_REQUESTS
-      value: "true"
-{% endif %}
-{% if gen_kubernetes_config_dora_execution_genesis_config %}
-    - name: EXECUTIONAPI_GENESIS_CONFIG
-      value: "{{ gen_kubernetes_config_dora_execution_genesis_config }}"
-{% endif %}
   postgresql:
     name: "dora-postgresql"
     fullnameOverride: "dora-postgresql"
@@ -81,6 +53,9 @@ dora:
         username: ""
         password: "<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>"
 
+{% if gen_kubernetes_config_dora_consensus_endpoints_url %}
+  endpointsUrl: "{{ gen_kubernetes_config_dora_consensus_endpoints_url }}"
+{% else %}
   endpoints:
   # Rpc
   - url: {{ default_cl_endpoint }}
@@ -97,6 +72,10 @@ dora:
     archive: true
 {% endif %}
 {% endfor %}
+{% endif %}
+{% if gen_kubernetes_config_dora_execution_endpoints_url %}
+  executionEndpointsUrl: "{{ gen_kubernetes_config_dora_execution_endpoints_url }}"
+{% else %}
   executionEndpoints:
   # Rpc
   - url: {{ default_el_endpoint }}
@@ -114,3 +93,4 @@ dora:
     engineSnooperUrl: http://{{ ethereum_node_rpc_prefix }}{{ hostvars[host]['inventory_hostname'] }}.{{ network_server_subdomain }}:{{ gen_kubernetes_config_dora_execution_snooper_port }}
 {% endif %}
 {% endfor %}
+{% endif %}
