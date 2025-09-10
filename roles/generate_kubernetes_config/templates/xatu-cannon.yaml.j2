@@ -95,7 +95,7 @@ xatu-cannon:
       enabled: false
     ethereum:
 {% if groups['bootnode'] | length > 0 %}
-      beaconNodeAddress: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@bn.{{ hostvars[groups['bootnode'][0]]['inventory_hostname'] }}.{{ network_server_subdomain }}
+      beaconNodeAddress: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_beacon_prefix }}{{ hostvars[groups['bootnode'][0]]['inventory_hostname'] }}.{{ network_server_subdomain }}
 {% endif %}
       overrideNetworkName: {{ ethereum_network_name }}
       beaconNodeHeaders: {}
