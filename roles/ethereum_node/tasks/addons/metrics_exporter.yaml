@@ -6,8 +6,6 @@
     ethereum_metrics_exporter_cl_endpoint: "{{ ethereum_node_cl_beacon_endpoint }}"
     ethereum_metrics_exporter_container_networks: "{{ ethereum_node_docker_networks }}"
   when: ethereum_node_metrics_exporter_enabled
-  tags:
-    - ethereum_node_metrics_exporter
 
 - name: Cleanup metrics exporter
   ansible.builtin.include_role:
@@ -15,5 +13,3 @@
   vars:
     ethereum_metrics_exporter_cleanup: true
   when: not ethereum_node_metrics_exporter_enabled
-  tags:
-    - ethereum_node_metrics_exporter
