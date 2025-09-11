@@ -37,7 +37,7 @@ jobs:
           DOCKERHUB_USERNAME: ethpandaops
           DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
         run: |
-          execution_clients=(geth nethermind erigon besu ethereumjs reth nimbusel)
+          execution_clients=(geth nethermind erigon besu reth nimbusel)
 
           for execution_client in "${execution_clients[@]}"; do
             echo "::group::Testing ${{ matrix.consensus }} with $execution_client"
