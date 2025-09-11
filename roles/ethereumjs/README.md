@@ -1,5 +1,7 @@
 # ethpandaops.general.ethereumjs
 
+> ⚠️ **Deprecation Notice**: EthereumJS is no longer maintained
+
 Setup [ethereumjs](https://github.com/ethereumjs/ethereumjs-monorepo/tree/master/packages/client), a ethereum execution layer client.
 
 ## Requirements

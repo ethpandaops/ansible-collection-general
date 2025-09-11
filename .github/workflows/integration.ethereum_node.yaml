@@ -45,7 +45,6 @@ jobs:
             nethermind: roles/nethermind/**
             erigon: roles/erigon/**
             besu: roles/besu/**
-            ethereumjs: roles/ethereumjs/**
             reth: roles/reth/**
             nimbusel: roles/nimbusel/**
 
@@ -59,7 +58,7 @@ jobs:
         run: |
           echo "Verifying which client roles have changed...";
           ALL_CONSENSUS_CLIENTS='["teku", "prysm", "lighthouse", "nimbus", "lodestar", "grandine"]';
-          ALL_EXECUTION_CLIENTS='["geth", "nethermind", "erigon", "besu", "ethereumjs", "reth", "nimbusel"]';
+          ALL_EXECUTION_CLIENTS='["geth", "nethermind", "erigon", "besu", "reth", "nimbusel"]';
 
           CONSENSUS_CLIENTS="[]";
           EXECUTION_CLIENTS="[]";
