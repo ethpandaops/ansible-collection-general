@@ -4,8 +4,12 @@
 - name: Setup docker network
   ansible.builtin.include_role:
     name: ethpandaops.general.docker_network
+    apply:
+      tags:
+        - ethereum_node_docker_network
   vars:
     docker_network_name: "{{ ethereum_node_docker_network_name }}"
+  tags: [ethereum_node_docker_network]
 
 - name: Cleanup clients that shouldn't be running
   ansible.builtin.import_tasks: cleanup.yaml
@@ -18,6 +22,9 @@
 - name: Setup mev_mock_relay_builder
   ansible.builtin.include_role:
     name: ethpandaops.general.mev_mock_relay_builder
+    apply:
+      tags:
+        - ethereum_node_mev_mock_relay_builder
   vars:
     mev_mock_relay_builder_container_networks: "{{ ethereum_node_docker_networks }}"
     mev_mock_relay_builder_beacon_uri: "{{ ethereum_node_cl_beacon_endpoint }}"
@@ -38,6 +45,7 @@
 - name: Setup consensus client
   ansible.builtin.import_tasks: setup_cl.yaml
   when: ethereum_node_cl_enabled
+  tags: [ethereum_node_cl]
 
 - name: Collect and set facts about the nodes
   ansible.builtin.include_role:
