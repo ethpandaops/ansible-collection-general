@@ -13,10 +13,20 @@ json_rpc_snooper_container_env: {}
 json_rpc_snooper_port: 8560
 json_rpc_snooper_target: http://jsonrpc-target:8888
 json_rpc_snooper_public_port: 0
+json_rpc_snooper_ipv6_enabled: false
 json_rpc_snooper_container_ports: >-
   {{
     ["127.0.0.1:" + json_rpc_snooper_port|string + ":" + json_rpc_snooper_port|string] +
-    ([json_rpc_snooper_public_port|string + ":" + json_rpc_snooper_public_port|string] if json_rpc_snooper_public_port|int > 0 else [])
+    (["0.0.0.0:" + json_rpc_snooper_public_port|string + ":" + json_rpc_snooper_public_port|string] if json_rpc_snooper_public_port|int > 0 else []) +
+    (
+      ["[::1]:" + json_rpc_snooper_port|string + ":" + json_rpc_snooper_port|string]
+      if json_rpc_snooper_ipv6_enabled and ansible_default_ipv6.address is defined
+      else []
+    ) + (
+      ["[::]:" + json_rpc_snooper_public_port|string + ":" + json_rpc_snooper_public_port|string]
+      if json_rpc_snooper_ipv6_enabled and ansible_default_ipv6.address is defined and json_rpc_snooper_public_port|int > 0
+      else []
+    )
   }}
 
 json_rpc_snooper_container_networks: []
