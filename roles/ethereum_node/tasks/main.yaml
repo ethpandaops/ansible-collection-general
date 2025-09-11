@@ -13,6 +13,7 @@
 
 - name: Setup external block builder
   ansible.builtin.import_tasks: addons/external_block_builder.yaml
+  tags: [ethereum_node_external_block_builder]
 
 - name: Setup mev_mock_relay_builder
   ansible.builtin.include_role:
@@ -23,13 +24,16 @@
     mev_mock_relay_builder_el_uri: >-
       {{ ethereum_node_json_rpc_snooper_engine_enabled | ternary(ethereum_node_el_engine_snooper_endpoint, ethereum_node_el_engine_endpoint) }}
   when: ethereum_node_mev_mock_relay_builder_enabled
+  tags: [ethereum_node_mev_mock_relay_builder]
 
 - name: Setup execution client
   ansible.builtin.import_tasks: setup_el.yaml
   when: ethereum_node_el_enabled
+  tags: [ethereum_node_el]
 
 - name: Configure JSON RPC Snooper
   ansible.builtin.import_tasks: addons/snooper.yaml
+  tags: [ethereum_node_snooper]
 
 - name: Setup consensus client
   ansible.builtin.import_tasks: setup_cl.yaml
@@ -50,15 +54,20 @@
 
 - name: Configure metrics exporter
   ansible.builtin.import_tasks: addons/metrics_exporter.yaml
+  tags: [ethereum_node_metrics_exporter]
 
 - name: Configure xatu sentry
   ansible.builtin.import_tasks: addons/xatu_sentry.yaml
+  tags: [ethereum_node_xatu_sentry]
 
 - name: Configure blobber
   ansible.builtin.import_tasks: addons/blobber.yaml
+  tags: [ethereum_node_blobber]
 
 - name: Configure Grafana Alloy
   ansible.builtin.import_tasks: addons/grafana_alloy.yaml
+  tags: [ethereum_node_grafana_alloy]
 
 - name: Configure Docker Watchtower
   ansible.builtin.import_tasks: addons/docker_watchtower.yaml
+  tags: [ethereum_node_docker_watchtower]

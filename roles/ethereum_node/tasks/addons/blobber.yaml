@@ -5,8 +5,6 @@
     blobber_beacon_api: "{{ ethereum_node_cl_beacon_endpoint }}"
     blobber_container_networks: "{{ ethereum_node_docker_networks }}"
   when: ethereum_node_blobber_enabled
-  tags:
-    - ethereum_node_blobber
 
 - name: Cleanup blobber
   ansible.builtin.include_role:
@@ -14,5 +12,3 @@
   vars:
     blobber_cleanup: true
   when: not ethereum_node_blobber_enabled
-  tags:
-    - ethereum_node_blobber
