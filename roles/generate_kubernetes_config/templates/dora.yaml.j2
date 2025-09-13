@@ -30,6 +30,14 @@ dora:
   publicRpcUrl: "{{ gen_kubernetes_config_dora_frontend_public_rpc }}"
   rainbowkitProjectId: "{{ gen_kubernetes_config_dora_frontend_rainbowkit_id }}"
   executionGenesisConfig: "{{ gen_kubernetes_config_dora_execution_genesis_config }}"
+  apiRequireAuth: {{ gen_kubernetes_config_dora_api_require_auth }}
+  apiAuthSecret: "{{ gen_kubernetes_config_dora_api_secret }}"
+  apiWhitelistedIPs: {% if not gen_kubernetes_config_dora_api_whitelisted_ips %}[]{% endif %}
+  {% for ip in gen_kubernetes_config_dora_api_whitelisted_ips | sort %}
+    - {{ ip }}
+  {% endfor %}
+  apiDefaultRateLimit: 60
+  apiDisableDefaultRateLimit: false
   proxyCount: 2
   extraEnv:
     - name: FRONTEND_PPROF
