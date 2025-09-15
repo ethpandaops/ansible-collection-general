@@ -52,7 +52,8 @@
     command: >-
       {{
         teku_container_command +
-        teku_container_command_extra_args +
+        teku_container_command_extra_args + 
+        (teku_validator_enabled | ternary(teku_validator_container_args, [])) +
         (teku_checkpoint_sync_enabled | ternary(teku_container_command_checkpoint_args, [])) +
         (teku_mev_boost_enabled | ternary(teku_mev_boost_beacon_command, []))
       }}
