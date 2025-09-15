@@ -31,7 +31,7 @@ powfaucet:
 
   faucetTitle: "{{ ethereum_network_name }} PoW Faucet"
   faucetPrivkey: "<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.faucet_private_key}>"
-  faucetRpcUrl: "{{ default_el_endpoint }}"
+  faucetRpcUrl: "https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_rpc_prefix }}bootnode-1.{{ network_subdomain }}"
   faucetExplorerLink: "https://explorer.{{ network_subdomain }}/tx/{txid}"
   faucetTxGasLimit: 100000
 
