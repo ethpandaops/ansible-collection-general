@@ -18,7 +18,7 @@
         mode: "0644"
 
     - name: Check if Docker is rootless
-      command: docker info -f '{{json .SecurityOptions}}'
+      command: docker info -f '{{"{{json .SecurityOptions}}"}}'
       register: docker_secopts
       changed_when: false
 
