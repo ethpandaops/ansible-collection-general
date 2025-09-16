@@ -39,7 +39,7 @@
     - name: Create validator keys (Debian)
       loop: "{{ ethereum_genesis_validator_keyranges | dict2items }}"
       ansible.builtin.shell: >
-        docker run --rm -t -u $(id -u)
+        docker run --rm -t -u $(id -u) --userns=host
         --entrypoint eth2-val-tools
         --platform linux/amd64
         -v {{ ethereum_genesis_validator_keys_output_dir }}:/output

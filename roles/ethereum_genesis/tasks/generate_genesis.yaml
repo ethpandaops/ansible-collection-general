@@ -44,7 +44,7 @@
 
     - name: Run genesis generator (Debian)
       ansible.builtin.shell: >
-        docker run --rm -t -u $(id -u)
+        docker run --rm -t -u $(id -u) --userns=host
         -v {{ ethereum_genesis_generator_tmp_output_dir_register.path }}:/data
         -v {{ ethereum_genesis_generator_tmp_config_dir_register.path }}:/config
         {{ ethereum_genesis_generator_container_image }} all
