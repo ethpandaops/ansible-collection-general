@@ -18,12 +18,12 @@
         mode: "0644"
 
     - name: Check if Docker is rootless
-      command: docker info -f '{{"{{json .SecurityOptions}}"}}'
+      ansible.builtin.command: docker info -f '{{ "{{json .SecurityOptions}}" }}'
       register: docker_secopts
       changed_when: false
 
     - name: Set rootless fact
-      set_fact:
+      ansible.builtin.set_fact:
         docker_is_rootless: "{{ 'name=rootless' in docker_secopts.stdout }}"
 
     - name: Compute docker user flag
@@ -76,4 +76,3 @@
         > "{{ ethereum_genesis_validator_keys_output_dir }}/{{ item.key }}/change_operations.json"
       args:
         creates: "{{ ethereum_genesis_validator_keys_output_dir }}/{{ item.key }}/change_operations.json"
-
