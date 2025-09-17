@@ -12,8 +12,8 @@ dora:
       cpu: 500m
       memory: 1Gi
     limits:
-      cpu: 1000m
-      memory: 2Gi
+      cpu: 1500m
+      memory: 3Gi
   ingress:
     enabled: true
     className: ingress-nginx-public
@@ -46,6 +46,8 @@ dora:
       value: "true"
     - name: API_CORS_ORIGINS
       value: "*"
+    - name: FRONTEND_ENABLE_DAS_GUARDIAN_MASS_SCAN
+      value: "true"
   postgresql:
     name: "dora-postgresql"
     fullnameOverride: "dora-postgresql"
