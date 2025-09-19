@@ -87,6 +87,7 @@ prysm_container_supernode_command:
 prysm_container_pprof_command:
   - --pprof
   - --pprofport={{ prysm_ports_pprof }}
+  - --pprofaddr=0.0.0.0
 
 
 prysm_container_command: >-
