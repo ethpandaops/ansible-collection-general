@@ -2,11 +2,11 @@ nimbus_enabled: true
 nimbus_user: nimbus
 nimbus_datadir: /data/nimbus
 nimbus_auth_jwt_path: /data/execution-auth.secret
-nimbus_execution_engine_endpoint: http://geth:8551
+nimbus_execution_engine_endpoint: http://execution:8551
 nimbus_beacon_endpoint: "http://{{ nimbus_container_name }}:{{ nimbus_ports_http_beacon }}"
 nimbus_announced_ip: "{{ ansible_host }}"
 nimbus_announced_ipv6: "{{ ansible_default_ipv6.address if nimbus_ipv6_enabled and ansible_default_ipv6.address is defined else '' }}"
-nimbus_mev_boost_endpoint: "http://mev-boost:18550"
+nimbus_mev_boost_endpoint: "http://external-block-builder:18550"
 
 nimbus_cleanup: false # when set to "true" it will remove the container
 

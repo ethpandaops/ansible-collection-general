@@ -2,9 +2,9 @@ lodestar_enabled: true
 lodestar_user: lodestar
 lodestar_datadir: /data/lodestar
 lodestar_auth_jwt_path: /data/execution-auth.secret
-lodestar_execution_engine_endpoint: http://geth:8551
+lodestar_execution_engine_endpoint: http://execution:8551
 lodestar_beacon_endpoint: "http://{{ lodestar_container_name }}:{{ lodestar_ports_http_beacon }}"
-lodestar_mev_boost_endpoint: "http://mev-boost:18550"
+lodestar_mev_boost_endpoint: "http://external-block-builder:18550"
 
 lodestar_announced_ip: "{{ ansible_host }}"
 lodestar_announced_ipv6: "{{ ansible_default_ipv6.address if lodestar_ipv6_enabled and ansible_default_ipv6.address is defined else '' }}"

@@ -1,10 +1,10 @@
 grandine_user: grandine
 grandine_datadir: /data/grandine
 grandine_auth_jwt_path: /data/execution-auth.secret
-grandine_execution_engine_endpoint: http://geth:8551
+grandine_execution_engine_endpoint: http://execution:8551
 grandine_announced_ip: "{{ ansible_host }}"
 grandine_announced_ipv6: "{{ ansible_default_ipv6.address if grandine_ipv6_enabled and ansible_default_ipv6.address is defined else '' }}"
-grandine_mev_boost_endpoint: "http://mev-boost:18550"
+grandine_mev_boost_endpoint: "http://external-block-builder:18550"
 
 grandine_cleanup: false # when set to "true" it will remove the container
 

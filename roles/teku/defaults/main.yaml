@@ -2,11 +2,11 @@ teku_enabled: true
 teku_user: teku
 teku_datadir: /data/teku
 teku_auth_jwt_path: /data/execution-auth.secret
-teku_execution_engine_endpoint: http://geth:8551
+teku_execution_engine_endpoint: http://execution:8551
 teku_beacon_endpoint: "http://{{ teku_container_name }}:{{ teku_ports_http_beacon }}"
 teku_announced_ip: "{{ ansible_host }}"
 teku_announced_ipv6: "{{ ansible_default_ipv6.address if teku_ipv6_enabled and ansible_default_ipv6.address is defined else '' }}"
-teku_mev_boost_endpoint: "http://mev-boost:18550"
+teku_mev_boost_endpoint: "http://external-block-builder:18550"
 
 teku_cleanup: false # when set to "true" it will remove the container
 
