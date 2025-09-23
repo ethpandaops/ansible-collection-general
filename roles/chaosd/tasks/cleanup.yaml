@@ -1,0 +1,42 @@
+- name: Stop and disable chaosd service
+  ansible.builtin.systemd:
+    name: chaosd
+    enabled: false
+    state: stopped
+  ignore_errors: true
+
+- name: Stop and disable chaos iptables bridge service
+  ansible.builtin.systemd:
+    name: chaos-iptables-bridge
+    enabled: false
+    state: stopped
+  ignore_errors: true
+
+- name: Remove systemd service files
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/systemd/system/chaosd.service
+    - /etc/systemd/system/chaos-iptables-bridge.service
+  notify: Reload systemd
+
+- name: Remove chaos iptables bridge script
+  ansible.builtin.file:
+    path: /usr/local/sbin/chaos-iptables-bridge.sh
+    state: absent
+
+- name: Remove chaosd installation directory
+  ansible.builtin.file:
+    path: "{{ chaosd_install_dir }}"
+    state: absent
+
+- name: Clean up temporary files
+  ansible.builtin.file:
+    path: /tmp/chaosd.tar.gz
+    state: absent
+
+- name: Cleanup nginx proxy for chaosd
+  ansible.builtin.include_tasks:
+    file: cleanup_nginx_proxy.yaml
+  when: chaosd_nginx_proxy_enabled | bool

@@ -1,0 +1,16 @@
+# Chaosd configuration
+chaosd_version: "v1.4.0"
+chaosd_internal_port: 31768  # Internal port where chaosd actually runs
+chaosd_install_dir: /opt/chaosd
+chaosd_state: present  # present or absent
+
+# Service configuration
+chaosd_service_enabled: true
+chaosd_service_restart_sec: 5
+
+# Network interface for network chaos experiments
+chaosd_iface: eth0
+
+# nginx-proxy integration
+chaosd_nginx_proxy_enabled: false
+chaosd_nginx_proxy_hostname: "{{ ansible_fqdn }}"
