@@ -1,0 +1,5 @@
+- name: Restart vouch container
+  community.docker.docker_container:
+    name: "{{ vouch_container_name }}"
+    state: started
+    restart: true

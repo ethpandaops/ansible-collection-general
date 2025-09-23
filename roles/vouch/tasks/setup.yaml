@@ -1,0 +1,40 @@
+- name: Add vouch user
+  ansible.builtin.user:
+    name: "{{ vouch_user }}"
+  register: vouch_user_meta
+
+- name: Create a directory for the vouch config
+  ansible.builtin.file:
+    path: "{{ vouch_config_dir }}"
+    state: directory
+    mode: "0750"
+    owner: "{{ vouch_user_meta.uid }}"
+    group: "{{ vouch_user_meta.group }}"
+  register: vouch_config_dir_meta
+
+- name: Populate the vouch config
+  ansible.builtin.template:
+    src: vouch.yaml.j2
+    dest: "{{ vouch_config_dir_meta.path }}/vouch.yaml"
+    mode: "0640"
+    owner: "{{ vouch_user_meta.uid }}"
+    group: "{{ vouch_user_meta.group }}"
+  notify: Restart vouch container
+
+- name: Run vouch container
+  community.docker.docker_container:
+    name: "{{ vouch_container_name }}"
+    image: "{{ vouch_container_image }}"
+    image_name_mismatch: recreate
+    state: started
+    restart_policy: always
+    stop_timeout: "{{ vouch_container_stop_timeout }}"
+    ports: "{{ vouch_container_ports | default(omit) }}"
+    volumes: "{{ vouch_container_volumes }}"
+    env: "{{ vouch_container_env | default(omit) }}"
+    networks: "{{ vouch_container_networks }}"
+    entrypoint: "{{ vouch_container_entrypoint | default(omit) }}"
+    command: "{{ vouch_container_command | default(omit) }}"
+    user: "{{ vouch_user_meta.uid }}"
+    pull: "{{ vouch_container_pull | bool }}"
+    security_opts: "{{ vouch_container_security_opts }}"

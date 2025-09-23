@@ -1,0 +1,7 @@
+- name: Setup vouch
+  ansible.builtin.import_tasks: setup.yaml
+  when: not vouch_cleanup
+
+- name: Cleanup vouch
+  ansible.builtin.import_tasks: cleanup.yaml
+  when: vouch_cleanup

@@ -1,0 +1,393 @@
+#jinja2: trim_blocks: False
+
+{# Adapted from https://github.com/attestantio/vouch/blob/master/docs/configuration.md and associated documents -#}
+
+{# 
+ # log-file is the location for Vouch log output.  If this is not provided logs will be written to the console.
+ -#}
+{% if vouch_log_file is defined %}
+log-file: '{{ vouch_log_file }}'
+{% endif -%}
+{#
+ # log-level is the global log level for Vouch logging.
+ # Overrides can be set at any sub-level, giving fine-grained control over the specific
+ # information logged.
+-#}
+log-level: '{{ vouch_log_level }}'
+
+logging:
+  timestamp:
+    {#
+     # format defines the format of the timestamp in the log.  This can be any valid Go timestamp formatting string,
+     # or the special values '', 'UNIXMS', 'UNIXMICRO' or 'UNIXNANO' for Unix timestamps of varying precision.
+    -#}
+    format: '{{ vouch_logging_timestamp_format }}'
+
+{# 
+ # beacon-node-address is the address of the beacon node.  Can be lighthouse, nimbus, prysm or teku.
+ # Overridden by beacon-node-addresses if present.
+ # #beacon-node-address: 'localhost:4000'
+-#}
+
+{#
+ # beacon-node-addresses is the list of address of the beacon nodes.  Can be lighthouse, nimbus, prysm or teku.
+ # If multiple addresses are supplied here it makes Vouch resilient in the situation where a beacon
+ # node goes offline entirely.  If this occurs to the currently used node then the next in the list will
+ # be used.  If a beacon node comes back online it is added to the end of the list of potential nodes to
+ # use.
+ 
+ # Note that some beacon nodes have slightly different behavior in their events.  As such, users should
+ # ensure they are happy with the event output of all beacon nodes in this list.
+-#}
+beacon-node-addresses: {{ vouch_beacon_nodes | to_yaml }}
+
+{# timeout is the timeout for all validating operations, for example fetching attestation data from beacon nodes. -#}
+timeout: '{{vouch_timeout}}'
+
+{# reduced-memory-usage can be set on memory-constrained systems to reduce memory usage, at the cost of increased processing time. -#}
+reduced-memory-usage: {{ vouch_reduce_memory_usage }} 
+
+eth2client:
+  {#
+   # timeout is the timeout for all operations against beacon nodes that are not related to a specific validating
+   # operation, for example fetching the current list of active validators.  These operations are not time-sensitive,
+   # and can contain large amounts of information, hence the longer timeout.
+  -#}
+  timeout: '{{ vouch_eth2client_timeout }}'
+
+  {#
+   # allow-delayed-start allows Vouch to start if some of the consensus nodes are unavailable.
+   # Note that this can result in Vouch being active without being able to validate, however, if strategies use
+   # a subset of beacon nodes that are all unavailable.
+  -#}
+  allow-delayed-start: {{ vouch_eth2client_allow_delayed_start }} 
+
+{# metrics is the module that logs metrics, in this case using prometheus. -#}
+metrics:
+  prometheus:
+    {# log-level is the log level for this module, over-riding the global level. -#}
+    log-level: '{{ vouch_metrics_log_level }}'
+    {# listen-address is the address on which prometheus listens for metrics requests. -#}
+    listen-address: '{{ vouch_metrics.host + ":" + vouch_metrics.port }}'
+
+{% if vouch_graffiti|length > 0 -%}
+{# graffiti provides graffiti data.  Full details are in the separate document. -#}
+graffiti:
+  static:
+    value: '{{ vouch_graffiti }}'
+{% elif vouch_graffiti_block is defined %}
+{# See https://github.com/attestantio/vouch/blob/master/docs/graffiti.md for help with dynamic graffiti -#}
+graffiti:
+  {{ vouch_graffiti_block | to_yaml | indent(2) }}
+{% endif -%}
+
+{# controller controls when validating actions take place. -#}
+controller:
+  fast-track:
+    {#
+     # If attestations is true then Vouch will attest as soon as it receives notification that the head block has been updated
+     # for the duties' slot.  Otherwise it will wait until 4 seconds into the slot before attesting.
+    -#}
+    attestations: {{ vouch_controller_fast_track_attestations }} 
+    {#
+     # If sync-committees is true then Vouch will generate sync committee messages as soon as it receives notification that
+     # the head block has been updated for the duties' slot.  Otherwise it will wait until 4 seconds into the slot before
+     # generating sync committee messages.
+    -#}
+    sync-committees: {{ vouch_controller_fast_track_sync_committees }}
+    {#
+     # grace is the delay between receiving the notification of the head block and starting the fast track process.  This allows
+     # the rest of the network to settle if we saw the head block early.
+    -#}
+    grace: '{{ vouch_controller_fast_track_grace }}'
+  {#
+   # This flag enables verification of sync committee messages included in SyncAggregate. Exposes information via metrics and logs,
+   # defaults to false as this requires some extra processing to calculate the required metrics.
+  -#}
+  verify-sync-committee-inclusion: {{ vouch_controller_verify_sync_committee_inclusion }} 
+
+{# beaconblockproposer provides control of the beacon block proposal process. -#}
+beaconblockproposer:
+  {#
+   # If unblind-from-all-relays is true then Vouch will use all relays that it asked for blocks to unblind the
+   # selected bid.  This can potentially increase the reliability of obtaining an unblinded block, but will increment
+   # failures in the eth_builder_client_operations_total metric for the relays that do not know of the bid.
+  -#}
+  unblind-from-all-relays: {{ vouch_beaconblockproposer_unblind_from_all_relays }}
+  {#
+   # builder-boost-factor provides relative weightings between locally-produced and relay-supplied execution payloads.
+   # See https://ethereum.github.io/beacon-APIs/#/ValidatorRequiredApi/produceBlockV3 for full details, but some sample
+   # values are:
+   # -  50: `builder value` must be more than twice the local value (`local value*(100/50)`) to be used
+   # -  91: `builder value` must be more than ~10% higher than the local value (`local value*(100/91)`) to be used
+   # - 100: `builder value` must be more than the local value (`local value*(100/100)`) to be used
+  -#}
+  builder-boost-factor: {{ vouch_beaconblockproposer_builder_boost_factor }}
+
+{# attester provides control of the attester process. -#}
+attester:
+  {#
+  # grace is the amount of time to wait between starting the attestation process and fetching attestation data.  This can be
+  # useful when using multiple beacon nodes to give them a chance to be up-to-date with block processing prior to fetching data.
+  -#}
+  grace: '{{ vouch_attester_grace }}'
+
+{#
+ ## submitter submits data to beacon nodes.  If not present the nodes in beacon-node-address above will be used.
+ #submitter:
+ #  # style can currently only be 'multinode'
+ #  style: 'multinode'
+ #  aggregateattestation:
+ #    # beacon-node-addresses are the addresses to which to submit aggregate attestations.
+ #    beacon-node-addresses: ['localhost:4000', 'localhost:5051', 'localhost:5052']
+ #  attestation:
+ #    # beacon-node-addresses are the addresses to which to submit attestations.
+ #    beacon-node-addresses: ['localhost:4000', 'localhost:5051', 'localhost:5052']
+ #  beaconcommitteesubscription:
+ #    # beacon-node-addresses are the addresses to which to submit beacon committee subscriptions.
+ #    beacon-node-addresses: ['localhost:4000', 'localhost:5051', 'localhost:5052']
+ #  proposal:
+ #    # beacon-node-addresses are the addresses to which to submit beacon block proposals.
+ #    beacon-node-addresses: ['localhost:4000', 'localhost:5051', 'localhost:5052']
+ #  proposalpreparation:
+ #    # beacon-node-addresses are the addresses to which to submit beacon proposal preparations.
+ #    beacon-node-addresses: ['localhost:4000', 'localhost:5051', 'localhost:5052']
+ #  synccommitteecontribution:
+ #    # beacon-node-addresses are the addresses to which to submit beacon sync committee contributions.
+ #    beacon-node-addresses: ['localhost:4000', 'localhost:5051', 'localhost:5052']
+ #  synccommitteemessage:
+ #    # beacon-node-addresses are the addresses to which to submit beacon sync committee messages.
+ #    beacon-node-addresses: ['localhost:4000', 'localhost:5051', 'localhost:5052']
+ #  synccommitteesubscription:
+ #    # beacon-node-addresses are the addresses to which to submit beacon sync committee subscriptions.
+ #    beacon-node-addresses: ['localhost:4000', 'localhost:5051', 'localhost:5052']
+-#}
+{% if submitter_overrides is defined %}
+submitter:
+  {{ vouch_submitter_overrides | to_yaml | indent(2) }}
+{% endif -%}
+
+{# strategies provide advanced strategies for dealing with multiple beacon nodes -#}
+strategies:
+  {# The attestationdata strategy obtains attestation data from multiple sources. -#}
+  attestationdata:
+    {#
+     # style can be 'best', which obtains attestation data from all nodes and selects the best, 'first', which uses the first returned,
+     # or 'majority', which obtains attestation data from all nodes and selects the most common.
+    -#}
+    style: '{{ vouch_strategies_attestationdata_style }}'
+    {# beacon-node-addresses are the addresses from which to receive attestation data. -#}
+    beacon-node-addresses: {{ vouch_strategies_attestationdata_beacon_node_addresses | to_yaml }}
+    majority:
+      {#
+       # threshold is the minimum number of beacon nodes that have to provide the same attestation data for Vouch with the 'majority'
+       # strategy to use it.
+      -#}
+      threshold: {{ vouch_strategies_attestationdata_majority_threshold }}
+  {#
+   # The aggregateattestation strategy obtains aggregate attestations from multiple sources.
+   # Note that the list of nodes here must be a subset of those in the attestationdata strategy.  If not, the nodes will not have
+   # been gathering the attestations to aggregate and will error when the aggregate request is made.
+  -#}
+  aggregateattestation:
+    {# style can be 'best', which obtains aggregates from all nodes and selects the best, or 'first', which uses the first returned -#}
+    style: '{{ vouch_strategies_aggregateattestation_style }}'
+    {# beacon-node-addresses are the addresses from which to receive aggregate attestations. -#}
+    beacon-node-addresses: {{ vouch_strategies_aggregateattestation_beacon_node_addresses | to_yaml }}
+  {# The beaconblockproposal strategy obtains beacon block proposals from multiple beacon nodes. -#}
+  beaconblockproposal:
+    {# style can be 'best', which obtains blocks from all nodes and selects the best, or 'first', which uses the first returned -#}
+    style: '{{ vouch_strategies_beaconblockproposal_style }}'
+    {# beacon-node-addresses are the addresses from which to receive beacon block proposals. -#}
+    beacon-node-addresses: {{ vouch_strategies_beaconblockproposal_beacon_node_addresses | to_yaml }} 
+    {#
+     # timeout defines the maximum amount of time the strategy will wait for a response.  As soon as a response from all beacon
+     # nodes has been obtained,the strategy will return with the best.  Half-way through the timeout period, Vouch will check to see
+     # if there have been any responses from the beacon nodes, and if so will return with the best.
+     # This allows Vouch to remain responsive in the situation where some beacon nodes are significantly slower than others, for
+     # example if one is remote.
+    -#}
+    timeout: '{{ vouch_strategies_beaconblockproposal_timeout }}'
+  {# The beaconblockheader strategy obtains the beacon block headers from multiple beacon nodes. -#}
+  beaconblockheader:
+    {# style can be 'first'. If not defined or set to another value Vouch will default to using the multiclient. -#}
+    style: '{{ vouch_strategies_beaconblockheader_style }}'
+    first:
+      {# beacon-node-addresses are the addresses from which to receive beacon block headers. -#}
+      beacon-node-addresses: {{ vouch_strategies_beaconblockheader_beacon_node_addresses | to_yaml }}
+      {#
+       # timeout defines the maximum amount of time the strategy will wait for a response.  Different strategies may return earlier
+       # if they have obtained enough information from their beacon node(s).
+      -#}
+      timeout: '{{ vouch_strategies_beaconblockheader_timeout }}'
+  {# The beaconblockroot strategy obtains the beacon block root from multiple beacon nodes. -#}
+  beaconblockroot:
+    {#
+     # style can be 'first', which uses the first returned, 'latest', which uses the latest returned, or 'majority', which uses
+     # the one returned by most nodes (taking the latest in case of a tie).
+    -#}
+    style: '{{ vouch_strategies_beaconblockroot_style }}'
+    {# beacon-node-addresses are the addresses from which to receive beacon block roots. -#}
+    beacon-node-addresses: {{ vouch_strategies_beaconblockroot_beacon_node_addresses | to_yaml }}
+    {#
+     # timeout defines the maximum amount of time the strategy will wait for a response.  Different strategies may return earlier
+     # if they have obtained enough information from their beacon node(s).
+    -#}
+    timeout: '{{ vouch_strategies_beaconblockroot_timeout }}'
+  builderbid:
+    {#
+     # style can be 'best', which uses the best bid returned from a single request to each of the configured relays, or 'deadline',
+     # which repeatedly queries the configured relays until the deadline is reached.
+    -#}
+    style: '{{ vouch_strategies_builderbid_style }}'
+    best:
+      {# timeout defines the maximum amount of time that Vouch will wait for relays to respond. -#}
+      timeout: '{{ vouch_strategies_builderbid_best_timeout }}'
+    deadline:
+      {# deadline defines the maximum amount of time that Vouch will query relays before stopping. -#}
+      deadline: '{{ vouch_strategies_builderbid_deadline_deadline }}'
+      {# bid-gap is the gap between receiving a response from a relay and querying it again. -#}
+      bid-gap: '{{ vouch_strategies_builderbid_deadline_bid_gap }}'
+  {# The signedbeaconblock strategy obtains the signed beacon blocks from multiple beacon nodes. -#}
+  signedbeaconblock:
+    {# style can be 'first'. If not defined or set to another value Vouch will default to using the multiclient. -#}
+    style: '{{ vouch_strategies_signedbeaconblock_style }}'
+    first:
+      {# beacon-node-addresses are the addresses from which to receive signed beacon blocks. -#}
+      beacon-node-addresses: {{ vouch_strategies_signedbeaconblock_first_beacon_node_addresses | to_yaml }}
+      {#
+       # timeout defines the maximum amount of time the strategy will wait for a response.  Different strategies may return earlier
+       # if they have obtained enough information from their beacon node(s).
+      -#}
+      timeout: '{{ vouch_strategies_signedbeaconblock_first_timeout }}'
+  {# The synccommitteecontribution strategy obtains sync committee contributions from multiple sources. -#}
+  synccommitteecontribution:
+    {# style can be 'best', which obtains contributions from all nodes and selects the best, or 'first', which uses the first returned -#}
+    style: '{{ vouch_strategies_synccommitteecontribution_style }}'
+    {# beacon-node-addresses are the addresses from which to receive sync committee contributions. -#}
+    beacon-node-addresses: {{ vouch_strategies_synccommitteecontribution_beacon_node_addresses | to_yaml }}
+
+{# blockrelay provides information about working with local execution clients and remote relays for block proposals. -#}
+blockrelay:
+  {#
+   # config is a URL that contains the configuration file for carrying out auctions.  Each validator can have a different
+   # set of relays, a different fee recipient, and a different gas limit if required.  Details about the format of this file
+   # can be found in the "Execution configuration" document.
+  -#}
+  {% if vouch_blockrelay_config_url is defined %}
+  config:
+    url: '{{ vouch_blockrelay_config_url }}'
+  {% endif -%}
+  {# fallback-fee-recipient is used for validators that do not have a value provided by the configuration above. -#}
+  fallback-fee-recipient: '{{ vouch_blockrelay_fallback_fee_recipient }}'
+  {# fallback-gas-limit is used for validators that do not have a value provided by the configuration above. -#}
+  fallback-gas-limit: '{{ vouch_blockrelay_fallback_gas_limit }}'
+  {#
+   # If log-results is true then the results of each block auction will be written to the logs.  Output will include each
+   # participating relay, the bid provided, and if the bid was selected for use by Vouch.
+  -#}
+  log-results: {{ vouch_blockrelay_log_results }}
+  {#
+   # builder-configs contain specific configurations for different builders, with each builder defined by its public key.
+   # The base score for each bid is the value to the proposer, in wei.  The final score is calculated by adding
+   # the 'offset' value for the specific builder, and then multiplying by the percentage of 'factor' value. For example,
+   # if the base value is 1000, the offset is 10 and the factor is 110 then the final score is (1000+10)*110/100 = 1111.  If the
+   # offset is not configured it defaults to 0; if the factor is not configured it defaults to 100.  The category is used
+   # for differentiation of bids in metrics.
+   #builder-configs:
+   #  '0xaaaa...':
+   #    category: 'privileged'
+   #    # With factor of 1000000000 bids from this builder are pretty much guaranteed to be included above bids from other builders.
+   #    factor: 1000000000
+   #  '0xbbbb...':
+   #    category: 'excluded'
+   #    # With a factor of 0 bids from this builder will be ignored.
+   #    factor: 0
+  -#}
+  {% if vouch_blockrelay_builder_configs is defined %}
+  builder-configs:
+    {{ vouch_blockrelay_builder_configs | to_yaml | indent(4) }}
+  {% endif -%}
+
+{#
+ # builderclient provides timeout configuration for builder/relay communication.
+ # Vouch communicates with MEV-boost relays for validator registration, bid fetching, and block unblinding.
+ # Different operations have different performance characteristics and may benefit from different timeout values.
+-#}
+builderclient:
+  {# Global timeout for all builderclient operations. Falls back to the global 'timeout' value (2s) if not set. -#}
+  timeout: '{{ vouch_builderclient_timeout }}'
+
+  {# Validator registration timeout -#}
+  submitvalidatorregistrations:
+    timeout: '{{ vouch_builderclient_submitvalidatorregistrations_timeout }}'
+
+  {#
+   # Builder bid strategy timeout
+   # The 'strategies' section is needed because builder bid operations are part of Vouch's strategies module
+  -#}
+  strategies:
+    builderbid:
+      timeout: '{{ vouch_builderclient_strategies_builderbid_timeout }}'
+
+  {# Block relay timeout for unblinding operations -#}
+  blockrelay:
+    timeout: '{{ vouch_builderclient_blockrelay_timeout }}'
+
+{#
+ # multiinstance allows multiple instances of Vouch to run simultaneously, with the inactive Vouch instances taking over if they
+ # fail to see expected attestations or proposals within the given time period.
+-#}
+multiinstance:
+  {#
+   # style can be 'static-delay' or 'always'.  'always' means that the instance will carry out its duties regardless of which other
+   # instances may active.  'static-delay' means that the instance will wait for an amount of time if inactive before becoming
+   # active.  Note that for the 'static-delay' style to operate the beacon node(s) to which Vouch connects must be running with the
+   # 'subscribe all subnets' option enabled.  This is because this style looks at the attestation data to see if other instance(s)
+   # of Vouch are active.  However, Vouch cannot detect if the beacon nodes are configured correctly so it is up to the user to
+   # carry out this work themselves.
+  -#}
+  style: '{{ vouch_multiinstance_style }}'
+  static-delay:
+    {#
+     # attester-delay is the time for inactive Vouch instances to wait to see expected attestations prior to becoming active
+     # themselves.  The higher this value is, the more likely it is that an inactive Vouch will miss a slot's worth of attestations
+     # before becoming active.  The lower this value is, the more likely it is that multiple Vouch instances will consider
+     # themselves as all active and potentially cause attestation failures.  If either of these situations is seen commonly then the
+     # value below may need to be changed accordingly.
+    -#}
+    attester-delay: '{{ vouch_multiinstance_static_delay_attester_delay }}'
+    {#
+     # proposer-delay is the time for inactive Vouch instances to wait to see expected proposals prior to becoming active themselves.
+     # The same caveats apply to this value as to the attester delay, however in general it is very unlikely that a Vouch instance
+     # will become inactive around a proposal, given the relative frequency of proposals and attestations.
+    -#}
+    proposer-delay: '{{ vouch_multiinstance_static_delay_proposer_delay }}'
+
+{# tracing sends OTLP trace data to the supplied endpoint. -#}
+{% if vouch_tracing_address is defined %}
+tracing:
+  {# Address is the host and port of an OTLP trace receiver. -#}
+  address: '{{ vouch_tracing_address }}'
+  {#
+   # If the endpoint is secure you will need to supply a client certificate and key, and optionally a CA certificate if your client
+   # certificate is issued by a private certificate authority.
+  -#}
+  {% if vouch_tracing_client_cert is defined %}
+  client-cert: '{{ vouch_tracing_client_cert }}'
+  client-key: '{{ vouch_tracing_client_key }}'
+  {% endif -%}
+  {% if vouch_tracing_ca_cert is defined %}
+  ca-cert: '{{ vouch_tracing_ca_cert }}'
+  {% endif -%}
+{% endif -%}
+
+{# See https://github.com/attestantio/vouch/blob/master/docs/accountmanager.md for more information -#}
+accountmanager:
+  {%- if vouch_accountmanager.dirk is defined and vouch_accountmanager.dirk.endpoints | length > 0 %}
+  dirk:
+    {{ vouch_accountmanager.dirk | to_yaml | indent(4) }}
+  {%- elif vouch_accountmanager.wallet is defined %}
+  wallet:
+    {{ vouch_accountmanager.wallet | to_yaml | indent(4) }}
+  {%- endif %}

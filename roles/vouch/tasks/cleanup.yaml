@@ -1,0 +1,5 @@
+- name: Remove vouch container
+  community.docker.docker_container:
+    name: "{{ vouch_container_name }}"
+    state: absent
+    when: vouch_cleanup
