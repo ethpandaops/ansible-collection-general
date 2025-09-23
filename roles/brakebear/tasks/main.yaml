@@ -1,0 +1,7 @@
+- name: Setup brakebear
+  ansible.builtin.import_tasks: setup.yaml
+  when: not brakebear_cleanup
+
+- name: Cleanup brakebear
+  ansible.builtin.import_tasks: cleanup.yaml
+  when: brakebear_cleanup

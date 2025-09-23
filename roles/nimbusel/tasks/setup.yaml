@@ -7,7 +7,7 @@
   ansible.builtin.file:
     path: "{{ nimbusel_datadir }}"
     state: directory
-    mode: "0750"
+    mode: "0700"
     owner: "{{ nimbusel_user }}"
     group: "{{ nimbusel_user }}"
 

@@ -1,0 +1,37 @@
+- name: Add brakebear user
+  ansible.builtin.user:
+    name: "{{ brakebear_user }}"
+    shell: /bin/nologin
+
+- name: Create brakebear dir
+  ansible.builtin.file:
+    path: "{{ brakebear_dir_config }}"
+    state: directory
+    mode: '0777'
+    owner: "{{ brakebear_user }}"
+    group: "{{ brakebear_user }}"
+
+- name: Create brakebear config file
+  ansible.builtin.copy:
+    content: "{{ brakebear_config }}"
+    dest: "{{ brakebear_dir_config }}/brakebear.yaml"
+    owner: "{{ brakebear_user }}"
+    group: "{{ brakebear_user }}"
+    mode: '0640'
+  notify: Restart brakebear container
+
+- name: Run brakebear container
+  community.docker.docker_container:
+    name: "{{ brakebear_container_name }}"
+    image: "{{ brakebear_container_image }}"
+    image_name_mismatch: recreate
+    state: started
+    restart_policy: always
+    privileged: true
+    pid_mode: host
+    stop_timeout: "{{ brakebear_container_stop_timeout }}"
+    ports: "{{ brakebear_container_ports }}"
+    volumes: "{{ brakebear_container_volumes }}"
+    env: "{{ brakebear_container_env }}"
+    networks: "{{ brakebear_container_networks }}"
+    command: "{{ brakebear_container_command }}"

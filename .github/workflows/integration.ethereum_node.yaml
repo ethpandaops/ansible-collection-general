@@ -20,7 +20,7 @@ jobs:
       consensus_clients: ${{ steps.consensus_clients.outputs.changes }}
       execution_clients: ${{ steps.execution_clients.outputs.changes }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
         id: global
         with:
@@ -45,7 +45,6 @@ jobs:
             nethermind: roles/nethermind/**
             erigon: roles/erigon/**
             besu: roles/besu/**
-            ethereumjs: roles/ethereumjs/**
             reth: roles/reth/**
             nimbusel: roles/nimbusel/**
 
@@ -59,7 +58,7 @@ jobs:
         run: |
           echo "Verifying which client roles have changed...";
           ALL_CONSENSUS_CLIENTS='["teku", "prysm", "lighthouse", "nimbus", "lodestar", "grandine"]';
-          ALL_EXECUTION_CLIENTS='["geth", "nethermind", "erigon", "besu", "ethereumjs", "reth", "nimbusel"]';
+          ALL_EXECUTION_CLIENTS='["geth", "nethermind", "erigon", "besu", "reth", "nimbusel"]';
 
           CONSENSUS_CLIENTS="[]";
           EXECUTION_CLIENTS="[]";
@@ -103,16 +102,15 @@ jobs:
       }}
     concurrency:
       group: >-
-        ${{ github.head_ref }}-ethereum-node-${{ matrix.consensus }}-${{ matrix.execution }}
+        ${{ github.head_ref }}-ethereum-node-${{ matrix.consensus }}
       cancel-in-progress: true
     strategy:
       fail-fast: false
       matrix:
         consensus: ${{ fromJSON(needs.vars.outputs.CONSENSUS_CLIENTS) }}
-        execution: ${{ fromJSON(needs.vars.outputs.EXECUTION_CLIENTS) }}
     runs-on: self-hosted-ghr-size-s-x64
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           path: ansible_collections/ethpandaops/general
 
@@ -121,13 +119,20 @@ jobs:
           dockerhub_username: ethpandaops
           dockerhub_password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Run molecule
+      - name: Test ${{ matrix.consensus }} with all execution clients
         working-directory: ansible_collections/ethpandaops/general/roles/ethereum_node
-        run: molecule test
         env:
           PY_COLORS: '1'
           ANSIBLE_DOCKER_TIMEOUT: '120'
-          EXECUTION_CLIENT: ${{ matrix.execution }}
           CONSENSUS_CLIENT: ${{ matrix.consensus }}
           DOCKERHUB_USERNAME: ethpandaops
           DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          execution_clients_json='${{ needs.vars.outputs.EXECUTION_CLIENTS }}'
+          execution_clients=($(echo $execution_clients_json | jq -r '.[]'))
+
+          for execution_client in "${execution_clients[@]}"; do
+            echo "::group::Testing ${{ matrix.consensus }} with $execution_client"
+            EXECUTION_CLIENT=$execution_client molecule test
+            echo "::endgroup::"
+          done

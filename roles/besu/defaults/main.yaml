@@ -53,8 +53,7 @@ besu_container_command_default:
   - --metrics-host=0.0.0.0
   - --metrics-port={{ besu_ports_metrics }}
 
-besu_container_command_v6:
-  - --p2p-host-ipv6={{ besu_announced_ipv6 }}
+besu_container_command_v6: []
 
 besu_container_command: >-
   {{ besu_container_command_default + (besu_container_command_v6 if besu_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}

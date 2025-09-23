@@ -27,7 +27,7 @@ xatu-mimicry:
       config:
         retryInterval: 60s
         nodeRecords:
-{% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
+{% for host in (groups['bootnode']) | sort %}
           - {{ hostvars[host]['ethereum_node_fact_el_enode'] }}
 {% endfor %}
     outputs:

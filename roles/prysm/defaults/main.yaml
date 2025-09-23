@@ -15,9 +15,12 @@ prysm_ports_p2p_udp: 12000
 prysm_ports_http_beacon: 3500
 prysm_ports_metrics: 8080
 prysm_ports_grpc: 4000
+prysm_ports_pprof: 6061
 
 prysm_ipv6_enabled: false
 prysm_supernode_enabled: false
+
+prysm_pprof_enabled: false
 
 prysm_validator_enabled: false
 prysm_validator_fee_recipient: "0x25941dC771bB64514Fc8abBce970307Fb9d477e9" # theprotocolguild.eth
@@ -37,12 +40,19 @@ prysm_container_ports_ipv4:
   - "0.0.0.0:{{ prysm_ports_p2p_tcp }}:{{ prysm_ports_p2p_tcp }}"
   - "0.0.0.0:{{ prysm_ports_p2p_udp }}:{{ prysm_ports_p2p_udp }}/udp"
 
+prysm_container_ports_pprof:
+  - "127.0.0.1:{{ prysm_ports_pprof }}:{{ prysm_ports_pprof }}"
+
 prysm_container_ports_ipv6:
   - "[::]:{{ prysm_ports_p2p_tcp }}:{{ prysm_ports_p2p_tcp }}"
   - "[::]:{{ prysm_ports_p2p_udp }}:{{ prysm_ports_p2p_udp }}/udp"
 
 prysm_container_ports: >-
-  {{ prysm_container_ports_ipv4 + (prysm_container_ports_ipv6 if prysm_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
+  {{
+    prysm_container_ports_ipv4 +
+    (prysm_container_ports_ipv6 if prysm_ipv6_enabled and ansible_default_ipv6.address is defined else []) +
+    (prysm_container_ports_pprof if prysm_pprof_enabled else [])
+  }}
 
 prysm_container_volumes:
   - "{{ prysm_datadir }}:/data"
@@ -74,11 +84,18 @@ prysm_container_command_v6: []
 prysm_container_supernode_command:
   - --subscribe-all-data-subnets
 
+prysm_container_pprof_command:
+  - --pprof
+  - --pprofport={{ prysm_ports_pprof }}
+  - --pprofaddr=0.0.0.0
+
+
 prysm_container_command: >-
   {{
     prysm_container_command_default +
     (prysm_container_command_v6 if prysm_ipv6_enabled and ansible_default_ipv6.address is defined else []) +
-    (prysm_container_supernode_command if prysm_supernode_enabled else [])
+    (prysm_container_supernode_command if prysm_supernode_enabled else []) +
+    (prysm_container_pprof_command if prysm_pprof_enabled else [])
   }}
 
 prysm_container_command_extra_args: []

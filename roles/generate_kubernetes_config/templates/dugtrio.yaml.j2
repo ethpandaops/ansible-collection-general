@@ -33,6 +33,6 @@ dugtrio:
   - url: {{ default_cl_endpoint }}
     name: rpc-{{ gen_kubernetes_config_ethereum_node_name }}
 {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
-  - url: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@bn.{{ hostvars[host]['inventory_hostname'] }}.{{ network_subdomain }}
+  - url: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_beacon_prefix }}{{ hostvars[host]['inventory_hostname'] }}.{{ network_server_subdomain }}
     name: {{ hostvars[host]['inventory_hostname'] }}
 {% endfor %}

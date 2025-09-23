@@ -13,6 +13,7 @@
     recreate: "{{ docker_watchtower_container_recreate }}"
     stop_timeout: "{{ docker_watchtower_container_stop_timeout }}"
     env: "{{ docker_watchtower_container_env }}"
+    labels: "{{ docker_watchtower_container_labels }}"
     ports: "{{ docker_watchtower_container_ports }}"
     expose: "{{ docker_watchtower_container_exposed_ports }}"
     volumes: "{{ docker_watchtower_container_volumes }}"

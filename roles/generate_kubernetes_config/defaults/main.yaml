@@ -42,9 +42,13 @@ gen_kubernetes_config_ethereum_node_name: >- # noqa var-naming[no-role-prefix] y
 gen_kubernetes_config_dora_frontend_explorer_link: "https://explorer.{{ network_subdomain }}" # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_dora_frontend_rainbowkit_id: "" # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_dora_frontend_public_rpc: "https://rpc.{{ network_subdomain }}" # noqa var-naming[no-role-prefix]
-gen_kubernetes_config_dora_frontend_with_submit_deposits: true # noqa var-naming[no-role-prefix]
-gen_kubernetes_config_dora_frontend_with_submit_el_requests: true # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_dora_execution_snooper_port: false # noqa var-naming[no-role-prefix]
+gen_kubernetes_config_dora_execution_genesis_config: "https://config.{{ network_subdomain }}/el/genesis.json" # noqa var-naming[no-role-prefix]
+gen_kubernetes_config_dora_execution_endpoints_url: "" # noqa var-naming[no-role-prefix]
+gen_kubernetes_config_dora_consensus_endpoints_url: "" # noqa var-naming[no-role-prefix]
+gen_kubernetes_config_dora_api_require_auth: false # noqa var-naming[no-role-prefix]
+gen_kubernetes_config_dora_api_secret: "" # noqa var-naming[no-role-prefix]
+gen_kubernetes_config_dora_api_whitelisted_ips: [] # noqa var-naming[no-role-prefix]
 
 # Chaos Mesh configuration  
 gen_kubernetes_config_chaos_mesh_dashboard_security_mode: false # noqa var-naming[no-role-prefix]
@@ -107,10 +111,13 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
         version: 0.1.5
   dora:
     valuesTemplatePath: templates/dora.yaml.j2
+    additionalTemplates:
+      "endpoints-cl.yaml": templates/dora-endpoints-cl.yaml.j2
+      "endpoints-el.yaml": templates/dora-endpoints-el.yaml.j2
     dependencies:
       - name: dora
         repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 0.0.9
+        version: 1.0.2
   forky:
     valuesTemplatePath: templates/forky.yaml.j2
     dependencies:
@@ -183,4 +190,21 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
     dependencies:
       - name: chaos-mesh
         repository: https://ethpandaops.github.io/general-helm-charts
+  syncoor-server:
+    valuesTemplatePath: templates/syncoor-server.yaml.j2
+    dependencies:
+      - name: syncoor-server
+        repository: https://ethpandaops.github.io/ethereum-helm-charts
+        version: 0.0.1
+  syncoor-web:
+    valuesTemplatePath: templates/syncoor-web.yaml.j2
+    dependencies:
+      - name: syncoor-web
+        repository: https://ethpandaops.github.io/ethereum-helm-charts
+        version: 0.0.1
+  xatu-relay-monitor:
+    valuesTemplatePath: templates/xatu-relay-monitor.yaml.j2
+    dependencies:
+      - name: xatu-relay-monitor
+        repository: https://ethpandaops.github.io/ethereum-helm-charts
         version: 0.0.1
