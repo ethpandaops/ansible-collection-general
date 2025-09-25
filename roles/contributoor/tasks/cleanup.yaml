@@ -1,0 +1,9 @@
+- name: Stop contributoor container
+  community.docker.docker_container:
+    name: "{{ contributoor_container_name }}"
+    state: absent
+
+- name: Remove contributoor user
+  ansible.builtin.user:
+    name: "{{ contributoor_user }}"
+    state: absent
