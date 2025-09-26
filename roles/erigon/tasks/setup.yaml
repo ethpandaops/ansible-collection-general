@@ -42,7 +42,13 @@
         security_opts: "{{ erigon_container_security_opts }}"
 
       # first part is checking if we wanna reinit usually done for shadowforks by default do not reinit
-      when: if "keep.stored.chain.config" in erigon_container_command or not erigon_init_custom_network_chaindata_stat.stat.exists
+      # second part checks if the execution container is already running, if you init with a running container there will
+      # be a crash on erigon
+      when: >
+          (erigon_container_command_extra_args | select('match', '.*keep\\.stored\\.chain\\.config.*') | list | length > 0 or
+           not erigon_init_custom_network_chaindata_stat.stat.exists) and
+          (not erigon_container_info.exists or
+           erigon_container_info.container.State.Status != "running")
 
 - name: Run erigon container
   community.docker.docker_container:
