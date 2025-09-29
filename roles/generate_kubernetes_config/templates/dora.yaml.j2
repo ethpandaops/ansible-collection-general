@@ -31,7 +31,7 @@ dora:
   rainbowkitProjectId: "{{ gen_kubernetes_config_dora_frontend_rainbowkit_id }}"
   executionGenesisConfig: "{{ gen_kubernetes_config_dora_execution_genesis_config }}"
   apiRequireAuth: {{ gen_kubernetes_config_dora_api_require_auth }}
-  apiAuthSecret: "{{ gen_kubernetes_config_dora_api_secret }}"
+  apiAuthSecret: "<path:/secrets/services/services.enc.yaml#dora | jsonPath {.api_secret}>"
   apiWhitelistedIPs: {% if not gen_kubernetes_config_dora_api_whitelisted_ips %}[]
 {% else %}
 {% for ip in gen_kubernetes_config_dora_api_whitelisted_ips | sort %}
