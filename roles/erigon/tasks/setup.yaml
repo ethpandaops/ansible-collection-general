@@ -45,10 +45,10 @@
       # second part checks if the execution container is already running, if you init with a running container there will
       # be a crash on erigon
       when: >
-          (erigon_container_command_extra_args | select('match', '.*keep\\.stored\\.chain\\.config.*') | list | length > 0 or
-           not erigon_init_custom_network_chaindata_stat.stat.exists) and
-          (not erigon_container_info.exists or
-           erigon_container_info.container.State.Status != "running")
+        (erigon_container_command_extra_args | select('match', '.*keep\\.stored\\.chain\\.config.*') | list | length > 0 or
+         not erigon_init_custom_network_chaindata_stat.stat.exists) and
+        (not (erigon_container_info.exists | default(false)) or
+         (erigon_container_info.container.State.Status | default('')) != "running")
 
 - name: Run erigon container
   community.docker.docker_container:
