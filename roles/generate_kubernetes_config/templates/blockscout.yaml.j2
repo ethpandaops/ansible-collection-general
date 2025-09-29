@@ -45,6 +45,8 @@ blockscout-stack:
       SUBNETWORK: {{ ethereum_network_name }}
       POOL_SIZE: "15"
       CHAIN_SPEC_PATH: /config-update/chainspec.json
+      FIRST_BLOCK: "{{ shadowfork_height | default(0) }}"
+      TRACE_FIRST_BLOCK: "{{ shadowfork_height | default(0) }}"
 
     service:
       type: ClusterIP
