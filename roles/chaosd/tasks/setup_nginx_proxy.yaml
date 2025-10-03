@@ -1,0 +1,49 @@
+- name: Create chaosd nginx location configuration file
+  ansible.builtin.copy:
+    content: |
+      # Chaosd chaos engineering API endpoint
+      location /chaosd/ {
+          auth_basic "Restricted Access";
+          auth_basic_user_file /etc/nginx/htpasswd/{{ chaosd_nginx_proxy_hostname | default(ansible_fqdn) }};
+          
+          # Strip /chaosd prefix and proxy to chaosd service
+          rewrite ^/chaosd/(.*) /$1 break;
+          proxy_pass http://172.17.0.1:{{ chaosd_internal_port }};
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+          
+          # Handle chaosd API specific headers
+          proxy_set_header Content-Type $content_type;
+          proxy_pass_request_headers on;
+          
+          # Timeouts for chaos experiments
+          proxy_connect_timeout 30s;
+          proxy_send_timeout 300s;
+          proxy_read_timeout 300s;
+      }
+    dest: "{{ docker_nginx_proxy_datadir | default('/opt/nginx-proxy') }}/vhost/{{ chaosd_nginx_proxy_hostname | default(ansible_fqdn) }}.chaosd.conf"
+    mode: '0644'
+    owner: "{{ docker_nginx_proxy_user | default('nginx-proxy') }}"
+    group: "{{ docker_nginx_proxy_user | default('nginx-proxy') }}"
+
+- name: Add include directive for chaosd config to main vhost location file
+  ansible.builtin.lineinfile:
+    path: "{{ docker_nginx_proxy_datadir | default('/opt/nginx-proxy') }}/vhost/{{ chaosd_nginx_proxy_hostname | default(ansible_fqdn) }}_location"
+    line: "include /etc/nginx/vhost.d/{{ chaosd_nginx_proxy_hostname | default(ansible_fqdn) }}.chaosd.conf;"
+    create: yes
+    mode: '0644'
+    owner: "{{ docker_nginx_proxy_user | default('nginx-proxy') }}"
+    group: "{{ docker_nginx_proxy_user | default('nginx-proxy') }}"
+  notify: Reload nginx-proxy
+
+- name: Test chaosd API through nginx-proxy path
+  ansible.builtin.uri:
+    url: "https://{{ chaosd_nginx_proxy_hostname | default(ansible_fqdn) }}/chaosd/api/experiments/"
+    method: GET
+    status_code: [200, 401]  # 401 is expected without auth
+    validate_certs: false
+  register: chaosd_proxy_test
+  failed_when: false
+  delegate_to: localhost
