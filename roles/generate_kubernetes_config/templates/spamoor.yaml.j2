@@ -45,7 +45,7 @@ spamoor:
 {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
 {% set host_name = hostvars[host]['inventory_hostname'] %}
 {% if 'mev-relay' in host_name %}
-  - "group(mev-relay){{ host_name }} + https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_rpc_prefix }}{{ host_name }}.{{ network_server_subdomain }}"
+  - "group(mev-relay)https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_rpc_prefix }}{{ host_name }}.{{ network_server_subdomain }}"
 {% else %}
   - "https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_rpc_prefix }}{{ host_name }}.{{ network_server_subdomain }}"
 {% endif %}
