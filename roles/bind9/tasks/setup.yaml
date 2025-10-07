@@ -1,0 +1,52 @@
+- name: Add bind9 user
+  ansible.builtin.user:
+    name: "{{ bind9_user }}"
+  register: bind9_user_meta
+
+- name: Create a directory for the bind9 config
+  ansible.builtin.file:
+    path: "{{ bind9_config_dir }}"
+    state: directory
+    mode: "0750"
+    owner: "{{ bind9_user_meta.uid }}"
+    group: "{{ bind9_user_meta.group }}"
+  register: bind9_config_dir_meta
+
+- name: Create the bind9 named.conf
+  ansible.builtin.copy:
+    dest: "{{ bind9_config_dir }}/named.conf"
+    mode: "0640"
+    owner: "{{ bind9_user_meta.uid }}"
+    group: "{{ bind9_user_meta.group }}"
+    content: "{{ bind9_named_conf }}"
+  notify: Restart bind9 container
+
+- name: Create the bind9 zone configs
+  ansible.builtin.copy:
+    dest: "{{ bind9_config_dir }}/{{ item.filename }}"
+    mode: "0640"
+    owner: "{{ bind9_user_meta.uid }}"
+    group: "{{ bind9_user_meta.group }}"
+    content: "{{ item.content }}"
+  loop: "{{ bind9_zone_configs }}"
+  notify: Restart bind9 container
+
+- name: Run bind9 container
+  community.docker.docker_container:
+    name: "{{ bind9_container_name }}"
+    image: "{{ bind9_container_image }}"
+    image_name_mismatch: recreate
+    state: started
+    restart_policy: always
+    stop_timeout: "{{ bind9_container_stop_timeout }}"
+    ports: "{{ bind9_container_ports }}"
+    volumes: "{{ bind9_container_volumes }}"
+    env: "{{ bind9_container_env }}"
+    networks: "{{ bind9_container_networks }}"
+    entrypoint: "{{ bind9_container_entrypoint | default(omit) }}"
+    command: "{{ bind9_container_command | default(omit) }}"
+    user: "{{ bind9_user_meta.uid }}:{{ bind9_user_meta.group }}"
+    pull: "{{ bind9_container_pull | bool }}"
+    security_opts: "{{ bind9_container_security_opts }}"
+#    capabilities:
+#      - CAP_SETGID # named uses setgid to respect BIND9_USER env var

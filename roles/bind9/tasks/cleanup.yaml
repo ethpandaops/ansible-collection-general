@@ -1,0 +1,5 @@
+- name: Remove bind9 container
+  community.docker.docker_container:
+    name: "{{ bind9_container_name }}"
+    state: absent
+    when: bind9_cleanup

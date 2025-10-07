@@ -1,0 +1,7 @@
+- name: Setup bind9
+  ansible.builtin.import_tasks: setup.yaml
+  when: not bind9_cleanup
+
+- name: Cleanup bind9
+  ansible.builtin.import_tasks: cleanup.yaml
+  when: bind9_cleanup

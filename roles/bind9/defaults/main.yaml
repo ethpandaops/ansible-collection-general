@@ -1,0 +1,89 @@
+bind9_cleanup: false # when set to "true" it will remove the container(s)
+
+bind9_container_name: bind9
+bind9_container_image: ubuntu/bind9:latest
+bind9_container_stop_timeout: "60"
+bind9_container_ports:
+  - "0.0.0.0:53:53/udp"
+bind9_container_volumes:
+  - "{{ bind9_config_dir }}:{{ bind9_config_dir }}:ro"
+#  - "bind9_cache:/var/cache/bind"
+bind9_container_networks: []
+bind9_container_pull: false
+bind9_container_security_opts: []
+bind9_container_env:
+  BIND9_USER: "{{ bind9_user }}"
+  TZ: "UTC"
+
+# XXX
+# bind9_container_entrypoint: ["/bin/bash", "-c", "while true; do sleep 1000000000; done"]
+
+bind9_user: bind
+bind9_config_dir: "/home/bind/config"
+bind9_allowed_subnets:
+  - "10.40.0.0/16"
+bind9_upstream_dns_servers:
+  - "1.1.1.1"
+  - "8.8.8.8"
+bind9_dnssec_validation: "auto"
+bind9_listen_on_v4:
+  - "listen-on port 53 { 0.0.0.0; };"
+bind9_named_conf: |
+  options {
+    directory "{{ bind9_config_dir }}";
+
+    // Allow only specific subnets
+    allow-query {
+      {%- for subnet in bind9_allowed_subnets %}
+      {{ subnet }};
+      {%- endfor %}
+    };
+    allow-recursion {
+      {%- for subnet in bind9_allowed_subnets %}
+      {{ subnet }};
+      {%- endfor %}
+    };
+    allow-query-cache {
+      {%- for subnet in bind9_allowed_subnets %}
+      {{ subnet }};
+      {%- endfor %}
+    };
+
+    {% if bind9_upstream_dns_servers | length > 0 -%}
+    recursion yes;
+
+    // Forward to upstream DNS servers
+    forwarders {
+        {% for dns_server in bind9_upstream_dns_servers %}{{ dns_server }};
+        {% endfor %}
+    };
+    {%- endif %}
+
+    dnssec-validation {{ bind9_dnssec_validation }};
+
+    {{ bind9_listen_on_v4 | default(omit) }};
+    {{ bind9_listen_on_v6 | default(omit) }};
+  };
+  {% for zone in bind9_zone_configs %}
+  zone "{{ zone.filename }}" {
+    type {{ zone.type }};
+    file "{{ bind9_config_dir }}/{{ zone.filename }}";
+  };
+  {% endfor %}
+
+bind9_zone_configs:
+  - filename: "ef.internal"
+    type: "master"
+    content: |
+      $TTL 604800
+      @ IN SOA ns.ef.internal. noreply.ethereum.org. (
+          2 ; Serial
+          604800 ; Refresh
+          86400 ; Retry
+          2419200 ; Expire
+          604800 ; Negative Cache TTL
+      )
+      @ IN NS ns.ef.internal.
+      ns IN A 10.40.0.1
+
+      example IN A 10.40.0.2
