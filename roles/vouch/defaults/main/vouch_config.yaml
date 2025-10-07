@@ -1,0 +1,106 @@
+### vouch.yaml configuration
+vouch_log_level: "info"
+vouch_logging_timestamp_format: "2006-01-02T15:04:05.999Z07:00"
+
+# Beacon Nodes - this should almost always be overridden
+vouch_beacon_nodes:
+  - "localhost:5052"
+
+# Timeout for validating operations
+vouch_timeout: "2s"
+
+vouch_reduce_memory_usage: "false"
+
+# Timeout for non-validating operations
+vouch_eth2client_timeout: "2m"
+# Allows vouch to start even if some upstream beacon nodes are offline
+vouch_eth2client_allow_delayed_start: "true"
+
+vouch_metrics:
+  port: "8081"
+  host: "0.0.0.0"
+
+vouch_metrics_log_level: "warn"
+
+vouch_graffiti: ""
+
+# Attestations and sync committees can be 'fast-tracked',
+# meaning vouch will perform these duties as soon as the duty
+# slot is reached (by configurable strategy)
+vouch_controller_fast_track_attestations: "true"
+vouch_controller_fast_track_sync_committees: "true"
+# Delay at the beginning of the fast-tracked duties to allow
+# all the beacon nodes to 'catch up'
+vouch_controller_fast_track_grace: "500ms"
+
+# Enables extra logging/metrics for verification of sync committee messages
+# in SyncAggregate
+vouch_controller_verify_sync_committee_inclusion: "false"
+
+vouch_beaconblockproposer_unblind_from_all_relays: "false"
+vouch_beaconblockproposer_builder_boost_factor: "91"
+
+vouch_attester_grace: "0s"
+
+# Strategy configurations
+
+# attestationdata
+vouch_strategies_attestationdata_style: "majority"
+# Nodes from which to request attestationdata - can override to, say, exclude nodes at
+# risk of being a majority risk
+vouch_strategies_attestationdata_beacon_node_addresses: "{{ vouch_beacon_nodes }}"
+# If using majority style, this variable can adjust the threshold
+vouch_strategies_attestationdata_majority_threshold: "{{ (vouch_beacon_nodes | length) // 2 + 1 }}"
+
+# aggregateattestation
+vouch_strategies_aggregateattestation_style: "best"
+# Nodes from which to request aggregateattestation - must be subset of nodes in attestationdata
+vouch_strategies_aggregateattestation_beacon_node_addresses: "{{ vouch_strategies_attestationdata_beacon_node_addresses }}"
+
+# beaconblockproposal
+vouch_strategies_beaconblockproposal_style: "best"
+vouch_strategies_beaconblockproposal_beacon_node_addresses: "{{ vouch_beacon_nodes }}"
+vouch_strategies_beaconblockproposal_timeout: "2s"
+
+# beaconblockheader
+vouch_strategies_beaconblockheader_style: "first"
+vouch_strategies_beaconblockheader_beacon_node_addresses: "{{ vouch_beacon_nodes }}"
+vouch_strategies_beaconblockheader_timeout: "2s"
+
+# beaconblockroot
+vouch_strategies_beaconblockroot_style: "latest"
+vouch_strategies_beaconblockroot_beacon_node_addresses: "{{ vouch_beacon_nodes }}"
+vouch_strategies_beaconblockroot_timeout: "2s"
+
+# builderbid
+vouch_strategies_builderbid_style: "best"
+vouch_strategies_builderbid_best_timeout: "2s"
+vouch_strategies_builderbid_deadline_deadline: "1s"
+vouch_strategies_builderbid_deadline_bid_gap: "100ms"
+
+# signedbeaconblock
+vouch_strategies_signedbeaconblock_style: "first"
+vouch_strategies_signedbeaconblock_first_beacon_node_addresses: "{{ vouch_beacon_nodes }}"
+vouch_strategies_signedbeaconblock_first_timeout: "2s"
+
+# synccommitteecontribution
+vouch_strategies_synccommitteecontribution_style: "best"
+vouch_strategies_synccommitteecontribution_beacon_node_addresses: "{{ vouch_beacon_nodes }}"
+
+# End of strategies
+
+vouch_blockrelay_fallback_fee_recipient: "0xc06145782F31030dB1C40B203bE6B0fD53410B6d"
+vouch_blockrelay_fallback_gas_limit: "45000000"
+vouch_blockrelay_log_results: "true"
+
+vouch_builderclient_timeout: "2s"
+vouch_builderclient_submitvalidatorregistrations_timeout: "10s"
+vouch_builderclient_strategies_builderbid_timeout: "5s"
+vouch_builderclient_blockrelay_timeout: "5s"
+
+# Change to static-delay for 'non-leaders'
+vouch_multiinstance_style: "always"
+# Each vouch should have a different value for these
+# except for the leader, which ignores these settings
+vouch_multiinstance_static_delay_attester_delay: "1s"
+vouch_multiinstance_static_delay_proposer_delay: "2s"
