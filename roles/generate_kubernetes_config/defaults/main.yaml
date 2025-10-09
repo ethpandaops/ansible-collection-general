@@ -47,7 +47,6 @@ gen_kubernetes_config_dora_execution_genesis_config: "https://config.{{ network_
 gen_kubernetes_config_dora_execution_endpoints_url: "" # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_dora_consensus_endpoints_url: "" # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_dora_api_require_auth: false # noqa var-naming[no-role-prefix]
-gen_kubernetes_config_dora_api_secret: "" # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_dora_api_whitelisted_ips: [] # noqa var-naming[no-role-prefix]
 
 # Chaos Mesh configuration  

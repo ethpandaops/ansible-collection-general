@@ -31,27 +31,28 @@
         mode: "0644"
       loop: "{{ ethereum_genesis_generator_config_files | dict2items }}"
 
+    - name: Check if Docker is rootless
+      ansible.builtin.command: docker info -f '{{ "{{json .SecurityOptions}}" }}'
+      register: docker_secopts
+      changed_when: false
+
+    - name: Set rootless fact
+      ansible.builtin.set_fact:
+        docker_is_rootless: "{{ 'name=rootless' in docker_secopts.stdout }}"
+
+    - name: Compute docker user flag
+      ansible.builtin.set_fact:
+        docker_user_flag: "{{ docker_is_rootless | ternary('', '-u ' ~ (ansible_effective_user_id | default(ansible_uid, true))) }}"
+
     - name: Run genesis generator
       ansible.builtin.shell: >
-        docker run --rm -t -u $UID
+        docker run --rm -t {{ docker_user_flag }}
         -v {{ ethereum_genesis_generator_tmp_output_dir_register.path }}:/data
         -v {{ ethereum_genesis_generator_tmp_config_dir_register.path }}:/config
         {{ ethereum_genesis_generator_container_image }} all
       register: ethereum_genesis_generator_cmd
       changed_when: false
       failed_when: (ethereum_genesis_generator_cmd.rc != 0) or (ethereum_genesis_generator_cmd.stdout == "")
-      when: ansible_os_family != "Debian"
-
-    - name: Run genesis generator (Debian)
-      ansible.builtin.shell: >
-        docker run --rm -t -u $(id -u)
-        -v {{ ethereum_genesis_generator_tmp_output_dir_register.path }}:/data
-        -v {{ ethereum_genesis_generator_tmp_config_dir_register.path }}:/config
-        {{ ethereum_genesis_generator_container_image }} all
-      register: ethereum_genesis_generator_cmd_debian
-      changed_when: false
-      failed_when: (ethereum_genesis_generator_cmd_debian.rc != 0) or (ethereum_genesis_generator_cmd_debian.stdout == "")
-      when: ansible_os_family == "Debian"
 
     - name: Removes extended attr from config.yaml, breaks on linux due to perms if present
       ansible.builtin.command: xattr -c "{{ ethereum_genesis_generator_tmp_output_dir_register.path }}/metadata/config.yaml"
@@ -111,5 +112,4 @@
           - Temp config dir: {{ ethereum_genesis_generator_tmp_config_dir_register.path }}
           - Temp output dir: {{ ethereum_genesis_generator_tmp_output_dir_register.path }}
       when: >-
-        (ethereum_genesis_generator_cmd.rc | default('')  != 0) or
-        (ethereum_genesis_generator_cmd_debian.rc | default('')  != 0)
+        (ethereum_genesis_generator_cmd.rc | default('')  != 0)
