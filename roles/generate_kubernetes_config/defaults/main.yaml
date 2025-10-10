@@ -49,7 +49,7 @@ gen_kubernetes_config_dora_consensus_endpoints_url: "" # noqa var-naming[no-role
 gen_kubernetes_config_dora_api_require_auth: false # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_dora_api_whitelisted_ips: [] # noqa var-naming[no-role-prefix]
 
-# Chaos Mesh configuration  
+# Chaos Mesh configuration
 gen_kubernetes_config_chaos_mesh_dashboard_security_mode: false # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_chaos_mesh_chaosd_security_mode: false # noqa var-naming[no-role-prefix]
 
@@ -188,7 +188,7 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
     valuesTemplatePath: templates/chaos-mesh.yaml.j2
     dependencies:
       - name: chaos-mesh
-        repository: https://ethpandaops.github.io/general-helm-charts
+        repository: https://ethpandaops.github.io/ethereum-helm-charts
         version: 0.0.1
   syncoor-server:
     valuesTemplatePath: templates/syncoor-server.yaml.j2
