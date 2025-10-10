@@ -23,6 +23,11 @@
       ansible.builtin.stat:
         path: "{{ erigon_datadir }}/chaindata"
       register: erigon_init_custom_network_chaindata_stat
+    - name: Get erigon container info
+      community.docker.docker_container_info:
+        name: "{{ erigon_container_name }}"
+      register: erigon_container_info
+      ignore_errors: true
     - name: Chaindata is empty, run erigon init container
       community.docker.docker_container:
         name: "{{ erigon_container_name }}-init"
