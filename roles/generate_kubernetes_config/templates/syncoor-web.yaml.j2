@@ -27,8 +27,24 @@ syncoor-web:
           {
             "directories": [
               {
-                "name": "{{ ethereum_network_name }}",
+                "name": "cl-full-checkpoint-sync",
+                "displayName": "CL Fullnode + CL Checkpoint Sync",
                 "url": "https://syncoor-data.{{ gen_kubernetes_domain }}/devnets/{{ ethereum_network_name }}"
+              },
+              {
+                "name": "cl-super-checkpoint-sync",
+                "displayName": "CL Supernode + CL Checkpoint Sync",
+                "url": "https://syncoor-data.{{ gen_kubernetes_domain }}/devnets/{{ ethereum_network_name }}-clsupernode"
+              },
+              {
+                "name": "cl-full-genesis-sync",
+                "displayName": "CL Fullnode + CL Genesis Sync",
+                "url": "https://syncoor-data.{{ gen_kubernetes_domain }}/devnets/{{ ethereum_network_name }}-clcheckpointsyncdisabled"
+              },
+              {
+                "name": "cl-super-genesis-sync",
+                "displayName": "CL Supernode + CL Genesis Sync",
+                "url": "https://syncoor-data.{{ gen_kubernetes_domain }}/devnets/{{ ethereum_network_name }}-clsupernode-clcheckpointsyncdisabled"
               }
             ],
             "syncoorApiEndpoints": [
