@@ -1,0 +1,9 @@
+- name: Include setup tasks
+  ansible.builtin.include_tasks:
+    file: setup.yaml
+  when: chaosd_state == "present"
+
+- name: Include cleanup tasks
+  ansible.builtin.include_tasks:
+    file: cleanup.yaml
+  when: chaosd_state == "absent"

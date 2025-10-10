@@ -1,0 +1,18 @@
+[Unit]
+Description=Chaosd fault-injection service
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart={{ chaosd_install_dir }}/chaosd server --port {{ chaosd_internal_port }}
+Restart=always
+RestartSec={{ chaosd_service_restart_sec }}
+KillMode=process
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
