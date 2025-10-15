@@ -1,0 +1,56 @@
+- name: Add step-ca user
+  ansible.builtin.user:
+    name: "{{ acme_server_user }}"
+  register: acme_server_user_meta
+
+- name: Create a directory in the step-ca user home for secrets
+  ansible.builtin.file:
+    path: "{{ acme_server_user_meta.home }}/secrets"
+    state: directory
+    mode: "0700"
+    owner: "{{ acme_server_user }}"
+    group: "{{ acme_server_user }}"
+
+- name: Create data directory
+  ansible.builtin.file:
+    path: "{{ acme_server_data_bind_path }}"
+    state: directory
+    mode: "0700"
+    owner: "{{ acme_server_user }}"
+    group: "{{ acme_server_user }}"
+
+- name: Create step-ca password file
+  ansible.builtin.copy:
+    dest: "{{ acme_server_user_meta.home }}/secrets/password.txt"
+    content: "{{ acme_server_password }}"
+    mode: "0600"
+    owner: "{{ acme_server_user_meta.name }}"
+    group: "{{ acme_server_user_meta.group }}"
+
+- name: Set volumes for step-ca container
+  ansible.builtin.set_fact:
+    acme_server_container_volumes_extra:
+      - "{{ acme_server_user_meta.home }}/secrets:/mnt/secrets:ro"
+      - "{{ acme_server_data_bind_path }}:/home/step:rw"
+
+- name: Set environment variables for step-ca container
+  ansible.builtin.set_fact:
+    acme_server_container_env_extra:
+      DOCKER_STEPCA_INIT_PASSWORD_FILE: "/mnt/secrets/password.txt"
+
+- name: Run step-ca container
+  community.docker.docker_container:
+    name: "{{ acme_server_container_name }}"
+    image: "{{ acme_server_container_image }}"
+    image_name_mismatch: recreate
+    user: "{{ acme_server_user_meta.uid }}"
+    state: started
+    restart_policy: always
+    stop_timeout: "{{ acme_server_container_stop_timeout }}"
+    ports: "{{ acme_server_container_ports }}"
+    volumes: "{{ acme_server_container_volumes + acme_server_container_volumes_extra }}"
+    env: "{{ acme_server_container_env | combine(acme_server_container_env_extra) | to_json }}"
+    networks: "{{ acme_server_container_networks }}"
+    entrypoint: "{{ acme_server_container_entrypoint | default(omit) }}"
+    command: "{{ acme_server_container_command | default(omit) }}"
+    pull: "{{ acme_server_container_pull | bool }}"

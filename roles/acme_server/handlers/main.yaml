@@ -1,0 +1,5 @@
+- name: Restart step-ca container
+  community.docker.docker_container:
+    name: "{{ acme_server_container_name }}"
+    state: started
+    restart: true
