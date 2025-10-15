@@ -10,6 +10,10 @@ You'll need docker on the target system. Make sure to install it upfront.
 
 Default variables are defined in [defaults/main.yaml](defaults/main.yaml)
 
+### Important Security Note
+
+**WARNING**: The default value for `acme_server_password` in [defaults/main.yaml](defaults/main.yaml) is a placeholder and MUST be changed in production environments.
+
 ## Dependencies
 
 You'll need docker to run this role. One way of installing docker could be via ansible galaxy with the following dependencies set within `requirements.yaml`:
