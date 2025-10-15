@@ -1,0 +1,18 @@
+acme_server_cleanup: false
+
+acme_server_user: step-ca
+acme_server_container_name: step-ca
+acme_server_container_image: smallstep/step-ca:latest
+acme_server_container_stop_timeout: "300"
+acme_server_container_ports: []
+acme_server_container_volumes: []
+acme_server_password: "3cnUhbRSxFjoDq"
+acme_server_container_env:
+  DOCKER_STEPCA_INIT_NAME: Ethereum Foundation
+  DOCKER_STEPCA_INIT_DNS_NAMES: localhost,acme.ef.internal
+  DOCKER_STEPCA_INIT_REMOTE_MANAGEMENT: "false"
+  DOCKER_STEPCA_INIT_ACME: "true"
+  DOCKER_STEPCA_INIT_PASSWORD_FILE: /mnt/secrets/password.txt
+acme_server_container_networks: []
+acme_server_container_pull: false
+acme_server_data_bind_path: "{{ acme_server_user_meta.home }}/data"
