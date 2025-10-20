@@ -189,7 +189,7 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
     dependencies:
       - name: chaos-mesh
         repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 0.0.4
+        version: 0.0.3
   syncoor-server:
     valuesTemplatePath: templates/syncoor-server.yaml.j2
     dependencies:
