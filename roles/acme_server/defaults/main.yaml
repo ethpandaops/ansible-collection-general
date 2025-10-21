@@ -12,7 +12,6 @@ acme_server_container_env:
   DOCKER_STEPCA_INIT_DNS_NAMES: localhost,acme.ef.internal
   DOCKER_STEPCA_INIT_REMOTE_MANAGEMENT: "false"
   DOCKER_STEPCA_INIT_ACME: "true"
-  DOCKER_STEPCA_INIT_PASSWORD_FILE: /mnt/secrets/password.txt
 acme_server_container_networks: []
 acme_server_container_pull: false
 acme_server_data_bind_path: "{{ acme_server_user_meta.home }}/data"
