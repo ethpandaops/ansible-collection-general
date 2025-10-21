@@ -64,6 +64,12 @@
     state: started
     daemon_reload: true
 
+- name: Run network partition attack
+  ansible.builtin.command:
+    cmd: "{{ chaosd_install_dir }}/chaosd attack network partition -d eth0 --direction from --hostname temporary.com --uid 9999"
+  become: true
+  changed_when: true
+
 - name: Copy chaos iptables bridge script
   ansible.builtin.template:
     src: chaos-iptables-bridge.sh.j2

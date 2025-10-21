@@ -46,4 +46,5 @@
     validate_certs: false
   register: chaosd_proxy_test
   failed_when: false
+  become: false
   delegate_to: localhost

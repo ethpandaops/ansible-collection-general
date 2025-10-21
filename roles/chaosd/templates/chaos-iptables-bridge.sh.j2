@@ -12,16 +12,5 @@ add_jump() {
   iptables -t "$table" -C "$from" -j "$to" 2>/dev/null || iptables -t "$table" -I "$from" "$pos" -j "$to"
 }
 
-# Reuse Chaos Mesh chains if they exist
-has_chain() { iptables -t filter -nL "$1" >/dev/null 2>&1; }
-
-# 1) Container egress: DOCKER-USER -> CHAOS-OUTPUT
-if has_chain CHAOS-OUTPUT; then
-  add_jump filter DOCKER-USER CHAOS-OUTPUT 1
-fi
-
-# 2) Container ingress prep: DOCKER-USER -> CHAOS-INPUT
-# (This lets CHAOS-INPUT rules, when present, also run for FORWARDed traffic to containers.)
-if has_chain CHAOS-INPUT; then
-  add_jump filter DOCKER-USER CHAOS-INPUT 1
-fi
+add_jump filter DOCKER-USER CHAOS-OUTPUT 1
+add_jump filter DOCKER-USER CHAOS-INPUT 1

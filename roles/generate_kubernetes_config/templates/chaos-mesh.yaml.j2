@@ -2,54 +2,56 @@
 
 # Configuration for the official chaos-mesh chart
 chaos-mesh:
-  # Dashboard configuration
-  dashboard:
-    create: true
-    securityMode: {{ gen_kubernetes_config_chaos_mesh_dashboard_security_mode }}
-    ingress:
-      enabled: true
-      annotations:
-        kubernetes.io/ingress.class: ingress-nginx-public
-        external-dns.alpha.kubernetes.io/hostname: chaos-mesh.{{ network_subdomain }}
-      hosts:
-        - name: chaos-mesh.{{ network_subdomain }}
-          paths:
-            - path: /
-              pathType: Prefix
-  
-  # Controller Manager configuration
-  controllerManager:
-    replicaCount: 1
-    # Disable mTLS for physical machine connections
-    chaosdSecurityMode: {{ gen_kubernetes_config_chaos_mesh_chaosd_security_mode }}
-  
-  # Chaos Daemon configuration
-  chaosDaemon:
-    runtime: containerd
-    socketPath: /run/containerd/containerd.sock
+  chaos-mesh:
+    # Dashboard configuration
+    fullnameOverride: {{ ethereum_network_name }}
+    
+    dashboard:
+      create: true
+      securityMode: {{ gen_kubernetes_config_chaos_mesh_dashboard_security_mode }}
+      ingress:
+        enabled: true
+        apiVersionOverrides: "networking.k8s.io/v1"  
+        annotations:
+          kubernetes.io/ingress.class: nginx
+          external-dns.alpha.kubernetes.io/hostname: chaos-mesh.{{ network_subdomain }}
+        hosts:
+          - name: chaos-mesh.{{ network_subdomain }}
+        paths: ["/"]
+        ingressClassName: nginx
+          
+    # Controller Manager configuration
+    controllerManager:
+      replicaCount: 1
+      # Disable mTLS for physical machine connections
+      chaosdSecurityMode: {{ gen_kubernetes_config_chaos_mesh_chaosd_security_mode }}
+    
+    # Chaos Daemon configuration
+    chaosDaemon:
+      runtime: containerd
+      socketPath: /run/containerd/containerd.sock
 
-# Custom physical machines configuration (not supported by upstream chart)
-# These will be created by our custom template
-physicalMachines:
+  # Custom physical machines configuration (not supported by upstream chart)
+  # These will be created by our custom template
+  physicalMachines:
+    enabled: true
+    machines:
 {% for host in groups['ethereum_node'] | sort %}
-{% if 'chaosd_state' in hostvars[host] and hostvars[host]['chaosd_state'] == 'present' %}
-  - name: {{ hostvars[host]['inventory_hostname'] }}
-    address: "https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@rpc.{{ hostvars[host]['inventory_hostname'] }}.{{ network_subdomain }}/chaosd/"
-    labels:
+    - name: {{ hostvars[host]['inventory_hostname'] }}
+      address: "https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@rpc.{{ hostvars[host]['inventory_hostname'] }}.{{ network_subdomain }}/chaosd/"
+      hostname: "{{ hostvars[host]['inventory_hostname'] }}.{{ network_subdomain }}"
+      ip: "{{ hostvars[host]['ansible_host'] }}"
+      labels:
 {% if 'ethereum_node_cl' in hostvars[host] %}
-      consensus: {{ hostvars[host]['ethereum_node_cl'] }}
+        consensus: {{ hostvars[host]['ethereum_node_cl'] }}
 {% endif %}
 {% if 'ethereum_node_el' in hostvars[host] %}
-      execution: {{ hostvars[host]['ethereum_node_el'] }}
+        execution: {{ hostvars[host]['ethereum_node_el'] }}
 {% endif %}
-      nodename: {{ hostvars[host]['inventory_hostname'] }}
+        nodename: {{ hostvars[host]['inventory_hostname'] }}
 {% if 'ethereum_network_name' in hostvars[host] %}
-      network: {{ hostvars[host]['ethereum_network_name'] }}
+        network: {{ hostvars[host]['ethereum_network_name'] }}
 {% endif %}
-    annotations:
-      description: "{{ hostvars[host]['ethereum_node_cl'] | default('unknown') | title }} + {{ hostvars[host]['ethereum_node_el'] | default('unknown') | title }} node"
-{% if 'node_role' in hostvars[host] %}
-      role: {{ hostvars[host]['node_role'] }}
-{% endif %}
-{% endif %}
+      annotations:
+        description: "{{ hostvars[host]['ethereum_node_cl'] | default('unknown') | title }} + {{ hostvars[host]['ethereum_node_el'] | default('unknown') | title }} node"
 {% endfor %}
