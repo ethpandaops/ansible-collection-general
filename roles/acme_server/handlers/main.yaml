@@ -1,0 +1,30 @@
+- name: Restart step-ca container
+  community.docker.docker_container:
+    name: "{{ acme_server_container_name }}"
+    state: started
+    restart: true
+
+- name: Update step-cli fingerprint
+  community.docker.docker_container_exec:
+    container: "{{ acme_server_container_name }}"
+    argv:
+      - step
+      - certificate
+      - fingerprint
+      - /home/step/certs/root_ca.crt
+  register: acme_server_root_ca_fingerprint_output
+  notify: Write step-cli configuration
+
+- name: Write step-cli configuration
+  ansible.builtin.copy:
+    dest: "{{ acme_server_data_bind_path }}/config/defaults.json"
+    mode: "0644"
+    owner: "{{ acme_server_user }}"
+    group: "{{ acme_server_user }}"
+    content: |
+      {
+        "ca-url": "https://localhost:9000",
+        "ca-config": "/home/step/config/ca.json",
+        "fingerprint": "{{ acme_server_root_ca_fingerprint_output.stdout }}",
+        "root": "/home/step/certs/root_ca.crt"
+      }

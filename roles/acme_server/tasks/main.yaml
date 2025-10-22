@@ -1,0 +1,7 @@
+- name: Setup step-ca
+  ansible.builtin.import_tasks: setup.yaml
+  when: not acme_server_cleanup
+
+- name: Cleanup step-ca
+  ansible.builtin.import_tasks: cleanup.yaml
+  when: acme_server_cleanup

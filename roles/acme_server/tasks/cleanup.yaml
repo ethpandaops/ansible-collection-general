@@ -1,0 +1,17 @@
+- name: Remove step-ca container
+  community.docker.docker_container:
+    name: "{{ acme_server_container_name }}"
+    state: absent
+  when: acme_server_cleanup
+
+- name: Remove step-ca data volume
+  community.docker.docker_volume:
+    name: "{{ acme_server_data_volume }}"
+    state: absent
+  when: acme_server_cleanup
+
+- name: Remove step-ca secrets directory
+  ansible.builtin.file:
+    path: "{{ acme_server_user_meta.home }}/secrets"
+    state: absent
+  when: acme_server_cleanup
