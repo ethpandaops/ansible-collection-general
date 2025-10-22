@@ -3,3 +3,14 @@
     name: "{{ acme_server_container_name }}"
     state: started
     restart: true
+
+- name: Run step bootstrap in the acme server container
+  community.docker.docker_container_exec:
+    container: "{{ acme_server_container_name }}"
+    argv:
+      - step
+      - ca
+      - bootstrap
+      - --ca-url=localhost:9000
+      - --fingerprint={{ acme_server_root_ca_fingerprint.stdout }}
+      - --force
