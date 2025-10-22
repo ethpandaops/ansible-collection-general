@@ -55,44 +55,34 @@
     command: "{{ acme_server_container_command | default(omit) }}"
     pull: "{{ acme_server_container_pull | bool }}"
 
-- name: Overwrite the root CA certificate
-  ansible.builtin.copy:
-    dest: "{{ acme_server_data_bind_path }}/certs/root_ca.crt"
-    content: "{{ acme_server_certificate_bundle.root_ca_certificate }}"
-    mode: "0644"
-    owner: "{{ acme_server_user }}"
-    group: "{{ acme_server_user }}"
+- name: Install custom certificates
   when: acme_server_certificate_bundle is defined
-  notify: Restart step-ca container
+  block:
+    - name: Overwrite the root CA certificate
+      ansible.builtin.copy:
+        dest: "{{ acme_server_data_bind_path }}/certs/root_ca.crt"
+        content: "{{ acme_server_certificate_bundle.root_ca_certificate }}"
+        mode: "0644"
+        owner: "{{ acme_server_user }}"
+        group: "{{ acme_server_user }}"
+      notify:
+        - Restart step-ca container
+        - Update step-cli fingerprint
 
-- name: Update the fingerprint of the root CA certificate
-  community.docker.docker_container_exec:
-    container: "{{ acme_server_container_name }}"
-    argv:
-      - step
-      - certificate
-      - fingerprint
-      - /home/step/certs/root_ca.crt
-  register: acme_server_root_ca_fingerprint
-  when: acme_server_certificate_bundle is defined
-  notify: Run step bootstrap in the acme server container
+    - name: Overwrite the intermediate CA certificate
+      ansible.builtin.copy:
+        dest: "{{ acme_server_data_bind_path }}/certs/intermediate_ca.crt"
+        content: "{{ acme_server_certificate_bundle.intermediate_ca_certificate }}"
+        mode: "0644"
+        owner: "{{ acme_server_user }}"
+        group: "{{ acme_server_user }}"
+      notify: Restart step-ca container
 
-- name: Overwrite the intermediate CA certificate
-  ansible.builtin.copy:
-    dest: "{{ acme_server_data_bind_path }}/certs/intermediate_ca.crt"
-    content: "{{ acme_server_certificate_bundle.intermediate_ca_certificate }}"
-    mode: "0644"
-    owner: "{{ acme_server_user }}"
-    group: "{{ acme_server_user }}"
-  when: acme_server_certificate_bundle is defined
-  notify: Restart step-ca container
-
-- name: Overwrite the intermediate CA key
-  ansible.builtin.copy:
-    dest: "{{ acme_server_data_bind_path }}/secrets/intermediate_ca_key"
-    content: "{{ acme_server_certificate_bundle.intermediate_ca_key }}"
-    mode: "0644"
-    owner: "{{ acme_server_user }}"
-    group: "{{ acme_server_user }}"
-  when: acme_server_certificate_bundle is defined
-  notify: Restart step-ca container
+    - name: Overwrite the intermediate CA key
+      ansible.builtin.copy:
+        dest: "{{ acme_server_data_bind_path }}/secrets/intermediate_ca_key"
+        content: "{{ acme_server_certificate_bundle.intermediate_ca_key }}"
+        mode: "0644"
+        owner: "{{ acme_server_user }}"
+        group: "{{ acme_server_user }}"
+      notify: Restart step-ca container
