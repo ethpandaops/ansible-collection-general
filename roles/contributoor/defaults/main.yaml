@@ -1,0 +1,28 @@
+contributoor_user: "contributoor"
+contributoor_cleanup: false # when set to "true" it will remove the container
+
+contributoor_container_name: "contributoor"
+contributoor_container_image: "ethpandaops/contributoor:latest"
+contributoor_container_env: {}
+contributoor_container_ports: []
+contributoor_container_volumes: []
+
+contributoor_container_stop_timeout: "300"
+contributoor_container_networks: []
+
+contributoor_container_command: |
+  --beacon-node-address={{ contributoor_beacon_node_address }}
+  {% if contributoor_output_server_address is defined %}
+  --output-server-address={{ contributoor_output_server_address }}
+  {% endif %}
+  {% if contributoor_metrics_enabled %}
+  --metrics
+  --metrics-address={{ contributoor_metrics_address }}
+  --metrics-port={{ contributoor_metrics_port }}
+  {% endif %}
+
+contributoor_beacon_node_address: "http://localhost:5052"
+contributoor_output_server_address: ""
+contributoor_metrics_enabled: false
+contributoor_metrics_address: "0.0.0.0"
+contributoor_metrics_port: "9090"
