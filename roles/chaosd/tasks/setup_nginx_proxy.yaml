@@ -5,7 +5,7 @@
       location /chaosd/ {
           auth_basic "Restricted Access";
           auth_basic_user_file /etc/nginx/htpasswd/{{ chaosd_nginx_proxy_hostname | default(ansible_fqdn) }};
-          
+
           # Strip /chaosd prefix and proxy to chaosd service
           rewrite ^/chaosd/(.*) /$1 break;
           proxy_pass http://172.17.0.1:{{ chaosd_internal_port }};
@@ -13,11 +13,11 @@
           proxy_set_header X-Real-IP $remote_addr;
           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
           proxy_set_header X-Forwarded-Proto $scheme;
-          
+
           # Handle chaosd API specific headers
           proxy_set_header Content-Type $content_type;
           proxy_pass_request_headers on;
-          
+
           # Timeouts for chaos experiments
           proxy_connect_timeout 30s;
           proxy_send_timeout 300s;
