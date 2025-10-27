@@ -1,6 +1,6 @@
 devnet_name: "template" # noqa var-naming[no-role-prefix]
 
-primary_bootnode: "bootnode-1"
+primary_bootnode: "bootnode-1" # noqa var-naming[no-role-prefix]
 
 gen_kubernetes_config_default_output_dir: ../kubernetes/{{ ethereum_network_name | replace(devnet_name + "-", '') }} # noqa var-naming[no-role-prefix]
 
