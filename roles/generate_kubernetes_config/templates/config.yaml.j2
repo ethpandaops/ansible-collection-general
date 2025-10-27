@@ -76,8 +76,8 @@ config:
 
     # Ansible generated ethereum nodes inventory
     - path: /api/v1/nodes/inventory
-      upstream: bootnode-1.{{ network_server_subdomain }}
+      upstream: {{ primary_bootnode }}.{{ network_server_subdomain }}
       target: /meta/api/v1/inventory.json
     - path: /api/v1/nodes/validator-ranges
-      upstream: bootnode-1.{{ network_server_subdomain }}
+      upstream: {{ primary_bootnode }}.{{ network_server_subdomain }}
       target: /meta/api/v1/validator-ranges.json
