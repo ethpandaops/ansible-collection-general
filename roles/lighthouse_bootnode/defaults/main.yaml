@@ -1,0 +1,60 @@
+lighthouse_bootnode_enabled: true
+lighthouse_bootnode_user: lighthouse-bootnode
+lighthouse_bootnode_datadir: /data/lighthouse-bootnode
+lighthouse_bootnode_cleanup: false # when set to "true" it will remove the container
+
+# Lighthouse bootnode private key (secp256k1, hex-encoded without 0x prefix)
+# Supports both lighthouse_bootnode_privkey (new) and cl_bootnode_privkey (old) for backward compatibility
+lighthouse_bootnode_privkey: "{{ cl_bootnode_privkey | default('0000000000000000000000000000000000000000000000000000000000000000') }}"
+
+lighthouse_bootnode_announced_ip: "{{ ansible_host }}"
+
+# Fact collection (supports both new and old variable names for backward compatibility)
+lighthouse_bootnode_set_facts: "{{ cl_bootnode_set_facts | default(true) }}"
+
+lighthouse_bootnode_p2p_port: 9010
+lighthouse_bootnode_api_port: 8002
+
+# Genesis fork version for ENR generation
+# Default is mainnet (0x00000000), override for custom networks
+# Can be set explicitly or will attempt to read from testnet config if available
+lighthouse_bootnode_genesis_fork_version: "0x00000000"
+lighthouse_bootnode_testnet_config_dir: ""  # Set to eth_testnet_config_dir if using custom testnet
+
+################################################################################
+##
+## Bootnode container configuration
+##
+################################################################################
+lighthouse_bootnode_container_name: "lighthouse-bootnode"
+lighthouse_bootnode_container_image: "sigp/lighthouse:latest"
+lighthouse_bootnode_lcli_image: "sigp/lcli:latest"
+lighthouse_bootnode_container_env: {}
+lighthouse_bootnode_container_ports:
+  - "0.0.0.0:{{ lighthouse_bootnode_p2p_port }}:{{ lighthouse_bootnode_p2p_port }}"
+  - "127.0.0.1:{{ lighthouse_bootnode_api_port }}:{{ lighthouse_bootnode_api_port }}"
+  - "0.0.0.0:{{ lighthouse_bootnode_p2p_port }}:{{ lighthouse_bootnode_p2p_port }}/udp"
+
+lighthouse_bootnode_container_volumes:
+  - "{{ lighthouse_bootnode_datadir }}:/data"
+
+lighthouse_bootnode_container_security_opts: []
+lighthouse_bootnode_container_stop_timeout: "30"
+lighthouse_bootnode_container_networks: []
+
+lighthouse_bootnode_container_command:
+  - lighthouse
+  - boot_node
+  - --network-dir=/data/beacon/network
+  - --listen-address=0.0.0.0
+  - --port={{ lighthouse_bootnode_p2p_port }}
+  - --disable-packet-filter
+
+lighthouse_bootnode_container_command_extra_args: []
+
+# Additional boot nodes to connect to (comma-separated ENR/multiaddr strings)
+# Example: "enr:-...,enr:-..."
+lighthouse_bootnode_boot_nodes: ""
+
+# Default image pull policy
+lighthouse_bootnode_container_pull: false

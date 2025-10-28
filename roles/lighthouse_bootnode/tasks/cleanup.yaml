@@ -1,0 +1,5 @@
+- name: Remove lighthouse bootnode container
+  community.docker.docker_container:
+    name: "{{ lighthouse_bootnode_container_name }}"
+    state: absent
+  when: lighthouse_bootnode_cleanup or (not lighthouse_bootnode_enabled)
