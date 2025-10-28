@@ -1,0 +1,141 @@
+- name: Add lighthouse bootnode user
+  ansible.builtin.user:
+    name: "{{ lighthouse_bootnode_user }}"
+  register: lighthouse_bootnode_user_meta
+
+- name: Configure lighthouse bootnode
+  when: lighthouse_bootnode_enabled
+  block:
+    - name: Create bootnode data directory
+      ansible.builtin.file:
+        path: "{{ lighthouse_bootnode_datadir }}"
+        state: directory
+        mode: "0750"
+        owner: "{{ lighthouse_bootnode_user }}"
+        group: "{{ lighthouse_bootnode_user }}"
+
+    - name: Create beacon network directory
+      ansible.builtin.file:
+        path: "{{ lighthouse_bootnode_datadir }}/beacon/network"
+        state: directory
+        mode: "0750"
+        owner: "{{ lighthouse_bootnode_user }}"
+        group: "{{ lighthouse_bootnode_user }}"
+
+    - name: Write bootnode private key (Lighthouse format)
+      ansible.builtin.copy:
+        dest: "{{ lighthouse_bootnode_datadir }}/beacon/network/key"
+        content: "{{ lighthouse_bootnode_privkey }}"
+        mode: "0600"
+        owner: "{{ lighthouse_bootnode_user }}"
+        group: "{{ lighthouse_bootnode_user }}"
+      no_log: true
+
+    - name: Remove old ENR and config files to force regeneration
+      ansible.builtin.file:
+        path: "{{ lighthouse_bootnode_datadir }}/{{ item }}"
+        state: absent
+      loop:
+        - beacon/network/enr.dat
+        - config.json
+
+    - name: Check if testnet config exists
+      ansible.builtin.stat:
+        path: "{{ lighthouse_bootnode_testnet_config_dir }}/config.yaml"
+      register: testnet_config_stat
+      when: lighthouse_bootnode_testnet_config_dir | length > 0
+
+    - name: Read genesis fork version from testnet config
+      ansible.builtin.shell: |
+        grep -i 'GENESIS_FORK_VERSION:' {{ lighthouse_bootnode_testnet_config_dir }}/config.yaml | awk '{print $2}' | tr -d '"' | tr -d "'"
+      register: testnet_genesis_fork_version
+      changed_when: false
+      when:
+        - lighthouse_bootnode_testnet_config_dir | length > 0
+        - testnet_config_stat.stat.exists | default(false)
+
+    - name: Set genesis fork version fact (default)
+      ansible.builtin.set_fact:
+        lighthouse_bootnode_genesis_fork_version_final: "{{ lighthouse_bootnode_genesis_fork_version }}"
+
+    - name: Override genesis fork version if detected from testnet config
+      ansible.builtin.set_fact:
+        lighthouse_bootnode_genesis_fork_version_final: "{{ testnet_genesis_fork_version.stdout | trim }}"
+      when:
+        - testnet_genesis_fork_version is defined
+        - testnet_genesis_fork_version.stdout is defined
+        - testnet_genesis_fork_version.stdout | trim | length > 0
+
+    - name: Generate ENR using lighthouse --dump-config
+      community.docker.docker_container:
+        name: "{{ lighthouse_bootnode_container_name }}-enr-gen"
+        image: "{{ lighthouse_bootnode_container_image }}"
+        auto_remove: true
+        detach: false
+        volumes:
+          - "{{ lighthouse_bootnode_datadir }}:/data"
+        command:
+          - lighthouse
+          - boot_node
+          - --datadir=/data
+          - --enr-address={{ lighthouse_bootnode_announced_ip }}
+          - --port={{ lighthouse_bootnode_p2p_port }}
+          - --dump-config=/data/config.json
+          - --immediate-shutdown
+        user: "{{ lighthouse_bootnode_user_meta.uid }}"
+      register: lighthouse_bootnode_enr_generation
+
+    - name: Set permissions on generated files
+      ansible.builtin.command: "chown -R {{ lighthouse_bootnode_user }}:{{ lighthouse_bootnode_user }} {{ lighthouse_bootnode_datadir }}" # noqa no-free-form
+      failed_when: false
+      changed_when: false
+
+    - name: Build bootnode volumes list
+      ansible.builtin.set_fact:
+        lighthouse_bootnode_final_volumes: >-
+          {{
+            lighthouse_bootnode_container_volumes +
+            ((lighthouse_bootnode_testnet_config_dir | length > 0) | ternary(
+              [lighthouse_bootnode_testnet_config_dir + ':/network-config:ro'],
+              []
+            ))
+          }}
+
+    - name: Build bootnode command
+      ansible.builtin.set_fact:
+        lighthouse_bootnode_final_command: >-
+          {{
+            lighthouse_bootnode_container_command +
+            ((lighthouse_bootnode_testnet_config_dir | length > 0) | ternary(
+              ['--testnet-dir=/network-config'],
+              []
+            )) +
+            (lighthouse_bootnode_boot_nodes | length > 0) | ternary(
+              ['--boot-nodes=' + lighthouse_bootnode_boot_nodes],
+              []
+            ) +
+            lighthouse_bootnode_container_command_extra_args
+          }}
+
+    - name: Run lighthouse bootnode container
+      community.docker.docker_container:
+        name: "{{ lighthouse_bootnode_container_name }}"
+        image: "{{ lighthouse_bootnode_container_image }}"
+        image_name_mismatch: recreate
+        state: started
+        restart_policy: always
+        stop_timeout: "{{ lighthouse_bootnode_container_stop_timeout }}"
+        ports: "{{ lighthouse_bootnode_container_ports }}"
+        volumes: "{{ lighthouse_bootnode_final_volumes }}"
+        env: "{{ lighthouse_bootnode_container_env }}"
+        networks: "{{ lighthouse_bootnode_container_networks }}"
+        command: "{{ lighthouse_bootnode_final_command }}"
+        user: "{{ lighthouse_bootnode_user_meta.uid }}"
+        pull: "{{ lighthouse_bootnode_container_pull | bool }}"
+        security_opts: "{{ lighthouse_bootnode_container_security_opts }}"
+
+    - name: Set facts
+      ansible.builtin.import_tasks: facts.yaml
+      when: lighthouse_bootnode_set_facts
+      tags:
+        - ethereum_node_fact_discovery
