@@ -35,6 +35,7 @@
     networks: "{{ vouch_container_networks }}"
     entrypoint: "{{ vouch_container_entrypoint | default(omit) }}"
     command: "{{ vouch_container_command | default(omit) }}"
-    user: "{{ vouch_user_meta.uid }}"
+    user: "{{ vouch_user_meta.uid }}:{{ vouch_user_meta.group }}"
+    groups: "{{ vouch_container_groups | default(omit) }}"
     pull: "{{ vouch_container_pull | bool }}"
     security_opts: "{{ vouch_container_security_opts }}"
