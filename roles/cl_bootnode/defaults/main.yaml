@@ -15,6 +15,7 @@ cl_bootnode_container_ports:
   - "127.0.0.1:{{ cl_bootnode_api_port }}:{{ cl_bootnode_api_port }}"
   - "{{ cl_bootnode_p2p_port }}:{{ cl_bootnode_p2p_port }}/udp"
   - "{{ cl_bootnode_webui_port}}:{{ cl_bootnode_webui_port }}"
+
 cl_bootnode_container_volumes:
   - "{{ cl_bootnode_datadir }}:/data"
 
