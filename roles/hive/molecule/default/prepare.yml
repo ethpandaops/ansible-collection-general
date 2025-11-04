@@ -18,9 +18,9 @@
           vars:
             pip_install_packages:
               - name: docker
-        - name: Install golang
-          ansible.builtin.import_role:
-            name: gantsign.golang
-          vars:
-            golang_gopath: '/data/workspace-go'
-            golang_version: '1.21.13'
+        # - name: Install golang
+        #   ansible.builtin.import_role:
+        #     name: gantsign.golang
+        #   vars:
+        #     golang_gopath: '/data/workspace-go'
+        #     golang_version: '1.21.13'

@@ -16,4 +16,4 @@
   community.docker.docker_container:
     name: "{{ docker_nginx_proxy_container_name | default('nginx-proxy') }}"
     restart: true
-  ignore_errors: true
+  failed_when: false
