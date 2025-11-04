@@ -1,6 +1,6 @@
 - name: Get ENR record
   ansible.builtin.uri:
-    url: http://127.0.0.1:8002/enr
+    url: http://127.0.0.1:{{ cl_bootnode_api_port}}/enr
     return_content: true
   register: cl_bootnode_facts_collect_enr
 
