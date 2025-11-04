@@ -41,10 +41,10 @@
   community.general.modprobe:
     name: sch_netem
     state: present
-  when: 
+  when:
     - ansible_kernel is version('2.6', '>')
     - ansible_virtualization_type != "docker"
-  ignore_errors: true
+  failed_when: false
 
 - name: Copy systemd service file
   ansible.builtin.template:

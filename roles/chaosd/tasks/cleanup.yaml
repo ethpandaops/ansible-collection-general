@@ -3,14 +3,14 @@
     name: chaosd
     enabled: false
     state: stopped
-  ignore_errors: true
+  failed_when: false
 
 - name: Stop and disable chaos iptables bridge service
   ansible.builtin.systemd:
     name: chaos-iptables-bridge
     enabled: false
     state: stopped
-  ignore_errors: true
+  failed_when: false
 
 - name: Remove systemd service files
   ansible.builtin.file:

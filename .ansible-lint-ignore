@@ -1,2 +1,3 @@
 galaxy.yml galaxy[no-changelog]
 galaxy.yml galaxy[no-runtime]
+roles/hive/molecule/default/prepare.yml syntax-check[specific]
