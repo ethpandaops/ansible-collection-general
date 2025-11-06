@@ -118,7 +118,7 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
     dependencies:
       - name: dora
         repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 1.0.2
+        version: 1.0.3
   forky:
     valuesTemplatePath: templates/forky.yaml.j2
     dependencies:
