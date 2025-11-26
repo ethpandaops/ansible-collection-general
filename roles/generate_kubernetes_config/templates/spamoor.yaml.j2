@@ -44,9 +44,18 @@ spamoor:
   - "{{ default_el_endpoint }}"
 {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
 {% set host_name = hostvars[host]['inventory_hostname'] %}
-{% if 'mev-relay' in host_name %}
-  - "group(mev-relay)name({{ host_name }}) + https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_rpc_prefix }}{{ host_name }}.{{ network_server_subdomain }}"
-{% else %}
-  - "name({{ host_name }})https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_rpc_prefix }}{{ host_name }}.{{ network_server_subdomain }}"
+{% set parts = host_name.split('-') %}
+{% set groups_list = [] %}
+{% if parts | length >= 4 %}
+{% set _ = groups_list.append(parts[0]) %}
+{% set _ = groups_list.append(parts[1]) %}
+{% set _ = groups_list.append(parts[2]) %}
+{% set _ = groups_list.append(parts[3]) %}
 {% endif %}
+{% if 'mev-relay' in host_name %}
+{% set _ = groups_list.append('mev-relay') %}
+{% endif %}
+{% set _ = groups_list.append(host_name) %}
+{% set separator = ' + ' if 'mev-relay' in host_name else '' %}
+  - "group({{ groups_list | join(',') }})name({{ host_name }}){{separator}}https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_rpc_prefix }}{{ host_name }}.{{ network_server_subdomain }}"
 {% endfor %}
