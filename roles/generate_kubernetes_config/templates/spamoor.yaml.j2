@@ -47,6 +47,18 @@ spamoor:
 {% if 'mev-relay' in host_name %}
   - "group(mev-relay)name({{ host_name }}) + https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_rpc_prefix }}{{ host_name }}.{{ network_server_subdomain }}"
 {% else %}
+{% set parts = host_name.split('-') %}
+{% if parts | length >= 4 %}
+{% set cl_type = parts[0] %}
+{% set el_type = parts[1] %}
+{% set node_type = parts[2] %}
+{% if node_type == 'super' %}
+  - "group({{ cl_type }})group({{ el_type }})group(supernode)name({{ host_name }})https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_rpc_prefix }}{{ host_name }}.{{ network_server_subdomain }}"
+{% else %}
+  - "group({{ cl_type }})group({{ el_type }})name({{ host_name }})https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_rpc_prefix }}{{ host_name }}.{{ network_server_subdomain }}"
+{% endif %}
+{% else %}
   - "name({{ host_name }})https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_rpc_prefix }}{{ host_name }}.{{ network_server_subdomain }}"
+{% endif %}
 {% endif %}
 {% endfor %}
