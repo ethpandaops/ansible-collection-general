@@ -26,11 +26,21 @@
     mode: '0640'
   notify: Restart ethereum_metrics_exporter container
 
+- name: Remove existing ethereum_metrics_exporter container
+  community.docker.docker_container:
+    name: "{{ ethereum_metrics_exporter_container_name }}"
+    state: absent
+
+- name: Pull ethereum_metrics_exporter image
+  community.docker.docker_image:
+    name: "{{ ethereum_metrics_exporter_container_image }}"
+    source: pull
+    force_source: true
+
 - name: Run ethereum_metrics_exporter container
   community.docker.docker_container:
     name: "{{ ethereum_metrics_exporter_container_name }}"
     image: "{{ ethereum_metrics_exporter_container_image }}"
-    image_name_mismatch: recreate
     user: >-
       {{
         ethereum_metrics_exporter_container_user |
