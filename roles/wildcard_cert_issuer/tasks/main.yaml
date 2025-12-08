@@ -30,6 +30,7 @@
           {{
             (tsig_keyfile_slurp.content | b64decode)
             | regex_search('secret\s+"([^"]+)"', '\1')
+            | first
           }}
 
     - name: Fail if TSIG secret could not be parsed
