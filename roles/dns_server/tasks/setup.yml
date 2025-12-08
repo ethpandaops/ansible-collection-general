@@ -1,3 +1,10 @@
+- name: Detect available services
+  ansible.builtin.service_facts:
+
+- name: Flag if systemd-resolved exists
+  ansible.builtin.set_fact:
+    systemd_resolved_present: "{{ 'systemd-resolved.service' in ansible_facts.services }}"
+
 - name: Ensure DNSStubListener=no is set in resolved.conf
   ansible.builtin.lineinfile:
     path: /etc/systemd/resolved.conf
@@ -7,12 +14,16 @@
     create: true
     backup: true
     mode: '0644'
-  when: dns_server_disable_systemd_resolved | bool
+  when:
+    - dns_server_disable_systemd_resolved | bool
+    - systemd_resolved_present
   notify: Restart systemd-resolved
 
 - name: Immediately apply systemd-resolved changes
   ansible.builtin.meta: flush_handlers
-  when: dns_server_disable_systemd_resolved | bool
+  when:
+    - dns_server_disable_systemd_resolved | bool
+    - systemd_resolved_present
 
 - name: Create directories
   ansible.builtin.file:

@@ -32,7 +32,7 @@
   ansible.builtin.lineinfile:
     path: "{{ docker_nginx_proxy_datadir | default('/opt/nginx-proxy') }}/vhost/{{ chaosd_nginx_proxy_hostname | default(ansible_fqdn) }}_location"
     line: "include /etc/nginx/vhost.d/{{ chaosd_nginx_proxy_hostname | default(ansible_fqdn) }}.chaosd.conf;"
-    create: yes
+    create: true
     mode: '0644'
     owner: "{{ docker_nginx_proxy_user | default('nginx-proxy') }}"
     group: "{{ docker_nginx_proxy_user | default('nginx-proxy') }}"

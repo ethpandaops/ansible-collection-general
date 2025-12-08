@@ -47,14 +47,24 @@ dns_server_container_network_mode: "host"
 dns_server_container_command: ""
 
 dns_server_config: |
+  acl "trusted" {
+    localhost;
+    127.0.0.1;
+    ::1;
+
+    // Docker default + custom network
+    172.17.0.0/16;
+    172.18.0.0/16;
+  };
+
   options {
     directory "/var/cache/bind";
     dnssec-validation auto;
     listen-on-v6 { any; };
-    allow-query { any; };
 
-    // Global default — we'll set per-zone allow-transfer/notify below
+    // Global default — we'll set per-zone allow-query/transfer/notify below
     allow-transfer { none; };
+    allow-query { trusted; };
   };
 
   {% if dns_server_tsig_enabled %}

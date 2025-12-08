@@ -1,0 +1,20 @@
+- name: Run bootnodoor container
+  community.docker.docker_container:
+    name: "{{ bootnodoor_container_name }}"
+    image: "{{ bootnodoor_container_image }}"
+    image_name_mismatch: recreate
+    state: started
+    restart_policy: always
+    stop_timeout: "{{ bootnodoor_container_stop_timeout }}"
+    ports: "{{ bootnodoor_container_ports }}"
+    volumes: "{{ bootnodoor_container_volumes }}"
+    env: "{{ bootnodoor_container_env }}"
+    networks: "{{ bootnodoor_container_networks }}"
+    command: "{{ bootnodoor_container_command }}"
+
+- name: Set facts
+  ansible.builtin.import_tasks: facts.yaml
+  when: bootnodoor_set_facts
+  tags:
+    - ethereum_node_fact_discovery
+    - bootnodoor_fact_discovery

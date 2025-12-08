@@ -1,4 +1,6 @@
-devnet_name: 'template' # noqa var-naming[no-role-prefix]
+devnet_name: "template" # noqa var-naming[no-role-prefix]
+
+primary_bootnode: "bootnode-1" # noqa var-naming[no-role-prefix]
 
 gen_kubernetes_config_default_output_dir: ../kubernetes/{{ ethereum_network_name | replace(devnet_name + "-", '') }} # noqa var-naming[no-role-prefix]
 
@@ -116,7 +118,7 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
     dependencies:
       - name: dora
         repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 1.0.2
+        version: 1.0.3
   forky:
     valuesTemplatePath: templates/forky.yaml.j2
     dependencies:
