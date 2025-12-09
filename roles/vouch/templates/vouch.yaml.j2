@@ -307,7 +307,7 @@ blockrelay:
   {% if vouch_blockrelay_builder_configs is defined %}
   builder-configs:
     {{ vouch_blockrelay_builder_configs | to_yaml | indent(4) }}
-  {% endif -%}
+  {% endif %}
 
 {#
  # builderclient provides timeout configuration for builder/relay communication.
@@ -379,7 +379,7 @@ tracing:
   {% endif -%}
   {% if vouch_tracing_ca_cert is defined %}
   ca-cert: '{{ vouch_tracing_ca_cert }}'
-  {% endif -%}
+  {% endif %}
 {% endif -%}
 
 {# See https://github.com/attestantio/vouch/blob/master/docs/accountmanager.md for more information -#}
