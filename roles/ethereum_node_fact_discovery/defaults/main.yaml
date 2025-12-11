@@ -3,12 +3,12 @@ ethereum_node_fact_discovery_cl: true
 
 # How to find the EL node key on the target system
 ethereum_node_fact_discovery_el_key_cmd:
-  besu: cat /data/besu/key | cut -d 'x' -f2
-  geth: cat /data/geth/geth/nodekey
-  erigon: cat /data/erigon/nodekey
-  nethermind: xxd -p -c32 /data/nethermind/keystore/node.key.plain
-  reth: cat /data/reth/discovery-secret
-  nimbusel: cat /data/nimbusel/nodekey | cut -d 'x' -f2
+  besu: cat {{ besu_datadir | default('/data/besu') }}/key | cut -d 'x' -f2
+  geth: cat {{ geth_datadir | default('/data/geth') }}/geth/nodekey
+  erigon: cat {{ erigon_datadir | default('/data/erigon') }}/nodekey
+  nethermind: xxd -p -c32 {{ nethermind_datadir | default('/data/nethermind') }}/keystore/node.key.plain
+  reth: cat {{ reth_datadir | default('/data/reth') }}/discovery-secret
+  nimbusel: cat {{ nimbusel_datadir | default('/data/nimbusel') }}/nodekey | cut -d 'x' -f2
 
 # How to find the EL enode on the target system
 ethereum_node_fact_discovery_el_enode_cmd:
