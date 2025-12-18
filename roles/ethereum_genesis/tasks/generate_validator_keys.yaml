@@ -9,7 +9,7 @@
       ansible.builtin.file:
         path: "{{ ethereum_genesis_validator_keys_output_dir }}"
         state: directory
-        mode: '0755'
+        mode: "0755"
 
     - name: Create generic prysm wallet password file
       ansible.builtin.copy:
@@ -47,12 +47,10 @@
         --source-mnemonic="{{ ethereum_genesis_validator_mnemonic }}"
       args:
         creates: "{{ ethereum_genesis_validator_keys_output_dir }}/{{ item.key }}"
-      when: ansible_os_family != "Debian"
 
     - name: Create bls address change operations
       when:
         - ethereum_genesis_validator_bls_change_operations_enabled
-        - ansible_os_family != "Debian"
       loop: "{{ ethereum_genesis_validator_keyranges | dict2items }}"
       vars:
         genesis_validator_root: >-
