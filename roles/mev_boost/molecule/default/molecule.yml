@@ -28,5 +28,16 @@ provisioner:
           storage-driver: "vfs"
         # Role specific variables
         mev_boost_container_name: mev-boost
+        # Use ethpandaops develop image for testing with config.yaml support
+        mev_boost_container_image: ethpandaops/mev-boost:develop
+        # Test config.yaml functionality
+        mev_boost_config_enabled: true
+        mev_boost_timeout_get_header_ms: 900
+        mev_boost_late_in_slot_time_ms: 1800
+        mev_boost_relays:
+          - url: https://0x845bd072b7cd566f02faeb0a4033ce9399e42839ced64e8b2adcfc859ed1e8e1a5a293336a49feac6d9a5edb779be53a@boost-relay-sepolia.flashbots.net
+            enable_timing_games: true
+            target_first_request_ms: 200
+            frequency_get_header_ms: 100
 verifier:
   name: ansible
