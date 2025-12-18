@@ -27,6 +27,10 @@ forky:
   postgresql:
     enabled: true
     fullnameOverride: "forky-postgresql"
+    image:
+      registry: docker.io
+      repository: bitnamilegacy/postgresql
+      tag: 15.3.0-debian-11-r7
     auth:
       username: <path:/secrets/services/services.enc.yaml#forky | jsonPath {.postgres.devnets.username}>
       password: <path:/secrets/services/services.enc.yaml#forky | jsonPath {.postgres.devnets.password}>

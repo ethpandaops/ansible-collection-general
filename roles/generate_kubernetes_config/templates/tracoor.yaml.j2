@@ -26,6 +26,10 @@ tracoor-single:
   postgresql:
     enabled: true
     fullnameOverride: "tracoor-postgresql"
+    image:
+      registry: docker.io
+      repository: bitnamilegacy/postgresql
+      tag: 15.3.0-debian-11-r7
     auth:
       username: <path:/secrets/services/services.enc.yaml#tracoor | jsonPath {.postgres.devnets.username}>
       password: <path:/secrets/services/services.enc.yaml#tracoor | jsonPath {.postgres.devnets.password}>
