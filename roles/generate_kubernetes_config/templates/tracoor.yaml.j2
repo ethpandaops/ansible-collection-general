@@ -29,11 +29,7 @@ tracoor-single:
     image:
       registry: docker.io
       repository: bitnamilegacy/postgresql
-<<<<<<< Updated upstream
-      tag: 15.3.0-debian-11-r7
-=======
       tag: 16.4.0-debian-12-r2
->>>>>>> Stashed changes
     auth:
       username: <path:/secrets/services/services.enc.yaml#tracoor | jsonPath {.postgres.devnets.username}>
       password: <path:/secrets/services/services.enc.yaml#tracoor | jsonPath {.postgres.devnets.password}>
