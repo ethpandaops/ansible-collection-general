@@ -1,0 +1,22 @@
+timeout_get_header_ms: {{ mev_boost_timeout_get_header_ms }}
+
+late_in_slot_time_ms: {{ mev_boost_late_in_slot_time_ms }}
+
+{% if mev_boost_relays | length > 0 %}
+relays:
+{% for relay in mev_boost_relays %}
+  - url: {{ relay.url }}
+{% if relay.enable_timing_games is defined %}
+    enable_timing_games: {{ relay.enable_timing_games | lower }}
+{% endif %}
+{% if relay.target_first_request_ms is defined %}
+    target_first_request_ms: {{ relay.target_first_request_ms }}
+{% endif %}
+{% if relay.frequency_get_header_ms is defined %}
+    frequency_get_header_ms: {{ relay.frequency_get_header_ms }}
+{% endif %}
+{% endfor %}
+{% else %}
+relays: []
+{% endif %}
+

@@ -4,13 +4,50 @@ mev_boost_cleanup: false # when set to "true" it will remove the container(s)
 mev_boost_docker_network_name: shared
 mev_boost_docker_networks:
   - name: "{{ mev_boost_docker_network_name }}"
+
+################################################################################
+##
+## mev_boost config.yaml configuration
+##
+################################################################################
+# Enable config.yaml file support (when enabled, config file is used instead of CLI relay flags)
+mev_boost_config_enabled: false
+
+# Directory where config.yaml will be stored on the host
+mev_boost_config_dir: /opt/mev_boost
+
+# Timeout in milliseconds for get_header requests to relays
+# This value should be less than the timeout on the CL
+# Default: 950ms
+mev_boost_timeout_get_header_ms: 950
+
+# Threshold in milliseconds that marks when in a slot is considered "too late"
+# If a getHeader request arrives after this threshold, mev-boost skips all relay requests
+# and forces local block building to reduce the risk of missed slot
+# Default: 2000ms
+mev_boost_late_in_slot_time_ms: 2000
+
+# Relay configurations for config.yaml
+# Each relay can have its own timing games settings
+# Only used when mev_boost_config_enabled: true
+mev_boost_relays:
+  - url: https://0x845bd072b7cd566f02faeb0a4033ce9399e42839ced64e8b2adcfc859ed1e8e1a5a293336a49feac6d9a5edb779be53a@boost-relay-sepolia.flashbots.net
+    enable_timing_games: false
+# Example with timing games enabled:
+#   - url: https://0x9000009807ed12c1f08bf4e81c6da3ba8e3fc3d953898ce0102433094e5f22f21102ec057841fcb81978ed1ea0fa8246@relay.relayer1.net
+#     enable_timing_games: true
+#     target_first_request_ms: 200
+#     frequency_get_header_ms: 100
+
 ################################################################################
 ##
 ## mev_boost container configuration
 ##
 ################################################################################
 mev_boost_container_name: mev-boost
-mev_boost_container_image: flashbots/mev-boost:1.5.0
+# Using a pinned ethpandaops/mev-boost:develop image with config.yaml support
+# Update the commit hash (e.g., develop-XXXXXXX) to use a newer version
+mev_boost_container_image: ethpandaops/mev-boost:develop
 mev_boost_container_env: {}
 mev_boost_server_port: 18550
 mev_boost_container_ports:
@@ -22,6 +59,6 @@ mev_boost_container_command:
   - -addr=0.0.0.0:{{ mev_boost_server_port }}
   - -sepolia
   - -relay-check
-  - -relays=https://0x845bd072b7cd566f02faeb0a4033ce9399e42839ced64e8b2adcfc859ed1e8e1a5a293336a49feac6d9a5edb779be53a@boost-relay-sepolia.flashbots.net
+# Use mev_boost_relays (in config.yaml) or mev_boost_container_command_extra_args (CLI) to configure relays
 
 mev_boost_container_command_extra_args: []
