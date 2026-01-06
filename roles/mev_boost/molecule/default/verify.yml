@@ -1,19 +1,85 @@
 - name: Verify
   hosts: all
+  vars:
+    mev_boost_config_dir: /opt/mev_boost
+    mev_boost_container_name: mev-boost
   tasks:
     - name: Wait and let the container start
       ansible.builtin.pause:
-        seconds: 5
-    - name: Get infos from container
+        seconds: 10
+
+    - name: Wait for container to be in running state
       community.docker.docker_container_info:
         name: "{{ mev_boost_container_name }}"
       register: result_container
+      until:
+        - result_container.container.State.Running
+        - not result_container.container.State.Restarting
+      retries: 10
+      delay: 3
+      failed_when: false
+
+    - name: Get final container info
+      community.docker.docker_container_info:
+        name: "{{ mev_boost_container_name }}"
+      register: result_container
+
     - name: Show infos
       ansible.builtin.debug:
         var: "{{ item }}"
       loop:
         - result_container
+    - name: Check if config file exists on host
+      ansible.builtin.stat:
+        path: "{{ mev_boost_config_dir }}/config.yaml"
+      register: config_file
+    - name: Display config file content
+      ansible.builtin.command:
+        cmd: "cat {{ mev_boost_config_dir }}/config.yaml"
+      register: config_content
+      changed_when: false
+    - name: Show config content
+      ansible.builtin.debug:
+        msg: "{{ config_content.stdout }}"
+    - name: Verify config file in container
+      ansible.builtin.command:
+        cmd: "docker exec {{ mev_boost_container_name }} cat /config.yaml"
+      register: container_config
+      changed_when: false
+      when:
+        - result_container.container.State.Running
+        - not result_container.container.State.Restarting
+    - name: Show container config
+      ansible.builtin.debug:
+        msg: "{{ container_config.stdout }}"
+      when:
+        - result_container.container.State.Running
+        - not result_container.container.State.Restarting
+        - container_config is defined
+
+    - name: Get container logs
+      ansible.builtin.command:
+        cmd: "docker logs {{ mev_boost_container_name }}"
+      register: container_logs
+      changed_when: false
+
+    - name: Show container logs
+      ansible.builtin.debug:
+        msg: "{{ container_logs.stderr }}"
+
     - name: Assert results
       ansible.builtin.assert:
         that:
-          - "result_container.container.State.Running == true"
+          - result_container.container.State.Running or result_container.container.State.Status == 'running'
+          - not result_container.container.State.Restarting
+          - config_file.stat.exists
+          - "'timeout_get_header_ms: 900' in config_content.stdout"
+          - "'late_in_slot_time_ms: 1800' in config_content.stdout"
+          - "'0x845bd072b7cd566f02faeb0a4033ce9399e42839ced64e8b2adcfc859ed1e8e1a5a293336a49feac6d9a5edb779be53a' in config_content.stdout"
+          - "'enable_timing_games: true' in config_content.stdout"
+          - "'target_first_request_ms: 200' in config_content.stdout"
+          - "'frequency_get_header_ms: 100' in config_content.stdout"
+          - "'-config' in result_container.container.Config.Cmd"
+          - "'/config.yaml' in result_container.container.Config.Cmd"
+        fail_msg: "❌ Container is not running properly or config is not correctly set. Check container logs above."
+        success_msg: "✅ MEV-Boost container is running with config.yaml support!"

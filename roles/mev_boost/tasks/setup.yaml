@@ -9,6 +9,53 @@
   vars:
     docker_network_name: "{{ mev_boost_docker_network_name }}"
 
+- name: Create mev_boost config directory
+  ansible.builtin.file:
+    path: "{{ mev_boost_config_dir }}"
+    state: directory
+    owner: "{{ mev_boost_user }}"
+    group: "{{ mev_boost_user }}"
+    mode: '0750'
+  when: mev_boost_config_enabled
+
+- name: Create mev_boost config.yaml
+  ansible.builtin.copy:
+    content: "{{ mev_boost_config }}"
+    dest: "{{ mev_boost_config_dir }}/config.yaml"
+    owner: "{{ mev_boost_user }}"
+    group: "{{ mev_boost_user }}"
+    mode: '0640'
+  when: mev_boost_config_enabled
+
+- name: Set volumes with config file
+  ansible.builtin.set_fact:
+    mev_boost_volumes: >-
+      {{
+        mev_boost_container_volumes + [mev_boost_config_dir + '/config.yaml:/config.yaml:ro']
+      }}
+  when: mev_boost_config_enabled
+
+- name: Set volumes without config file
+  ansible.builtin.set_fact:
+    mev_boost_volumes: "{{ mev_boost_container_volumes }}"
+  when: not mev_boost_config_enabled
+
+- name: Set command with config flag
+  ansible.builtin.set_fact:
+    mev_boost_command: >-
+      {{
+        mev_boost_container_command + ['-config', '/config.yaml'] + mev_boost_container_command_extra_args
+      }}
+  when: mev_boost_config_enabled
+
+- name: Set command without config flag
+  ansible.builtin.set_fact:
+    mev_boost_command: >-
+      {{
+        mev_boost_container_command + mev_boost_container_command_extra_args
+      }}
+  when: not mev_boost_config_enabled
+
 - name: Run mev_boost container
   community.docker.docker_container:
     name: "{{ mev_boost_container_name }}"
@@ -17,9 +64,9 @@
     state: started
     restart_policy: always
     stop_timeout: "{{ mev_boost_container_stop_timeout }}"
-    volumes: "{{ mev_boost_container_volumes }}"
+    volumes: "{{ mev_boost_volumes }}"
     env: "{{ mev_boost_container_env }}"
     networks: "{{ mev_boost_container_networks }}"
     ports: "{{ mev_boost_container_ports }}"
-    command: "{{ mev_boost_container_command + mev_boost_container_command_extra_args }} "
+    command: "{{ mev_boost_command }}"
     user: "{{ mev_boost_user_meta.uid }}"
