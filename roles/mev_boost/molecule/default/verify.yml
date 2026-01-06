@@ -24,20 +24,6 @@
         name: "{{ mev_boost_container_name }}"
       register: result_container
 
-    - name: Get container logs if not running
-      ansible.builtin.command:
-        cmd: "docker logs {{ mev_boost_container_name }}"
-      register: container_logs
-      changed_when: false
-      when:
-        - not result_container.container.State.Running or result_container.container.State.Restarting
-
-    - name: Show container logs if not running
-      ansible.builtin.debug:
-        msg: "{{ container_logs.stderr }}"
-      when:
-        - not result_container.container.State.Running or result_container.container.State.Restarting
-
     - name: Show infos
       ansible.builtin.debug:
         var: "{{ item }}"
@@ -70,6 +56,17 @@
         - result_container.container.State.Running
         - not result_container.container.State.Restarting
         - container_config is defined
+
+    - name: Get container logs
+      ansible.builtin.command:
+        cmd: "docker logs {{ mev_boost_container_name }}"
+      register: container_logs
+      changed_when: false
+
+    - name: Show container logs
+      ansible.builtin.debug:
+        msg: "{{ container_logs.stderr }}"
+
     - name: Assert results
       ansible.builtin.assert:
         that:
