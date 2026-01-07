@@ -41,6 +41,8 @@ dora:
   apiDefaultRateLimit: 60
   apiDisableDefaultRateLimit: false
   proxyCount: 2
+  executionIndexerEnabled: {{ gen_kubernetes_config_dora_execution_indexer_enabled }}
+  executionIndexerRetention: {{ gen_kubernetes_config_dora_execution_indexer_retention }}
   extraEnv:
     - name: FRONTEND_PPROF
       value: "true"

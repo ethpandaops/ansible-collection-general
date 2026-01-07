@@ -50,6 +50,8 @@ gen_kubernetes_config_dora_execution_endpoints_url: "" # noqa var-naming[no-role
 gen_kubernetes_config_dora_consensus_endpoints_url: "" # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_dora_api_require_auth: false # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_dora_api_whitelisted_ips: [] # noqa var-naming[no-role-prefix]
+gen_kubernetes_config_dora_execution_indexer_enabled: false # noqa var-naming[no-role-prefix]
+gen_kubernetes_config_dora_execution_indexer_retention: "336h" # noqa var-naming[no-role-prefix]
 
 # Chaos Mesh configuration
 gen_kubernetes_config_chaos_mesh_dashboard_security_mode: false # noqa var-naming[no-role-prefix]
@@ -118,7 +120,7 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
     dependencies:
       - name: dora
         repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 1.0.3
+        version: 1.0.4
   forky:
     valuesTemplatePath: templates/forky.yaml.j2
     dependencies:
