@@ -26,6 +26,7 @@
     group: "{{ mev_boost_user }}"
     mode: '0640'
   when: mev_boost_config_enabled
+  notify: Restart mev_boost container
 
 - name: Set volumes with config file
   ansible.builtin.set_fact:
