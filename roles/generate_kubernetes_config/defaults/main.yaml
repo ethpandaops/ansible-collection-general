@@ -59,6 +59,10 @@ gen_kubernetes_config_dora_postgres_size: >- # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_chaos_mesh_dashboard_security_mode: false # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_chaos_mesh_chaosd_security_mode: false # noqa var-naming[no-role-prefix]
 
+# PandaMenu configuration
+gen_kubernetes_config_pandamenu_enabled: true # noqa var-naming[no-role-prefix]
+gen_kubernetes_config_pandamenu_script: '<script src="https://pandamenu.ethpandaops.io/panda-menu-1.0.0.js" integrity="sha384-j6D+DanVUQs7XYmJaMXGwg2VdBq07F/ekc+bP5CNPsLOYCv4TKf8r3JBWqxwakKL" crossorigin="anonymous"></script>' # noqa var-naming[no-role-prefix] yaml[line-length]
+
 gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
   config:
     valuesTemplatePath: templates/config.yaml.j2

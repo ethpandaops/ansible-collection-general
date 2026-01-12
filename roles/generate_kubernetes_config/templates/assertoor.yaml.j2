@@ -21,6 +21,13 @@ assertoor:
     className: ingress-nginx-public
     annotations:
       cert-manager.io/cluster-issuer: letsencrypt-production
+{% if gen_kubernetes_config_pandamenu_enabled %}
+      nginx.ingress.kubernetes.io/proxy-body-size: "0"
+      nginx.ingress.kubernetes.io/configuration-snippet: |
+        sub_filter '</head>' '{{ gen_kubernetes_config_assertoor_pandamenu | default('') }}{{ gen_kubernetes_config_pandamenu_script }}</head>';
+        sub_filter_types text/html;
+        sub_filter_once off;
+{% endif %}
     hosts:
       - host: assertoor.{{ network_subdomain }}
         paths:

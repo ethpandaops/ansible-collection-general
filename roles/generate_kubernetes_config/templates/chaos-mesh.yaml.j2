@@ -11,6 +11,13 @@ chaos-mesh:
       annotations:
         kubernetes.io/ingress.class: ingress-nginx-public
         external-dns.alpha.kubernetes.io/hostname: chaos-mesh.{{ network_subdomain }}
+{% if gen_kubernetes_config_pandamenu_enabled %}
+        nginx.ingress.kubernetes.io/proxy-body-size: "0"
+        nginx.ingress.kubernetes.io/configuration-snippet: |
+          sub_filter '</head>' '{{ gen_kubernetes_config_chaos_mesh_pandamenu | default('') }}{{ gen_kubernetes_config_pandamenu_script }}</head>';
+          sub_filter_types text/html;
+          sub_filter_once off;
+{% endif %}
       hosts:
         - name: chaos-mesh.{{ network_subdomain }}
           paths:

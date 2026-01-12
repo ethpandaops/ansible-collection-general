@@ -17,6 +17,14 @@ dugtrio:
   ingress:
     enabled: true
     className: ingress-nginx-public
+{% if gen_kubernetes_config_pandamenu_enabled %}
+    annotations:
+      nginx.ingress.kubernetes.io/proxy-body-size: "0"
+      nginx.ingress.kubernetes.io/configuration-snippet: |
+        sub_filter '</head>' '{{ gen_kubernetes_config_dugtrio_pandamenu | default('') }}{{ gen_kubernetes_config_pandamenu_script }}</head>';
+        sub_filter_types text/html;
+        sub_filter_once off;
+{% endif %}
     hosts:
       - host: beacon.{{ network_subdomain }}
         paths:
