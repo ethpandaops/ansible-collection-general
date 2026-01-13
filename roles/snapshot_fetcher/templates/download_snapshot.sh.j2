@@ -45,7 +45,7 @@ if [ ! -f "$DATA_DIR/.snapshot_fetcher_started" ]; then
     -e "RCLONE_CONFIG_MYS3_SECRET_ACCESS_KEY={{ snapshot_fetcher_s3_secret_access_key }}" \
     docker.ethquokkaops.io/dh/library/alpine -c "cd /data && \
     apk add --no-cache curl tar zstd rclone && \
-    rclone cat mys3:/{{ ethpandaops-ethereum-node-snapshots }}/$NETWORK/$CLIENT/$BLOCK/snapshot.tar.zst | tar -I zstd -xvf - -C /data"
+    rclone cat mys3:/{{ snapshot_fetcher_s3_bucket }}/$NETWORK/$CLIENT/$BLOCK/snapshot.tar.zst | tar -I zstd -xvf - -C /data"
 
   touch $DATA_DIR/.snapshot_fetcher_started
   echo "================================================"
