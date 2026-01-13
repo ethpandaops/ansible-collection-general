@@ -4,6 +4,10 @@ snapshot_fetcher_out_dir: "/data/{{ snapshot_fetcher_client }}"  # Where to stor
 snapshot_fetcher_base_url: "https://snapshots.ethpandaops.io"  # Base URL for snapshots
 snapshot_fetcher_block: "{{ lookup('pipe', 'curl -s https://snapshots.ethpandaops.io/{{ snapshot_fetcher_network }}/latest') }}"  # noqa yaml[line-length]
 
+snapshot_fetcher_s3_provider: Cloudflare
+snapshot_fetcher_s3_bucket: ethpandaops-ethereum-node-snapshots
+snapshot_fetcher_s3_region: auto
+snapshot_fetcher_s3_acl: public-read
 snapshot_fetcher_s3_endpoint: "https://xxxxxx.r2.cloudflarestorage.com"
 snapshot_fetcher_s3_access_key_id: "your-access-key-id"
 snapshot_fetcher_s3_secret_access_key: "your-secret-access-key"
