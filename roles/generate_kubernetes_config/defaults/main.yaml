@@ -50,7 +50,7 @@ gen_kubernetes_config_dora_execution_endpoints_url: "" # noqa var-naming[no-role
 gen_kubernetes_config_dora_consensus_endpoints_url: "" # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_dora_api_require_auth: false # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_dora_api_whitelisted_ips: [] # noqa var-naming[no-role-prefix]
-gen_kubernetes_config_dora_execution_indexer_enabled: false # noqa var-naming[no-role-prefix]
+gen_kubernetes_config_dora_execution_indexer_enabled: true # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_dora_execution_indexer_retention: "336h" # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_dora_postgres_size: >- # noqa var-naming[no-role-prefix]
   {{ "50Gi" if gen_kubernetes_config_dora_execution_indexer_enabled else "10Gi" }}
