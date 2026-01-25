@@ -65,7 +65,7 @@ gen_kubernetes_config_pandamenu_script: '<script src="https://pandamenu.ethpanda
 
 # Enabled charts configuration
 gen_kubernetes_config_disabled_services: [] # noqa var-naming[no-role-prefix]
-gen_kubernetes_config_enabled_charts: "{{ gen_kubernetes_config_helm_charts.keys() | reject('in', gen_kubernetes_config_disabled_services) | list }}"
+gen_kubernetes_config_enabled_charts: "{{ gen_kubernetes_config_helm_charts.keys() | reject('in', gen_kubernetes_config_disabled_services) | list }}" # noqa var-naming[no-role-prefix] yaml[line-length]
 
 gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
   config:
