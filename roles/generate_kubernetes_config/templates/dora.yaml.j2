@@ -51,11 +51,10 @@ dora:
   proxyCount: 2
   executionIndexerEnabled: {{ gen_kubernetes_config_dora_execution_indexer_enabled }}
   executionIndexerRetention: {{ gen_kubernetes_config_dora_execution_indexer_retention }}
-
-  {%- if 'syncoor' in gen_kubernetes_config_enabled_services %}
+{% if 'tracoor' in gen_kubernetes_config_enabled_services %}
   tracoorUrl: "https://tracoor.{{ network_subdomain }}"
   tracoorNetwork: "{{ ethereum_network_name }}"
-  {%- endif %}
+{% endif %}
 
   
   extraEnv:
