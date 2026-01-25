@@ -86,7 +86,7 @@ gen_kubernetes_config_enabled_services: # noqa var-naming[no-role-prefix]
   - xatu-cl-mimicry
   - xatu-relay-monitor
 
-gen_kubernetes_config_enabled_charts: "{{ gen_kubernetes_config_enabled_services + [ gen_kubernetes_config_ethereum_node_name ] }}"
+gen_kubernetes_config_enabled_charts: "{{ gen_kubernetes_config_enabled_services + [ gen_kubernetes_config_ethereum_node_name ] }}" # noqa var-naming[no-role-prefix]
 
 gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
   config:
