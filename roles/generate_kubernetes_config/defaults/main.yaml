@@ -64,29 +64,8 @@ gen_kubernetes_config_pandamenu_enabled: true # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_pandamenu_script: '<script src="https://pandamenu.ethpandaops.io/panda-menu-1.0.0.js" integrity="sha384-j6D+DanVUQs7XYmJaMXGwg2VdBq07F/ekc+bP5CNPsLOYCv4TKf8r3JBWqxwakKL" crossorigin="anonymous"></script>' # noqa var-naming[no-role-prefix] yaml[line-length]
 
 # Enabled charts configuration
-gen_kubernetes_config_enabled_services: # noqa var-naming[no-role-prefix]
-  - config
-  - blockscout
-  - checkpointz
-  - dugtrio
-  - faucet
-  - forkmon
-  - dora
-  - forky
-  - homepage
-  - assertoor
-  - tracoor
-  - erpc
-  - spamoor
-  - chaos-mesh
-  - syncoor-server
-  - syncoor-web
-  - xatu-cannon
-  - xatu-mimicry
-  - xatu-cl-mimicry
-  - xatu-relay-monitor
-
-gen_kubernetes_config_enabled_charts: "{{ gen_kubernetes_config_enabled_services + [ gen_kubernetes_config_ethereum_node_name ] }}" # noqa var-naming[no-role-prefix]
+gen_kubernetes_config_disabled_services: [] # noqa var-naming[no-role-prefix]
+gen_kubernetes_config_enabled_charts: "{{ gen_kubernetes_config_helm_charts.keys() | reject('in', gen_kubernetes_config_disabled_services) | list }}"
 
 gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
   config:
