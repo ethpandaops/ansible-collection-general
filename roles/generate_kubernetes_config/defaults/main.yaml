@@ -50,7 +50,7 @@ gen_kubernetes_config_dora_execution_endpoints_url: "" # noqa var-naming[no-role
 gen_kubernetes_config_dora_consensus_endpoints_url: "" # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_dora_api_require_auth: false # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_dora_api_whitelisted_ips: [] # noqa var-naming[no-role-prefix]
-gen_kubernetes_config_dora_execution_indexer_enabled: false # noqa var-naming[no-role-prefix]
+gen_kubernetes_config_dora_execution_indexer_enabled: true # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_dora_execution_indexer_retention: "336h" # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_dora_postgres_size: >- # noqa var-naming[no-role-prefix]
   {{ "50Gi" if gen_kubernetes_config_dora_execution_indexer_enabled else "10Gi" }}
@@ -62,6 +62,10 @@ gen_kubernetes_config_chaos_mesh_chaosd_security_mode: false # noqa var-naming[n
 # PandaMenu configuration
 gen_kubernetes_config_pandamenu_enabled: true # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_pandamenu_script: '<script src="https://pandamenu.ethpandaops.io/panda-menu-1.0.0.js" integrity="sha384-j6D+DanVUQs7XYmJaMXGwg2VdBq07F/ekc+bP5CNPsLOYCv4TKf8r3JBWqxwakKL" crossorigin="anonymous"></script>' # noqa var-naming[no-role-prefix] yaml[line-length]
+
+# Enabled charts configuration
+gen_kubernetes_config_disabled_services: [] # noqa var-naming[no-role-prefix]
+gen_kubernetes_config_enabled_charts: "{{ gen_kubernetes_config_helm_charts.keys() | reject('in', gen_kubernetes_config_disabled_services) | list }}" # noqa var-naming[no-role-prefix] yaml[line-length]
 
 gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
   config:
@@ -126,7 +130,7 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
     dependencies:
       - name: dora
         repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 1.0.4
+        version: 1.0.5
   forky:
     valuesTemplatePath: templates/forky.yaml.j2
     dependencies:
