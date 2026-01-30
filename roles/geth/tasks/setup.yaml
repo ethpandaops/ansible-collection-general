@@ -16,31 +16,6 @@
   failed_when: false
   changed_when: false
 
-- name: Init custom network
-  when: geth_init_custom_network
-  block:
-    - name: Check for empty chaindata dir
-      ansible.builtin.stat:
-        path: "{{ geth_datadir }}/geth/chaindata"
-      register: geth_init_custom_network_chaindata_stat
-    - name: Chaindata is empty, run geth init container
-      community.docker.docker_container:
-        name: "{{ geth_container_name }}-init"
-        image: "{{ geth_container_image }}"
-        image_name_mismatch: recreate
-        detach: false
-        auto_remove: "{{ geth_init_autoremove_enabled }}"
-        restart_policy: "no"
-        state: started
-        volumes: "{{ geth_init_custom_network_container_volumes }}"
-        env: "{{ geth_init_custom_network_container_env }}"
-        networks: "{{ geth_container_networks }}"
-        command: "{{ geth_init_custom_network_container_command }}"
-        user: "{{ geth_user_meta.uid }}"
-        pull: "{{ geth_container_pull | bool }}"
-        security_opts: "{{ geth_container_security_opts }}"
-      when: not geth_init_custom_network_chaindata_stat.stat.exists
-
 - name: Run geth container
   community.docker.docker_container:
     name: "{{ geth_container_name }}"
