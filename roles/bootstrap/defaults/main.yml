@@ -47,7 +47,6 @@ bootstrap_ntp_enabled: true
 bootstrap_ntp_servers:
   # Generic
   - pool.ntp.org
-  - time.google.com
   - time.cloudflare.com
   - time.apple.com
   - time.windows.com
