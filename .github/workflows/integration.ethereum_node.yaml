@@ -20,7 +20,7 @@ jobs:
       consensus_clients: ${{ steps.consensus_clients.outputs.changes }}
       execution_clients: ${{ steps.execution_clients.outputs.changes }}
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
         id: global
         with:
@@ -110,7 +110,7 @@ jobs:
         consensus: ${{ fromJSON(needs.vars.outputs.CONSENSUS_CLIENTS) }}
     runs-on: self-hosted-ghr-size-s-x64
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           path: ansible_collections/ethpandaops/general
 
