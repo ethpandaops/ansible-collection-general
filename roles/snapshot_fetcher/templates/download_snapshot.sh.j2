@@ -6,6 +6,7 @@ CLIENT="{{ snapshot_fetcher_client }}"
 DATA_DIR="{{ snapshot_fetcher_out_dir }}"
 BLOCK="{{ snapshot_fetcher_block }}"
 BASE_URL="{{ snapshot_fetcher_base_url }}"
+CONTAINER_NAME="snapshot-fetcher-$NETWORK-$CLIENT-$BLOCK"
 
 # Set tmux window title
 printf '\033]2;%s\033\\' "Snapshot: $NETWORK-$CLIENT"
@@ -31,7 +32,8 @@ echo "Starting snapshot download container..."
 
 # Only run the snapshot download once. You have to manually remove the file if you want to run it again.
 if [ ! -f "$DATA_DIR/.snapshot_fetcher_started" ]; then
-  docker run -d --name snapshot_fetcher \
+{% if snapshot_fetcher_s3_provider_enabled %}
+  docker run -d --name $CONTAINER_NAME \
     -v $DATA_DIR:/data \
     --entrypoint "/bin/sh" \
     -e RCLONE_CONFIG_MYS3_TYPE=s3 \
@@ -46,12 +48,20 @@ if [ ! -f "$DATA_DIR/.snapshot_fetcher_started" ]; then
     docker.ethquokkaops.io/dh/library/alpine -c "cd /data && \
     apk add --no-cache curl tar zstd rclone && \
     rclone cat mys3:/{{ snapshot_fetcher_s3_bucket }}/$NETWORK/$CLIENT/$BLOCK/snapshot.tar.zst | tar -I zstd -xvf - -C /data"
+{% else %}
+  docker run -d --name $CONTAINER_NAME \
+    -v $DATA_DIR:/data \
+    --entrypoint "/bin/sh" \
+    docker.ethquokkaops.io/dh/library/alpine -c "cd /data && \
+    apk add --no-cache wget curl tar zstd && \
+    wget --tries=0 --retry-connrefused -O - $BASE_URL/$NETWORK/$CLIENT/$BLOCK/snapshot.tar.zst | tar -I zstd -xvf - -C /data"
+{% endif %}
 
   touch $DATA_DIR/.snapshot_fetcher_started
   echo "================================================"
   echo "Snapshot downloading to $DATA_DIR"
   echo "================================================"
-  echo "Use 'docker logs -f snapshot_fetcher' to follow the progress"
+  echo "Use 'docker logs -f $CONTAINER_NAME' to follow the progress"
 
 else
   echo "Snapshot download container did already run. Skipping..."
