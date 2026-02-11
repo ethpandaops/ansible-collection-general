@@ -32,7 +32,7 @@ echo "Starting snapshot download container..."
 # Only run the snapshot download once. You have to manually remove the file if you want to run it again.
 if [ ! -f "$DATA_DIR/.snapshot_fetcher_started" ]; then
 {% if snapshot_fetcher_s3_provider_enabled %}
-  docker run -d --name snapshot_fetcher \
+  docker run -d --name snapshot-fetcher-$NETWORK-$CLIENT-$BLOCK \
     -v $DATA_DIR:/data \
     --entrypoint "/bin/sh" \
     -e RCLONE_CONFIG_MYS3_TYPE=s3 \
