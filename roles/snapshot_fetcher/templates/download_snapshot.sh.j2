@@ -31,6 +31,7 @@ echo "Starting snapshot download container..."
 
 # Only run the snapshot download once. You have to manually remove the file if you want to run it again.
 if [ ! -f "$DATA_DIR/.snapshot_fetcher_started" ]; then
+{% if snapshot_fetcher_s3_provider_enabled %}
   docker run -d --name snapshot_fetcher \
     -v $DATA_DIR:/data \
     --entrypoint "/bin/sh" \
@@ -46,6 +47,14 @@ if [ ! -f "$DATA_DIR/.snapshot_fetcher_started" ]; then
     docker.ethquokkaops.io/dh/library/alpine -c "cd /data && \
     apk add --no-cache curl tar zstd rclone && \
     rclone cat mys3:/{{ snapshot_fetcher_s3_bucket }}/$NETWORK/$CLIENT/$BLOCK/snapshot.tar.zst | tar -I zstd -xvf - -C /data"
+{% else %}
+  docker run -d --name snapshot_fetcher \
+    -v $DATA_DIR:/data \
+    --entrypoint "/bin/sh" \
+    docker.ethquokkaops.io/dh/library/alpine -c "cd /data && \
+    apk add --no-cache wget curl tar zstd && \
+    wget --tries=0 --retry-connrefused -O - $BASE_URL/$NETWORK/$CLIENT/$BLOCK/snapshot.tar.zst | tar -I zstd -xvf - -C /data"
+{% endif %}
 
   touch $DATA_DIR/.snapshot_fetcher_started
   echo "================================================"
