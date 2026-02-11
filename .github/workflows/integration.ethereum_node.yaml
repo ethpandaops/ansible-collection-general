@@ -47,6 +47,7 @@ jobs:
             besu: roles/besu/**
             reth: roles/reth/**
             nimbusel: roles/nimbusel/**
+            ethrex: roles/ethrex/**
 
   vars:
     runs-on: ubuntu-latest
@@ -58,7 +59,7 @@ jobs:
         run: |
           echo "Verifying which client roles have changed...";
           ALL_CONSENSUS_CLIENTS='["teku", "prysm", "lighthouse", "nimbus", "lodestar", "grandine"]';
-          ALL_EXECUTION_CLIENTS='["geth", "nethermind", "erigon", "besu", "reth", "nimbusel"]';
+          ALL_EXECUTION_CLIENTS='["geth", "nethermind", "erigon", "besu", "reth", "nimbusel", "ethrex"]';
 
           CONSENSUS_CLIENTS="[]";
           EXECUTION_CLIENTS="[]";

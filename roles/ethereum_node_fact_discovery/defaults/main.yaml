@@ -9,6 +9,7 @@ ethereum_node_fact_discovery_el_key_cmd:
   nethermind: xxd -p -c32 {{ nethermind_datadir | default('/data/nethermind') }}/keystore/node.key.plain
   reth: cat {{ reth_datadir | default('/data/reth') }}/discovery-secret
   nimbusel: cat {{ nimbusel_datadir | default('/data/nimbusel') }}/nodekey | cut -d 'x' -f2
+  ethrex: xxd -p -c32 {{ ethrex_datadir | default('/data/ethrex') }}/node.key
 
 # How to find the EL enode on the target system
 ethereum_node_fact_discovery_el_enode_cmd:
