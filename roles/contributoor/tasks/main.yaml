@@ -1,0 +1,7 @@
+- name: Setup contributoor
+  ansible.builtin.import_tasks: setup.yaml
+  when: not contributoor_cleanup
+
+- name: Cleanup contributoor
+  ansible.builtin.import_tasks: cleanup.yaml
+  when: contributoor_cleanup
