@@ -53,6 +53,17 @@ lighthouse_container_volumes:
   - "{{ lighthouse_datadir }}:/data"
   - "{{ lighthouse_auth_jwt_path }}:/execution-auth.jwt:ro"
 lighthouse_container_security_opts: []
+# lighthouse_container_memory:
+# lighthouse_container_memory_reservation:
+# lighthouse_container_memory_swap:
+# lighthouse_container_memory_swappiness:
+# lighthouse_container_kernel_memory:
+# lighthouse_container_cpus:
+# lighthouse_container_cpuset_cpus:
+# lighthouse_container_cpuset_mems:
+# lighthouse_container_cpu_shares:
+# lighthouse_container_cpu_quota:
+# lighthouse_container_cpu_period:
 lighthouse_container_stop_timeout: "300"
 lighthouse_container_networks: []
 lighthouse_container_command_default:
@@ -117,6 +128,17 @@ lighthouse_validator_container_ports: []
 lighthouse_validator_container_volumes:
   - "{{ lighthouse_validator_datadir }}:/validator-data"
 lighthouse_validator_container_security_opts: []
+# lighthouse_validator_container_memory:
+# lighthouse_validator_container_memory_reservation:
+# lighthouse_validator_container_memory_swap:
+# lighthouse_validator_container_memory_swappiness:
+# lighthouse_validator_container_kernel_memory:
+# lighthouse_validator_container_cpus:
+# lighthouse_validator_container_cpuset_cpus:
+# lighthouse_validator_container_cpuset_mems:
+# lighthouse_validator_container_cpu_shares:
+# lighthouse_validator_container_cpu_quota:
+# lighthouse_validator_container_cpu_period:
 lighthouse_validator_container_stop_timeout: "300"
 lighthouse_validator_container_networks: []
 lighthouse_validator_container_command:

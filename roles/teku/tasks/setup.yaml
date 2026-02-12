@@ -60,6 +60,17 @@
     user: "{{ teku_user_meta.uid }}"
     pull: "{{ teku_container_pull | bool }}"
     security_opts: "{{ teku_container_security_opts }}"
+    memory: "{{ teku_container_memory | default(omit) }}"
+    memory_reservation: "{{ teku_container_memory_reservation | default(omit) }}"
+    memory_swap: "{{ teku_container_memory_swap | default(omit) }}"
+    memory_swappiness: "{{ teku_container_memory_swappiness | default(omit) }}"
+    kernel_memory: "{{ teku_container_kernel_memory | default(omit) }}"
+    cpus: "{{ teku_container_cpus | default(omit) }}"
+    cpuset_cpus: "{{ teku_container_cpuset_cpus | default(omit) }}"
+    cpuset_mems: "{{ teku_container_cpuset_mems | default(omit) }}"
+    cpu_shares: "{{ teku_container_cpu_shares | default(omit) }}"
+    cpu_quota: "{{ teku_container_cpu_quota | default(omit) }}"
+    cpu_period: "{{ teku_container_cpu_period | default(omit) }}"
 
 - name: Run teku validator container
   when: teku_validator_enabled and (not teku_enabled)

@@ -33,6 +33,17 @@ ethereumjs_container_volumes:
   - "{{ ethereumjs_datadir }}:/data"
   - "{{ ethereumjs_auth_jwt_path }}:/execution-auth.jwt:ro"
 ethereumjs_container_security_opts: []
+# ethereumjs_container_memory:
+# ethereumjs_container_memory_reservation:
+# ethereumjs_container_memory_swap:
+# ethereumjs_container_memory_swappiness:
+# ethereumjs_container_kernel_memory:
+# ethereumjs_container_cpus:
+# ethereumjs_container_cpuset_cpus:
+# ethereumjs_container_cpuset_mems:
+# ethereumjs_container_cpu_shares:
+# ethereumjs_container_cpu_quota:
+# ethereumjs_container_cpu_period:
 ethereumjs_container_stop_timeout: "300"
 ethereumjs_container_networks: []
 ethereumjs_container_command_default:

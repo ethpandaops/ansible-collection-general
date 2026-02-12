@@ -38,6 +38,17 @@ erigon_container_volumes:
   - "{{ erigon_datadir }}:/data"
   - "{{ erigon_auth_jwt_path }}:/execution-auth.jwt:ro"
 erigon_container_security_opts: []
+# erigon_container_memory:
+# erigon_container_memory_reservation:
+# erigon_container_memory_swap:
+# erigon_container_memory_swappiness:
+# erigon_container_kernel_memory:
+# erigon_container_cpus:
+# erigon_container_cpuset_cpus:
+# erigon_container_cpuset_mems:
+# erigon_container_cpu_shares:
+# erigon_container_cpu_quota:
+# erigon_container_cpu_period:
 erigon_container_stop_timeout: "300"
 erigon_container_networks: []
 erigon_container_entrypoint:

@@ -47,6 +47,17 @@ teku_container_volumes:
   - "{{ teku_datadir }}:/data"
   - "{{ teku_auth_jwt_path }}:/execution-auth.jwt:ro"
 teku_container_security_opts: []
+# teku_container_memory:
+# teku_container_memory_reservation:
+# teku_container_memory_swap:
+# teku_container_memory_swappiness:
+# teku_container_kernel_memory:
+# teku_container_cpus:
+# teku_container_cpuset_cpus:
+# teku_container_cpuset_mems:
+# teku_container_cpu_shares:
+# teku_container_cpu_quota:
+# teku_container_cpu_period:
 teku_container_stop_timeout: "300"
 teku_container_networks: []
 teku_container_command_default:
