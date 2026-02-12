@@ -34,6 +34,17 @@ nethermind_container_volumes:
   - "{{ nethermind_datadir }}:/data"
   - "{{ nethermind_auth_jwt_path }}:/execution-auth.jwt:ro"
 nethermind_container_security_opts: []
+# nethermind_container_memory:
+# nethermind_container_memory_reservation:
+# nethermind_container_memory_swap:
+# nethermind_container_memory_swappiness:
+# nethermind_container_kernel_memory:
+# nethermind_container_cpus:
+# nethermind_container_cpuset_cpus:
+# nethermind_container_cpuset_mems:
+# nethermind_container_cpu_shares:
+# nethermind_container_cpu_quota:
+# nethermind_container_cpu_period:
 nethermind_container_stop_timeout: "300"
 nethermind_container_networks: []
 nethermind_container_entrypoint:

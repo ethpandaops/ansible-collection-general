@@ -34,6 +34,17 @@ geth_container_volumes:
   - "{{ geth_datadir }}:/data"
   - "{{ geth_auth_jwt_path }}:/execution-auth.jwt:ro"
 geth_container_security_opts: []
+# geth_container_memory:
+# geth_container_memory_reservation:
+# geth_container_memory_swap:
+# geth_container_memory_swappiness:
+# geth_container_kernel_memory:
+# geth_container_cpus:
+# geth_container_cpuset_cpus:
+# geth_container_cpuset_mems:
+# geth_container_cpu_shares:
+# geth_container_cpu_quota:
+# geth_container_cpu_period:
 geth_container_stop_timeout: "300"
 geth_container_networks: []
 geth_container_command_default:

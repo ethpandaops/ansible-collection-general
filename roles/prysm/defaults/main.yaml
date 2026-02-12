@@ -58,6 +58,17 @@ prysm_container_volumes:
   - "{{ prysm_datadir }}:/data"
   - "{{ prysm_auth_jwt_path }}:/execution-auth.jwt:ro"
 prysm_container_security_opts: []
+# prysm_container_memory:
+# prysm_container_memory_reservation:
+# prysm_container_memory_swap:
+# prysm_container_memory_swappiness:
+# prysm_container_kernel_memory:
+# prysm_container_cpus:
+# prysm_container_cpuset_cpus:
+# prysm_container_cpuset_mems:
+# prysm_container_cpu_shares:
+# prysm_container_cpu_quota:
+# prysm_container_cpu_period:
 prysm_container_stop_timeout: "300"
 prysm_container_networks: []
 prysm_container_tty: false
@@ -118,6 +129,17 @@ prysm_validator_container_ports: []
 prysm_validator_container_volumes:
   - "{{ prysm_validator_datadir }}:/validator-data"
 prysm_validator_container_security_opts: []
+# prysm_validator_container_memory:
+# prysm_validator_container_memory_reservation:
+# prysm_validator_container_memory_swap:
+# prysm_validator_container_memory_swappiness:
+# prysm_validator_container_kernel_memory:
+# prysm_validator_container_cpus:
+# prysm_validator_container_cpuset_cpus:
+# prysm_validator_container_cpuset_mems:
+# prysm_validator_container_cpu_shares:
+# prysm_validator_container_cpu_quota:
+# prysm_validator_container_cpu_period:
 prysm_validator_container_stop_timeout: "300"
 prysm_validator_container_networks: []
 prysm_validator_container_tty: false

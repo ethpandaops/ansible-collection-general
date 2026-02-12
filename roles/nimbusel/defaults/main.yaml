@@ -34,6 +34,17 @@ nimbusel_container_volumes:
   - "{{ nimbusel_datadir }}:/data"
   - "{{ nimbusel_auth_jwt_path }}:/execution-auth.jwt:ro"
 nimbusel_container_security_opts: []
+# nimbusel_container_memory:
+# nimbusel_container_memory_reservation:
+# nimbusel_container_memory_swap:
+# nimbusel_container_memory_swappiness:
+# nimbusel_container_kernel_memory:
+# nimbusel_container_cpus:
+# nimbusel_container_cpuset_cpus:
+# nimbusel_container_cpuset_mems:
+# nimbusel_container_cpu_shares:
+# nimbusel_container_cpu_quota:
+# nimbusel_container_cpu_period:
 nimbusel_container_stop_timeout: "300"
 nimbusel_container_networks: []
 nimbusel_container_command_default:

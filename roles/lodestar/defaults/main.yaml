@@ -50,6 +50,17 @@ lodestar_container_volumes:
   - "{{ lodestar_datadir }}:/data"
   - "{{ lodestar_auth_jwt_path }}:/execution-auth.jwt:ro"
 lodestar_container_security_opts: []
+# lodestar_container_memory:
+# lodestar_container_memory_reservation:
+# lodestar_container_memory_swap:
+# lodestar_container_memory_swappiness:
+# lodestar_container_kernel_memory:
+# lodestar_container_cpus:
+# lodestar_container_cpuset_cpus:
+# lodestar_container_cpuset_mems:
+# lodestar_container_cpu_shares:
+# lodestar_container_cpu_quota:
+# lodestar_container_cpu_period:
 lodestar_container_stop_timeout: "300"
 lodestar_container_networks: []
 lodestar_container_command_default:
@@ -107,6 +118,17 @@ lodestar_validator_container_ports: []
 lodestar_validator_container_volumes:
   - "{{ lodestar_validator_datadir }}:/validator-data"
 lodestar_validator_container_security_opts: []
+# lodestar_validator_container_memory:
+# lodestar_validator_container_memory_reservation:
+# lodestar_validator_container_memory_swap:
+# lodestar_validator_container_memory_swappiness:
+# lodestar_validator_container_kernel_memory:
+# lodestar_validator_container_cpus:
+# lodestar_validator_container_cpuset_cpus:
+# lodestar_validator_container_cpuset_mems:
+# lodestar_validator_container_cpu_shares:
+# lodestar_validator_container_cpu_quota:
+# lodestar_validator_container_cpu_period:
 lodestar_validator_container_stop_timeout: "300"
 lodestar_validator_container_networks: []
 lodestar_validator_container_command:
