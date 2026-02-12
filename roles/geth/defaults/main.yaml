@@ -73,18 +73,5 @@ geth_container_command_extra_args: []
 #  - --http.api=eth,net,web3
 #  - --http.vhosts=*
 
-# Only required changing when running custom networks
-geth_init_custom_network: false
-geth_init_autoremove_enabled: false
-geth_init_custom_network_genesis_file: /config/genesis.json
-geth_init_custom_network_container_env: {}
-geth_init_custom_network_container_volumes:
-  - "{{ geth_datadir }}:/data"
-  - "{{ geth_init_custom_network_genesis_file }}:/genesis.json:ro"
-geth_init_custom_network_container_command:
-  - --datadir=/data
-  - init
-  - /genesis.json
-
 # Default image pull policy
 geth_container_pull: false
