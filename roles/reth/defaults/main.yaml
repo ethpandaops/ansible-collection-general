@@ -36,6 +36,17 @@ reth_container_volumes:
   - "{{ reth_datadir }}:/data"
   - "{{ reth_auth_jwt_path }}:/execution-auth.jwt:ro"
 reth_container_security_opts: []
+# reth_container_memory:
+# reth_container_memory_reservation:
+# reth_container_memory_swap:
+# reth_container_memory_swappiness:
+# reth_container_kernel_memory:
+# reth_container_cpus:
+# reth_container_cpuset_cpus:
+# reth_container_cpuset_mems:
+# reth_container_cpu_shares:
+# reth_container_cpu_quota:
+# reth_container_cpu_period:
 reth_container_stop_timeout: "300"
 reth_container_networks: []
 reth_container_command_default:

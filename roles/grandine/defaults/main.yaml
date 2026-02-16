@@ -53,6 +53,17 @@ grandine_container_volumes:
   - "{{ grandine_datadir }}:/data"
   - "{{ grandine_auth_jwt_path }}:/execution-auth.jwt:ro"
 grandine_container_security_opts: []
+# grandine_container_memory:
+# grandine_container_memory_reservation:
+# grandine_container_memory_swap:
+# grandine_container_memory_swappiness:
+# grandine_container_kernel_memory:
+# grandine_container_cpus:
+# grandine_container_cpuset_cpus:
+# grandine_container_cpuset_mems:
+# grandine_container_cpu_shares:
+# grandine_container_cpu_quota:
+# grandine_container_cpu_period:
 grandine_container_stop_timeout: "300"
 grandine_container_networks: []
 grandine_container_command_default:

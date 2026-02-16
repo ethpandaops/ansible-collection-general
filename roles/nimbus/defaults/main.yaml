@@ -63,6 +63,17 @@ nimbus_container_volumes:
   - "{{ nimbus_datadir }}:/data"
   - "{{ nimbus_auth_jwt_path }}:/execution-auth.jwt:ro"
 nimbus_container_security_opts: []
+# nimbus_container_memory:
+# nimbus_container_memory_reservation:
+# nimbus_container_memory_swap:
+# nimbus_container_memory_swappiness:
+# nimbus_container_kernel_memory:
+# nimbus_container_cpus:
+# nimbus_container_cpuset_cpus:
+# nimbus_container_cpuset_mems:
+# nimbus_container_cpu_shares:
+# nimbus_container_cpu_quota:
+# nimbus_container_cpu_period:
 nimbus_container_stop_timeout: "300"
 nimbus_container_networks: []
 nimbus_container_command_default:
