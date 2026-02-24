@@ -30,12 +30,16 @@
       ansible.builtin.set_fact:
         docker_user_flag: "{{ docker_is_rootless | ternary('', '-u ' ~ (ansible_effective_user_id | default(ansible_uid, true))) }}"
 
+    - name: Set docker platform based on architecture
+      ansible.builtin.set_fact:
+        docker_platform: "{{ 'linux/arm64' if ansible_architecture == 'aarch64' or ansible_architecture == 'arm64' else 'linux/amd64' }}"
+
     - name: Create validator keys
       loop: "{{ ethereum_genesis_validator_keyranges | dict2items }}"
       ansible.builtin.shell: >
         docker run --rm -t {{ docker_user_flag }}
         --entrypoint eth2-val-tools
-        --platform linux/amd64
+        --platform {{ docker_platform }}
         -v {{ ethereum_genesis_validator_keys_output_dir }}:/output
         {{ ethereum_genesis_generator_container_image }}
         keystores
@@ -60,7 +64,7 @@
       ansible.builtin.shell: >
         docker run --rm -t {{ docker_user_flag }}
         --entrypoint eth2-val-tools
-        --platform linux/amd64
+        --platform {{ docker_platform }}
         -v {{ ethereum_genesis_validator_keys_output_dir }}:/output
         {{ ethereum_genesis_generator_container_image }}
         bls-address-change
