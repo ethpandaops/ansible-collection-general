@@ -125,6 +125,7 @@ jobs:
         env:
           PY_COLORS: '1'
           ANSIBLE_DOCKER_TIMEOUT: '120'
+          ANSIBLE_REMOTE_TMP: '/tmp/.ansible/tmp'
           CONSENSUS_CLIENT: ${{ matrix.consensus }}
           DOCKERHUB_USERNAME: ethpandaops
           DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}

@@ -33,6 +33,7 @@ jobs:
         working-directory: ansible_collections/ethpandaops/general/roles/ethereum_node
         env:
           PY_COLORS: '1'
+          ANSIBLE_REMOTE_TMP: '/tmp/.ansible/tmp'
           CONSENSUS_CLIENT: ${{ matrix.consensus }}
           DOCKERHUB_USERNAME: ethpandaops
           DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
