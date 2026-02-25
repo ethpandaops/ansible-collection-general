@@ -138,7 +138,7 @@
   tags: ["bootstrap_swap"]
   ansible.builtin.replace:
     path: /etc/fstab
-    regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
+    regexp: '^([^#].*?\sswap\s+(sw|defaults)\s+.*)$'
     replace: '# \1'
   when: bootstrap_swap_disable
   notify: Disable SWAP
