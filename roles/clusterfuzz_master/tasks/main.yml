@@ -1,0 +1,10 @@
+---
+# tasks file for clusterfuzz-master
+
+- name: Include cleanup tasks
+  ansible.builtin.import_tasks: cleanup.yml
+  when: clusterfuzz_master_cleanup | default(false) | bool
+
+- name: Include configure tasks
+  ansible.builtin.include_tasks: configure.yml
+  when: not clusterfuzz_master_cleanup | default(true) | bool
