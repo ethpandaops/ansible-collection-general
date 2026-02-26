@@ -1,0 +1,7 @@
+- name: Setup observoor
+  ansible.builtin.import_tasks: setup.yaml
+  when: not observoor_cleanup
+
+- name: Cleanup observoor
+  ansible.builtin.import_tasks: cleanup.yaml
+  when: observoor_cleanup
