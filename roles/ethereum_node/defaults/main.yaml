@@ -68,6 +68,9 @@ ethereum_node_metrics_exporter_enabled: false
 # Xatu sentry
 ethereum_node_xatu_sentry_enabled: false
 
+# Observoor
+ethereum_node_observoor_enabled: false
+
 # RPC/Beacon URL prefix
 ethereum_node_rpc_prefix: "rpc."
 ethereum_node_beacon_prefix: "bn."

@@ -72,6 +72,10 @@
   ansible.builtin.import_tasks: addons/blobber.yaml
   tags: [ethereum_node_blobber]
 
+- name: Configure observoor
+  ansible.builtin.import_tasks: addons/observoor.yaml
+  tags: [ethereum_node_observoor]
+
 - name: Configure Grafana Alloy
   ansible.builtin.import_tasks: addons/grafana_alloy.yaml
   tags: [ethereum_node_grafana_alloy]
