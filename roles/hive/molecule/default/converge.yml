@@ -17,10 +17,10 @@
           ansible.builtin.command:
             cmd: journalctl -u {{ hive_systemd_service_name }}
           changed_when: false
-          register: journalctl_logs
+          register: hive_journalctl_logs
         - name: Show logs
           ansible.builtin.debug:
             var: "{{ item }}"
           loop:
-            - journalctl_logs.stdout
-            - journalctl_logs.stderr
+            - hive_journalctl_logs.stdout
+            - hive_journalctl_logs.stderr

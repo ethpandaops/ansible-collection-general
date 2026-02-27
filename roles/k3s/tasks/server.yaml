@@ -54,7 +54,7 @@
 - name: Register node-token file access mode
   ansible.builtin.stat:
     path: "{{ k3s_server_location }}/server/node-token"
-  register: p
+  register: k3s_p
 
 - name: Change file access node-token
   ansible.builtin.file:
@@ -73,7 +73,7 @@
 - name: Restore node-token file access
   ansible.builtin.file:
     path: "{{ k3s_server_location }}/server/node-token"
-    mode: "{{ p.stat.mode }}"
+    mode: "{{ k3s_p.stat.mode }}"
 
 - name: Replace https://localhost:6443 by https://master-ip:6443
   ansible.builtin.command: >

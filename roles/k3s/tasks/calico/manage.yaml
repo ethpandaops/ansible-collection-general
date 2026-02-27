@@ -1,7 +1,7 @@
 ---
 # Backup tasks
 - name: Backup existing resources
-  when: legacy_calico_detected or calico_version_changed
+  when: k3s_legacy_calico_detected or k3s_calico_version_changed
   block:
     - name: Create backup directory
       ansible.builtin.file:
@@ -16,14 +16,14 @@
           {{ k3s_calico_backup_dir }}/installation-{{ ansible_date_time.iso8601 }}.yaml
       failed_when: false
       changed_when: true
-      when: legacy_install_check.rc == 0
+      when: k3s_legacy_install_check.rc == 0
 
     - name: Backup any NetworkPolicy objects
       ansible.builtin.shell:
         cmd: >-
           k3s kubectl get networkpolicies --all-namespaces -o yaml >
           {{ k3s_calico_backup_dir }}/networkpolicies-{{ ansible_date_time.iso8601 }}.yaml
-      when: network_policies_exist
+      when: k3s_network_policies_exist
       failed_when: false
       changed_when: true
 
@@ -34,17 +34,17 @@
           {{ k3s_calico_backup_dir }}/tigera-operator-{{ ansible_date_time.iso8601 }}.yaml
       failed_when: false
       changed_when: true
-      when: legacy_operator_check.rc == 0
+      when: k3s_legacy_operator_check.rc == 0
 
 # Uninstall tasks
 - name: Remove existing Calico deployment
-  when: calico_version_changed
+  when: k3s_calico_version_changed
   block:
     # Remove webhook configurations that might block uninstallation
     - name: Check for Rancher mutating webhook configurations
       ansible.builtin.command:
         cmd: "k3s kubectl get mutatingwebhookconfiguration rancher.cattle.io -o name"
-      register: rancher_mutating_webhook
+      register: k3s_rancher_mutating_webhook
       failed_when: false
       changed_when: false
 
@@ -52,13 +52,13 @@
       ansible.builtin.command:
         cmd: "k3s kubectl delete mutatingwebhookconfiguration rancher.cattle.io"
       failed_when: false
-      changed_when: rancher_mutating_webhook.rc == 0
-      when: rancher_mutating_webhook.rc == 0
+      changed_when: k3s_rancher_mutating_webhook.rc == 0
+      when: k3s_rancher_mutating_webhook.rc == 0
 
     - name: Check for Rancher validating webhook configurations
       ansible.builtin.command:
         cmd: "k3s kubectl get validatingwebhookconfiguration rancher.cattle.io -o name"
-      register: rancher_validating_webhook
+      register: k3s_rancher_validating_webhook
       failed_when: false
       changed_when: false
 
@@ -66,23 +66,23 @@
       ansible.builtin.command:
         cmd: "k3s kubectl delete validatingwebhookconfiguration rancher.cattle.io"
       failed_when: false
-      changed_when: rancher_validating_webhook.rc == 0
-      when: rancher_validating_webhook.rc == 0
+      changed_when: k3s_rancher_validating_webhook.rc == 0
+      when: k3s_rancher_validating_webhook.rc == 0
 
     - name: Check for other webhook configurations
       ansible.builtin.shell:
         cmd: >
           set -o pipefail && k3s kubectl get
           mutatingwebhookconfiguration,validatingwebhookconfiguration | grep -i calico | awk '{print $1}'
-      register: other_webhooks
+      register: k3s_other_webhooks
       failed_when: false
       changed_when: false
 
     - name: Delete any Calico-related webhook configurations
       ansible.builtin.command:
         cmd: "k3s kubectl delete {{ item }}"
-      with_items: "{{ other_webhooks.stdout_lines }}"
-      when: other_webhooks.stdout_lines | length > 0
+      with_items: "{{ k3s_other_webhooks.stdout_lines }}"
+      when: k3s_other_webhooks.stdout_lines | length > 0
       failed_when: false
       changed_when: true
 
@@ -91,48 +91,48 @@
       ansible.builtin.command:
         cmd: "k3s kubectl delete -f {{ k3s_calico_resources_file }}"
       failed_when: false
-      register: delete_custom_resources
-      changed_when: delete_custom_resources.rc == 0
+      register: k3s_delete_custom_resources
+      changed_when: k3s_delete_custom_resources.rc == 0
 
     - name: Remove existing installation directly
       ansible.builtin.command:
         cmd: "k3s kubectl delete installation default"
       failed_when: false
-      when: legacy_calico_detected
-      changed_when: legacy_calico_detected
+      when: k3s_legacy_calico_detected
+      changed_when: k3s_legacy_calico_detected
 
     - name: Remove existing apiserver directly
       ansible.builtin.command:
         cmd: "k3s kubectl delete apiserver default"
       failed_when: false
-      when: legacy_calico_detected
-      changed_when: legacy_calico_detected
+      when: k3s_legacy_calico_detected
+      changed_when: k3s_legacy_calico_detected
 
     - name: Remove existing operator
       ansible.builtin.command:
         cmd: "k3s kubectl delete -f {{ k3s_calico_operator_file }}"
       failed_when: false
-      when: delete_custom_resources is succeeded or delete_custom_resources is skipped
-      changed_when: delete_custom_resources is succeeded or delete_custom_resources is skipped
+      when: k3s_delete_custom_resources is succeeded or k3s_delete_custom_resources is skipped
+      changed_when: k3s_delete_custom_resources is succeeded or k3s_delete_custom_resources is skipped
 
     - name: Wait for Calico pods to be removed
       ansible.builtin.command:
         cmd: "k3s kubectl get pods -n calico-system -o name"
-      register: calico_pods
+      register: k3s_calico_pods
       retries: 30
       delay: 10
-      until: calico_pods.stdout | trim == ""
+      until: k3s_calico_pods.stdout | trim == ""
       failed_when: false
       changed_when: false
 
     # Handle stuck resources
     - name: Handle stuck resources (if any)
-      when: legacy_calico_detected
+      when: k3s_legacy_calico_detected
       block:
         - name: Check for finalizers that might be stuck
           ansible.builtin.command:
             cmd: "k3s kubectl get installation default -o yaml"
-          register: stuck_installation
+          register: k3s_stuck_installation
           failed_when: false
           changed_when: false
 
@@ -140,9 +140,9 @@
           ansible.builtin.command:
             cmd: >
               k3s kubectl patch installation default -p '{"metadata":{"finalizers":[]}}' --type=merge
-          when: stuck_installation.rc == 0
+          when: k3s_stuck_installation.rc == 0
           failed_when: false
-          changed_when: stuck_installation.rc == 0
+          changed_when: k3s_stuck_installation.rc == 0
 
 # Install/Update tasks
 - name: Download tigera-operator.yaml
@@ -152,49 +152,49 @@
     owner: root
     group: root
     mode: "0644"
-    force: "{{ calico_version_changed }}"
-  register: download_tigera_operator
-  when: operator_download_needed
+    force: "{{ k3s_calico_version_changed }}"
+  register: k3s_download_tigera_operator
+  when: k3s_operator_download_needed
 
 - name: Check if tigera-operator needs update
   ansible.builtin.command:
     cmd: bash -c '{{ k3s_resource_compare_script }}' -- "{{ k3s_calico_operator_file }}"
   environment:
     PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
-  register: operator_diff
+  register: k3s_operator_diff
   failed_when: false
   changed_when: false
-  when: not calico_version_changed
+  when: not k3s_calico_version_changed
 
 - name: Display tigera-operator diff result
   ansible.builtin.debug:
     msg:
-      - "Check result: {{ operator_diff.stdout_lines[0] | default('skipped') }}"
-      - "Changes detected: {{ operator_diff.rc | default(0) == 1 }}"
-      - "Calico version changed: {{ calico_version_changed }}"
-      - "Will apply operator: {{ calico_version_changed or (operator_diff.rc | default(0) == 1) }}"
-  when: operator_diff is not skipped or calico_version_changed
+      - "Check result: {{ k3s_operator_diff.stdout_lines[0] | default('skipped') }}"
+      - "Changes detected: {{ k3s_operator_diff.rc | default(0) == 1 }}"
+      - "Calico version changed: {{ k3s_calico_version_changed }}"
+      - "Will apply operator: {{ k3s_calico_version_changed or (k3s_operator_diff.rc | default(0) == 1) }}"
+  when: k3s_operator_diff is not skipped or k3s_calico_version_changed
 
 - name: Apply tigera-operator.yaml
   ansible.builtin.command:
     cmd: >
       k3s kubectl apply --server-side --force-conflicts -f {{ k3s_calico_operator_file }}
-  register: apply_tigera_operator
+  register: k3s_apply_tigera_operator
   retries: 5
   delay: 10
-  until: apply_tigera_operator is succeeded
-  changed_when: apply_tigera_operator.stdout is defined and apply_tigera_operator.stdout != ""
-  when: calico_version_changed or (operator_diff.rc | default(0) == 1)
+  until: k3s_apply_tigera_operator is succeeded
+  changed_when: k3s_apply_tigera_operator.stdout is defined and k3s_apply_tigera_operator.stdout != ""
+  when: k3s_calico_version_changed or (k3s_operator_diff.rc | default(0) == 1)
 
 - name: Wait for operator deployment to be ready
   ansible.builtin.command:
     cmd: "k3s kubectl -n tigera-operator wait --for=condition=available deployment/tigera-operator --timeout=300s"
-  register: wait_operator
+  register: k3s_wait_operator
   retries: 3
   delay: 10
-  until: wait_operator is succeeded
+  until: k3s_wait_operator is succeeded
   changed_when: false
-  when: apply_tigera_operator is not skipped
+  when: k3s_apply_tigera_operator is not skipped
 
 # Handle custom resources
 - name: Write custom resources to file
@@ -202,52 +202,52 @@
     dest: "{{ k3s_calico_resources_file }}"
     content: "{{ k3s_calico_custom_resources }}"
     mode: "0644"
-  when: custom_resources_defined
-  register: custom_resources_result
+  when: k3s_custom_resources_defined
+  register: k3s_custom_resources_result
 
 - name: Use default custom resources
-  when: not custom_resources_defined
+  when: not k3s_custom_resources_defined
   block:
     - name: Check if default resources should be used
       ansible.builtin.set_fact:
-        use_default_resources: true
-      when: not custom_resources_defined
+        k3s_use_default_resources: true
+      when: not k3s_custom_resources_defined
 
     - name: Write default custom resources to file
       ansible.builtin.copy:
         dest: "{{ k3s_calico_resources_file }}"
         content: "{{ k3s_calico_default_custom_resources | to_nice_yaml }}"
         mode: "0644"
-      when: use_default_resources
+      when: k3s_use_default_resources
 
 - name: Check if custom-resources needs update
   ansible.builtin.command:
     cmd: bash -c '{{ k3s_resource_compare_script }}' -- "{{ k3s_calico_resources_file }}"
   environment:
     PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
-  register: resources_diff
+  register: k3s_resources_diff
   failed_when: false
   changed_when: false
-  when: not calico_version_changed
+  when: not k3s_calico_version_changed
 
 - name: Display custom-resources diff result
   ansible.builtin.debug:
     msg:
-      - "Check result: {{ resources_diff.stdout_lines[0] | default('skipped') }}"
-      - "Changes detected: {{ resources_diff.rc | default(0) == 1 }}"
-      - "Calico version changed: {{ calico_version_changed }}"
-      - "Will apply resources: {{ calico_version_changed or (resources_diff.rc | default(0) == 1) }}"
-  when: resources_diff is not skipped or calico_version_changed
+      - "Check result: {{ k3s_resources_diff.stdout_lines[0] | default('skipped') }}"
+      - "Changes detected: {{ k3s_resources_diff.rc | default(0) == 1 }}"
+      - "Calico version changed: {{ k3s_calico_version_changed }}"
+      - "Will apply resources: {{ k3s_calico_version_changed or (k3s_resources_diff.rc | default(0) == 1) }}"
+  when: k3s_resources_diff is not skipped or k3s_calico_version_changed
 
 - name: Apply custom-resources.yaml
   ansible.builtin.command:
     cmd: >
       k3s kubectl apply --server-side --force-conflicts -f {{ k3s_calico_resources_file }}
-  register: apply_custom_resources
+  register: k3s_apply_custom_resources
   retries: 5
   delay: 10
-  until: apply_custom_resources is succeeded
-  changed_when: apply_custom_resources.stdout is defined and apply_custom_resources.stdout != ""
-  when: calico_version_changed or (resources_diff.rc | default(0) == 1)
+  until: k3s_apply_custom_resources is succeeded
+  changed_when: k3s_apply_custom_resources.stdout is defined and k3s_apply_custom_resources.stdout != ""
+  when: k3s_calico_version_changed or (k3s_resources_diff.rc | default(0) == 1)
 
 # Version will be saved after successful verification in main.yaml

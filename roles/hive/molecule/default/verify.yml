@@ -8,23 +8,23 @@
     - name: Get infos from web container
       community.docker.docker_container_info:
         name: "{{ hive_container_www_name }}"
-      register: result_container
+      register: hive_result_container
     - name: Show infos
       ansible.builtin.debug:
-        var: result_container
+        var: hive_result_container
     - name: Assert container results
       ansible.builtin.assert:
         that:
-          - "result_container.container.State.Running == true"
+          - "hive_result_container.container.State.Running == true"
     # Check if the systemd service is running
     - name: Get infos from systemd service
       ansible.builtin.service_facts:
-      register: result_service
+      register: hive_result_service
     - name: Show service infos
       ansible.builtin.debug:
-        var: result_service.ansible_facts.services[hive_systemd_service_name]
+        var: hive_result_service.ansible_facts.services[hive_systemd_service_name]
     - name: Assert service results
       ansible.builtin.assert:
         that:
-          - "result_service.ansible_facts.services[hive_systemd_service_name]['state'] == 'running'"
-          - "result_service.ansible_facts.services[hive_systemd_service_name]['status'] == 'enabled'"
+          - "hive_result_service.ansible_facts.services[hive_systemd_service_name]['state'] == 'running'"
+          - "hive_result_service.ansible_facts.services[hive_systemd_service_name]['status'] == 'enabled'"

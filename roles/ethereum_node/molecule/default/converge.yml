@@ -35,21 +35,21 @@
           ansible.builtin.command:
             cmd: docker logs {{ vars[ethereum_node_cl + '_container_name'] | default(ethereum_node_cl) }}
           changed_when: false
-          register: cl_logs
+          register: ethereum_node_cl_logs
         - name: Show CL client logs
           ansible.builtin.debug:
             var: "{{ item }}"
           loop:
-            - cl_logs.stdout
-            - cl_logs.stderr
+            - ethereum_node_cl_logs.stdout
+            - ethereum_node_cl_logs.stderr
         - name: Get EL client logs
           ansible.builtin.command:
             cmd: docker logs {{ vars[ethereum_node_el + '_container_name'] | default(ethereum_node_el) }}
           changed_when: false
-          register: el_logs
+          register: ethereum_node_el_logs
         - name: Show EL client logs
           ansible.builtin.debug:
             var: "{{ item }}"
           loop:
-            - el_logs.stdout
-            - el_logs.stderr
+            - ethereum_node_el_logs.stdout
+            - ethereum_node_el_logs.stderr

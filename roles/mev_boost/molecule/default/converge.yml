@@ -26,10 +26,10 @@
           ansible.builtin.command:
             cmd: docker logs {{ mev_boost_container_name }}
           changed_when: false
-          register: container_logs
+          register: mev_boost_container_logs
         - name: Show logs
           ansible.builtin.debug:
             var: "{{ item }}"
           loop:
-            - container_logs.stdout
-            - container_logs.stderr
+            - mev_boost_container_logs.stdout
+            - mev_boost_container_logs.stderr

@@ -20,8 +20,8 @@
       ansible.builtin.copy:
         content: |-
           {% for host in ((groups['ethereum_node'] + groups['bootnode']) | sort | unique)[:20] -%}
-          {% if hostvars[host]['ethereum_node_fact_el_enode'] is defined %}
-          {{ hostvars[host]['ethereum_node_fact_el_enode'] }}
+          {% if hostvars[host]['ethereum_node_fact_discovery_el_enode'] is defined %}
+          {{ hostvars[host]['ethereum_node_fact_discovery_el_enode'] }}
           {%- if not loop.last %}
 
           {% endif %}
@@ -40,8 +40,8 @@
           {% endif %}
           {% endfor %}
           {% for host in ((groups['ethereum_node'] + groups['bootnode']) | sort | unique)[:20] -%}
-          {% if hostvars[host]['ethereum_node_fact_cl_enr'] is defined %}
-          {{ hostvars[host]['ethereum_node_fact_cl_enr'] }}
+          {% if hostvars[host]['ethereum_node_fact_discovery_cl_enr'] is defined %}
+          {{ hostvars[host]['ethereum_node_fact_discovery_cl_enr'] }}
           {%- if not loop.last %}
 
           {% endif %}
@@ -60,8 +60,8 @@
           {% endif %}
           {% endfor %}
           {% for host in ((groups['ethereum_node'] + groups['bootnode']) | sort | unique)[:20] -%}
-          {% if hostvars[host]['ethereum_node_fact_cl_enr'] is defined %}
-          - {{ hostvars[host]['ethereum_node_fact_cl_enr'] }}
+          {% if hostvars[host]['ethereum_node_fact_discovery_cl_enr'] is defined %}
+          - {{ hostvars[host]['ethereum_node_fact_discovery_cl_enr'] }}
           {%- if not loop.last %}
 
           {% endif %}
