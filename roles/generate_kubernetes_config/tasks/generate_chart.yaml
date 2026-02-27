@@ -29,17 +29,17 @@
       {% endfor %}
   changed_when: false
   failed_when: false
-  register: chart_needs_update
+  register: generate_kubernetes_config_chart_needs_update
 
 - name: Run helm dependency update for {{ item.key }}
   ansible.builtin.command: # noqa: no-changed-when
     cmd: helm  dependency update {{ gen_kubernetes_config_default_output_dir }}/{{ item.key }}
-  when: chart_needs_update.rc != 0
+  when: generate_kubernetes_config_chart_needs_update.rc != 0
 
 - name: Run helm dependency build for {{ item.key }}
   ansible.builtin.command: # noqa: no-changed-when
     cmd: helm dependency build {{ gen_kubernetes_config_default_output_dir }}/{{ item.key }}
-  when: chart_needs_update.rc != 0
+  when: generate_kubernetes_config_chart_needs_update.rc != 0
 
 - name: Include client vars for {{ item.key }}
   ansible.builtin.include_vars:

@@ -3,7 +3,7 @@
 
 - name: Flag if systemd-resolved exists
   ansible.builtin.set_fact:
-    systemd_resolved_present: "{{ 'systemd-resolved.service' in ansible_facts.services }}"
+    dns_server_systemd_resolved_present: "{{ 'systemd-resolved.service' in ansible_facts.services }}"
 
 - name: Ensure DNSStubListener=no is set in resolved.conf
   ansible.builtin.lineinfile:
@@ -16,14 +16,14 @@
     mode: '0644'
   when:
     - dns_server_disable_systemd_resolved | bool
-    - systemd_resolved_present
+    - dns_server_systemd_resolved_present
   notify: Restart systemd-resolved
 
 - name: Immediately apply systemd-resolved changes
   ansible.builtin.meta: flush_handlers
   when:
     - dns_server_disable_systemd_resolved | bool
-    - systemd_resolved_present
+    - dns_server_systemd_resolved_present
 
 - name: Create directories
   ansible.builtin.file:
@@ -47,7 +47,7 @@
 - name: Check if TSIG key already exists
   ansible.builtin.stat:
     path: "{{ dns_server_tsig_keyfile }}"
-  register: tsig_key_stat
+  register: dns_server_tsig_key_stat
   when: dns_server_tsig_enabled | bool
 
 - name: Generate TSIG key using bind9 container (tsig-keygen)
@@ -66,7 +66,7 @@
       - "{{ dns_server_tsig_keysdir }}:/keys"
   when:
     - dns_server_tsig_enabled | bool
-    - not tsig_key_stat.stat.exists
+    - not dns_server_tsig_key_stat.stat.exists
 
 - name: Generate DNS zone serial
   ansible.builtin.set_fact:

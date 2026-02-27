@@ -4,14 +4,14 @@
 
 - name: Check if Docker is installed and running
   ansible.builtin.command: docker info
-  register: docker_check
+  register: kurtosis_docker_check
   changed_when: false
   failed_when: false
 
 - name: Fail if Docker is not installed or not running
   ansible.builtin.fail:
     msg: "Docker is required for Kurtosis but is not installed or not running. Please make sure Docker is installed and running."
-  when: docker_check.rc != 0
+  when: kurtosis_docker_check.rc != 0
 
 - name: Install Kurtosis CLI
   block:

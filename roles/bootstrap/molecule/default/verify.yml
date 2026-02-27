@@ -12,24 +12,24 @@
       ansible.builtin.command:
         cmd: whoami
       changed_when: false
-      register: whoami
+      register: bootstrap_whoami
     - name: Print whoami
       ansible.builtin.debug:
-        var: whoami.stdout
+        var: bootstrap_whoami.stdout
 
     # SSH key checks
     - name: Check authorized_keys
       ansible.builtin.command:
         cmd: cat ~/.ssh/authorized_keys
       changed_when: false
-      register: authorized_keys
+      register: bootstrap_authorized_keys
     - name: Print authorized_keys
       ansible.builtin.debug:
-        var: authorized_keys.stdout
+        var: bootstrap_authorized_keys.stdout
     - name: Assert SSH keys are present
       ansible.builtin.assert:
         that:
-          - authorized_keys.stdout | length > 0
+          - bootstrap_authorized_keys.stdout | length > 0
         fail_msg: "SSH keys are not present"
 
     # NTP checks
@@ -37,17 +37,17 @@
       ansible.builtin.command:
         cmd: cat /etc/chrony/sources.d/local-ntp-server.sources
       changed_when: false
-      register: chrony_sources
+      register: bootstrap_chrony_sources
     - name: Print chrony sources
       ansible.builtin.debug:
-        var: chrony_sources.stdout
+        var: bootstrap_chrony_sources.stdout
     - name: Check chrony tracking
       ansible.builtin.command:
         cmd: chronyc tracking
       changed_when: false
-      register: chrony_tracking
+      register: bootstrap_chrony_tracking
     - name: Assert system clock is synchronized
       ansible.builtin.assert:
         that:
-          - chrony_tracking.stdout | regex_search('^System clock synchronized: yes$')
+          - bootstrap_chrony_tracking.stdout | regex_search('^System clock synchronized: yes$')
         fail_msg: "Chrony is not synchronized"

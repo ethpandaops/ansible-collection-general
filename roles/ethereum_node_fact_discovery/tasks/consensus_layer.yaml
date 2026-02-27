@@ -9,13 +9,13 @@
 
 - name: Set consensus node facts
   ansible.builtin.set_fact:
-    ethereum_node_fact_cl_enr: "{{ (ethereum_node_fact_discovery_beacon_node_identity.content | from_json)['data']['enr'] }}"
-    ethereum_node_fact_cl_peer_id: "{{ (ethereum_node_fact_discovery_beacon_node_identity.content | from_json)['data']['peer_id'] }}"
+    ethereum_node_fact_discovery_cl_enr: "{{ (ethereum_node_fact_discovery_beacon_node_identity.content | from_json)['data']['enr'] }}"
+    ethereum_node_fact_discovery_cl_peer_id: "{{ (ethereum_node_fact_discovery_beacon_node_identity.content | from_json)['data']['peer_id'] }}"
     cacheable: true
 
 - name: Show consensus node facts
   ansible.builtin.debug:
     var: "{{ item }}"
   loop:
-    - ethereum_node_fact_cl_enr
-    - ethereum_node_fact_cl_peer_id
+    - ethereum_node_fact_discovery_cl_enr
+    - ethereum_node_fact_discovery_cl_peer_id

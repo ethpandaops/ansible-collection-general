@@ -3,94 +3,94 @@
 
 - name: Set per-zone paths
   ansible.builtin.set_fact:
-    zone_name: "{{ zone_item.zone }}"
-    dest_zone: "{{ dns_server_zonesdir }}/{{ zone_item.zone }}"
-    stage_zone: "{{ dns_server_zonesdir }}/{{ zone_item.zone }}.staged"
+    dns_server_zone_name: "{{ zone_item.zone }}"
+    dns_server_dest_zone: "{{ dns_server_zonesdir }}/{{ zone_item.zone }}"
+    dns_server_stage_zone: "{{ dns_server_zonesdir }}/{{ zone_item.zone }}.staged"
 
 - name: Write staged zone (original Ansible content)
   ansible.builtin.copy:
     content: "{{ zone_item.content }}"
-    dest: "{{ stage_zone }}"
+    dest: "{{ dns_server_stage_zone }}"
     owner: "{{ dns_server_uid }}"
     group: "{{ dns_server_uid }}"
     mode: "0644"
-  register: staged_copy
+  register: dns_server_staged_copy
 
 - name: Check if zone was changed
   ansible.builtin.set_fact:
-    need_zone_update: "{{ staged_copy.changed }}"
+    dns_server_need_zone_update: "{{ dns_server_staged_copy.changed }}"
 
 # Check whether the productive zone exists
 - name: Stat productive zone file
   ansible.builtin.stat:
-    path: "{{ dest_zone }}"
-  register: dest_zone_stat
-  when: need_zone_update
+    path: "{{ dns_server_dest_zone }}"
+  register: dns_server_dest_zone_stat
+  when: dns_server_need_zone_update
 
 - name: Slurp existing productive zone (if present)
   ansible.builtin.slurp:
-    path: "{{ dest_zone }}"
-  register: existing_zone_b64
+    path: "{{ dns_server_dest_zone }}"
+  register: dns_server_existing_zone_b64
   ignore_errors: true
-  when: need_zone_update and dest_zone_stat.stat.exists
+  when: dns_server_need_zone_update and dns_server_dest_zone_stat.stat.exists
 
 - name: Slurp staged zone
   ansible.builtin.slurp:
-    path: "{{ stage_zone }}"
-  register: staged_zone_b64
-  when: need_zone_update
+    path: "{{ dns_server_stage_zone }}"
+  register: dns_server_staged_zone_b64
+  when: dns_server_need_zone_update
 
 - name: Decode zone contents
   ansible.builtin.set_fact:
-    existing_zone_content: "{{ (existing_zone_b64.content | default('') | b64decode) | default('') }}"
-    staged_zone_content: "{{ (staged_zone_b64.content | b64decode) }}"
-  when: need_zone_update
+    dns_server_existing_zone_content: "{{ (dns_server_existing_zone_b64.content | default('') | b64decode) | default('') }}"
+    dns_server_staged_zone_content: "{{ (dns_server_staged_zone_b64.content | b64decode) }}"
+  when: dns_server_need_zone_update
 
 - name: Extract current serial from existing zone
   ansible.builtin.set_fact:
-    existing_serial: >-
+    dns_server_existing_serial: >-
       {{
-        ((existing_zone_content
+        ((dns_server_existing_zone_content
          | regex_search('(?i)\(\s*(\d+)\s*;\s*Serial', '\1'))
          | default(['0'], true))
          | first
       }}
-  when: need_zone_update
+  when: dns_server_need_zone_update
 
 - name: Compute next serial (monotonic)
   ansible.builtin.set_fact:
-    next_serial: >-
+    dns_server_next_serial: >-
       {{
         [
-          (existing_serial | int) + 1,
+          (dns_server_existing_serial | int) + 1,
           (dns_server_serial_min_base | int)
         ] | max
       }}
-  when: need_zone_update
+  when: dns_server_need_zone_update
 
 - name: Build final productive zone content (with correct serial)
   ansible.builtin.set_fact:
-    final_zone_content: >-
+    dns_server_final_zone_content: >-
       {{
-        staged_zone_content
-        | regex_replace('(?mi)^\s*\d+(?=\s*;\s*Serial)', next_serial|string)
+        dns_server_staged_zone_content
+        | regex_replace('(?mi)^\s*\d+(?=\s*;\s*Serial)', dns_server_next_serial|string)
       }}
-  when: need_zone_update
+  when: dns_server_need_zone_update
 
 - name: Show zone update details
   ansible.builtin.debug:
     msg:
-      - "zone name:  {{ zone_name }}"
-      - "old serial: {{ existing_serial }}"
-      - "new serial: {{ next_serial }}"
-  when: need_zone_update
+      - "zone name:  {{ dns_server_zone_name }}"
+      - "old serial: {{ dns_server_existing_serial }}"
+      - "new serial: {{ dns_server_next_serial }}"
+  when: dns_server_need_zone_update
 
 - name: Install productive zone when changed or missing
   ansible.builtin.copy:
-    content: "{{ final_zone_content }}"
-    dest: "{{ dest_zone }}"
+    content: "{{ dns_server_final_zone_content }}"
+    dest: "{{ dns_server_dest_zone }}"
     owner: "{{ dns_server_uid }}"
     group: "{{ dns_server_uid }}"
     mode: "0644"
-  when: need_zone_update
+  when: dns_server_need_zone_update
   notify: Reload DNS server container

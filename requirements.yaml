@@ -1,17 +1,17 @@
 collections:
   - name: community.docker
-    version: "3.12.1"
+    version: "5.0.6"
   - name: ansible.posix
-    version: "1.5.4"
+    version: "2.1.0"
   - name: community.general
-    version: "6.6.9"
+    version: "12.4.0"
 
 roles:
   - name: geerlingguy.docker
-    version: "6.0.3"
+    version: "8.0.0"
   - src: geerlingguy.pip
-    version: "2.2.0"
+    version: "3.1.2"
   - name: gantsign.oh-my-zsh
-    version: "2.4.0"
+    version: "2.7.0"
   - name: gantsign.golang
-    version: "3.4.0"
+    version: "3.5.0"
