@@ -1,0 +1,7 @@
+- name: Remove ethrex containers
+  community.docker.docker_container:
+    name: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ ethrex_container_name }}"
+    - "{{ ethrex_container_name }}-init"
