@@ -1,0 +1,8 @@
+roles/k3s/files/k3s-killall.sh shellcheck!skip
+roles/k3s/files/k3s-uninstall.sh shellcheck!skip
+roles/traffic_control/templates/script-down.sh.j2 shebang
+roles/traffic_control/templates/script-up.sh.j2 shebang
+roles/hive/templates/cleanup.sh.j2 shebang
+roles/hive/templates/start.sh.j2 shebang
+roles/hive/templates/helpers.sh.j2 shebang
+roles/snapshot_fetcher/templates/download_snapshot.sh.j2 shebang
