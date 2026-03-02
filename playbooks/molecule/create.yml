@@ -7,7 +7,7 @@
         hostname: "{{ item }}"
         name: "{{ item }}"
         image: "{{ hostvars[item]['container_image'] }}"
-        command: "{{ hostvars[item]['container_command'] | default('sleep 1d') }}"
+        command: "{{ hostvars[item]['container_command'] | default(omit) }}"
         privileged: "{{ hostvars[item]['container_privileged'] | default(false) }}"
         volumes: "{{ hostvars[item]['container_volumes'] | default(omit) }}"
         systemd: "{{ hostvars[item]['container_systemd'] | default(false) }}"
@@ -29,4 +29,6 @@
       ansible.builtin.wait_for_connection:
         timeout: 30
       delegate_to: "{{ item }}"
+      vars:
+        ansible_user: root
       loop: "{{ groups['molecule'] }}"
