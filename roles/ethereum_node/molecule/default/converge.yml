@@ -14,12 +14,14 @@
         - name: Install docker
           ansible.builtin.import_role:
             name: geerlingguy.docker
+
         - name: Install pip and docker pkg
           ansible.builtin.import_role:
             name: geerlingguy.pip
           vars:
             pip_install_packages:
               - name: docker
+                extra_args: --break-system-packages
         - name: Login to dockerhub
           community.docker.docker_login:
             username: "{{ DOCKERHUB_USERNAME }}"
