@@ -1,0 +1,19 @@
+- name: Destroy container instances
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Get info for all containers
+      containers.podman.podman_container_info:
+        name: "{{ item }}"
+      loop: "{{ groups['molecule'] }}"
+      register: podman_infos # noqa: var-naming[no-role-prefix]
+
+    - name: Stop and remove containers
+      containers.podman.podman_container:
+        name: "{{ item.item }}"
+        state: absent
+      loop: "{{ podman_infos.results }}"
+      loop_control:
+        label: "{{ item.item }}"
+      when:
+        - item.containers | length > 0

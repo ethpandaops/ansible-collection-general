@@ -1,5 +1,5 @@
 - name: Prepare
-  hosts: all
+  hosts: molecule
   become: true
   pre_tasks:
     - name: Update apt cache

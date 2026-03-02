@@ -1,12 +1,12 @@
 - name: Verify
-  hosts: all
+  hosts: molecule
   tasks:
     - name: Get infos on EL container
       community.docker.docker_container_info:
         name: "blockscout"
-      register: result_blockscout
+      register: blockscout_result
     - name: Show infos
       ansible.builtin.debug:
         var: "{{ item }}"
       loop:
-        - result_blockscout
+        - blockscout_result

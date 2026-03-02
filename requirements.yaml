@@ -5,6 +5,8 @@ collections:
     version: "2.1.0"
   - name: community.general
     version: "12.4.0"
+  - name: containers.podman
+    version: ">=1.10.0"
 
 roles:
   - name: geerlingguy.docker
