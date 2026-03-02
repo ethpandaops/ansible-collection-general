@@ -32,7 +32,7 @@
         env: "{{ prysm_container_env }}"
         networks: "{{ prysm_container_networks }}"
         tty: "{{ prysm_container_tty }}"
-        entrypoint: "{{ prysm_container_entrypoint }}"
+        entrypoint: "{{ prysm_container_entrypoint | default(omit) }}"
         command: >-
           {{
             prysm_container_command +
@@ -85,7 +85,7 @@
         env: "{{ prysm_validator_container_env }}"
         networks: "{{ prysm_validator_container_networks }}"
         tty: "{{ prysm_validator_container_tty }}"
-        entrypoint: "{{ prysm_validator_container_entrypoint }}"
+        entrypoint: "{{ prysm_validator_container_entrypoint | default(omit) }}"
         command: >-
           {{
             prysm_validator_container_command +

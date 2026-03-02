@@ -16,6 +16,7 @@ ethrex_ipv6_enabled: false
 ethrex_container_name: ethrex
 ethrex_container_image: ghcr.io/lambdaclass/ethrex:latest
 ethrex_container_env: {}
+# ethrex_container_entrypoint:
 ethrex_container_ports_ipv4:
   - "127.0.0.1:{{ ethrex_ports_http_rpc }}:{{ ethrex_ports_http_rpc }}"
   - "127.0.0.1:{{ ethrex_ports_engine }}:{{ ethrex_ports_engine }}"

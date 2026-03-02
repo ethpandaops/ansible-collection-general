@@ -30,6 +30,7 @@ teku_validator_datadir: /data/teku-validator
 teku_container_name: teku
 teku_container_image: consensys/teku:latest
 teku_container_env: {}
+# teku_container_entrypoint:
 teku_container_ports_ipv4:
   - "127.0.0.1:{{ teku_ports_http_beacon }}:{{ teku_ports_http_beacon }}"
   - "127.0.0.1:{{ teku_ports_metrics }}:{{ teku_ports_metrics }}"
