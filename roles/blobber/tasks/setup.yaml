@@ -49,6 +49,6 @@
     env: "{{ blobber_container_env }}"
     networks: "{{ blobber_container_networks }}"
     ports: "{{ blobber_container_ports }}"
-    command: "{{ blobber_container_command + blobber_container_command_extra_args }} "
+    command: "{{ blobber_container_command + blobber_container_command_extra_args }}"
     user: "{{ blobber_user_meta.uid }}"
     pull: "{{ blobber_container_pull | bool }}"

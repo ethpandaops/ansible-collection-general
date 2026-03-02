@@ -14,5 +14,5 @@
     env: "{{ json_rpc_snooper_container_env }}"
     networks: "{{ json_rpc_snooper_container_networks }}"
     ports: "{{ json_rpc_snooper_container_ports }}"
-    command: "{{ json_rpc_snooper_container_command + json_rpc_snooper_container_command_extra_args }} "
+    command: "{{ json_rpc_snooper_container_command + json_rpc_snooper_container_command_extra_args }}"
     user: "{{ json_rpc_snooper_user_meta.uid }}"
