@@ -19,27 +19,28 @@
 
     - name: Check if Docker is rootless
       ansible.builtin.command: docker info -f '{{ "{{json .SecurityOptions}}" }}'
-      register: docker_secopts
+      register: ethereum_genesis_docker_secopts
       changed_when: false
 
     - name: Set rootless fact
       ansible.builtin.set_fact:
-        docker_is_rootless: "{{ 'name=rootless' in docker_secopts.stdout }}"
+        ethereum_genesis_docker_is_rootless: "{{ 'name=rootless' in ethereum_genesis_docker_secopts.stdout }}"
 
     - name: Compute docker user flag
       ansible.builtin.set_fact:
-        docker_user_flag: "{{ docker_is_rootless | ternary('', '-u ' ~ (ansible_effective_user_id | default(ansible_uid, true))) }}"
+        ethereum_genesis_docker_user_flag: >-
+          {{ ethereum_genesis_docker_is_rootless | ternary('', '-u ' ~ (ansible_effective_user_id | default(ansible_uid, true))) }}
 
     - name: Set docker platform based on architecture
       ansible.builtin.set_fact:
-        docker_platform: "{{ 'linux/arm64' if ansible_architecture == 'aarch64' or ansible_architecture == 'arm64' else 'linux/amd64' }}"
+        ethereum_genesis_docker_platform: "{{ 'linux/arm64' if ansible_architecture == 'aarch64' or ansible_architecture == 'arm64' else 'linux/amd64' }}"
 
     - name: Create validator keys
       loop: "{{ ethereum_genesis_validator_keyranges | dict2items }}"
       ansible.builtin.shell: >
-        docker run --rm -t {{ docker_user_flag }}
+        docker run --rm -t {{ ethereum_genesis_docker_user_flag }}
         --entrypoint eth2-val-tools
-        --platform {{ docker_platform }}
+        --platform {{ ethereum_genesis_docker_platform }}
         -v {{ ethereum_genesis_validator_keys_output_dir }}:/output
         {{ ethereum_genesis_generator_container_image }}
         keystores
@@ -62,9 +63,9 @@
         fork_version: >-
           {{ '%#x' % (lookup('file', ethereum_genesis_generator_output_dir + '/metadata/config.yaml') | from_yaml).GENESIS_FORK_VERSION }}
       ansible.builtin.shell: >
-        docker run --rm -t {{ docker_user_flag }}
+        docker run --rm -t {{ ethereum_genesis_docker_user_flag }}
         --entrypoint eth2-val-tools
-        --platform {{ docker_platform }}
+        --platform {{ ethereum_genesis_docker_platform }}
         -v {{ ethereum_genesis_validator_keys_output_dir }}:/output
         {{ ethereum_genesis_generator_container_image }}
         bls-address-change

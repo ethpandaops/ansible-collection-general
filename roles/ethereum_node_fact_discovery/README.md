@@ -15,9 +15,9 @@ Default variables are defined in [defaults/main.yaml](defaults/main.yaml)
 
 The following facts can be discovered and set when using this role:
 
-- `ethereum_node_fact_el_enode` - Execution client enode
-- `ethereum_node_fact_cl_enr` - Consenus client ENR
-- `ethereum_node_fact_cl_peer_id` - Consensus client peer id
+- `ethereum_node_fact_discovery_el_enode` - Execution client enode
+- `ethereum_node_fact_discovery_cl_enr` - Consenus client ENR
+- `ethereum_node_fact_discovery_cl_peer_id` - Consensus client peer id
 
 ## Dependencies
 
