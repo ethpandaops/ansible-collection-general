@@ -4,3 +4,5 @@ ansible_user: devops
 bootstrap_hostname_set: false
 # Fix: due to SSH server not being installed
 bootstrap_harden_sshd_config: false
+# Fix: chrony fails in rootless podman containers (adjtimex syscall blocked)
+bootstrap_ntp_enabled: false
