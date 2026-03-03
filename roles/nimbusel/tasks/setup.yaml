@@ -28,7 +28,7 @@
     volumes: "{{ nimbusel_container_volumes }}"
     env: "{{ nimbusel_container_env }}"
     networks: "{{ nimbusel_container_networks }}"
-    entrypoint: "{{ nimbusel_container_entrypoint }}"
+    entrypoint: "{{ nimbusel_container_entrypoint | default(omit) }}"
     command: "{{ nimbusel_container_command + nimbusel_container_command_extra_args }}"
     user: "{{ nimbusel_user_meta.uid }}"
     pull: "{{ nimbusel_container_pull | bool }}"

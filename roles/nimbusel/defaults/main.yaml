@@ -45,12 +45,10 @@ nimbusel_container_security_opts: []
 # nimbusel_container_cpu_shares:
 # nimbusel_container_cpu_quota:
 # nimbusel_container_cpu_period:
-nimbusel_container_entrypoint:
-  - nimbus
-  - executionClient
 nimbusel_container_stop_timeout: "300"
 nimbusel_container_networks: []
 nimbusel_container_command_default:
+  - executionClient
   - --log-level=INFO
   - --data-dir=/data
   - --net-key=/data/nodekey
