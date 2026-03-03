@@ -23,5 +23,5 @@
     volumes: "{{ arbitrum_node_container_volumes }}"
     env: "{{ arbitrum_node_container_env }}"
     networks: "{{ arbitrum_node_container_networks }}"
-    command: "{{ arbitrum_node_container_command }} "
+    command: "{{ arbitrum_node_container_command }}"
     security_opts: "{{ arbitrum_node_container_security_opts }}"

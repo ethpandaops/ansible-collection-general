@@ -22,9 +22,9 @@
       changed_when: false
       failed_when: (ethereum_node_fact_discovery_el_pubkey.rc != 0) or (ethereum_node_fact_discovery_el_pubkey.stdout == "")
 
-    - name: Store enode var "ethereum_node_fact_el_enode"
+    - name: Store enode var "ethereum_node_fact_discovery_el_enode"
       ansible.builtin.set_fact:
-        ethereum_node_fact_el_enode: enode://{{ ethereum_node_fact_discovery_el_pubkey.stdout }}@{{ ansible_host }}:{{ ethereum_node_el_ports_p2p_tcp }}?discport={{ ethereum_node_el_ports_p2p_udp }} # noqa yaml[line-length]
+        ethereum_node_fact_discovery_el_enode: enode://{{ ethereum_node_fact_discovery_el_pubkey.stdout }}@{{ ansible_host }}:{{ ethereum_node_el_ports_p2p_tcp }}?discport={{ ethereum_node_el_ports_p2p_udp }} # noqa yaml[line-length]
         cacheable: true
 
 - name: Handle EthereumJS enode
@@ -38,13 +38,13 @@
       retries: "{{ ethereum_node_fact_discovery_el_retries }}"
       delay: "{{ ethereum_node_fact_discovery_el_delay }}"
 
-    - name: Store enode var "ethereum_node_fact_el_enode"
+    - name: Store enode var "ethereum_node_fact_discovery_el_enode"
       ansible.builtin.set_fact:
-        ethereum_node_fact_el_enode: "{{ ethereum_node_fact_discovery_el_enode.stdout }}"
+        ethereum_node_fact_discovery_el_enode: "{{ ethereum_node_fact_discovery_el_enode.stdout }}"
         cacheable: true
 
 - name: Show execution node facts
   ansible.builtin.debug:
     var: "{{ item }}"
   loop:
-    - ethereum_node_fact_el_enode
+    - ethereum_node_fact_discovery_el_enode

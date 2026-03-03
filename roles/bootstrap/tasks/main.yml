@@ -120,6 +120,19 @@
       ansible.builtin.service:
         name: chrony
         state: started
+      register: bootstrap_chrony_start
+      ignore_errors: true
+
+    - name: Get chrony service logs on failure
+      ansible.builtin.command:
+        cmd: journalctl -xeu chrony.service --no-pager
+      changed_when: false
+      when: bootstrap_chrony_start is failed
+
+    - name: Fail if chrony did not start
+      ansible.builtin.fail:
+        msg: "{{ bootstrap_chrony_start.msg }}"
+      when: bootstrap_chrony_start is failed
 
     - name: Configure chrony sources
       ansible.builtin.copy:
@@ -138,7 +151,7 @@
   tags: ["bootstrap_swap"]
   ansible.builtin.replace:
     path: /etc/fstab
-    regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
+    regexp: '^([^#].*?\sswap\s+(sw|defaults)\s+.*)$'
     replace: '# \1'
   when: bootstrap_swap_disable
   notify: Disable SWAP

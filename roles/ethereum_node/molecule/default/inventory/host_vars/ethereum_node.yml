@@ -1,0 +1,8 @@
+ethereum_node_cl: "{{ lookup('env', 'CONSENSUS_CLIENT') | default('lighthouse', true) }}"
+ethereum_node_el: "{{ lookup('env', 'EXECUTION_CLIENT') | default('geth', true) }}"
+DOCKERHUB_USERNAME: "{{ lookup('env', 'DOCKERHUB_USERNAME') | default('', true) }}" # noqa: var-naming[pattern]
+DOCKERHUB_PASSWORD: "{{ lookup('env', 'DOCKERHUB_PASSWORD') | default('', true) }}" # noqa: var-naming[pattern]
+# Add additional vars here if you're manually testing a feature:
+# ethereum_node_external_builder_enabled: true
+# ethereum_node_external_builder_type: mev_boost
+lighthouse_container_image: ethpandaops/lighthouse:stable # noqa: var-naming[no-role-prefix]

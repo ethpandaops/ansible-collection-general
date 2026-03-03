@@ -1,0 +1,4 @@
+---
+# Role specific variables
+hive_systemd_service_name: hive.service
+hive_container_www_name: nginx-hive

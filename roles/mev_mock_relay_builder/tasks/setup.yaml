@@ -15,5 +15,5 @@
     env: "{{ mev_mock_relay_builder_container_env }}"
     networks: "{{ mev_mock_relay_builder_container_networks }}"
     ports: "{{ mev_mock_relay_builder_container_ports }}"
-    command: "{{ mev_mock_relay_builder_container_command + mev_mock_relay_builder_container_command_extra_args }} "
+    command: "{{ mev_mock_relay_builder_container_command + mev_mock_relay_builder_container_command_extra_args }}"
     user: "{{ mev_mock_relay_builder_user_meta.uid }}"
