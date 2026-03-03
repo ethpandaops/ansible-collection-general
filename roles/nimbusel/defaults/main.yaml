@@ -16,6 +16,7 @@ nimbusel_ipv6_enabled: false
 nimbusel_container_name: nimbusel
 nimbusel_container_image: ethpandaops/nimbus-eth1:master
 nimbusel_container_env: {}
+# nimbusel_container_entrypoint:
 nimbusel_container_ports_ipv4:
   - "127.0.0.1:{{ nimbusel_ports_http_rpc }}:{{ nimbusel_ports_http_rpc }}"
   - "127.0.0.1:{{ nimbusel_ports_engine }}:{{ nimbusel_ports_engine }}"

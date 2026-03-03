@@ -30,141 +30,141 @@
       EOF
   args:
     executable: /bin/bash
-  register: pod_creation
+  register: k3s_pod_creation
   changed_when: true
   failed_when: false
 
 - name: Display pod creation result
   ansible.builtin.debug:
     msg:
-      - "Pod creation output: {{ pod_creation.stdout | default('No output') }}"
-      - "Pod creation stderr: {{ pod_creation.stderr | default('No errors') }}"
-      - "Return code: {{ pod_creation.rc }}"
+      - "Pod creation output: {{ k3s_pod_creation.stdout | default('No output') }}"
+      - "Pod creation stderr: {{ k3s_pod_creation.stderr | default('No errors') }}"
+      - "Return code: {{ k3s_pod_creation.rc }}"
 
 - name: List all pods in calico-test namespace
   ansible.builtin.command:
     cmd: "k3s kubectl get pods -n calico-test -o wide"
-  register: test_namespace_pods
+  register: k3s_test_namespace_pods
   failed_when: false
   changed_when: false
 
 - name: Show pods in test namespace
   ansible.builtin.debug:
-    msg: "{{ test_namespace_pods.stdout }}"
+    msg: "{{ k3s_test_namespace_pods.stdout }}"
 
 - name: Wait for test pod to be ready
   ansible.builtin.command:
     cmd: "k3s kubectl -n calico-test wait --for=condition=Ready pod/calico-test-pod --timeout=120s"
-  register: test_pod_ready
+  register: k3s_test_pod_ready
   retries: 5
   delay: 15
-  until: test_pod_ready is succeeded
+  until: k3s_test_pod_ready is succeeded
   failed_when: false
   changed_when: false
 
 - name: Get test pod detailed status
   ansible.builtin.command:
     cmd: "k3s kubectl -n calico-test get pod calico-test-pod -o yaml"
-  register: test_pod_details
+  register: k3s_test_pod_details
   failed_when: false
   changed_when: false
 
 - name: Display test pod details
   ansible.builtin.debug:
     msg:
-      - "Pod Ready: {{ test_pod_ready is succeeded }}"
-      - "Pod Status: {{ (test_pod_details.stdout | from_yaml).status.phase | default('Unknown') }}"
-      - "Pod IP: {{ (test_pod_details.stdout | from_yaml).status.podIP | default('Not assigned') }}"
-      - "Container Statuses: {{ (test_pod_details.stdout | from_yaml).status.containerStatuses | default([]) | map(attribute='ready') | list }}"
+      - "Pod Ready: {{ k3s_test_pod_ready is succeeded }}"
+      - "Pod Status: {{ (k3s_test_pod_details.stdout | from_yaml).status.phase | default('Unknown') }}"
+      - "Pod IP: {{ (k3s_test_pod_details.stdout | from_yaml).status.podIP | default('Not assigned') }}"
+      - "Container Statuses: {{ (k3s_test_pod_details.stdout | from_yaml).status.containerStatuses | default([]) | map(attribute='ready') | list }}"
 
 - name: Check if pod exists and get IP (with retries)
   ansible.builtin.command:
     cmd: "k3s kubectl -n calico-test get pod calico-test-pod -o jsonpath='{.status.podIP}'"
-  register: pod_ip
-  until: pod_ip.stdout | length > 0 and pod_ip.stdout != "<none>"
+  register: k3s_pod_ip
+  until: k3s_pod_ip.stdout | length > 0 and k3s_pod_ip.stdout != "<none>"
   retries: 12
   delay: 5
   failed_when: false
   changed_when: false
-  when: test_pod_ready is succeeded
+  when: k3s_test_pod_ready is succeeded
 
 - name: Verify pod has valid IP address format
   ansible.builtin.assert:
     that:
-      - pod_ip.stdout | length > 0
-      - pod_ip.stdout | regex_search('^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
-    msg: "Pod did not receive a valid IP address from CNI (got: {{ pod_ip.stdout | default('empty') }})"
-  when: test_pod_ready is succeeded
+      - k3s_pod_ip.stdout | length > 0
+      - k3s_pod_ip.stdout | regex_search('^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
+    msg: "Pod did not receive a valid IP address from CNI (got: {{ k3s_pod_ip.stdout | default('empty') }})"
+  when: k3s_test_pod_ready is succeeded
   ignore_errors: "{{ k3s_calico_ignore_test_failures | default(false) }}"
-  register: ip_verification
+  register: k3s_ip_verification
 
 - name: Display pod details
   ansible.builtin.command:
     cmd: "k3s kubectl -n calico-test get pod calico-test-pod -o wide"
-  register: pod_status
+  register: k3s_pod_status
   failed_when: false
   changed_when: false
 
 - name: Show pod details
   ansible.builtin.debug:
-    msg: "{{ pod_status.stdout }}"
-  when: pod_status is succeeded
+    msg: "{{ k3s_pod_status.stdout }}"
+  when: k3s_pod_status is succeeded
 
 - name: Get pod events for debugging (if IP assignment failed)
   ansible.builtin.command:
     cmd: "k3s kubectl -n calico-test describe pod calico-test-pod | grep -A 10 Events"
-  register: pod_events
+  register: k3s_pod_events
   failed_when: false
   changed_when: false
-  when: pod_ip.stdout | length == 0 or ip_verification is failed
+  when: k3s_pod_ip.stdout | length == 0 or k3s_ip_verification is failed
 
 - name: Show pod events
   ansible.builtin.debug:
-    msg: "{{ pod_events.stdout_lines }}"
-  when: pod_events is not skipped
+    msg: "{{ k3s_pod_events.stdout_lines }}"
+  when: k3s_pod_events is not skipped
 
 - name: Check Calico node status (if IP assignment failed)
   ansible.builtin.command:
     cmd: "k3s kubectl -n calico-system get pods -l k8s-app=calico-node -o wide"
-  register: calico_node_status
+  register: k3s_calico_node_status
   failed_when: false
   changed_when: false
-  when: pod_ip.stdout | length == 0 or ip_verification is failed
+  when: k3s_pod_ip.stdout | length == 0 or k3s_ip_verification is failed
 
 - name: Show Calico node status
   ansible.builtin.debug:
-    msg: "{{ calico_node_status.stdout }}"
-  when: calico_node_status is not skipped
+    msg: "{{ k3s_calico_node_status.stdout }}"
+  when: k3s_calico_node_status is not skipped
 
 # Test network connectivity
 - name: Test network connectivity from pod
   ansible.builtin.command:
     cmd: "k3s kubectl -n calico-test exec calico-test-pod -- ping -c 3 8.8.8.8"
-  register: ping_test
+  register: k3s_ping_test
   failed_when: false
   changed_when: false
 
 - name: Display connectivity test result
   ansible.builtin.debug:
-    msg: "External connectivity test: {{ 'Success' if ping_test.rc == 0 else 'Failed - check network policies and NAT settings' }}"
+    msg: "External connectivity test: {{ 'Success' if k3s_ping_test.rc == 0 else 'Failed - check network policies and NAT settings' }}"
 
 
 # Set test status
 - name: Set CNI test status fact
   ansible.builtin.set_fact:
-    k3s_cni_tests_completed: "{{ ip_verification is succeeded | default(false) }}"
-    cni_test_results:
-      pod_creation: "{{ test_pod_ready is succeeded }}"
-      pod_ip_assigned: "{{ pod_ip.stdout | length > 0 }}"
-      external_connectivity: "{{ ping_test.rc == 0 }}"
+    k3s_cni_tests_completed: "{{ k3s_ip_verification is succeeded | default(false) }}"
+    k3s_cni_test_results:
+      pod_creation: "{{ k3s_test_pod_ready is succeeded }}"
+      pod_ip_assigned: "{{ k3s_pod_ip.stdout | length > 0 }}"
+      external_connectivity: "{{ k3s_ping_test.rc == 0 }}"
 
 - name: Display test summary
   ansible.builtin.debug:
     msg:
       - "CNI Test Results:"
-      - "  Pod Creation: {{ 'Pass' if cni_test_results.pod_creation else 'Fail' }}"
-      - "  IP Assignment: {{ 'Pass' if cni_test_results.pod_ip_assigned else 'Fail' }}"
-      - "  External Connectivity: {{ 'Pass' if cni_test_results.external_connectivity else 'Fail' }}"
+      - "  Pod Creation: {{ 'Pass' if k3s_cni_test_results.pod_creation else 'Fail' }}"
+      - "  IP Assignment: {{ 'Pass' if k3s_cni_test_results.pod_ip_assigned else 'Fail' }}"
+      - "  External Connectivity: {{ 'Pass' if k3s_cni_test_results.external_connectivity else 'Fail' }}"
 
 # Cleanup test resources
 - name: Cleanup test resources

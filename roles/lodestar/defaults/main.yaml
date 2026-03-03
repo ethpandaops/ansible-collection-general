@@ -33,6 +33,7 @@ lodestar_validator_datadir: /data/lodestar-validator
 lodestar_container_name: lodestar
 lodestar_container_image: chainsafe/lodestar:latest
 lodestar_container_env: {}
+# lodestar_container_entrypoint:
 lodestar_container_ports_ipv4:
   - "127.0.0.1:{{ lodestar_ports_http_beacon }}:{{ lodestar_ports_http_beacon }}"
   - "127.0.0.1:{{ lodestar_ports_metrics }}:{{ lodestar_ports_metrics }}"
@@ -114,6 +115,7 @@ lodestar_container_command_checkpoint_args:
 lodestar_validator_container_name: "{{ lodestar_container_name }}-validator"
 lodestar_validator_container_image: "{{ lodestar_container_image }}"
 lodestar_validator_container_env: {}
+# lodestar_validator_container_entrypoint:
 lodestar_validator_container_ports: []
 lodestar_validator_container_volumes:
   - "{{ lodestar_validator_datadir }}:/validator-data"

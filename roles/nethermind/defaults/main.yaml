@@ -47,8 +47,8 @@ nethermind_container_security_opts: []
 # nethermind_container_cpu_period:
 nethermind_container_stop_timeout: "300"
 nethermind_container_networks: []
-nethermind_container_entrypoint:
-  - /nethermind/nethermind
+# nethermind_container_entrypoint:
+#   - /nethermind/nethermind
 nethermind_container_command_default:
   - --datadir=/data
   - --KeyStore.KeyStoreDirectory=/data/keystore

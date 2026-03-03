@@ -32,6 +32,7 @@ lighthouse_validator_datadir: /data/lighthouse-validator
 lighthouse_container_name: lighthouse
 lighthouse_container_image: sigp/lighthouse:latest
 lighthouse_container_env: {}
+# lighthouse_container_entrypoint:
 lighthouse_container_ports_ipv4:
   - "127.0.0.1:{{ lighthouse_ports_http_beacon }}:{{ lighthouse_ports_http_beacon }}"
   - "127.0.0.1:{{ lighthouse_ports_metrics }}:{{ lighthouse_ports_metrics }}"
@@ -124,6 +125,7 @@ lighthouse_container_command_checkpoint_args:
 lighthouse_validator_container_name: "{{ lighthouse_container_name }}-validator"
 lighthouse_validator_container_image: "{{ lighthouse_container_image }}"
 lighthouse_validator_container_env: {}
+# lighthouse_validator_container_entrypoint:
 lighthouse_validator_container_ports: []
 lighthouse_validator_container_volumes:
   - "{{ lighthouse_validator_datadir }}:/validator-data"

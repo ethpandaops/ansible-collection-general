@@ -16,6 +16,7 @@ besu_ipv6_enabled: false
 besu_container_name: besu
 besu_container_image: hyperledger/besu:latest
 besu_container_env: {}
+# besu_container_entrypoint:
 besu_container_ports_ipv4:
   - "127.0.0.1:{{ besu_ports_http_rpc }}:{{ besu_ports_http_rpc }}"
   - "127.0.0.1:{{ besu_ports_engine }}:{{ besu_ports_engine }}"

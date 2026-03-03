@@ -1,32 +1,17 @@
-scenario:
-  name: default
+ansible:
+  cfg:
+    defaults:
+      roles_path: ${MOLECULE_PROJECT_DIRECTORY}/..:${HOME}/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles
+  executor:
+    args:
+      ansible_playbook:
+        - --inventory=inventory/
+  playbooks:
+    create: ../../../../playbooks/molecule/create.yml
+    destroy: ../../../../playbooks/molecule/destroy.yml
+
 dependency:
   name: galaxy
   options:
     role-file: ../../requirements.yaml
     requirements-file: ../../requirements.yaml
-driver:
-  name: docker
-platforms:
-  - name: debian12
-    image: "geerlingguy/docker-debian12-ansible:latest"
-    # platform: linux/amd64
-    command: ""
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:rw
-    cgroupns_mode: host
-    privileged: true
-    pre_build_image: true
-provisioner:
-  name: ansible
-  # env:
-    # ANSIBLE_VERBOSITY: 3
-  inventory:
-    group_vars:
-      all:
-        docker_daemon_options:
-          storage-driver: "vfs"
-        # Role specific variables
-        mev_rs_container_name: mev-rs
-verifier:
-  name: ansible

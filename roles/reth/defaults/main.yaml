@@ -17,6 +17,7 @@ reth_ipv6_enabled: false
 reth_container_name: reth
 reth_container_image: ghcr.io/paradigmxyz/reth
 reth_container_env: {}
+# reth_container_entrypoint:
 reth_container_ports_ipv4:
   - "127.0.0.1:{{ reth_ports_http_rpc }}:{{ reth_ports_http_rpc }}"
   - "127.0.0.1:{{ reth_ports_engine }}:{{ reth_ports_engine }}"

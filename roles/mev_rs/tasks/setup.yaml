@@ -40,5 +40,5 @@
     env: "{{ mev_rs_container_env }}"
     networks: "{{ mev_rs_container_networks }}"
     ports: "{{ mev_rs_container_ports }}"
-    command: "{{ mev_rs_container_command + mev_rs_container_command_extra_args }} "
+    command: "{{ mev_rs_container_command + mev_rs_container_command_extra_args }}"
     user: "{{ mev_rs_user_meta.uid }}"
