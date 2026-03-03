@@ -80,8 +80,6 @@ dns_server_config: |
     file "/etc/bind/zones/{{ zone.zone }}";
     masterfile-format text;
     allow-query { any; };
-    journal "none";
-
     // Notify secondaries when the zone changes
     notify yes;
     {% if dns_server_slave | length > 0 %}
