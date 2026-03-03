@@ -48,6 +48,7 @@ nimbusel_container_security_opts: []
 nimbusel_container_stop_timeout: "300"
 nimbusel_container_networks: []
 nimbusel_container_command_default:
+  - executionClient
   - --log-level=INFO
   - --data-dir=/data
   - --net-key=/data/nodekey
