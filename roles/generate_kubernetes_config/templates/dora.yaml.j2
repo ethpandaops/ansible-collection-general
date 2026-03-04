@@ -72,8 +72,9 @@ dora:
   postgresql:
     name: "dora-postgresql"
     fullnameOverride: "dora-postgresql"
-    persistence:
-      size: "{{ gen_kubernetes_config_dora_postgres_size | default("50Gi") }}"
+    primary:
+      persistence:
+        size: "{{ gen_kubernetes_config_dora_postgres_size }}"
 
   mevRelays:
     - index: 0
