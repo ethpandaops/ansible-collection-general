@@ -6,6 +6,7 @@
     dns_server_zone_name: "{{ zone_item.zone }}"
     dns_server_dest_zone: "{{ dns_server_zonesdir }}/{{ zone_item.zone }}"
     dns_server_stage_zone: "{{ dns_server_zonesdir }}/{{ zone_item.zone }}.staged"
+    dns_server_journal_file: "{{ dns_server_zonesdir }}/{{ zone_item.zone }}.jnl"
 
 - name: Write staged zone (original Ansible content)
   ansible.builtin.copy:
@@ -85,6 +86,36 @@
       - "new serial: {{ dns_server_next_serial }}"
   when: dns_server_need_zone_update
 
+# If the DNS server container is already running, we must freeze the zone and
+# remove the journal file before overwriting the zone on disk.  DDNS updates
+# (e.g. ACME DNS-01 challenges) create journal files that will be out of sync
+# with the new zone content, causing BIND to refuse to load the zone.
+- name: Check if DNS server container is running
+  community.docker.docker_container_info:
+    name: "{{ dns_server_container_name }}"
+  register: dns_server_container_state
+  when: dns_server_need_zone_update
+
+- name: Set container running fact
+  ansible.builtin.set_fact:
+    dns_server_container_running: >-
+      {{ dns_server_container_state.container is defined
+         and dns_server_container_state.container.State.Running | default(false) }}
+  when: dns_server_need_zone_update
+
+- name: Freeze zone in running DNS server
+  ansible.builtin.command:
+    cmd: "docker exec {{ dns_server_container_name }} rndc freeze {{ dns_server_zone_name }}"
+  changed_when: true
+  when: dns_server_need_zone_update and dns_server_container_running | bool
+  ignore_errors: true
+
+- name: Remove stale journal file
+  ansible.builtin.file:
+    path: "{{ dns_server_journal_file }}"
+    state: absent
+  when: dns_server_need_zone_update | bool
+
 - name: Install productive zone when changed or missing
   ansible.builtin.copy:
     content: "{{ dns_server_final_zone_content }}"
@@ -93,4 +124,19 @@
     group: "{{ dns_server_uid }}"
     mode: "0644"
   when: dns_server_need_zone_update
+
+- name: Reload and thaw zone in running DNS server
+  ansible.builtin.command:
+    cmd: "docker exec {{ dns_server_container_name }} rndc {{ item }} {{ dns_server_zone_name }}"
+  changed_when: true
+  loop:
+    - reload
+    - thaw
+  when: dns_server_need_zone_update and dns_server_container_running | bool
+
+- name: Notify restart when container was not running
+  ansible.builtin.debug:
+    msg: "DNS server container was not running, notifying restart handler"
+  changed_when: true
+  when: dns_server_need_zone_update and not (dns_server_container_running | bool)
   notify: Reload DNS server container
