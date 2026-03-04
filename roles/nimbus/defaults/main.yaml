@@ -80,7 +80,6 @@ nimbus_container_networks: []
 nimbus_container_command_default:
   - --non-interactive=true
   - --data-dir=/data
-  - --log-level=INFO
   - --listen-address=0.0.0.0
   - --udp-port={{ nimbus_ports_p2p_udp }}
   - --tcp-port={{ nimbus_ports_p2p_tcp }}
