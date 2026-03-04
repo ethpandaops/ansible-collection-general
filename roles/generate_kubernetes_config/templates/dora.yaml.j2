@@ -73,6 +73,32 @@ dora:
     name: "dora-postgresql"
     fullnameOverride: "dora-postgresql"
     primary:
+{% if gen_kubernetes_config_dora_execution_indexer_enabled %}
+      resources:
+        requests:
+          cpu: 500m
+          memory: 2Gi
+        limits:
+          cpu: 2000m
+          memory: 4Gi
+      extendedConfiguration: |
+        max_connections = 1024
+        shared_buffers = 1GB
+        effective_cache_size = 3GB
+        random_page_cost = 1.1
+        work_mem = 16MB
+        maintenance_work_mem = 512MB
+        autovacuum_vacuum_scale_factor = 0.02
+        autovacuum_analyze_scale_factor = 0.01
+{% else %}
+      resources:
+        requests:
+          cpu: 250m
+          memory: 1Gi
+        limits:
+          cpu: 1000m
+          memory: 3Gi
+{% endif %}
       persistence:
         size: "{{ gen_kubernetes_config_dora_postgres_size }}"
 
