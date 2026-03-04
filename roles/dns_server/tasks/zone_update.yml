@@ -106,9 +106,10 @@
 - name: Freeze zone in running DNS server
   ansible.builtin.command:
     cmd: "docker exec {{ dns_server_container_name }} rndc freeze {{ dns_server_zone_name }}"
-  changed_when: true
+  register: dns_server_freeze_result
+  changed_when: dns_server_freeze_result.rc == 0
+  failed_when: dns_server_freeze_result.rc != 0 and 'not found' not in dns_server_freeze_result.stderr
   when: dns_server_need_zone_update and dns_server_container_running | bool
-  ignore_errors: true
 
 - name: Remove stale journal file
   ansible.builtin.file:
