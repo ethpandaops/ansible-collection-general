@@ -6,6 +6,7 @@ ethereum_node_supported_el:
   - ethereumjs
   - reth
   - nimbusel
+  - ethrex
 
 ethereum_node_supported_cl:
   - lighthouse

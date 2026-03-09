@@ -1,0 +1,5 @@
+---
+docker_daemon_options: # noqa: var-naming[no-role-prefix]
+  storage-driver: "vfs"
+# Role specific variables
+mev_rs_container_name: mev-rs

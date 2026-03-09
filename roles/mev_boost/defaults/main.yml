@@ -4,13 +4,34 @@ mev_boost_cleanup: false # when set to "true" it will remove the container(s)
 mev_boost_docker_network_name: shared
 mev_boost_docker_networks:
   - name: "{{ mev_boost_docker_network_name }}"
+
+################################################################################
+##
+## mev_boost config.yaml configuration
+##
+################################################################################
+# Enable config.yaml file support (when enabled, config file is used instead of CLI relay flags)
+# NOTE: This is currently only supported in the "develop" branch of mev-boost.
+#       Will require a release that is newer than 1.10.1
+mev_boost_config_enabled: false
+mev_boost_config_dir: /opt/mev_boost
+mev_boost_config: |
+  timeout_get_header_ms: 900
+  late_in_slot_time_ms: 1800
+  relays:
+    - url: https://0x845bd072b7cd566f02faeb0a4033ce9399e42839ced64e8b2adcfc859ed1e8e1a5a293336a49feac6d9a5edb779be53a@boost-relay-sepolia.flashbots.net
+      enable_timing_games: true
+      target_first_request_ms: 200
+      frequency_get_header_ms: 100
+
+
 ################################################################################
 ##
 ## mev_boost container configuration
 ##
 ################################################################################
 mev_boost_container_name: mev-boost
-mev_boost_container_image: flashbots/mev-boost:1.5.0
+mev_boost_container_image: flashbots/mev-boost:latest
 mev_boost_container_env: {}
 mev_boost_server_port: 18550
 mev_boost_container_ports:
@@ -23,5 +44,6 @@ mev_boost_container_command:
   - -sepolia
   - -relay-check
   - -relays=https://0x845bd072b7cd566f02faeb0a4033ce9399e42839ced64e8b2adcfc859ed1e8e1a5a293336a49feac6d9a5edb779be53a@boost-relay-sepolia.flashbots.net
+  # Remove -relays if you use mev_boost_config_enabled
 
 mev_boost_container_command_extra_args: []

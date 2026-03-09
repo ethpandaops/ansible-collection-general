@@ -1,0 +1,25 @@
+- name: Get ENR record
+  ansible.builtin.uri:
+    url: http://127.0.0.1:{{ bootnodoor_ui_port }}/enr
+    return_content: true
+  register: bootnodoor_facts_collect_enr
+  when: bootnodoor_cl_enabled
+
+- name: Get ENODE record
+  ansible.builtin.uri:
+    url: http://127.0.0.1:{{ bootnodoor_ui_port }}/enode
+    return_content: true
+  register: bootnodoor_facts_collect_enode
+  when: bootnodoor_el_enabled
+
+- name: Set fact "bootnodoor_fact_enr"
+  ansible.builtin.set_fact:
+    bootnodoor_fact_enr: "{{ bootnodoor_facts_collect_enr.content }}"
+    cacheable: true
+  when: bootnodoor_cl_enabled
+
+- name: Set fact "bootnodoor_fact_enode"
+  ansible.builtin.set_fact:
+    bootnodoor_fact_enode: "{{ bootnodoor_facts_collect_enode.content }}"
+    cacheable: true
+  when: bootnodoor_el_enabled

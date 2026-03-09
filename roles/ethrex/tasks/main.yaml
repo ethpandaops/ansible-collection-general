@@ -1,0 +1,7 @@
+- name: Setup ethrex
+  ansible.builtin.import_tasks: setup.yaml
+  when: not ethrex_cleanup
+
+- name: Cleanup ethrex
+  ansible.builtin.import_tasks: cleanup.yaml
+  when: ethrex_cleanup

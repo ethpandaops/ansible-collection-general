@@ -18,6 +18,14 @@ forky:
   ingress:
     enabled: true
     className: ingress-nginx-public
+{% if gen_kubernetes_config_pandamenu_enabled %}
+    annotations:
+      nginx.ingress.kubernetes.io/proxy-body-size: "0"
+      nginx.ingress.kubernetes.io/configuration-snippet: |
+        sub_filter '</head>' '{{ gen_kubernetes_config_forky_pandamenu | default('') }}{{ gen_kubernetes_config_pandamenu_script }}</head>';
+        sub_filter_types text/html;
+        sub_filter_once off;
+{% endif %}
     hosts:
       - host: forky.{{ network_subdomain }}
         paths:
@@ -27,6 +35,10 @@ forky:
   postgresql:
     enabled: true
     fullnameOverride: "forky-postgresql"
+    image:
+      registry: docker.io
+      repository: bitnamilegacy/postgresql
+      tag: 16.4.0-debian-12-r2
     auth:
       username: <path:/secrets/services/services.enc.yaml#forky | jsonPath {.postgres.devnets.username}>
       password: <path:/secrets/services/services.enc.yaml#forky | jsonPath {.postgres.devnets.password}>

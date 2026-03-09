@@ -59,6 +59,14 @@ syncoor-web:
     main:
       className: ingress-nginx-public
       enabled: true
+{% if gen_kubernetes_config_pandamenu_enabled %}
+      annotations:
+        nginx.ingress.kubernetes.io/proxy-body-size: "0"
+        nginx.ingress.kubernetes.io/configuration-snippet: |
+          sub_filter '</head>' '{{ gen_kubernetes_config_syncoor_pandamenu | default('') }}{{ gen_kubernetes_config_pandamenu_script }}</head>';
+          sub_filter_types text/html;
+          sub_filter_once off;
+{% endif %}
       hosts:
         - host: syncoor.{{ network_subdomain }}
           paths:

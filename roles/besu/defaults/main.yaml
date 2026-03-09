@@ -16,6 +16,7 @@ besu_ipv6_enabled: false
 besu_container_name: besu
 besu_container_image: hyperledger/besu:latest
 besu_container_env: {}
+# besu_container_entrypoint:
 besu_container_ports_ipv4:
   - "127.0.0.1:{{ besu_ports_http_rpc }}:{{ besu_ports_http_rpc }}"
   - "127.0.0.1:{{ besu_ports_engine }}:{{ besu_ports_engine }}"
@@ -34,6 +35,17 @@ besu_container_volumes:
   - "{{ besu_datadir }}:/data"
   - "{{ besu_auth_jwt_path }}:/execution-auth.jwt:ro"
 besu_container_security_opts: []
+# besu_container_memory:
+# besu_container_memory_reservation:
+# besu_container_memory_swap:
+# besu_container_memory_swappiness:
+# besu_container_kernel_memory:
+# besu_container_cpus:
+# besu_container_cpuset_cpus:
+# besu_container_cpuset_mems:
+# besu_container_cpu_shares:
+# besu_container_cpu_quota:
+# besu_container_cpu_period:
 besu_container_stop_timeout: "300"
 besu_container_networks: []
 besu_container_command_default:

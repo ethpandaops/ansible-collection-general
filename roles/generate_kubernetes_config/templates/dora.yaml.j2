@@ -17,6 +17,14 @@ dora:
   ingress:
     enabled: true
     className: ingress-nginx-public
+{% if gen_kubernetes_config_pandamenu_enabled %}
+    annotations:
+      nginx.ingress.kubernetes.io/proxy-body-size: "0"
+      nginx.ingress.kubernetes.io/configuration-snippet: |
+        sub_filter '</head>' '{{ gen_kubernetes_config_dora_pandamenu | default('') }}{{ gen_kubernetes_config_pandamenu_script }}</head>';
+        sub_filter_types text/html;
+        sub_filter_once off;
+{% endif %}
     hosts:
       - host: dora.{{ network_subdomain }}
         paths:
@@ -41,6 +49,17 @@ dora:
   apiDefaultRateLimit: 60
   apiDisableDefaultRateLimit: false
   proxyCount: 2
+  executionIndexerEnabled: {{ gen_kubernetes_config_dora_execution_indexer_enabled }}
+  executionIndexerRetention: {{ gen_kubernetes_config_dora_execution_indexer_retention }}
+  executionIndexerDetailsEnabled: true
+  executionIndexerTracesEnabled: {{ gen_kubernetes_config_dora_execution_indexer_traces }}
+  executionIndexerDetailsMaxSize: "{{ gen_kubernetes_config_dora_execution_indexer_details_max_size }}"
+{% if 'tracoor' in gen_kubernetes_config_enabled_charts %}
+  tracoorUrl: "https://tracoor.{{ network_subdomain }}"
+  tracoorNetwork: "{{ ethereum_network_name }}"
+{% endif %}
+
+  
   extraEnv:
     - name: FRONTEND_PPROF
       value: "true"
@@ -53,6 +72,9 @@ dora:
   postgresql:
     name: "dora-postgresql"
     fullnameOverride: "dora-postgresql"
+    primary:
+      persistence:
+        size: "{{ gen_kubernetes_config_dora_postgres_size }}"
 
   mevRelays:
     - index: 0
@@ -64,6 +86,15 @@ dora:
       credentials:
         username: ""
         password: "<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>"
+
+  blockDbEngine: "s3"
+  blockDbConfig:
+    endpoint: "<path:/secrets/services/services.enc.yaml#dora | jsonPath {.s3_url}>"
+    secure: <path:/secrets/services/services.enc.yaml#dora | jsonPath {.s3_secure}>
+    accessKey: <path:/secrets/services/services.enc.yaml#dora | jsonPath {.s3_access_key}>
+    secretKey: <path:/secrets/services/services.enc.yaml#dora | jsonPath {.s3_secret_key}>
+    bucket: <path:/secrets/services/services.enc.yaml#dora | jsonPath {.s3_bucket}>
+    path: "{{ ethereum_network_name }}"
 
 {% if gen_kubernetes_config_dora_consensus_endpoints_url %}
   endpointsUrl: "{{ gen_kubernetes_config_dora_consensus_endpoints_url }}"

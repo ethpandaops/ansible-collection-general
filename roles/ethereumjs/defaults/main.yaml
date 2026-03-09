@@ -15,6 +15,7 @@ ethereumjs_ipv6_enabled: false
 ethereumjs_container_name: ethereumjs
 ethereumjs_container_image: ethpandaops/ethereumjs:master
 ethereumjs_container_env: {}
+# ethereumjs_container_entrypoint:
 ethereumjs_container_ports_ipv4:
   - "127.0.0.1:{{ ethereumjs_ports_http_rpc }}:{{ ethereumjs_ports_http_rpc }}"
   - "127.0.0.1:{{ ethereumjs_ports_engine }}:{{ ethereumjs_ports_engine }}"
@@ -33,6 +34,17 @@ ethereumjs_container_volumes:
   - "{{ ethereumjs_datadir }}:/data"
   - "{{ ethereumjs_auth_jwt_path }}:/execution-auth.jwt:ro"
 ethereumjs_container_security_opts: []
+# ethereumjs_container_memory:
+# ethereumjs_container_memory_reservation:
+# ethereumjs_container_memory_swap:
+# ethereumjs_container_memory_swappiness:
+# ethereumjs_container_kernel_memory:
+# ethereumjs_container_cpus:
+# ethereumjs_container_cpuset_cpus:
+# ethereumjs_container_cpuset_mems:
+# ethereumjs_container_cpu_shares:
+# ethereumjs_container_cpu_quota:
+# ethereumjs_container_cpu_period:
 ethereumjs_container_stop_timeout: "300"
 ethereumjs_container_networks: []
 ethereumjs_container_command_default:

@@ -22,13 +22,13 @@
     - name: Read TSIG key file (bind key syntax)
       ansible.builtin.slurp:
         path: "{{ wildcard_cert_issuer_tsig_keyfile }}"
-      register: tsig_keyfile_slurp
+      register: wildcard_cert_issuer_tsig_keyfile_slurp
 
     - name: Extract TSIG secret (base64) from key file
       ansible.builtin.set_fact:
         wildcard_cert_issuer_tsig_secret: >-
           {{
-            (tsig_keyfile_slurp.content | b64decode)
+            (wildcard_cert_issuer_tsig_keyfile_slurp.content | b64decode)
             | regex_search('secret\s+"([^"]+)"', '\1')
           }}
 
@@ -58,7 +58,7 @@
     - name: Check if live cert already exists
       ansible.builtin.stat:
         path: "{{ wildcard_cert_issuer_letsencrypt_dir }}/live/{{ wildcard_cert_issuer_base_domain }}/fullchain.pem"
-      register: live_cert_stat
+      register: wildcard_cert_issuer_live_cert_stat
 
     - name: One-time initial issuance
       community.docker.docker_container:
@@ -72,7 +72,7 @@
         ports: "{{ wildcard_cert_issuer_container_ports }}"
         volumes: "{{ wildcard_cert_issuer_container_volumes }}"
         command: "{{ wildcard_cert_issuer_container_init_command }}"
-      when: not live_cert_stat.stat.exists
+      when: not wildcard_cert_issuer_live_cert_stat.stat.exists
 
     - name: Start renewal loop container (with deploy-hook)
       community.docker.docker_container:

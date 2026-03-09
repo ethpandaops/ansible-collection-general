@@ -42,3 +42,4 @@
     dns_servers: "{{ vouch_container_dns_servers | default(omit) }}"
     dns_opts: "{{ vouch_container_dns_opts | default(omit) }}"
     dns_search_domains: "{{ vouch_container_dns_search_domains | default(omit) }}"
+    hostname: "{{ vouch_container_hostname | default(omit) }}"

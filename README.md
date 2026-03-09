@@ -39,6 +39,7 @@ A collection of reusable ansible components used by the EthPandaOps team.
 - [besu](roles/besu)
 - [erigon](roles/erigon)
 - [ethereumjs](roles/ethereumjs)
+- [ethrex](roles/ethrex)
 - [geth](roles/geth)
 - [nethermind](roles/nethermind)
 - [reth](roles/reth)

@@ -33,20 +33,21 @@
 
     - name: Check if Docker is rootless
       ansible.builtin.command: docker info -f '{{ "{{json .SecurityOptions}}" }}'
-      register: docker_secopts
+      register: ethereum_genesis_docker_secopts
       changed_when: false
 
     - name: Set rootless fact
       ansible.builtin.set_fact:
-        docker_is_rootless: "{{ 'name=rootless' in docker_secopts.stdout }}"
+        ethereum_genesis_docker_is_rootless: "{{ 'name=rootless' in ethereum_genesis_docker_secopts.stdout }}"
 
     - name: Compute docker user flag
       ansible.builtin.set_fact:
-        docker_user_flag: "{{ docker_is_rootless | ternary('', '-u ' ~ (ansible_effective_user_id | default(ansible_uid, true))) }}"
+        ethereum_genesis_docker_user_flag: >-
+          {{ ethereum_genesis_docker_is_rootless | ternary('', '-u ' ~ (ansible_effective_user_id | default(ansible_uid, true))) }}
 
     - name: Run genesis generator
       ansible.builtin.shell: >
-        docker run --rm -t {{ docker_user_flag }}
+        docker run --rm -t {{ ethereum_genesis_docker_user_flag }}
         -v {{ ethereum_genesis_generator_tmp_output_dir_register.path }}:/data
         -v {{ ethereum_genesis_generator_tmp_config_dir_register.path }}:/config
         {{ ethereum_genesis_generator_container_image }} all

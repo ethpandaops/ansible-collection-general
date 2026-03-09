@@ -35,7 +35,7 @@
     env: "{{ mev_flood_container_env }}"
     networks: "{{ mev_flood_container_networks }}"
     ports: "{{ mev_flood_container_ports }}"
-    command: "{{ mev_flood_container_command + mev_flood_container_command_extra_args }} "
+    command: "{{ mev_flood_container_command + mev_flood_container_command_extra_args }}"
     user: "{{ mev_flood_user_meta.uid }}"
 
 - name: Run mev_flood_spam container
@@ -50,5 +50,5 @@
     env: "{{ mev_flood_spam_container_env }}"
     networks: "{{ mev_flood_spam_container_networks }}"
     ports: "{{ mev_flood_spam_container_ports }}"
-    command: "{{ mev_flood_spam_container_command + mev_flood_spam_container_command_extra_args }} "
+    command: "{{ mev_flood_spam_container_command + mev_flood_spam_container_command_extra_args }}"
     user: "{{ mev_flood_user_meta.uid }}"

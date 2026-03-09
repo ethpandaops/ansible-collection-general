@@ -1,5 +1,5 @@
 - name: Handle Besu, Geth, Erigon, Nethermind enode
-  when: ethereum_node_el in ["besu", "geth", "erigon", "nethermind", "reth", "nimbusel"]
+  when: ethereum_node_el in ["besu", "geth", "erigon", "nethermind", "reth", "nimbusel", "ethrex"]
   block:
     - name: Get EL node key
       ansible.builtin.shell: "{{ ethereum_node_fact_discovery_el_key_cmd[ethereum_node_el] }}" # noqa command-instead-of-shell
@@ -22,9 +22,9 @@
       changed_when: false
       failed_when: (ethereum_node_fact_discovery_el_pubkey.rc != 0) or (ethereum_node_fact_discovery_el_pubkey.stdout == "")
 
-    - name: Store enode var "ethereum_node_fact_el_enode"
+    - name: Store enode var "ethereum_node_fact_discovery_el_enode"
       ansible.builtin.set_fact:
-        ethereum_node_fact_el_enode: enode://{{ ethereum_node_fact_discovery_el_pubkey.stdout }}@{{ ansible_host }}:{{ ethereum_node_el_ports_p2p_tcp }}?discport={{ ethereum_node_el_ports_p2p_udp }} # noqa yaml[line-length]
+        ethereum_node_fact_discovery_el_enode: enode://{{ ethereum_node_fact_discovery_el_pubkey.stdout }}@{{ ansible_host }}:{{ ethereum_node_el_ports_p2p_tcp }}?discport={{ ethereum_node_el_ports_p2p_udp }} # noqa yaml[line-length]
         cacheable: true
 
 - name: Handle EthereumJS enode
@@ -32,19 +32,19 @@
   block:
     - name: Get enode
       ansible.builtin.command: "{{ ethereum_node_fact_discovery_el_enode_cmd[ethereum_node_el] }}"
-      register: ethereum_node_fact_discovery_el_enode
+      register: ethereum_node_fact_discovery_el_enode_raw
       changed_when: false
-      until: ethereum_node_fact_discovery_el_enode.rc == 0
+      until: ethereum_node_fact_discovery_el_enode_raw.rc == 0
       retries: "{{ ethereum_node_fact_discovery_el_retries }}"
       delay: "{{ ethereum_node_fact_discovery_el_delay }}"
 
-    - name: Store enode var "ethereum_node_fact_el_enode"
+    - name: Store enode var "ethereum_node_fact_discovery_el_enode"
       ansible.builtin.set_fact:
-        ethereum_node_fact_el_enode: "{{ ethereum_node_fact_discovery_el_enode.stdout }}"
+        ethereum_node_fact_discovery_el_enode: "{{ ethereum_node_fact_discovery_el_enode_raw.stdout }}"
         cacheable: true
 
 - name: Show execution node facts
   ansible.builtin.debug:
     var: "{{ item }}"
   loop:
-    - ethereum_node_fact_el_enode
+    - ethereum_node_fact_discovery_el_enode

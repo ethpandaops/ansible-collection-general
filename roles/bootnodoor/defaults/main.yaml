@@ -1,0 +1,47 @@
+bootnodoor_privkey: "{{ secret_bootnodoor_privkey }}"
+
+bootnodoor_set_facts: true
+
+bootnodoor_container_name: "bootnodoor"
+bootnodoor_container_image: "ethpandaops/bootnodoor:master"
+bootnodoor_container_env: {}
+bootnodoor_p2p_port: 9010
+bootnodoor_ui_port: 8004
+bootnodoor_enr_ip: "{{ ansible_host }}"
+bootnodoor_datadir: "/data/bootnodoor"
+bootnodoor_container_ports:
+  - "{{ bootnodoor_p2p_port }}:{{ bootnodoor_p2p_port }}"
+  - "{{ bootnodoor_p2p_port }}:{{ bootnodoor_p2p_port }}/udp"
+  - "127.0.0.1:{{ bootnodoor_ui_port }}:{{ bootnodoor_ui_port }}"
+bootnodoor_container_volumes_default:
+  - "{{ bootnodoor_datadir }}:/data"
+bootnodoor_container_volumes_extra: []
+bootnodoor_container_volumes: "{{ bootnodoor_container_volumes_default + bootnodoor_container_volumes_extra }}"
+
+bootnodoor_nodedb: /data/database.sqlite
+bootnodoor_el_enabled: true
+bootnodoor_el_config: /data/el-genesis.json
+bootnodoor_el_genesis_hash: /data/el-genesis-hash.txt
+bootnodoor_cl_enabled: true
+bootnodoor_cl_config: /data/cl-config.yaml
+bootnodoor_cl_gvr: /data/cl-gvr.txt
+
+bootnodoor_container_stop_timeout: "30"
+bootnodoor_container_networks: []
+bootnodoor_container_command_default:
+  - --private-key={{ bootnodoor_privkey }}
+  - --enr-ip={{ bootnodoor_enr_ip }}
+  - --enr-port={{ bootnodoor_p2p_port }}
+  - --bind-port={{ bootnodoor_p2p_port }}
+  - --el-config={{ bootnodoor_el_config }}
+  - --el-genesis-hash={{ bootnodoor_el_genesis_hash }}
+  - --cl-config={{ bootnodoor_cl_config }}
+  - --genesis-validators-root={{ bootnodoor_cl_gvr }}
+  - --nodedb={{ bootnodoor_nodedb }}
+  - --enable-el={{ bootnodoor_el_enabled }}
+  - --enable-cl={{ bootnodoor_cl_enabled }}
+  - --web-ui
+  - --web-port={{ bootnodoor_ui_port }}
+bootnodoor_container_command_extra_args: []
+bootnodoor_container_command: >-
+  {{ bootnodoor_container_command_default + bootnodoor_container_command_extra_args }}

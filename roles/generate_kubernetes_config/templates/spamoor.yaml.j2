@@ -17,6 +17,14 @@ spamoor:
   ingress:
     enabled: true
     className: ingress-nginx-public
+{% if gen_kubernetes_config_pandamenu_enabled %}
+    annotations:
+      nginx.ingress.kubernetes.io/proxy-body-size: "0"
+      nginx.ingress.kubernetes.io/configuration-snippet: |
+        sub_filter '</head>' '{{ gen_kubernetes_config_spamoor_pandamenu | default('') }}{{ gen_kubernetes_config_pandamenu_script }}</head>';
+        sub_filter_types text/html;
+        sub_filter_once off;
+{% endif %}
     hosts:
       - host: spamoor.{{ network_subdomain }}
         paths:
@@ -39,6 +47,8 @@ spamoor:
     enabled: true
 
   privateKey: "<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.spamoor_private_key}>"
+  enableAuth: true
+  authTokenKey: "<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.spamoor_private_key}>-spamoor-jwt"
   rpcEndpoints:
   # Rpc
   - "{{ default_el_endpoint }}"
@@ -56,6 +66,5 @@ spamoor:
 {% set _ = groups_list.append('mev-relay') %}
 {% endif %}
 {% set _ = groups_list.append(host_name) %}
-{% set separator = ' + ' if 'mev-relay' in host_name else '' %}
-  - "group({{ groups_list | join(',') }})name({{ host_name }}){{separator}}https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_rpc_prefix }}{{ host_name }}.{{ network_server_subdomain }}"
+  - "group({{ groups_list | join(',') }})name({{ host_name }})https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_rpc_prefix }}{{ host_name }}.{{ network_server_subdomain }}"
 {% endfor %}

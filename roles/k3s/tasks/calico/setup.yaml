@@ -9,18 +9,18 @@
 
 - name: Set calico facts
   ansible.builtin.set_fact:
-    custom_resources_defined: "{{ k3s_calico_custom_resources is defined and k3s_calico_custom_resources | trim | length > 0 }}"
+    k3s_custom_resources_defined: "{{ k3s_calico_custom_resources is defined and k3s_calico_custom_resources | trim | length > 0 }}"
 
 - name: Check for network policies in all namespaces
   ansible.builtin.command:
     cmd: "k3s kubectl get networkpolicies --all-namespaces -o name"
-  register: network_policies_check
+  register: k3s_network_policies_check
   failed_when: false
   changed_when: false
 
 - name: Set network policies fact
   ansible.builtin.set_fact:
-    network_policies_exist: "{{ network_policies_check.rc == 0 and network_policies_check.stdout | trim != '' }}"
+    k3s_network_policies_exist: "{{ k3s_network_policies_check.rc == 0 and k3s_network_policies_check.stdout | trim != '' }}"
 
 # Detection of pre-existing installation
 - name: Check for existing Calico installation
@@ -28,53 +28,53 @@
     - name: Check if version file exists
       ansible.builtin.stat:
         path: "{{ k3s_calico_version_file }}"
-      register: version_file_stat
+      register: k3s_version_file_stat
 
     - name: Check if legacy operator exists (pre-version tracking)
       ansible.builtin.command:
         cmd: "k3s kubectl get -n tigera-operator deployment/tigera-operator -o name"
-      register: legacy_operator_check
+      register: k3s_legacy_operator_check
       failed_when: false
       changed_when: false
 
     - name: Check if legacy resources exist (pre-version tracking)
       ansible.builtin.command:
         cmd: "k3s kubectl get installation default -o name"
-      register: legacy_install_check
+      register: k3s_legacy_install_check
       failed_when: false
       changed_when: false
 
 - name: Read current version
   ansible.builtin.slurp:
     path: "{{ k3s_calico_version_file }}"
-  register: current_version_b64
-  when: version_file_stat.stat.exists
+  register: k3s_current_version_b64
+  when: k3s_version_file_stat.stat.exists
 
 - name: Set version detection facts
   ansible.builtin.set_fact:
-    current_calico_version: "{{ current_version_b64.content | b64decode | trim if version_file_stat.stat.exists else '' }}"
-    legacy_calico_detected: "{{ not version_file_stat.stat.exists and (legacy_operator_check.rc == 0 or legacy_install_check.rc == 0) }}"
+    k3s_current_calico_version: "{{ k3s_current_version_b64.content | b64decode | trim if k3s_version_file_stat.stat.exists else '' }}"
+    k3s_legacy_calico_detected: "{{ not k3s_version_file_stat.stat.exists and (k3s_legacy_operator_check.rc == 0 or k3s_legacy_install_check.rc == 0) }}"
 
 - name: Determine if version change is needed
   ansible.builtin.set_fact:
-    calico_version_changed: "{{ not version_file_stat.stat.exists or current_calico_version != k3s_calico_version or legacy_calico_detected }}"
-    calico_install_required: "{{ not version_file_stat.stat.exists and not legacy_calico_detected }}"
+    k3s_calico_version_changed: "{{ not k3s_version_file_stat.stat.exists or k3s_current_calico_version != k3s_calico_version or k3s_legacy_calico_detected }}"
+    k3s_calico_install_required: "{{ not k3s_version_file_stat.stat.exists and not k3s_legacy_calico_detected }}"
 
 - name: Display Calico version comparison
   ansible.builtin.debug:
     msg:
-      - "Version file exists: {{ version_file_stat.stat.exists }}"
-      - "Current Calico version: {{ current_calico_version | default('Not installed') }}"
+      - "Version file exists: {{ k3s_version_file_stat.stat.exists }}"
+      - "Current Calico version: {{ k3s_current_calico_version | default('Not installed') }}"
       - "Expected Calico version: {{ k3s_calico_version }}"
-      - "Legacy Calico detected: {{ legacy_calico_detected }}"
-      - "Version change detected: {{ calico_version_changed }}"
-      - "Fresh install required: {{ calico_install_required }}"
+      - "Legacy Calico detected: {{ k3s_legacy_calico_detected }}"
+      - "Version change detected: {{ k3s_calico_version_changed }}"
+      - "Fresh install required: {{ k3s_calico_install_required }}"
       - >-
         Reason for change:
-        {% if not version_file_stat.stat.exists and not legacy_calico_detected %}Fresh installation
-        {% elif not version_file_stat.stat.exists %}Version file missing
-        {% elif current_calico_version != k3s_calico_version %}Version mismatch ({{ current_calico_version }} != {{ k3s_calico_version }})
-        {% elif legacy_calico_detected %}Legacy installation detected
+        {% if not k3s_version_file_stat.stat.exists and not k3s_legacy_calico_detected %}Fresh installation
+        {% elif not k3s_version_file_stat.stat.exists %}Version file missing
+        {% elif k3s_current_calico_version != k3s_calico_version %}Version mismatch ({{ k3s_current_calico_version }} != {{ k3s_calico_version }})
+        {% elif k3s_legacy_calico_detected %}Legacy installation detected
         {% else %}No change needed{% endif %}
   tags:
     - calico
@@ -84,8 +84,8 @@
 - name: Check if tigera-operator file exists
   ansible.builtin.stat:
     path: "{{ k3s_calico_operator_file }}"
-  register: operator_file_stat
+  register: k3s_operator_file_stat
 
 - name: Set operator download needed fact
   ansible.builtin.set_fact:
-    operator_download_needed: "{{ calico_version_changed or not operator_file_stat.stat.exists }}"
+    k3s_operator_download_needed: "{{ k3s_calico_version_changed or not k3s_operator_file_stat.stat.exists }}"

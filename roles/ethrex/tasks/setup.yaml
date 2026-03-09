@@ -1,0 +1,35 @@
+- name: Add ethrex user
+  ansible.builtin.user:
+    name: "{{ ethrex_user }}"
+  register: ethrex_user_meta
+
+- name: Create data dir
+  ansible.builtin.file:
+    path: "{{ ethrex_datadir }}"
+    state: directory
+    mode: "0750"
+    owner: "{{ ethrex_user }}"
+    group: "{{ ethrex_user }}"
+
+- name: Set permissions
+  ansible.builtin.command: "chown -R {{ ethrex_user }}:{{ ethrex_user }} {{ ethrex_datadir }}" # noqa no-free-form
+  failed_when: false
+  changed_when: false
+
+- name: Run ethrex container
+  community.docker.docker_container:
+    name: "{{ ethrex_container_name }}"
+    image: "{{ ethrex_container_image }}"
+    image_name_mismatch: recreate
+    state: started
+    restart_policy: always
+    stop_timeout: "{{ ethrex_container_stop_timeout }}"
+    ports: "{{ ethrex_container_ports }}"
+    volumes: "{{ ethrex_container_volumes }}"
+    env: "{{ ethrex_container_env }}"
+    networks: "{{ ethrex_container_networks }}"
+    entrypoint: "{{ ethrex_container_entrypoint | default(omit) }}"
+    command: "{{ ethrex_container_command + ethrex_container_command_extra_args }}"
+    user: "{{ ethrex_user_meta.uid }}"
+    pull: "{{ ethrex_container_pull | bool }}"
+    security_opts: "{{ ethrex_container_security_opts }}"
