@@ -14,7 +14,7 @@ besu_ports_metrics: 9545
 besu_ipv6_enabled: false
 
 besu_container_name: besu
-besu_container_image: hyperledger/besu:latest
+besu_container_image: besu-eth/besu:latest
 besu_container_env: {}
 # besu_container_entrypoint:
 besu_container_ports_ipv4:
