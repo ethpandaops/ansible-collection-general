@@ -97,7 +97,7 @@ hive_simulations_client_config: []
 #    nametag: prague-devnet-4
 #    dockerfile: git
 #    build_args:
-#      github: hyperledger/besu
+#      github: besu-eth/besu
 #      tag: pectra-devnet-4
 
 #  - client: ethereumjs

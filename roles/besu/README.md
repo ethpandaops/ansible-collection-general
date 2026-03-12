@@ -1,6 +1,6 @@
 # ethpandaops.general.besu
 
-Setup [besu](https://github.com/hyperledger/besu), a ethereum execution layer client.
+Setup [besu](https://github.com/besu-eth/besu), a ethereum execution layer client.
 
 ## Requirements
 
