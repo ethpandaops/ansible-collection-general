@@ -48,9 +48,14 @@ jobs:
         working-directory: .
         run: |
           ALL_ROLES='["blockscout", "bootstrap", "hive", "mev_boost", "mev_rs"]'
+          FORK_SHARED_ROLES='["mev_boost"]'
 
           if [[ "${{ needs.changes.outputs.shared }}" == "true" ]]; then
-            ROLES=$ALL_ROLES
+            if [[ "${{ github.repository_owner }}" == "ethpandaops" ]]; then
+              ROLES=$ALL_ROLES
+            else
+              ROLES=$FORK_SHARED_ROLES
+            fi
           else
             ROLES='${{ needs.changes.outputs.roles }}'
           fi

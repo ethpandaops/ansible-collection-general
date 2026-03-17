@@ -119,7 +119,7 @@ jobs:
       fail-fast: false
       matrix:
         consensus: ${{ fromJSON(needs.vars.outputs.CONSENSUS_CLIENTS) }}
-    runs-on: self-hosted-ghr-size-s-x64
+    runs-on: ${{ github.repository_owner == 'ethpandaops' && 'self-hosted-ghr-size-s-x64' || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
