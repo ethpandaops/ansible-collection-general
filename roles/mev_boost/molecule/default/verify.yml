@@ -67,6 +67,27 @@
       ansible.builtin.debug:
         msg: "{{ mev_boost_container_logs.stderr }}"
 
+    - name: Verify conflicting extra args are rejected
+      block:
+        - name: Run mev_boost role with conflicting extra args
+          ansible.builtin.include_role:
+            name: mev_boost
+          vars:
+            mev_boost_container_name: mev-boost-invalid
+            mev_boost_config_dir: /opt/mev_boost-invalid
+            mev_boost_container_ports: []
+            mev_boost_config_enabled: true
+            mev_boost_container_command_extra_args:
+              - -relays=https://invalid.example
+
+        - name: Fail if conflicting extra args were accepted
+          ansible.builtin.fail:
+            msg: "Role accepted conflicting extra args"
+      rescue:
+        - name: Save conflicting-extra-args failure
+          ansible.builtin.set_fact:
+            mev_boost_conflict_result: "{{ ansible_failed_result }}"
+
     - name: Assert results
       ansible.builtin.assert:
         that:
@@ -81,5 +102,9 @@
           - "'frequency_get_header_ms: 100' in mev_boost_config_content.stdout"
           - "'-config' in mev_boost_result_container.container.Config.Cmd"
           - "'/config.yaml' in mev_boost_result_container.container.Config.Cmd"
+          - mev_boost_result_container.container.Config.Cmd | select('match', '^-relays=.*') | list | length == 0
+          - mev_boost_conflict_result is defined
+          - mev_boost_conflict_result.msg is search('redefines managed or incompatible flags')
+          - mev_boost_conflict_result.msg is search('-relays')
         fail_msg: "❌ Container is not running properly or config is not correctly set. Check container logs above."
         success_msg: "✅ MEV-Boost container is running with config.yaml support!"

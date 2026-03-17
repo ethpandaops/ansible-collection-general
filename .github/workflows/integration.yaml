@@ -16,6 +16,7 @@ jobs:
     permissions:
       pull-requests: read
     outputs:
+      shared: ${{ steps.filter.outputs.shared }}
       roles: ${{ steps.filter.outputs.changes }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -23,20 +24,48 @@ jobs:
         id: filter
         with:
           filters: |
+            shared:
+              - .github/actions/setup/**
+              - .github/workflows/integration.yaml
+              - playbooks/molecule/**
+              - plugins/filter/**
+              - requirements.*
+              - requirements.yaml
+            blockscout: roles/blockscout/**
             bootstrap: roles/bootstrap/**
+            hive: roles/hive/**
             mev_boost: roles/mev_boost/**
             mev_rs: roles/mev_rs/**
 
+  vars:
+    runs-on: ubuntu-latest
+    needs: changes
+    outputs:
+      roles: ${{ steps.vars.outputs.roles }}
+    steps:
+      - name: Set roles matrix
+        id: vars
+        run: |
+          ALL_ROLES='["blockscout", "bootstrap", "hive", "mev_boost", "mev_rs"]'
+
+          if [[ "${{ needs.changes.outputs.shared }}" == "true" ]]; then
+            ROLES=$ALL_ROLES
+          else
+            ROLES='${{ needs.changes.outputs.roles }}'
+          fi
+
+          echo "roles=$ROLES" >> "$GITHUB_OUTPUT"
+
   # Integration test using molecule
   job:
-    needs: changes
+    needs: [changes, vars]
     concurrency:
       group: ${{ github.head_ref }}-${{ matrix.role }}
       cancel-in-progress: true
-    if: ${{ needs.changes.outputs.roles != '' && toJson(fromJson(needs.changes.outputs.roles)) != '[]' }}
+    if: ${{ needs.vars.outputs.roles != '' && toJson(fromJson(needs.vars.outputs.roles)) != '[]' }}
     strategy:
       matrix:
-        role: ${{ fromJSON(needs.changes.outputs.roles) }}
+        role: ${{ fromJSON(needs.vars.outputs.roles) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2

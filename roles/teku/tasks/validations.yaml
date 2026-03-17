@@ -1,4 +1,88 @@
+- name: Build teku validator extra args
+  ansible.builtin.set_fact:
+    teku_validator_effective_extra_args: >-
+      {{
+        teku_validator_container_command_extra_args
+        if teku_validator_container_command_extra_args | length > 0
+        else ((not teku_enabled) | ternary(teku_container_command_extra_args, []))
+      }}
+
 - name: Check if consensus client supports blobber configuration
   ansible.builtin.fail:
     msg: "Error: Teku cannot run checkpoint sync if the initial-state flag is already defined"
-  when: "teku_checkpoint_sync_enabled and (teku_container_command_extra_args | default('') | regex_search('initial-state') != None)"
+  vars:
+    teku_container_extra_arg_keys: >-
+      {{
+        teku_container_command_extra_args | ethpandaops.general.command_flag_keys(
+          teku_container_command_pair_flags
+        )
+      }}
+  when:
+    - teku_checkpoint_sync_enabled
+    - "'--initial-state' in teku_container_extra_arg_keys"
+
+- name: Validate teku beacon extra args
+  vars:
+    teku_reserved_flag_keys: >-
+      {{
+        (
+          teku_container_command_default +
+          teku_container_command_metrics +
+          teku_container_command_v6 +
+          teku_container_supernode_command +
+          teku_container_command_checkpoint_args +
+          teku_validator_container_command_base +
+          teku_validator_container_args +
+          teku_mev_boost_beacon_command
+        ) | ethpandaops.general.command_flag_keys(teku_container_command_pair_flags)
+      }}
+    teku_container_conflicting_flags: >-
+      {{
+        teku_container_command_extra_args | ethpandaops.general.command_conflicting_flags(
+          teku_container_command +
+          (teku_validator_enabled | ternary(teku_validator_container_args, [])) +
+          (teku_checkpoint_sync_enabled | ternary(teku_container_command_checkpoint_args, [])) +
+          (teku_mev_boost_enabled | ternary(teku_mev_boost_beacon_command, [])),
+          teku_container_command_pair_flags,
+          teku_reserved_flag_keys
+        )
+      }}
+  ansible.builtin.assert:
+    that:
+      - teku_container_conflicting_flags | length == 0
+    fail_msg: >-
+      teku_container_command_extra_args redefines managed flags:
+      {{ teku_container_conflicting_flags | join(', ') }}.
+      Configure these through teku role variables instead of re-adding them in extra args.
+
+- name: Validate teku validator extra args
+  when: teku_validator_enabled
+  vars:
+    teku_reserved_flag_keys: >-
+      {{
+        (
+          teku_container_command_default +
+          teku_container_command_metrics +
+          teku_container_command_v6 +
+          teku_container_supernode_command +
+          teku_container_command_checkpoint_args +
+          teku_validator_container_command_base +
+          teku_validator_container_args +
+          teku_mev_boost_beacon_command
+        ) | ethpandaops.general.command_flag_keys(teku_validator_container_command_pair_flags)
+      }}
+    teku_validator_conflicting_flags: >-
+      {{
+        teku_validator_effective_extra_args | ethpandaops.general.command_conflicting_flags(
+          teku_validator_container_command,
+          teku_validator_container_command_pair_flags,
+          teku_reserved_flag_keys
+        )
+      }}
+  ansible.builtin.assert:
+    that:
+      - teku_validator_conflicting_flags | length == 0
+    fail_msg: >-
+      teku validator extra args redefine managed flags:
+      {{ teku_validator_conflicting_flags | join(', ') }}.
+      Use teku_container_command_extra_args for beacon-only flags and dedicated teku vars for managed settings.
