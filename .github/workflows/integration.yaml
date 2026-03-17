@@ -45,6 +45,7 @@ jobs:
     steps:
       - name: Set roles matrix
         id: vars
+        working-directory: .
         run: |
           ALL_ROLES='["blockscout", "bootstrap", "hive", "mev_boost", "mev_rs"]'
 
