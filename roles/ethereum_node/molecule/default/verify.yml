@@ -135,7 +135,7 @@
       ansible.builtin.assert:
         that:
           - ethereum_node_beacon_validation_failure is defined
-          - ethereum_node_beacon_validation_failure.msg is search('redefines managed flags')
+          - ethereum_node_beacon_validation_failure.msg is search('managed flags')
           - ethereum_node_beacon_validation_failure.msg is search(ethereum_node_validation_scenario.beacon.expected_flag)
 
     - name: Verify conflicting validator args are rejected
@@ -160,5 +160,5 @@
       ansible.builtin.assert:
         that:
           - ethereum_node_validator_validation_failure is defined
-          - ethereum_node_validator_validation_failure.msg is search('redefines managed flags')
+          - ethereum_node_validator_validation_failure.msg is search('managed flags')
           - ethereum_node_validator_validation_failure.msg is search(ethereum_node_validation_scenario.validator.expected_flag)

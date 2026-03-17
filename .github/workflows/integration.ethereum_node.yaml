@@ -108,6 +108,7 @@ jobs:
     needs: [changes, vars]
     if: >-
       ${{
+        github.repository_owner == 'ethpandaops' &&
         needs.vars.outputs.EXECUTION_CLIENTS != '[]' &&
         needs.vars.outputs.CONSENSUS_CLIENTS != '[]'
       }}
@@ -119,7 +120,7 @@ jobs:
       fail-fast: false
       matrix:
         consensus: ${{ fromJSON(needs.vars.outputs.CONSENSUS_CLIENTS) }}
-    runs-on: ${{ github.repository_owner == 'ethpandaops' && 'self-hosted-ghr-size-s-x64' || 'ubuntu-latest' }}
+    runs-on: self-hosted-ghr-size-s-x64
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -148,3 +149,36 @@ jobs:
             EXECUTION_CLIENT=$execution_client molecule test
             echo "::endgroup::"
           done
+
+  test_fork_validation:
+    needs: [changes, vars]
+    if: >-
+      ${{
+        github.repository_owner != 'ethpandaops' &&
+        needs.vars.outputs.CONSENSUS_CLIENTS != '[]'
+      }}
+    strategy:
+      fail-fast: false
+      matrix:
+        consensus: ${{ fromJSON(needs.vars.outputs.CONSENSUS_CLIENTS) }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          path: ansible_collections/ethpandaops/general
+
+      - uses: ./ansible_collections/ethpandaops/general/.github/actions/setup
+        with:
+          dockerhub_username: ethpandaops
+          dockerhub_password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Validate ${{ matrix.consensus }} command conflict guards
+        env:
+          ANSIBLE_COLLECTIONS_PATH: ${{ github.workspace }}
+          ANSIBLE_FILTER_PLUGINS: ${{ github.workspace }}/ansible_collections/ethpandaops/general/plugins/filter
+          ANSIBLE_STDOUT_CALLBACK: default
+          PY_COLORS: '1'
+        run: >-
+          ansible-playbook
+          playbooks/ci/validate_consensus_command_conflicts.yml
+          --extra-vars "consensus_client=${{ matrix.consensus }}"
