@@ -2,8 +2,6 @@
   hosts: localhost
   connection: local
   gather_facts: false
-  collections:
-    - ethpandaops.general
   vars:
     validation_conflicting_fee_recipient: "0x0000000000000000000000000000000000000001"
     validation_scenarios:
