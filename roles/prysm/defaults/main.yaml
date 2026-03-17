@@ -110,6 +110,7 @@ prysm_container_command: >-
   }}
 
 prysm_container_command_extra_args: []
+prysm_container_command_pair_flags: []
 
 checkpoint_sync_url: https://beaconstate.ethstaker.cc # noqa var-naming[no-role-prefix]
 prysm_checkpoint_sync_enabled: true
@@ -156,6 +157,7 @@ prysm_validator_container_command:
   - --monitoring-port={{ prysm_ports_metrics }}
 
 prysm_validator_container_command_extra_args: []
+prysm_validator_container_command_pair_flags: []
   # - --graffiti=hello-world
 
 # Default image pull policy

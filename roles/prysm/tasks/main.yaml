@@ -1,3 +1,7 @@
+- name: Validate prysm
+  ansible.builtin.import_tasks: validations.yaml
+  when: not prysm_cleanup
+
 - name: Setup prysm
   ansible.builtin.import_tasks: setup.yaml
   when: not prysm_cleanup
