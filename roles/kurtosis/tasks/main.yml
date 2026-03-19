@@ -33,7 +33,7 @@
         - name: Add Kurtosis apt repository
           become: true
           ansible.builtin.apt_repository:
-            repo: deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /
+            repo: deb [trusted=yes] https://sdk.kurtosis.com/kurtosis-cli-release-artifacts/ /
             state: present
 
         - name: Update apt cache
@@ -55,7 +55,7 @@
           ansible.builtin.yum_repository:
             name: kurtosis
             description: Kurtosis
-            baseurl: https://yum.fury.io/kurtosis-tech/
+            baseurl: https://sdk.kurtosis.com/kurtosis-cli-release-artifacts/rpm/
             enabled: true
             gpgcheck: false
             state: present
