@@ -90,16 +90,16 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
   #     - name: blobscan-indexer
   #       repository: https://blobscan.github.io/blobscan-helm-charts/
   #       version: 0.2.9
-  blockscout:
-    valuesTemplatePath: templates/blockscout.yaml.j2
-    dependencies:
-      - name: blockscout-stack
-        repository: https://blockscout.github.io/helm-charts
-        version: 2.0.0
-      - name: postgresql
-        repository: https://charts.bitnami.com/bitnami
-        version: "14.x.x"
-        condition: postgresql.enabled
+  # blockscout:
+  #   valuesTemplatePath: templates/blockscout.yaml.j2
+  #   dependencies:
+  #     - name: blockscout-stack
+  #       repository: https://blockscout.github.io/helm-charts
+  #       version: 2.0.0
+  #     - name: postgresql
+  #       repository: https://charts.bitnami.com/bitnami
+  #       version: "14.x.x"
+  #       condition: postgresql.enabled
   checkpointz:
     valuesTemplatePath: templates/checkpointz.yaml.j2
     dependencies:
@@ -163,13 +163,13 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
       - name: tracoor-single
         repository: https://ethpandaops.github.io/ethereum-helm-charts
         version: 0.0.5
-  "{{ gen_kubernetes_config_ethereum_node_name }}":
-    valuesTemplatePath: templates/ethereum-node.yaml.j2
-    dependencies:
-      - name: ethereum-node
-        repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 0.0.27
-        alias: "{{ gen_kubernetes_config_ethereum_node_name }}"
+  # "{{ gen_kubernetes_config_ethereum_node_name }}":
+  #   valuesTemplatePath: templates/ethereum-node.yaml.j2
+  #   dependencies:
+  #     - name: ethereum-node
+  #       repository: https://ethpandaops.github.io/ethereum-helm-charts
+  #       version: 0.0.27
+  #       alias: "{{ gen_kubernetes_config_ethereum_node_name }}"
   erpc:
     valuesTemplatePath: templates/erpc.yaml.j2
     dependencies:
