@@ -32,15 +32,15 @@
   block:
     - name: Get enode
       ansible.builtin.command: "{{ ethereum_node_fact_discovery_el_enode_cmd[ethereum_node_el] }}"
-      register: ethereum_node_fact_discovery_el_enode
+      register: ethereum_node_fact_discovery_el_enode_raw
       changed_when: false
-      until: ethereum_node_fact_discovery_el_enode.rc == 0
+      until: ethereum_node_fact_discovery_el_enode_raw.rc == 0
       retries: "{{ ethereum_node_fact_discovery_el_retries }}"
       delay: "{{ ethereum_node_fact_discovery_el_delay }}"
 
     - name: Store enode var "ethereum_node_fact_discovery_el_enode"
       ansible.builtin.set_fact:
-        ethereum_node_fact_discovery_el_enode: "{{ ethereum_node_fact_discovery_el_enode.stdout }}"
+        ethereum_node_fact_discovery_el_enode: "{{ ethereum_node_fact_discovery_el_enode_raw.stdout }}"
         cacheable: true
 
 - name: Show execution node facts
