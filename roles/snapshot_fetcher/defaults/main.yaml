@@ -3,6 +3,7 @@ snapshot_fetcher_client: "{{ ethereum_node_el | default('geth') }}"  # Client to
 snapshot_fetcher_out_dir: "/data/{{ snapshot_fetcher_client }}"  # Where to store the snapshot
 snapshot_fetcher_base_url: "https://snapshots.ethpandaops.io"  # Base URL for snapshots
 snapshot_fetcher_block: "{{ lookup('pipe', 'curl -s https://snapshots.ethpandaops.io/{{ snapshot_fetcher_network }}/latest') }}"  # noqa yaml[line-length]
+snapshot_fetcher_filename: "snapshot.tar.zst"
 
 snapshot_fetcher_s3_provider_enabled: false
 
