@@ -1,0 +1,53 @@
+---
+- name: Ensure clusterfuzz storage directory exists
+  ansible.builtin.file:
+    path: "{{ clusterfuzz_master_storage_path }}"
+    state: directory
+    owner: devops
+    group: devops
+    mode: '0755'
+
+- name: Clone clusterfuzz repository
+  ansible.builtin.git:
+    repo: "{{ clusterfuzz_master_repo_url }}"
+    dest: "{{ clusterfuzz_master_repo_path }}"
+    version: master
+    force: true
+  become: true
+  become_user: devops
+
+- name: Install system dependencies
+  ansible.builtin.command:
+    cmd: "{{ clusterfuzz_master_repo_path }}/local/install_deps_linux.bash"
+    chdir: "{{ clusterfuzz_master_repo_path }}"
+  become: true
+  become_user: devops
+  changed_when: false
+
+- name: Install Python dependencies
+  ansible.builtin.command:
+    cmd: |
+      export PYTHON='python3'
+      "{{ clusterfuzz_master_repo_path }}/local/install_python_deps_linux.bash"
+    chdir: "{{ clusterfuzz_master_repo_path }}"
+  become: true
+  become_user: devops
+  changed_when: false
+
+- name: Create clusterfuzz service script
+  ansible.builtin.template:
+    src: clusterfuzz.service.j2
+    dest: /etc/systemd/system/clusterfuzz.service
+    owner: devops
+    group: devops
+    mode: '0644'
+
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Ensure clusterfuzz service is started and enabled
+  ansible.builtin.systemd:
+    name: clusterfuzz
+    state: started
+    enabled: true
