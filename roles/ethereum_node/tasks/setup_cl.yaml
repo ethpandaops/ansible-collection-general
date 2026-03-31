@@ -13,7 +13,6 @@
     lighthouse_container_pull: "{{ ethereum_node_images_always_pull }}"
     lighthouse_execution_engine_endpoint: "{{ ethereum_node_execution_engine_endpoint }}"
     lighthouse_beacon_endpoint: "{{ ethereum_node_beacon_endpoint }}"
-    lighthouse_validator_enabled: false
     lighthouse_mev_boost_enabled: "{{ ethereum_node_external_builder_enabled }}"
     lighthouse_mev_boost_endpoint: "{{ ethereum_node_external_builder_endpoint }}"
     lighthouse_checkpoint_sync_enabled: "{{ ethereum_node_cl_checkpoint_sync_enabled }}"
@@ -33,7 +32,6 @@
     teku_container_networks: "{{ ethereum_node_docker_networks }}"
     teku_container_pull: "{{ ethereum_node_images_always_pull }}"
     teku_execution_engine_endpoint: "{{ ethereum_node_execution_engine_endpoint }}"
-    teku_validator_enabled: false
     teku_mev_boost_enabled: "{{ ethereum_node_external_builder_enabled }}"
     teku_mev_boost_endpoint: "{{ ethereum_node_external_builder_endpoint }}"
     teku_checkpoint_sync_enabled: "{{ ethereum_node_cl_checkpoint_sync_enabled }}"
@@ -54,7 +52,6 @@
     prysm_container_pull: "{{ ethereum_node_images_always_pull }}"
     prysm_execution_engine_endpoint: "{{ ethereum_node_execution_engine_endpoint }}"
     prysm_beacon_endpoint: "{{ ethereum_node_beacon_grpc_endpoint }}"
-    prysm_validator_enabled: false
     prysm_mev_boost_enabled: "{{ ethereum_node_external_builder_enabled }}"
     prysm_mev_boost_endpoint: "{{ ethereum_node_external_builder_endpoint }}"
     prysm_checkpoint_sync_enabled: "{{ ethereum_node_cl_checkpoint_sync_enabled }}"
@@ -75,7 +72,6 @@
     lodestar_container_pull: "{{ ethereum_node_images_always_pull }}"
     lodestar_execution_engine_endpoint: "{{ ethereum_node_execution_engine_endpoint }}"
     lodestar_beacon_endpoint: "{{ ethereum_node_beacon_endpoint }}"
-    lodestar_validator_enabled: false
     lodestar_mev_boost_enabled: "{{ ethereum_node_external_builder_enabled }}"
     lodestar_mev_boost_endpoint: "{{ ethereum_node_external_builder_endpoint }}"
     lodestar_checkpoint_sync_enabled: "{{ ethereum_node_cl_checkpoint_sync_enabled }}"
@@ -95,7 +91,6 @@
     nimbus_container_networks: "{{ ethereum_node_docker_networks }}"
     nimbus_container_pull: "{{ ethereum_node_images_always_pull }}"
     nimbus_execution_engine_endpoint: "{{ ethereum_node_execution_engine_endpoint }}"
-    nimbus_validator_enabled: false
     nimbus_mev_boost_enabled: "{{ ethereum_node_external_builder_enabled }}"
     nimbus_mev_boost_endpoint: "{{ ethereum_node_external_builder_endpoint }}"
     nimbus_checkpoint_sync_enabled: "{{ ethereum_node_cl_checkpoint_sync_enabled }}"
@@ -116,7 +111,6 @@
     grandine_container_networks: "{{ ethereum_node_docker_networks }}"
     grandine_container_pull: "{{ ethereum_node_images_always_pull }}"
     grandine_execution_engine_endpoint: "{{ ethereum_node_execution_engine_endpoint }}"
-    grandine_validator_enabled: false
     grandine_mev_boost_enabled: "{{ ethereum_node_external_builder_enabled }}"
     grandine_mev_boost_endpoint: "{{ ethereum_node_external_builder_endpoint }}"
     grandine_checkpoint_sync_enabled: "{{ ethereum_node_cl_checkpoint_sync_enabled }}"
