@@ -76,7 +76,8 @@
     command: >-
       {{
         nimbus_validator_enabled | ternary(
-          nimbus_container_command + nimbus_validator_container_args + nimbus_container_command_extra_args +
+          nimbus_container_command + nimbus_validator_container_args + nimbus_validator_container_command_extra_args +
+          nimbus_container_command_extra_args +
           (nimbus_mev_boost_enabled | ternary(nimbus_mev_boost_beacon_command, [])),
           nimbus_container_command + nimbus_container_command_extra_args,
         )
@@ -110,7 +111,7 @@
     env: "{{ nimbus_container_env }}"
     networks: "{{ nimbus_container_networks }}"
     entrypoint: "{{ nimbus_container_entrypoint | default(omit) }}"
-    command: "{{ nimbus_validator_container_command }}"
+    command: "{{ nimbus_validator_container_command + nimbus_validator_effective_extra_args }}"
     user: "{{ nimbus_user_meta.uid }}"
     pull: "{{ nimbus_container_pull | bool }}"
     security_opts: "{{ nimbus_container_security_opts }}"

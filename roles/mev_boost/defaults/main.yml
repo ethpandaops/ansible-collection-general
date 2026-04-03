@@ -39,11 +39,22 @@ mev_boost_container_ports:
 mev_boost_container_stop_timeout: "300"
 mev_boost_container_networks: "{{ mev_boost_docker_networks }}"
 mev_boost_container_volumes: []
-mev_boost_container_command:
+mev_boost_container_command_default:
   - -addr=0.0.0.0:{{ mev_boost_server_port }}
   - -sepolia
   - -relay-check
+
+mev_boost_container_command_relay_args:
   - -relays=https://0x845bd072b7cd566f02faeb0a4033ce9399e42839ced64e8b2adcfc859ed1e8e1a5a293336a49feac6d9a5edb779be53a@boost-relay-sepolia.flashbots.net
-  # Remove -relays if you use mev_boost_config_enabled
+
+mev_boost_container_command: >-
+  {{
+    mev_boost_container_command_default +
+    (mev_boost_config_enabled | ternary([], mev_boost_container_command_relay_args))
+  }}
 
 mev_boost_container_command_extra_args: []
+mev_boost_container_command_pair_flags:
+  - -config
+mev_boost_config_incompatible_flag_keys:
+  - -relays

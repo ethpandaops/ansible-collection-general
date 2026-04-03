@@ -1,5 +1,94 @@
 - name: Verify
   hosts: molecule
+  vars:
+    ethereum_node_conflicting_fee_recipient: "0x0000000000000000000000000000000000000001"
+    ethereum_node_client_validation_scenarios:
+      grandine:
+        defaults_file: "{{ playbook_dir }}/../../../grandine/defaults/main.yaml"
+        tasks_file: "{{ playbook_dir }}/../../../grandine/tasks/validations.yaml"
+        beacon:
+          expected_flag: --builder-url
+          extra_args_var: grandine_container_command_extra_args
+          extra_args:
+            - --builder-url=http://other-relay:18550
+          extra_vars:
+            grandine_mev_boost_enabled: true
+        validator:
+          expected_flag: --suggested-fee-recipient
+          enabled_var: grandine_validator_enabled
+          extra_args_var: grandine_container_command_extra_args
+          extra_args:
+            - --suggested-fee-recipient={{ ethereum_node_conflicting_fee_recipient }}
+      lighthouse:
+        defaults_file: "{{ playbook_dir }}/../../../lighthouse/defaults/main.yaml"
+        tasks_file: "{{ playbook_dir }}/../../../lighthouse/tasks/validations.yaml"
+        beacon:
+          expected_flag: --http-port
+          extra_args_var: lighthouse_container_command_extra_args
+          extra_args:
+            - --http-port=9999
+        validator:
+          expected_flag: --suggested-fee-recipient
+          enabled_var: lighthouse_validator_enabled
+          extra_args_var: lighthouse_validator_container_command_extra_args
+          extra_args:
+            - --suggested-fee-recipient={{ ethereum_node_conflicting_fee_recipient }}
+      lodestar:
+        defaults_file: "{{ playbook_dir }}/../../../lodestar/defaults/main.yaml"
+        tasks_file: "{{ playbook_dir }}/../../../lodestar/tasks/validations.yaml"
+        beacon:
+          expected_flag: --rest.port
+          extra_args_var: lodestar_container_command_extra_args
+          extra_args:
+            - --rest.port=9999
+        validator:
+          expected_flag: --suggestedFeeRecipient
+          enabled_var: lodestar_validator_enabled
+          extra_args_var: lodestar_validator_container_command_extra_args
+          extra_args:
+            - --suggestedFeeRecipient={{ ethereum_node_conflicting_fee_recipient }}
+      nimbus:
+        defaults_file: "{{ playbook_dir }}/../../../nimbus/defaults/main.yaml"
+        tasks_file: "{{ playbook_dir }}/../../../nimbus/tasks/validations.yaml"
+        beacon:
+          expected_flag: --rest-port
+          extra_args_var: nimbus_container_command_extra_args
+          extra_args:
+            - --rest-port=9999
+        validator:
+          expected_flag: --suggested-fee-recipient
+          enabled_var: nimbus_validator_enabled
+          extra_args_var: nimbus_validator_container_command_extra_args
+          extra_args:
+            - --suggested-fee-recipient={{ ethereum_node_conflicting_fee_recipient }}
+      prysm:
+        defaults_file: "{{ playbook_dir }}/../../../prysm/defaults/main.yaml"
+        tasks_file: "{{ playbook_dir }}/../../../prysm/tasks/validations.yaml"
+        beacon:
+          expected_flag: --http-port
+          extra_args_var: prysm_container_command_extra_args
+          extra_args:
+            - --http-port=9999
+        validator:
+          expected_flag: --suggested-fee-recipient
+          enabled_var: prysm_validator_enabled
+          extra_args_var: prysm_validator_container_command_extra_args
+          extra_args:
+            - --suggested-fee-recipient={{ ethereum_node_conflicting_fee_recipient }}
+      teku:
+        defaults_file: "{{ playbook_dir }}/../../../teku/defaults/main.yaml"
+        tasks_file: "{{ playbook_dir }}/../../../teku/tasks/validations.yaml"
+        beacon:
+          expected_flag: --rest-api-port
+          extra_args_var: teku_container_command_extra_args
+          extra_args:
+            - --rest-api-port=9999
+        validator:
+          expected_flag: --validators-proposer-default-fee-recipient
+          enabled_var: teku_validator_enabled
+          extra_args_var: teku_validator_container_command_extra_args
+          extra_args:
+            - --validators-proposer-default-fee-recipient={{ ethereum_node_conflicting_fee_recipient }}
   tasks:
     - name: Get infos on EL container
       community.docker.docker_container_info:
@@ -20,3 +109,56 @@
         that:
           - "ethereum_node_result_el.container.State.Running == true"
           - "ethereum_node_result_cl.container.State.Running == true"
+
+    - name: Select validation scenario for active consensus client
+      ansible.builtin.set_fact:
+        ethereum_node_validation_scenario: "{{ ethereum_node_client_validation_scenarios[ethereum_node_cl] }}"
+
+    - name: Verify conflicting beacon args are rejected
+      ansible.builtin.include_tasks: tasks/expect_validation_failure.yml
+      vars:
+        validation_defaults_file: "{{ ethereum_node_validation_scenario.defaults_file }}"
+        validation_tasks_file: "{{ ethereum_node_validation_scenario.tasks_file }}"
+        validation_result_var: ethereum_node_beacon_validation_failure
+        validation_unexpected_success_msg: "Consensus client accepted conflicting beacon extra args"
+        validation_var_items: >-
+          {{
+            {
+              ethereum_node_validation_scenario.beacon.extra_args_var:
+                ethereum_node_validation_scenario.beacon.extra_args
+            }
+            | combine(ethereum_node_validation_scenario.beacon.extra_vars | default({}))
+            | dict2items
+          }}
+
+    - name: Assert beacon conflict was rejected
+      ansible.builtin.assert:
+        that:
+          - ethereum_node_beacon_validation_failure is defined
+          - ethereum_node_beacon_validation_failure.msg is search('managed flags')
+          - ethereum_node_beacon_validation_failure.msg is search(ethereum_node_validation_scenario.beacon.expected_flag)
+
+    - name: Verify conflicting validator args are rejected
+      ansible.builtin.include_tasks: tasks/expect_validation_failure.yml
+      vars:
+        validation_defaults_file: "{{ ethereum_node_validation_scenario.defaults_file }}"
+        validation_tasks_file: "{{ ethereum_node_validation_scenario.tasks_file }}"
+        validation_result_var: ethereum_node_validator_validation_failure
+        validation_unexpected_success_msg: "Consensus client accepted conflicting validator extra args"
+        validation_var_items: >-
+          {{
+            {
+              ethereum_node_validation_scenario.validator.enabled_var: true,
+              ethereum_node_validation_scenario.validator.extra_args_var:
+                ethereum_node_validation_scenario.validator.extra_args
+            }
+            | combine(ethereum_node_validation_scenario.validator.extra_vars | default({}))
+            | dict2items
+          }}
+
+    - name: Assert validator conflict was rejected
+      ansible.builtin.assert:
+        that:
+          - ethereum_node_validator_validation_failure is defined
+          - ethereum_node_validator_validation_failure.msg is search('managed flags')
+          - ethereum_node_validator_validation_failure.msg is search(ethereum_node_validation_scenario.validator.expected_flag)

@@ -17,6 +17,7 @@ jobs:
     outputs:
       dependencies: ${{ steps.global.outputs.dependencies }}
       ethereum_node: ${{ steps.global.outputs.ethereum_node }}
+      shared: ${{ steps.global.outputs.shared }}
       consensus_clients: ${{ steps.consensus_clients.outputs.changes }}
       execution_clients: ${{ steps.execution_clients.outputs.changes }}
     steps:
@@ -26,7 +27,16 @@ jobs:
         with:
           filters: |
             ethereum_node: roles/ethereum_node/**
-            dependencies: requirements.*
+            dependencies:
+              - requirements.*
+              - requirements.yaml
+            shared:
+              - .github/actions/setup/**
+              - .github/workflows/integration.ethereum_node.yaml
+              - .github/workflows/integration.ethereum_node.scheduled.yaml
+              - playbooks/ci/**
+              - playbooks/molecule/**
+              - plugins/filter/**
       - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
         id: consensus_clients
         with:
@@ -64,7 +74,8 @@ jobs:
           CONSENSUS_CLIENTS="[]";
           EXECUTION_CLIENTS="[]";
 
-          if [[ "${{ needs.changes.outputs.ethereum_node }}" == "true" ]] || \
+          if [[ "${{ needs.changes.outputs.shared }}" == "true" ]] || \
+             [[ "${{ needs.changes.outputs.ethereum_node }}" == "true" ]] || \
              [[ "${{ needs.changes.outputs.dependencies }}" == "true" ]] || \
              [[ "${{ needs.changes.outputs.consensus_clients }}" != "[]" && "${{ needs.changes.outputs.execution_clients }}" != "[]" ]]; then
             echo "Global changes detected - Need to run all clients";
@@ -98,6 +109,7 @@ jobs:
     needs: [changes, vars]
     if: >-
       ${{
+        github.repository_owner == 'ethpandaops' &&
         needs.vars.outputs.EXECUTION_CLIENTS != '[]' &&
         needs.vars.outputs.CONSENSUS_CLIENTS != '[]'
       }}
@@ -138,3 +150,36 @@ jobs:
             EXECUTION_CLIENT=$execution_client molecule test
             echo "::endgroup::"
           done
+
+  test_fork_validation:
+    needs: [changes, vars]
+    if: >-
+      ${{
+        github.repository_owner != 'ethpandaops' &&
+        needs.vars.outputs.CONSENSUS_CLIENTS != '[]'
+      }}
+    strategy:
+      fail-fast: false
+      matrix:
+        consensus: ${{ fromJSON(needs.vars.outputs.CONSENSUS_CLIENTS) }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          path: ansible_collections/ethpandaops/general
+
+      - uses: ./ansible_collections/ethpandaops/general/.github/actions/setup
+        with:
+          dockerhub_username: ethpandaops
+          dockerhub_password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Validate ${{ matrix.consensus }} command conflict guards
+        env:
+          ANSIBLE_COLLECTIONS_PATH: ${{ github.workspace }}
+          ANSIBLE_FILTER_PLUGINS: ${{ github.workspace }}/ansible_collections/ethpandaops/general/plugins/filter
+          ANSIBLE_STDOUT_CALLBACK: default
+          PY_COLORS: '1'
+        run: >-
+          ansible-playbook
+          playbooks/ci/validate_consensus_command_conflicts.yml
+          --extra-vars "consensus_client=${{ matrix.consensus }}"
