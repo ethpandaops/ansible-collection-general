@@ -101,6 +101,7 @@ lodestar_container_command: >-
   }}
 
 lodestar_container_command_extra_args: []
+lodestar_container_command_pair_flags: []
 
 checkpoint_sync_url: https://beaconstate.ethstaker.cc # noqa var-naming[no-role-prefix]
 lodestar_checkpoint_sync_enabled: true
@@ -142,6 +143,7 @@ lodestar_validator_container_command:
   - --suggestedFeeRecipient={{ lodestar_validator_fee_recipient }}
 
 lodestar_validator_container_command_extra_args: []
+lodestar_validator_container_command_pair_flags: []
   # - --builder
   # - --graffiti=hello-world
 

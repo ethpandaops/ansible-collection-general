@@ -112,6 +112,7 @@ nimbus_container_command: >-
   }}
 
 nimbus_container_command_extra_args: []
+nimbus_container_command_pair_flags: []
   # - --graffiti=hello-world
 
 ################################################################################
@@ -121,6 +122,8 @@ nimbus_container_command_extra_args: []
 ################################################################################
 nimbus_validator_container_image: statusim/nimbus-validator-client:multiarch-latest
 nimbus_validator_container_name: "{{ nimbus_container_name }}-validator"
+nimbus_validator_container_command_base:
+  - --beacon-node={{ nimbus_beacon_endpoint }}
 nimbus_validator_container_args:
   - --validators-dir=/validator-data/keys
   - --secrets-dir=/validator-data/secrets
@@ -129,13 +132,12 @@ nimbus_validator_container_volumes:
   - "{{ nimbus_validator_datadir }}:/validator-data"
 nimbus_validator_container_command: >-
   {{
-    [
-      "--beacon-node=" + nimbus_beacon_endpoint
-    ] +
+    nimbus_validator_container_command_base +
     nimbus_validator_container_args +
-    nimbus_container_command_metrics +
-    nimbus_container_command_extra_args
+    nimbus_container_command_metrics
   }}
+nimbus_validator_container_command_extra_args: []
+nimbus_validator_container_command_pair_flags: []
 
 # Default image pull policy
 nimbus_container_pull: false

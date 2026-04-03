@@ -1,0 +1,27 @@
+- name: Load validation defaults
+  ansible.builtin.include_vars:
+    file: "{{ validation_defaults_file }}"
+
+- name: Set validation vars
+  ansible.builtin.set_fact:
+    "{{ item.key }}": "{{ item.value }}"
+  loop: "{{ validation_var_items }}"
+
+- name: Run validation expecting failure
+  block:
+    - name: Include validation tasks
+      ansible.builtin.include_tasks:
+        file: "{{ validation_tasks_file }}"
+
+    - name: Fail if conflicting args were accepted
+      ansible.builtin.fail:
+        msg: "{{ validation_unexpected_success_msg }}"
+  rescue:
+    - name: Save validation failure result
+      ansible.builtin.set_fact:
+        "{{ validation_result_var }}": "{{ ansible_failed_result }}"
+  always:
+    - name: Reset validation vars
+      ansible.builtin.set_fact:
+        "{{ item.key }}": "{{ false if item.value is boolean else [] }}"
+      loop: "{{ validation_var_items }}"

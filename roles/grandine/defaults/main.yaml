@@ -106,6 +106,7 @@ grandine_container_command: >-
   }}
 
 grandine_container_command_extra_args: []
+grandine_container_command_pair_flags: []
 # - --network=mainnet
 # - --graffiti=hello-world
 
