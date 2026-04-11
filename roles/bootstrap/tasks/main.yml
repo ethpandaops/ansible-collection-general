@@ -167,6 +167,13 @@
     state: absent
   loop: "{{ bootstrap_python_system_version.python_system_path }}"
 
+# Install pip packages
+- name: Install pip packages
+  ansible.builtin.pip:
+    name: "{{ bootstrap_default_pip_packages }}"
+    state: present
+  when: bootstrap_default_pip_packages | length > 0
+
 # Reboot the machine if required
 - name: Check if reboot required
   ansible.builtin.stat:
