@@ -6,10 +6,6 @@ mev_boost_container_name: mev-boost
 # Test config.yaml functionality
 mev_boost_container_image: ethpandaops/mev-boost:develop
 mev_boost_config_enabled: true
-mev_boost_container_command:
-  - -addr=0.0.0.0:{{ mev_boost_server_port }}
-  - -sepolia
-  - -relay-check
 mev_boost_config: |
   timeout_get_header_ms: 900
   late_in_slot_time_ms: 1800

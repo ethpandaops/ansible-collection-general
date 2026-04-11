@@ -51,9 +51,8 @@
     command: >-
       {{
         grandine_container_command +
-        (grandine_validator_enabled | ternary(grandine_container_validator_args +
-          (grandine_mev_boost_enabled | ternary(grandine_mev_boost_beacon_command,[])),
-        [])) +
+        (grandine_validator_enabled | ternary(grandine_container_validator_args, [])) +
+        (grandine_mev_boost_enabled | ternary(grandine_mev_boost_beacon_command, [])) +
         (grandine_checkpoint_sync_enabled | ternary(
           grandine_container_command_extra_args + grandine_container_command_checkpoint_args,
           grandine_container_command_extra_args

@@ -111,6 +111,7 @@ lighthouse_container_command: >-
   }}
 
 lighthouse_container_command_extra_args: []
+lighthouse_container_command_pair_flags: []
 
 checkpoint_sync_url: https://beaconstate.ethstaker.cc # noqa var-naming[no-role-prefix]
 lighthouse_checkpoint_sync_enabled: true
@@ -156,6 +157,7 @@ lighthouse_validator_container_command:
   - --metrics-allow-origin=*
   - --metrics-port={{ lighthouse_ports_metrics }}
 lighthouse_validator_container_command_extra_args: []
+lighthouse_validator_container_command_pair_flags: []
   # - --http
   # - --http-port=5062
   # - --graffiti=hello-world
