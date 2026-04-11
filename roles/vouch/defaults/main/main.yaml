@@ -10,10 +10,8 @@ vouch_container_name: "vouch"
 vouch_container_image: "attestant/vouch:latest"
 
 vouch_container_stop_timeout: "300"
-vouch_container_ports: []
 vouch_container_volumes:
   - "{{ vouch_config_dir }}:{{ vouch_config_dir }}:ro"
-vouch_container_networks: []
 vouch_container_command:
   - "--base-dir={{ vouch_config_dir }}"
 vouch_container_pull: false

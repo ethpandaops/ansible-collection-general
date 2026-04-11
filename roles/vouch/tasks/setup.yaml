@@ -29,10 +29,11 @@
     state: started
     restart_policy: always
     stop_timeout: "{{ vouch_container_stop_timeout }}"
+    network_mode: "{{ vouch_container_network_mode | default(omit) }}"
     ports: "{{ vouch_container_ports | default(omit) }}"
     volumes: "{{ vouch_container_volumes }}"
     env: "{{ vouch_container_env | default(omit) }}"
-    networks: "{{ vouch_container_networks }}"
+    networks: "{{ vouch_container_networks | default(omit) }}"
     entrypoint: "{{ vouch_container_entrypoint | default(omit) }}"
     command: "{{ vouch_container_command | default(omit) }}"
     user: "{{ vouch_user_meta.uid }}:{{ vouch_user_meta.group }}"
