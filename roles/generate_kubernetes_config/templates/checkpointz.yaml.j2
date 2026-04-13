@@ -53,13 +53,8 @@ checkpointz:
 
     beacon:
       upstreams:
-        - name: rpc-{{ gen_kubernetes_config_ethereum_node_name }}
-          address: {{ default_cl_endpoint }}
-          dataProvider: true
 {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
-{% if "-super-" in (hostvars[host]['inventory_hostname'] | string) and ((hostvars[host]['inventory_hostname'] | string)[-2:]) == "-1" %}
         - name: {{ hostvars[host]['inventory_hostname'] }}
           address: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_beacon_prefix }}{{ hostvars[host]['inventory_hostname'] }}.{{ network_server_subdomain }}
           dataProvider: true
-{% endif %}
 {% endfor %}

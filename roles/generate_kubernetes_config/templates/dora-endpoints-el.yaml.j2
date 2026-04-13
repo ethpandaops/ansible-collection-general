@@ -1,11 +1,6 @@
 # {{ ansible_managed }}
 # Execution layer endpoints
 
-- url: {{ default_el_endpoint }}
-  name: rpc-{{ gen_kubernetes_config_ethereum_node_name }}
-  authGroup: pandaops
-  archive: true
-  priority: 1
 {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
 - url: https://{{ ethereum_node_rpc_prefix }}{{ hostvars[host]['inventory_hostname'] }}.{{ network_server_subdomain }}
   name: {{ hostvars[host]['inventory_hostname'] }}

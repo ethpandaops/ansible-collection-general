@@ -7,7 +7,7 @@ DATA_DIR="{{ snapshot_fetcher_out_dir }}"
 BLOCK="{{ snapshot_fetcher_block }}"
 BASE_URL="{{ snapshot_fetcher_base_url }}"
 CONTAINER_NAME="snapshot-fetcher-$NETWORK-$CLIENT-$BLOCK"
-
+SNAPSHOT_FILENAME="{{ snapshot_fetcher_filename }}"
 # Set tmux window title
 printf '\033]2;%s\033\\' "Snapshot: $NETWORK-$CLIENT"
 
@@ -16,16 +16,6 @@ echo "Network: $NETWORK"
 echo "Client: $CLIENT"
 echo "Target Block: $BLOCK"
 echo "================================"
-
-# Get block info
-echo "Fetching snapshot info for $NETWORK $CLIENT at block $BLOCK..."
-BLOCK_INFO=$(curl -s "$BASE_URL/$NETWORK/$CLIENT/$BLOCK/_snapshot_eth_getBlockByNumber.json")
-snapshot_fetcher_block=$(echo "$BLOCK_INFO" | jq -r '.result.number')
-CLIENT_VERSION=$(curl -s "$BASE_URL/$NETWORK/$CLIENT/$BLOCK/_snapshot_web3_clientVersion.json" | jq -r '.result')
-
-echo "Snapshot info:"
-echo "Block: $snapshot_fetcher_block"
-echo "Client: $CLIENT_VERSION"
 
 # Download and extract
 echo "Starting snapshot download container..."
@@ -47,14 +37,14 @@ if [ ! -f "$DATA_DIR/.snapshot_fetcher_started" ]; then
     -e "RCLONE_CONFIG_MYS3_SECRET_ACCESS_KEY={{ snapshot_fetcher_s3_secret_access_key }}" \
     docker.ethquokkaops.io/dh/library/alpine -c "cd /data && \
     apk add --no-cache curl tar zstd rclone && \
-    rclone cat mys3:/{{ snapshot_fetcher_s3_bucket }}/$NETWORK/$CLIENT/$BLOCK/snapshot.tar.zst | tar -I zstd -xvf - -C /data"
+    rclone cat mys3:/{{ snapshot_fetcher_s3_bucket }}/$NETWORK/$CLIENT/$BLOCK/$SNAPSHOT_FILENAME | tar -I zstd -xvf - -C /data"
 {% else %}
   docker run -d --name $CONTAINER_NAME \
     -v $DATA_DIR:/data \
     --entrypoint "/bin/sh" \
     docker.ethquokkaops.io/dh/library/alpine -c "cd /data && \
     apk add --no-cache wget curl tar zstd && \
-    wget --tries=0 --retry-connrefused -O - $BASE_URL/$NETWORK/$CLIENT/$BLOCK/snapshot.tar.zst | tar -I zstd -xvf - -C /data"
+    wget --tries=0 --retry-connrefused -O - $BASE_URL/$NETWORK/$CLIENT/$BLOCK/$SNAPSHOT_FILENAME | tar -I zstd -xvf - -C /data"
 {% endif %}
 
   touch $DATA_DIR/.snapshot_fetcher_started
