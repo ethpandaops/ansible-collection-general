@@ -55,7 +55,7 @@
     detach: false
     cleanup: true
     state: started
-    command: "curl -sf http://{{vouch_metrics.host }}:{{ vouch_metrics.port }}/metrics"
+    command: "curl -sf http://{{ vouch_metrics.host }}:{{ vouch_metrics.port }}/metrics"
   register: _vouch_metrics_curl_result
   until: _vouch_metrics_curl_result.status == 0 and (_vouch_metrics_curl_result.container.Output | regex_search('^vouch_ready.*1$', multiline=true) is not none)
   retries: "{{ vouch_healthcheck_retries }}"
