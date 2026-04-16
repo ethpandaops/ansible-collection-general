@@ -21,8 +21,8 @@
 
     - name: Set bridge route variables
       ansible.builtin.set_fact:
-        _bridge_iface: "br-{{ _docker_network_id.stdout[:12] }}"
-        _bridge_v6_subnet: >-
+        docker_network_bridge_iface: "br-{{ _docker_network_id.stdout[:12] }}"
+        docker_network_bridge_v6_subnet: >-
           {{ (docker_network_ipam_config
           | selectattr('subnet', 'defined')
           | selectattr('subnet', 'search', ':')
@@ -33,14 +33,14 @@
         src: docker-ipv6-route-fix.service.j2
         dest: /etc/systemd/system/docker-ipv6-route-fix.service
         mode: "0644"
-      register: _route_fix_service
+      register: docker_network_route_fix_service
 
     - name: Install docker-ipv6-route-fix script
       ansible.builtin.template:
         src: docker-ipv6-route-fix.sh.j2
         dest: /usr/local/bin/docker-ipv6-route-fix.sh
         mode: "0755"
-      register: _route_fix_script
+      register: docker_network_route_fix_script
 
     - name: Enable and start docker-ipv6-route-fix service
       ansible.builtin.systemd:
@@ -49,5 +49,6 @@
         enabled: true
         state: >-
           {{ 'restarted'
-          if (_route_fix_service.changed or _route_fix_script.changed)
+          if (docker_network_route_fix_service.changed
+          or docker_network_route_fix_script.changed)
           else 'started' }}

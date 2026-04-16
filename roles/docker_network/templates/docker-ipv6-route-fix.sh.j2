@@ -4,8 +4,8 @@
 # host's interface route for the same prefix. This script replaces it with
 # a more specific pool route so reply packets find the bridge correctly.
 
-BRIDGE="{{ _bridge_iface }}"
-SUBNET="{{ _bridge_v6_subnet }}"
+BRIDGE="{{ docker_network_bridge_iface }}"
+SUBNET="{{ docker_network_bridge_v6_subnet }}"
 POOL="{{ docker_network_ipv6_pool }}"
 
 # Wait for bridge to exist (Docker may still be starting)
