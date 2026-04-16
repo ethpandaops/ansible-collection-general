@@ -2,11 +2,12 @@
   ansible.builtin.include_role:
     name: ethpandaops.general.json_rpc_snooper
   vars:
-    json_rpc_snooper_container_networks: "{{ ethereum_node_docker_networks }}"
+    json_rpc_snooper_container_networks: "{{ ethereum_node_snooper_engine_docker_networks }}"
     json_rpc_snooper_container_name: "{{ ethereum_node_json_rpc_snooper_engine_name }}"
     json_rpc_snooper_port: "{{ ethereum_node_json_rpc_snooper_engine_port }}"
     json_rpc_snooper_public_port: "{{ ethereum_node_json_rpc_snooper_engine_public_port }}"
     json_rpc_snooper_ipv6_enabled: "{{ ethereum_node_ipv6_enabled }}"
+    json_rpc_snooper_public_ipv6: "{{ ethereum_node_snooper_engine_public_ipv6 }}"
     json_rpc_snooper_container_env: "{{ ethereum_node_json_rpc_snooper_engine_container_env }}"
     json_rpc_snooper_target: "{{ ethereum_node_el_engine_endpoint }}"
   when: ethereum_node_json_rpc_snooper_engine_enabled
@@ -15,11 +16,12 @@
   ansible.builtin.include_role:
     name: ethpandaops.general.json_rpc_snooper
   vars:
-    json_rpc_snooper_container_networks: "{{ ethereum_node_docker_networks }}"
+    json_rpc_snooper_container_networks: "{{ ethereum_node_snooper_rpc_docker_networks }}"
     json_rpc_snooper_container_name: "{{ ethereum_node_json_rpc_snooper_name }}"
     json_rpc_snooper_port: "{{ ethereum_node_json_rpc_snooper_port }}"
     json_rpc_snooper_public_port: "{{ ethereum_node_json_rpc_snooper_public_port }}"
     json_rpc_snooper_ipv6_enabled: "{{ ethereum_node_ipv6_enabled }}"
+    json_rpc_snooper_public_ipv6: "{{ ethereum_node_snooper_rpc_public_ipv6 }}"
     json_rpc_snooper_container_env: "{{ ethereum_node_json_rpc_snooper_container_env }}"
     json_rpc_snooper_target: "{{ ethereum_node_el_rpc_endpoint }}"
   when: ethereum_node_json_rpc_snooper_enabled

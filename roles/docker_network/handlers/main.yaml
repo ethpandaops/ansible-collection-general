@@ -1,0 +1,4 @@
+- name: restart ndppd
+  ansible.builtin.service:
+    name: ndppd
+    state: restarted

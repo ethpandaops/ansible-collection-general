@@ -1,5 +1,35 @@
+- name: Setup NDP proxy for routed IPv6
+  ansible.builtin.include_tasks: ndppd_setup.yaml
+  when: docker_network_enable_ipv6 | bool
+
 - name: Create docker network
   community.docker.docker_network:
     name: "{{ docker_network_name }}"
-    enable_ipv6: "{{  docker_network_enable_ipv6 }}"
+    enable_ipv6: "{{ docker_network_enable_ipv6 }}"
     ipam_config: "{{ docker_network_ipam_config }}"
+    driver_options: "{{ docker_network_driver_options | default(omit) }}"
+
+- name: Fix bridge IPv6 route to avoid conflict with host interface
+  when: docker_network_enable_ipv6 | bool
+  block:
+    - name: Get bridge interface name
+      ansible.builtin.command: docker network inspect {{ docker_network_name }} --format '{{ '{{' }}.Id{{ '}}' }}'
+      register: _docker_network_id
+      changed_when: false
+
+    - name: Set bridge route variables
+      ansible.builtin.set_fact:
+        _bridge_iface: "br-{{ _docker_network_id.stdout[:12] }}"
+        _bridge_v6_subnet: "{{ (docker_network_ipam_config | selectattr('subnet', 'defined') | selectattr('subnet', 'search', ':') | first).subnet }}"
+        _bridge_v6_pool: "{{ docker_network_ipv6_pool | default('') }}"
+
+    - name: Delete broad bridge subnet route
+      ansible.builtin.command: "ip -6 route del {{ _bridge_v6_subnet }} dev {{ _bridge_iface }}"
+      register: _del_route
+      changed_when: _del_route.rc == 0
+      failed_when: _del_route.rc != 0 and 'No such process' not in _del_route.stderr
+
+    - name: Add narrow pool route on bridge
+      ansible.builtin.command: "ip -6 route replace {{ _bridge_v6_pool }} dev {{ _bridge_iface }}"
+      when: _bridge_v6_pool | length > 0
+      changed_when: true

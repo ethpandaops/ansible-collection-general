@@ -42,6 +42,7 @@ bootstrap_default_common_packages:
   - rsync
   - tree
   - smartmontools
+  - python3-pip
 
 bootstrap_default_pip_packages:
   - runlike

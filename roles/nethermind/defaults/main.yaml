@@ -2,7 +2,8 @@ nethermind_user: nethermind
 nethermind_datadir: /data/nethermind
 nethermind_auth_jwt_path: /data/execution-auth.secret
 nethermind_announced_ip: "{{ ansible_host }}"
-nethermind_announced_ipv6: "{{ ansible_default_ipv6.address if nethermind_ipv6_enabled and ansible_default_ipv6.address is defined else '' }}"
+nethermind_public_ipv6: ""
+nethermind_announced_ipv6: "{{ nethermind_public_ipv6 if (nethermind_public_ipv6 | length > 0) else (ansible_default_ipv6.address if nethermind_ipv6_enabled and ansible_default_ipv6.address is defined else '') }}"
 
 nethermind_cleanup: false # when set to "true" it will remove the container
 
@@ -28,7 +29,7 @@ nethermind_container_ports_ipv6:
   - "[::]:{{ nethermind_ports_p2p }}:{{ nethermind_ports_p2p }}/udp"
 
 nethermind_container_ports: >-
-  {{ nethermind_container_ports_ipv4 + (nethermind_container_ports_ipv6 if nethermind_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
+  {{ nethermind_container_ports_ipv4 + (nethermind_container_ports_ipv6 if nethermind_ipv6_enabled and ansible_default_ipv6.address is defined and (nethermind_public_ipv6 | length == 0) else []) }}
 
 nethermind_container_volumes:
   - "{{ nethermind_datadir }}:/data"

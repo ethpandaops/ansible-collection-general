@@ -23,6 +23,18 @@ ethereum_node_supported_external_builders:
 ethereum_node_docker_networks:
   - name: "{{ ethereum_node_docker_network_name }}"
 
+# Per-component network lists: shared bridge with optional static IPv6 address
+ethereum_node_el_docker_networks: >-
+  {{ [{'name': ethereum_node_docker_network_name} | combine({'ipv6_address': ethereum_node_el_public_ipv6} if (ethereum_node_el_public_ipv6 | length > 0) else {})] }}
+ethereum_node_cl_docker_networks: >-
+  {{ [{'name': ethereum_node_docker_network_name} | combine({'ipv6_address': ethereum_node_cl_public_ipv6} if (ethereum_node_cl_public_ipv6 | length > 0) else {})] }}
+ethereum_node_validator_docker_networks: >-
+  {{ [{'name': ethereum_node_docker_network_name} | combine({'ipv6_address': ethereum_node_validator_public_ipv6} if (ethereum_node_validator_public_ipv6 | length > 0) else {})] }}
+ethereum_node_snooper_rpc_docker_networks: >-
+  {{ [{'name': ethereum_node_docker_network_name} | combine({'ipv6_address': ethereum_node_snooper_rpc_public_ipv6} if (ethereum_node_snooper_rpc_public_ipv6 | length > 0) else {})] }}
+ethereum_node_snooper_engine_docker_networks: >-
+  {{ [{'name': ethereum_node_docker_network_name} | combine({'ipv6_address': ethereum_node_snooper_engine_public_ipv6} if (ethereum_node_snooper_engine_public_ipv6 | length > 0) else {})] }}
+
 ethereum_node_execution_engine_endpoint: >-
   {{ ethereum_node_json_rpc_snooper_engine_enabled | ternary(ethereum_node_el_engine_snooper_endpoint, ethereum_node_el_engine_endpoint) }}
 

@@ -1,3 +1,9 @@
 docker_network_name: "shared"
 docker_network_enable_ipv6: false
 docker_network_ipam_config: []
+docker_network_driver_options: {}
+
+# Narrower IPv6 pool route to add on the bridge (replaces the broad subnet route).
+# Use this when the bridge subnet overlaps with the host's interface subnet.
+# Example: "2a01:4f8:x:y::/124" to route only the container pool via the bridge.
+docker_network_ipv6_pool: ""
