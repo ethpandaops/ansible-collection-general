@@ -99,7 +99,7 @@ lighthouse_container_command_default:
   - --enr-quic-port={{ lighthouse_ports_quic }}
 
 lighthouse_container_command_v6:
-  - --listen-address=::
+  - "--listen-address=::"
   - --enr-address={{ lighthouse_announced_ipv6 }}
   - --enr-tcp6-port={{ lighthouse_ports_p2p_tcp }}
   - --enr-udp6-port={{ lighthouse_ports_p2p_udp }}

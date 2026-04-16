@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Replace the broad bridge subnet route with a narrow pool route.
 # Docker adds a /64 (or /124) route on the bridge that conflicts with the
 # host's interface route for the same prefix. This script replaces it with

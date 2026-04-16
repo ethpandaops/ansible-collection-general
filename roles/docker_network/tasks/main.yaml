@@ -1,6 +1,11 @@
 - name: Setup NDP proxy for routed IPv6
   ansible.builtin.include_tasks: ndppd_setup.yaml
-  when: docker_network_enable_ipv6 | bool
+  when:
+    - docker_network_enable_ipv6 | bool
+    - >-
+      docker_network_driver_options is mapping and
+      docker_network_driver_options['com.docker.network.bridge.gateway_mode_ipv6']
+      | default('') == 'routed'
 
 - name: Create docker network
   community.docker.docker_network:
