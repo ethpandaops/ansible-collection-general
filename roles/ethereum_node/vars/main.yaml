@@ -44,6 +44,18 @@ ethereum_node_snooper_engine_docker_networks: >-
   {{ [{'name': ethereum_node_docker_network_name} |
   combine({'ipv6_address': ethereum_node_snooper_engine_public_ipv6}
   if (ethereum_node_snooper_engine_public_ipv6 | length > 0) else {})] }}
+ethereum_node_mev_boost_docker_networks: >-
+  {{ [{'name': ethereum_node_docker_network_name} |
+  combine({'ipv6_address': ethereum_node_mev_boost_public_ipv6}
+  if (ethereum_node_mev_boost_public_ipv6 | length > 0) else {})] }}
+ethereum_node_xatu_sentry_docker_networks: >-
+  {{ [{'name': ethereum_node_docker_network_name} |
+  combine({'ipv6_address': ethereum_node_xatu_sentry_public_ipv6}
+  if (ethereum_node_xatu_sentry_public_ipv6 | length > 0) else {})] }}
+ethereum_node_metrics_exporter_docker_networks: >-
+  {{ [{'name': ethereum_node_docker_network_name} |
+  combine({'ipv6_address': ethereum_node_metrics_exporter_public_ipv6}
+  if (ethereum_node_metrics_exporter_public_ipv6 | length > 0) else {})] }}
 
 ethereum_node_execution_engine_endpoint: >-
   {{ ethereum_node_json_rpc_snooper_engine_enabled | ternary(ethereum_node_el_engine_snooper_endpoint, ethereum_node_el_engine_endpoint) }}

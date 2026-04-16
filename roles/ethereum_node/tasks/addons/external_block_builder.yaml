@@ -5,7 +5,7 @@
       ansible.builtin.include_role:
         name: ethpandaops.general.mev_boost
       vars:
-        mev_boost_container_networks: "{{ ethereum_node_docker_networks }}"
+        mev_boost_container_networks: "{{ ethereum_node_mev_boost_docker_networks }}"
         mev_boost_container_name: "{{ ethereum_node_external_builder_container_name }}"
         mev_boost_server_port: "{{ ethereum_node_external_builder_server_port }}"
       when: ethereum_node_external_builder_type == "mev_boost"
