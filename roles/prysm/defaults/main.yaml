@@ -6,7 +6,10 @@ prysm_execution_engine_endpoint: http://geth:8551
 prysm_beacon_endpoint: "{{ prysm_container_name }}:{{ prysm_ports_grpc }}"
 prysm_announced_ip: "{{ ansible_host }}"
 prysm_public_ipv6: ""
-prysm_announced_ipv6: "{{ prysm_public_ipv6 if (prysm_public_ipv6 | length > 0) else (ansible_default_ipv6.address if prysm_ipv6_enabled and ansible_default_ipv6.address is defined else '') }}"
+prysm_announced_ipv6: >-
+  {{ prysm_public_ipv6 if (prysm_public_ipv6 | length > 0)
+  else (ansible_default_ipv6.address
+  if prysm_ipv6_enabled and ansible_default_ipv6.address is defined else '') }}
 prysm_mev_boost_endpoint: "http://mev-boost:18550"
 
 prysm_cleanup: false # when set to "true" it will remove the container(s)

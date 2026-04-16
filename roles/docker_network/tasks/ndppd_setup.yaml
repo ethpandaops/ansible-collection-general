@@ -33,7 +33,7 @@
     src: ndppd.conf.j2
     dest: /etc/ndppd.conf
     mode: "0644"
-  notify: restart ndppd
+  notify: Restart ndppd
 
 - name: Enable and start ndppd
   ansible.builtin.service:
