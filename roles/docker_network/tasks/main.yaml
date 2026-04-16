@@ -1,5 +1,59 @@
+- name: Setup NDP proxy for routed IPv6
+  ansible.builtin.include_tasks: ndppd_setup.yaml
+  when:
+    - docker_network_enable_ipv6 | bool
+    - >-
+      docker_network_driver_options is mapping and
+      docker_network_driver_options['com.docker.network.bridge.gateway_mode_ipv6']
+      | default('') == 'routed'
+
 - name: Create docker network
   community.docker.docker_network:
     name: "{{ docker_network_name }}"
-    enable_ipv6: "{{  docker_network_enable_ipv6 }}"
+    enable_ipv6: "{{ docker_network_enable_ipv6 }}"
     ipam_config: "{{ docker_network_ipam_config }}"
+    driver_options: "{{ docker_network_driver_options | default(omit) }}"
+
+- name: Setup persistent bridge IPv6 route fix
+  when: docker_network_enable_ipv6 | bool and (docker_network_ipv6_pool | default('') | length > 0)
+  block:
+    - name: Get bridge interface name
+      ansible.builtin.command: >-
+        docker network inspect {{ docker_network_name }}
+        --format '{{ '{{' }}.Id{{ '}}' }}'
+      register: _docker_network_id
+      changed_when: false
+
+    - name: Set bridge route variables
+      ansible.builtin.set_fact:
+        docker_network_bridge_iface: "br-{{ _docker_network_id.stdout[:12] }}"
+        docker_network_bridge_v6_subnet: >-
+          {{ (docker_network_ipam_config
+          | selectattr('subnet', 'defined')
+          | selectattr('subnet', 'search', ':')
+          | first).subnet }}
+
+    - name: Install docker-ipv6-route-fix service
+      ansible.builtin.template:
+        src: docker-ipv6-route-fix.service.j2
+        dest: /etc/systemd/system/docker-ipv6-route-fix.service
+        mode: "0644"
+      register: docker_network_route_fix_service
+
+    - name: Install docker-ipv6-route-fix script
+      ansible.builtin.template:
+        src: docker-ipv6-route-fix.sh.j2
+        dest: /usr/local/bin/docker-ipv6-route-fix.sh
+        mode: "0755"
+      register: docker_network_route_fix_script
+
+    - name: Enable and start docker-ipv6-route-fix service
+      ansible.builtin.systemd:
+        name: docker-ipv6-route-fix
+        daemon_reload: true
+        enabled: true
+        state: >-
+          {{ 'restarted'
+          if (docker_network_route_fix_service.changed
+          or docker_network_route_fix_script.changed)
+          else 'started' }}

@@ -1,0 +1,31 @@
+- name: Install ndppd
+  ansible.builtin.package:
+    name: ndppd
+    state: present
+
+- name: Enable IPv6 forwarding
+  ansible.posix.sysctl:
+    name: net.ipv6.conf.all.forwarding
+    value: "1"
+    sysctl_set: true
+    reload: true
+
+- name: Keep accepting RAs with forwarding enabled
+  ansible.posix.sysctl:
+    name: "net.ipv6.conf.{{ docker_network_ndppd_interface | default(ansible_default_ipv6.interface | default('eth0')) }}.accept_ra"
+    value: "2"
+    sysctl_set: true
+    reload: true
+
+- name: Configure ndppd
+  ansible.builtin.template:
+    src: ndppd.conf.j2
+    dest: /etc/ndppd.conf
+    mode: "0644"
+  notify: Restart ndppd
+
+- name: Enable and start ndppd
+  ansible.builtin.service:
+    name: ndppd
+    state: started
+    enabled: true

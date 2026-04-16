@@ -2,7 +2,11 @@ erigon_user: erigon
 erigon_datadir: /data/erigon
 erigon_auth_jwt_path: /data/execution-auth.secret
 erigon_announced_ip: "{{ ansible_host }}"
-erigon_announced_ipv6: "{{ ansible_default_ipv6.address if erigon_ipv6_enabled and ansible_default_ipv6.address is defined else '' }}"
+erigon_public_ipv6: ""
+erigon_announced_ipv6: >-
+  {{ erigon_public_ipv6 if (erigon_public_ipv6 | length > 0)
+  else (ansible_default_ipv6.address
+  if erigon_ipv6_enabled and ansible_default_ipv6.address is defined else '') }}
 
 erigon_cleanup: false # when set to "true" it will remove the container
 
@@ -32,7 +36,10 @@ erigon_container_ports_ipv6:
   - "[::]:{{ erigon_ports_torrent }}:{{ erigon_ports_torrent }}/udp"
 
 erigon_container_ports: >-
-  {{ erigon_container_ports_ipv4 + (erigon_container_ports_ipv6 if erigon_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
+  {{ erigon_container_ports_ipv4 +
+  (erigon_container_ports_ipv6
+  if erigon_ipv6_enabled and ansible_default_ipv6.address is defined
+  and (erigon_public_ipv6 | length == 0) else []) }}
 
 erigon_container_volumes:
   - "{{ erigon_datadir }}:/data"

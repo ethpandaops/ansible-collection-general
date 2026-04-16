@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Replace the broad bridge subnet route with a narrow pool route.
+# Docker adds a /64 (or /124) route on the bridge that conflicts with the
+# host's interface route for the same prefix. This script replaces it with
+# a more specific pool route so reply packets find the bridge correctly.
+
+BRIDGE="{{ docker_network_bridge_iface }}"
+SUBNET="{{ docker_network_bridge_v6_subnet }}"
+POOL="{{ docker_network_ipv6_pool }}"
+
+# Wait for bridge to exist (Docker may still be starting)
+for i in $(seq 1 30); do
+    ip link show "$BRIDGE" &>/dev/null && break
+    sleep 1
+done
+
+ip -6 route del "$SUBNET" dev "$BRIDGE" 2>/dev/null
+ip -6 route replace "$POOL" dev "$BRIDGE"
+
+# Allow IPv6 forwarding through Docker's DOCKER-USER chain
+ip6tables -C DOCKER-USER -j ACCEPT 2>/dev/null || ip6tables -I DOCKER-USER -j ACCEPT

@@ -1,0 +1,10 @@
+{% set iface = docker_network_ndppd_interface | default(ansible_default_ipv6.interface | default('eth0')) %}
+{% for ipam in docker_network_ipam_config %}
+{% if ':' in (ipam.subnet | default('')) %}
+proxy {{ iface }} {
+    rule {{ ipam.subnet }} {
+        static
+    }
+}
+{% endif %}
+{% endfor %}

@@ -1,0 +1,12 @@
+[Unit]
+Description=Fix Docker bridge IPv6 routes for routed mode
+After=docker.service
+BindsTo=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/bin/docker-ipv6-route-fix.sh
+
+[Install]
+WantedBy=docker.service
