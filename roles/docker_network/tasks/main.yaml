@@ -9,27 +9,45 @@
     ipam_config: "{{ docker_network_ipam_config }}"
     driver_options: "{{ docker_network_driver_options | default(omit) }}"
 
-- name: Fix bridge IPv6 route to avoid conflict with host interface
-  when: docker_network_enable_ipv6 | bool
+- name: Setup persistent bridge IPv6 route fix
+  when: docker_network_enable_ipv6 | bool and (docker_network_ipv6_pool | default('') | length > 0)
   block:
     - name: Get bridge interface name
-      ansible.builtin.command: docker network inspect {{ docker_network_name }} --format '{{ '{{' }}.Id{{ '}}' }}'
+      ansible.builtin.command: >-
+        docker network inspect {{ docker_network_name }}
+        --format '{{ '{{' }}.Id{{ '}}' }}'
       register: _docker_network_id
       changed_when: false
 
     - name: Set bridge route variables
       ansible.builtin.set_fact:
         _bridge_iface: "br-{{ _docker_network_id.stdout[:12] }}"
-        _bridge_v6_subnet: "{{ (docker_network_ipam_config | selectattr('subnet', 'defined') | selectattr('subnet', 'search', ':') | first).subnet }}"
-        _bridge_v6_pool: "{{ docker_network_ipv6_pool | default('') }}"
+        _bridge_v6_subnet: >-
+          {{ (docker_network_ipam_config
+          | selectattr('subnet', 'defined')
+          | selectattr('subnet', 'search', ':')
+          | first).subnet }}
 
-    - name: Delete broad bridge subnet route
-      ansible.builtin.command: "ip -6 route del {{ _bridge_v6_subnet }} dev {{ _bridge_iface }}"
-      register: _del_route
-      changed_when: _del_route.rc == 0
-      failed_when: _del_route.rc != 0 and 'No such process' not in _del_route.stderr
+    - name: Install docker-ipv6-route-fix service
+      ansible.builtin.template:
+        src: docker-ipv6-route-fix.service.j2
+        dest: /etc/systemd/system/docker-ipv6-route-fix.service
+        mode: "0644"
+      register: _route_fix_service
 
-    - name: Add narrow pool route on bridge
-      ansible.builtin.command: "ip -6 route replace {{ _bridge_v6_pool }} dev {{ _bridge_iface }}"
-      when: _bridge_v6_pool | length > 0
-      changed_when: true
+    - name: Install docker-ipv6-route-fix script
+      ansible.builtin.template:
+        src: docker-ipv6-route-fix.sh.j2
+        dest: /usr/local/bin/docker-ipv6-route-fix.sh
+        mode: "0755"
+      register: _route_fix_script
+
+    - name: Enable and start docker-ipv6-route-fix service
+      ansible.builtin.systemd:
+        name: docker-ipv6-route-fix
+        daemon_reload: true
+        enabled: true
+        state: >-
+          {{ 'restarted'
+          if (_route_fix_service.changed or _route_fix_script.changed)
+          else 'started' }}

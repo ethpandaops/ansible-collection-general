@@ -17,17 +17,6 @@
     sysctl_set: true
     reload: true
 
-- name: Check if DOCKER-USER IPv6 ACCEPT rule exists
-  ansible.builtin.command: ip6tables -C DOCKER-USER -j ACCEPT
-  register: _docker_user_check
-  changed_when: false
-  failed_when: false
-
-- name: Allow IPv6 forwarding through Docker DOCKER-USER chain
-  ansible.builtin.command: ip6tables -I DOCKER-USER -j ACCEPT
-  when: _docker_user_check.rc != 0
-  changed_when: true
-
 - name: Configure ndppd
   ansible.builtin.template:
     src: ndppd.conf.j2
