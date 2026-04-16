@@ -3,7 +3,7 @@
     name: ethpandaops.general.xatu_sentry
   vars:
     xatu_sentry_config_beacon_uri: "{{ ethereum_node_cl_beacon_endpoint }}"
-    xatu_sentry_container_networks: "{{ ethereum_node_xatu_sentry_docker_networks }}"
+    xatu_sentry_container_networks: "{{ ethereum_node_docker_networks }}"
   when: ethereum_node_xatu_sentry_enabled
 
 - name: Cleanup xatu sentry

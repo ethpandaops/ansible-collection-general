@@ -32,9 +32,6 @@ ethereum_node_cl_public_ipv6: ""
 ethereum_node_validator_public_ipv6: ""
 ethereum_node_snooper_rpc_public_ipv6: ""
 ethereum_node_snooper_engine_public_ipv6: ""
-ethereum_node_mev_boost_public_ipv6: ""
-ethereum_node_xatu_sentry_public_ipv6: ""
-ethereum_node_metrics_exporter_public_ipv6: ""
 
 # Validator
 ethereum_node_cl_validator_enabled: false
