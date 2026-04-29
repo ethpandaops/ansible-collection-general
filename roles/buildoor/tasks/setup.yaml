@@ -1,0 +1,48 @@
+- name: Validate required buildoor configuration
+  ansible.builtin.assert:
+    that:
+      - buildoor_builder_privkey | length > 0
+      - buildoor_wallet_privkey | length > 0
+      - buildoor_cl_client | length > 0
+      - buildoor_el_engine_api | length > 0
+      - buildoor_el_rpc | length > 0
+      - buildoor_jwt_path | length > 0
+    fail_msg: >-
+      buildoor requires builder/wallet keys, CL/EL endpoints and a JWT secret path
+      to be configured.
+
+- name: Add buildoor user
+  ansible.builtin.user:
+    name: "{{ buildoor_user }}"
+  register: buildoor_user_meta
+
+- name: Setup docker network
+  ansible.builtin.include_role:
+    name: ethpandaops.general.docker_network
+  vars:
+    docker_network_name: "{{ buildoor_docker_network_name }}"
+
+- name: Create buildoor data directory
+  ansible.builtin.file:
+    path: "{{ buildoor_datadir }}"
+    state: directory
+    owner: "{{ buildoor_user }}"
+    group: "{{ buildoor_user }}"
+    mode: '0750'
+
+- name: Run buildoor container
+  community.docker.docker_container:
+    name: "{{ buildoor_container_name }}"
+    image: "{{ buildoor_container_image }}"
+    image_name_mismatch: recreate
+    state: started
+    restart_policy: always
+    stop_timeout: "{{ buildoor_container_stop_timeout }}"
+    volumes: "{{ buildoor_container_volumes }}"
+    env: "{{ buildoor_container_env }}"
+    networks: "{{ buildoor_container_networks }}"
+    ports: "{{ buildoor_container_ports }}"
+    command: "{{ buildoor_container_command + buildoor_container_command_extra_args }}"
+    user: "{{ buildoor_user_meta.uid }}"
+    pull: "{{ buildoor_container_pull | bool }}"
+  no_log: true
