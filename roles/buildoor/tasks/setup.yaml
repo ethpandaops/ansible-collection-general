@@ -45,4 +45,3 @@
     command: "{{ buildoor_container_command + buildoor_container_command_extra_args }}"
     user: "{{ buildoor_user_meta.uid }}"
     pull: "{{ buildoor_container_pull | bool }}"
-  no_log: true
