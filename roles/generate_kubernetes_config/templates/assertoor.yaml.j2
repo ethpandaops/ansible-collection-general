@@ -34,17 +34,6 @@ assertoor:
           - path: /
             pathType: Prefix
 
-  ingressAdmin:
-    enabled: true
-    className: ingress-nginx-public
-    annotations:
-      cert-manager.io/cluster-issuer: letsencrypt-production
-    hosts:
-      - host: assertoor-admin.{{ network_subdomain }}
-        paths:
-          - path: /
-            pathType: Prefix
-
   persistence:
     enabled: true
 
