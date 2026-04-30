@@ -57,6 +57,11 @@ gen_kubernetes_config_dora_execution_indexer_details_max_size: "100GB" # noqa va
 gen_kubernetes_config_dora_postgres_size: >- # noqa var-naming[no-role-prefix]
   {{ "80Gi" if gen_kubernetes_config_dora_execution_indexer_enabled else "10Gi" }}
 
+# authenticatoor configuration
+gen_kubernetes_config_authenticatoor_cf_team_domain: "ethpandaops.cloudflareaccess.com" # noqa var-naming[no-role-prefix]
+gen_kubernetes_config_authenticatoor_cf_aud_tag: "" # noqa var-naming[no-role-prefix]
+gen_kubernetes_config_authenticatoor_persistence_size: "32Mi" # noqa var-naming[no-role-prefix]
+
 # Chaos Mesh configuration
 # gen_kubernetes_config_chaos_mesh_dashboard_security_mode: false # noqa var-naming[no-role-prefix]
 # gen_kubernetes_config_chaos_mesh_chaosd_security_mode: false # noqa var-naming[no-role-prefix]
@@ -157,6 +162,12 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
       - name: assertoor
         repository: https://ethpandaops.github.io/ethereum-helm-charts
         version: 1.1.0
+  authenticatoor:
+    valuesTemplatePath: templates/authenticatoor.yaml.j2
+    dependencies:
+      - name: authenticatoor
+        repository: https://ethpandaops.github.io/ethereum-helm-charts
+        version: 0.1.0
   tracoor:
     valuesTemplatePath: templates/tracoor.yaml.j2
     dependencies:
