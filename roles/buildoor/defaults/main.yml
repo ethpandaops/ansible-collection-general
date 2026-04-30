@@ -1,0 +1,85 @@
+buildoor_user: buildoor
+buildoor_datadir: /data/buildoor
+
+buildoor_cleanup: false # when set to "true" it will remove the container(s)
+
+buildoor_docker_network_name: shared
+buildoor_docker_networks:
+  - name: "{{ buildoor_docker_network_name }}"
+
+################################################################################
+##
+## buildoor endpoint configuration (must be set by the caller)
+##
+################################################################################
+# Beacon node URL (REQUIRED)
+buildoor_cl_client: ""
+# Engine API URL on the execution client (REQUIRED, JWT-authenticated)
+buildoor_el_engine_api: ""
+# Execution layer JSON-RPC URL (used for lifecycle deposits/top-ups)
+buildoor_el_rpc: ""
+# Path on the host to the JWT secret used for the Engine API
+buildoor_jwt_path: ""
+
+################################################################################
+##
+## buildoor key configuration (must be set by the caller)
+##
+################################################################################
+# Builder BLS private key (32 bytes hex)
+buildoor_builder_privkey: ""
+# Wallet ECDSA private key (used for lifecycle deposits/top-ups; pre-funded)
+buildoor_wallet_privkey: ""
+
+################################################################################
+##
+## buildoor container configuration
+##
+################################################################################
+buildoor_container_name: buildoor
+buildoor_container_image: ethpandaops/buildoor:latest
+buildoor_container_pull: false
+buildoor_container_env: {}
+buildoor_container_stop_timeout: "30"
+buildoor_container_networks: "{{ buildoor_docker_networks }}"
+
+# WebUI / management API port (0 = disabled)
+buildoor_api_port: 8080
+# Builder API port (0 = disabled). Setting > 0 makes the legacy Builder API
+# *available*; the mode itself stays off until --builder-api-enabled is passed
+# (e.g. via the WebUI or buildoor_container_command_extra_args).
+buildoor_builder_api_port: 18550
+
+buildoor_log_level: info
+
+# URL of the authenticatoor service. When set, API requests must carry a
+# JWT verified against the authenticatoor's JWKS, and the SPA loads
+# <url>/client.js for the browser-side login flow. Leave empty to run the
+# API unauthenticated (fine for restricted environments).
+buildoor_auth_provider_url: ""
+
+buildoor_container_ports:
+  - "127.0.0.1:{{ buildoor_api_port }}:{{ buildoor_api_port }}"
+  - "127.0.0.1:{{ buildoor_builder_api_port }}:{{ buildoor_builder_api_port }}"
+
+buildoor_container_volumes:
+  - "{{ buildoor_jwt_path }}:/execution-auth.jwt:ro"
+
+# Pre-requisites are wired here. ePBS, Builder API and lifecycle remain
+# *off* by default and can be enabled at runtime via the WebUI or by appending
+# the corresponding --epbs-enabled / --builder-api-enabled / --lifecycle flags
+# to buildoor_container_command_extra_args.
+buildoor_container_command:
+  - run
+  - --builder-privkey={{ buildoor_builder_privkey }}
+  - --cl-client={{ buildoor_cl_client }}
+  - --el-engine-api={{ buildoor_el_engine_api }}
+  - --el-jwt-secret=/execution-auth.jwt
+  - --el-rpc={{ buildoor_el_rpc }}
+  - --wallet-privkey={{ buildoor_wallet_privkey }}
+  - --api-port={{ buildoor_api_port }}
+  - --builder-api-port={{ buildoor_builder_api_port }}
+  - --log-level={{ buildoor_log_level }}
+  - --auth-provider-url={{ buildoor_auth_provider_url }}
+
+buildoor_container_command_extra_args: []
