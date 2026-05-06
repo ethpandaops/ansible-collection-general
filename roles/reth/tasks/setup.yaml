@@ -45,7 +45,7 @@
     entrypoint: "{{ reth_container_entrypoint | default(omit) }}"
     command: >-
       {{
-        reth_container_command + reth_container_command_extra_args +
+        reth_container_command + reth_container_command_gas_limit_args + reth_container_command_extra_args +
         (reth_rbuilder_enabled | ternary(reth_rbuilder_container_args, []))
       }}
     user: "{{ reth_user_meta.uid }}"

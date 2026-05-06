@@ -152,6 +152,11 @@ lodestar_validator_container_command_extra_args: []
   # - --builder
   # - --graffiti=hello-world
 
+# Optional validator suggested gas limit (in gas units). Empty string keeps the lodestar default.
+lodestar_gas_limit: ""
+lodestar_validator_container_command_gas_limit_args: >-
+  {{ ['--defaultGasLimit=' ~ (lodestar_gas_limit | string)] if (lodestar_gas_limit | string | length > 0) else [] }}
+
 # Default image pull policy
 lodestar_container_pull: false
 
