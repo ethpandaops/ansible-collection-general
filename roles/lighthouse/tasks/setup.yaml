@@ -91,6 +91,7 @@
         command: >-
           {{
             lighthouse_validator_container_command +
+            lighthouse_validator_container_command_gas_limit_args +
             lighthouse_validator_container_command_extra_args +
             (lighthouse_mev_boost_enabled | ternary(lighthouse_mev_boost_validator_command, []))
           }}

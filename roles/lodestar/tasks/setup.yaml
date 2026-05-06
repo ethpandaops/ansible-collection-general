@@ -91,6 +91,7 @@
         command: >-
           {{
             lodestar_validator_container_command +
+            lodestar_validator_container_command_gas_limit_args +
             lodestar_validator_container_command_extra_args +
             (lodestar_mev_boost_enabled | ternary(lodestar_mev_boost_validator_command, []))
           }}

@@ -121,6 +121,11 @@ nimbus_container_command: >-
 nimbus_container_command_extra_args: []
   # - --graffiti=hello-world
 
+# Optional validator suggested gas limit (in gas units). Empty string keeps the nimbus default.
+nimbus_gas_limit: ""
+nimbus_container_command_gas_limit_args: >-
+  {{ ['--suggested-gas-limit=' ~ (nimbus_gas_limit | string)] if (nimbus_gas_limit | string | length > 0) else [] }}
+
 ################################################################################
 ##
 ## Validator specific configuration
@@ -141,6 +146,7 @@ nimbus_validator_container_command: >-
     ] +
     nimbus_validator_container_args +
     nimbus_container_command_metrics +
+    nimbus_container_command_gas_limit_args +
     nimbus_container_command_extra_args
   }}
 

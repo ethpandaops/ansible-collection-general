@@ -22,6 +22,7 @@
     lighthouse_ipv6_enabled: "{{ ethereum_node_ipv6_enabled }}"
     lighthouse_supernode_enabled: "{{ ethereum_node_cl_supernode_enabled }}"
     lighthouse_public_ipv6: "{{ ethereum_node_cl_public_ipv6 }}"
+    lighthouse_gas_limit: "{{ ethereum_node_gas_limit }}"
 
 - name: "Consensus client: teku"
   when: ethereum_node_cl == "teku"
@@ -45,6 +46,7 @@
     teku_ipv6_enabled: "{{ ethereum_node_ipv6_enabled }}"
     teku_supernode_enabled: "{{ ethereum_node_cl_supernode_enabled }}"
     teku_public_ipv6: "{{ ethereum_node_cl_public_ipv6 }}"
+    teku_gas_limit: "{{ ethereum_node_gas_limit }}"
 
 - name: "Consensus client: prysm"
   when: ethereum_node_cl == "prysm"
@@ -69,6 +71,7 @@
     prysm_ipv6_enabled: "{{ ethereum_node_ipv6_enabled }}"
     prysm_supernode_enabled: "{{ ethereum_node_cl_supernode_enabled }}"
     prysm_public_ipv6: "{{ ethereum_node_cl_public_ipv6 }}"
+    prysm_gas_limit: "{{ ethereum_node_gas_limit }}"
 
 - name: "Consensus client: lodestar"
   when: ethereum_node_cl == "lodestar"
@@ -93,6 +96,7 @@
     lodestar_ipv6_enabled: "{{ ethereum_node_ipv6_enabled }}"
     lodestar_supernode_enabled: "{{ ethereum_node_cl_supernode_enabled }}"
     lodestar_public_ipv6: "{{ ethereum_node_cl_public_ipv6 }}"
+    lodestar_gas_limit: "{{ ethereum_node_gas_limit }}"
 
 - name: "Consensus client: nimbus"
   when: ethereum_node_cl == "nimbus"
@@ -116,6 +120,7 @@
     nimbus_ipv6_enabled: "{{ ethereum_node_ipv6_enabled }}"
     nimbus_supernode_enabled: "{{ ethereum_node_cl_supernode_enabled }}"
     nimbus_public_ipv6: "{{ ethereum_node_cl_public_ipv6 }}"
+    nimbus_gas_limit: "{{ ethereum_node_gas_limit }}"
 
 - name: "Consensus client: grandine"
   when: ethereum_node_cl == "grandine"
@@ -139,3 +144,4 @@
     grandine_ipv6_enabled: "{{ ethereum_node_ipv6_enabled }}"
     grandine_supernode_enabled: "{{ ethereum_node_cl_supernode_enabled }}"
     grandine_public_ipv6: "{{ ethereum_node_cl_public_ipv6 }}"
+    grandine_gas_limit: "{{ ethereum_node_gas_limit }}"
