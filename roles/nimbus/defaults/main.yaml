@@ -42,6 +42,12 @@ nimbus_checkpoint_container_command_extra_args:
   - --backfill=false
 nimbus_checkpoint_sync_enabled: true
 nimbus_checkpoint_autoremove_enabled: false
+# Checkpoint sync container runs alongside the main beacon container, so it
+# must not reuse the static ipv6_address claimed by nimbus.
+nimbus_checkpoint_container_networks: >-
+  {{ nimbus_container_networks | map('dict2items')
+  | map('selectattr', 'key', 'ne', 'ipv6_address')
+  | map('items2dict') | list }}
 ################################################################################
 ##
 ## Beacon node container configuration
