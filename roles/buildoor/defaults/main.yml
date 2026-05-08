@@ -39,7 +39,8 @@ buildoor_wallet_privkey: ""
 buildoor_container_name: buildoor
 buildoor_container_image: ethpandaops/buildoor:latest
 buildoor_container_pull: false
-buildoor_container_env: {}
+buildoor_container_env:
+  BUILDOOR_INJECT_HEAD_HTML: '<script src="https://pandamenu.ethpandaops.io/panda-menu-1.0.0.js" integrity="sha384-j6D+DanVUQs7XYmJaMXGwg2VdBq07F/ekc+bP5CNPsLOYCv4TKf8r3JBWqxwakKL" crossorigin="anonymous"></script>'
 buildoor_container_stop_timeout: "30"
 buildoor_container_networks: "{{ buildoor_docker_networks }}"
 
