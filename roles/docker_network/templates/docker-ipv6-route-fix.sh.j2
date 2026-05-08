@@ -22,8 +22,10 @@ if [ -n "$PUBLIC_SUBNET" ] && [ -n "$POOL" ]; then
     ip -6 route replace "$POOL" dev "$BRIDGE"
 fi
 
-# Allow IPv6 forwarding through Docker's DOCKER-USER chain
-ip6tables -C DOCKER-USER -j ACCEPT 2>/dev/null || ip6tables -I DOCKER-USER -j ACCEPT
+# Allow IPv6 forwarding through Docker's DOCKER-USER chain. Append (not
+# insert) so per-public-address jumps that the public-ipv6-injector adds at
+# the top of DOCKER-USER are evaluated first.
+ip6tables -C DOCKER-USER -j ACCEPT 2>/dev/null || ip6tables -A DOCKER-USER -j ACCEPT
 
 # Masquerade ULA egress so containers without a static public IPv6 can still
 # reach the internet, leaving with the host's public IPv6 as source.

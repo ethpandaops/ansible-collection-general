@@ -1,41 +1,92 @@
 {%- raw -%}
 #!/usr/bin/env bash
-# Watches Docker container start events and injects the public IPv6 address
-# carried by the org.ethpandaops.public_ipv6 label into the container's eth0.
-#
-# This works around Docker's single-subnet-per-bridge limit: the bridge holds
-# only the ULA private subnet, and public addresses are added directly to the
-# container's interface from the host's network namespace via nsenter. The
-# container image needs no iproute2 — `ip` runs from the host's filesystem.
+# Watches Docker container start events and:
+#   1. Injects the public IPv6 address carried by the
+#      `org.ethpandaops.public_ipv6` label into the container's eth0 (via
+#      nsenter from the host's netns — works even if the image has no
+#      iproute2).
+#   2. Installs a DOCKER-USER ip6tables chain that limits inbound traffic to
+#      the ports the container actually maps publicly. Without this, every
+#      port a container listens on is reachable on its public IPv6 because
+#      Docker's port mapping is a no-op in routed-mode IPv6.
 
 set -uo pipefail
 
 LABEL="org.ethpandaops.public_ipv6"
+CHAIN_PREFIX="IPV6INJ_"
+
+ipv6_chain_name() {
+    # Strip ':' from the address; trim from the start if the remainder is
+    # too long for ip6tables's 28-char chain name limit.
+    local stripped="${1//:/}"
+    printf '%s%s' "$CHAIN_PREFIX" "${stripped: -19}"
+}
+
+setup_firewall() {
+    local container="$1" addr="$2" chain
+    chain=$(ipv6_chain_name "$addr")
+
+    # Create-if-missing then flush — always rebuild the rule set fresh, so a
+    # restarted container with changed -p flags ends up with accurate rules.
+    ip6tables -N "$chain" 2>/dev/null
+    ip6tables -F "$chain"
+
+    # Allow return traffic for any connection the container itself opened.
+    ip6tables -A "$chain" -m conntrack --ctstate ESTABLISHED,RELATED -j RETURN
+
+    # Allow each port the user mapped to a public-iface HostIp (0.0.0.0, ::,
+    # or empty). Bindings to 127.0.0.1 / ::1 / a specific IP are deliberately
+    # not opened on the public IPv6 — that matches what the user wrote in
+    # `*_container_ports_ipv4` (e.g. `127.0.0.1:8545:8545` should never be
+    # reachable from the internet).
+    while IFS=$'\t' read -r portproto hostip; do
+        [ -z "$portproto" ] && continue
+        local port="${portproto%/*}"
+        local proto="${portproto#*/}"
+        case "$hostip" in
+            "" | "0.0.0.0" | "::")
+                ip6tables -A "$chain" -p "$proto" --dport "$port" -j RETURN
+                ;;
+        esac
+    done < <(docker inspect --format '{{range $p, $bs := .HostConfig.PortBindings}}{{range $bs}}{{$p}}{{"\t"}}{{.HostIp}}{{"\n"}}{{end}}{{end}}' "$container" 2>/dev/null)
+
+    # Drop everything else destined for this public address.
+    ip6tables -A "$chain" -j DROP
+
+    # Insert the dispatch from DOCKER-USER once. We rely on the route-fix
+    # script's catch-all ACCEPT being appended at the bottom of DOCKER-USER,
+    # so per-address jumps inserted at the top take precedence.
+    if ! ip6tables -C DOCKER-USER -d "$addr" -j "$chain" 2>/dev/null; then
+        ip6tables -I DOCKER-USER 1 -d "$addr" -j "$chain"
+    fi
+}
 
 inject_ip() {
     local container="$1"
     local addr pid
-
     addr=$(docker inspect --format "{{ index .Config.Labels \"$LABEL\" }}" "$container" 2>/dev/null || echo "")
     [ -z "$addr" ] && return 0
     [ "$addr" = "<no value>" ] && return 0
-
     pid=$(docker inspect --format '{{ .State.Pid }}' "$container" 2>/dev/null || echo 0)
     [ "$pid" -le 1 ] && return 0
+
+    # Firewall first: even if a peer raced our setup, the per-address chain
+    # default-DROPs anything that isn't explicitly allowed.
+    setup_firewall "$container" "$addr"
 
     # Idempotent — silently swallow "RTNETLINK answers: File exists".
     nsenter -t "$pid" -n ip -6 addr add "${addr}/128" dev eth0 2>/dev/null || true
 }
 
 # Sweep already-running containers on startup so we recover after a daemon
-# restart without losing addresses.
+# restart without losing addresses or rules.
 docker ps -q --filter "label=$LABEL" | while read -r cid; do
     inject_ip "$cid"
 done
 
 # Stream new starts. Docker emits the start event after the container's PID
 # is allocated but typically before the main process binds, so the address
-# is in place by the time clients listen on it.
+# and rules are in place by the time clients listen on it.
 exec docker events --filter type=container --filter event=start --format '{{ .Actor.ID }}' | while read -r cid; do
     inject_ip "$cid"
 done
