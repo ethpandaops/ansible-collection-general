@@ -28,7 +28,12 @@ When `docker_network_enable_ipv6` is `true`, the role automatically:
 - Installs ndppd
 - Enables IPv6 forwarding
 - Sets `accept_ra=2` so the host keeps its default route
-- Configures ndppd to proxy NDP for the IPv6 subnet
+- Configures ndppd to proxy NDP for the public IPv6 subnet (ULA is excluded)
+- Prepends a ULA private subnet (`docker_network_ipv6_private_subnet`,
+  default `fde7:f00d::/64`) to the bridge's IPAM config. Containers without an
+  explicit `ipv6_address` auto-assign from this range; egress is masqueraded
+  through the host's public IPv6, so internal-only containers don't burn
+  addresses from the small public pool. Set the variable to `""` to opt out.
 
 ## Dependencies
 
