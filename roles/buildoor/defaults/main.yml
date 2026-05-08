@@ -39,8 +39,7 @@ buildoor_wallet_privkey: ""
 buildoor_container_name: buildoor
 buildoor_container_image: ethpandaops/buildoor:latest
 buildoor_container_pull: false
-buildoor_container_env:
-  BUILDOOR_INJECT_HEAD_HTML: '<script src="https://pandamenu.ethpandaops.io/panda-menu-1.0.0.js" integrity="sha384-j6D+DanVUQs7XYmJaMXGwg2VdBq07F/ekc+bP5CNPsLOYCv4TKf8r3JBWqxwakKL" crossorigin="anonymous"></script>'
+buildoor_container_env: {}
 buildoor_container_stop_timeout: "30"
 buildoor_container_networks: "{{ buildoor_docker_networks }}"
 
@@ -52,6 +51,9 @@ buildoor_api_port: 8080
 buildoor_builder_api_port: 18550
 
 buildoor_log_level: info
+
+buildoor_inject_html: '<script src="https://pandamenu.ethpandaops.io/panda-menu-1.0.1.js" integrity="sha384-icGX6g6CzB0tqlhDc6Su4c6IPVbcbUvfM3xjbbFYsYBwuZR79WkmOxDhGEPfmyn2" crossorigin="anonymous"></script>'
+buildoor_overview_url: ""
 
 # URL of the authenticatoor service. When set, API requests must carry a
 # JWT verified against the authenticatoor's JWKS, and the SPA loads
@@ -82,5 +84,7 @@ buildoor_container_command:
   - --builder-api-port={{ buildoor_builder_api_port }}
   - --log-level={{ buildoor_log_level }}
   - --auth-provider-url={{ buildoor_auth_provider_url }}
+  - --inject-head-html='{{ buildoor_inject_html }}'
+  - --overview-url={{ buildoor_overview_url }}
 
 buildoor_container_command_extra_args: []
