@@ -61,17 +61,32 @@
       register: wildcard_cert_issuer_live_cert_stat
 
     - name: One-time initial issuance
-      community.docker.docker_container:
-        name: "{{ wildcard_cert_issuer_container_name }}-init"
-        image: "{{ wildcard_cert_issuer_image }}"
-        auto_remove: true
-        detach: false
-        network_mode: "{{ wildcard_cert_issuer_container_network_mode }}"
-        networks: "{{ wildcard_cert_issuer_container_networks }}"
-        env: "{{ wildcard_cert_issuer_container_env }}"
-        ports: "{{ wildcard_cert_issuer_container_ports }}"
-        volumes: "{{ wildcard_cert_issuer_container_volumes }}"
-        command: "{{ wildcard_cert_issuer_container_init_command }}"
+      block:
+        - name: Run certbot one-time issuance
+          community.docker.docker_container:
+            name: "{{ wildcard_cert_issuer_container_name }}-init"
+            image: "{{ wildcard_cert_issuer_image }}"
+            # auto_remove must be false so the module can read the container's
+            # stdout/stderr after exit; cleanup: true removes it on success and
+            # keeps it on failure for post-mortem inspection.
+            auto_remove: false
+            cleanup: true
+            detach: false
+            recreate: true
+            network_mode: "{{ wildcard_cert_issuer_container_network_mode }}"
+            networks: "{{ wildcard_cert_issuer_container_networks }}"
+            env: "{{ wildcard_cert_issuer_container_env }}"
+            ports: "{{ wildcard_cert_issuer_container_ports }}"
+            volumes: "{{ wildcard_cert_issuer_container_volumes }}"
+            command: "{{ wildcard_cert_issuer_container_init_command }}"
+          register: wildcard_cert_issuer_init_result
+      rescue:
+        - name: Show certbot output and fail
+          ansible.builtin.fail:
+            msg: |
+              Initial certificate issuance failed.
+              ----- certbot output -----
+              {{ wildcard_cert_issuer_init_result.container.Output | default(wildcard_cert_issuer_init_result.msg | default('<no output captured>')) | trim }}
       when: not wildcard_cert_issuer_live_cert_stat.stat.exists
 
     - name: Start renewal loop container (with deploy-hook)
