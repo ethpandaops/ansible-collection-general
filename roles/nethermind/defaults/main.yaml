@@ -7,6 +7,9 @@ nethermind_announced_ipv6: >-
   {{ nethermind_public_ipv6 if (nethermind_public_ipv6 | length > 0)
   else (ansible_default_ipv6.address
   if nethermind_ipv6_enabled and ansible_default_ipv6.address is defined else '') }}
+nethermind_container_labels: >-
+  {{ {'org.ethpandaops.public_ipv6': nethermind_public_ipv6}
+     if (nethermind_public_ipv6 | default('') | length > 0) else {} }}
 
 nethermind_cleanup: false # when set to "true" it will remove the container
 

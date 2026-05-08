@@ -1,0 +1,42 @@
+{%- raw -%}
+#!/usr/bin/env bash
+# Watches Docker container start events and injects the public IPv6 address
+# carried by the org.ethpandaops.public_ipv6 label into the container's eth0.
+#
+# This works around Docker's single-subnet-per-bridge limit: the bridge holds
+# only the ULA private subnet, and public addresses are added directly to the
+# container's interface from the host's network namespace via nsenter. The
+# container image needs no iproute2 — `ip` runs from the host's filesystem.
+
+set -uo pipefail
+
+LABEL="org.ethpandaops.public_ipv6"
+
+inject_ip() {
+    local container="$1"
+    local addr pid
+
+    addr=$(docker inspect --format "{{ index .Config.Labels \"$LABEL\" }}" "$container" 2>/dev/null || echo "")
+    [ -z "$addr" ] && return 0
+    [ "$addr" = "<no value>" ] && return 0
+
+    pid=$(docker inspect --format '{{ .State.Pid }}' "$container" 2>/dev/null || echo 0)
+    [ "$pid" -le 1 ] && return 0
+
+    # Idempotent — silently swallow "RTNETLINK answers: File exists".
+    nsenter -t "$pid" -n ip -6 addr add "${addr}/128" dev eth0 2>/dev/null || true
+}
+
+# Sweep already-running containers on startup so we recover after a daemon
+# restart without losing addresses.
+docker ps -q --filter "label=$LABEL" | while read -r cid; do
+    inject_ip "$cid"
+done
+
+# Stream new starts. Docker emits the start event after the container's PID
+# is allocated but typically before the main process binds, so the address
+# is in place by the time clients listen on it.
+exec docker events --filter type=container --filter event=start --format '{{ .Actor.ID }}' | while read -r cid; do
+    inject_ip "$cid"
+done
+{%- endraw -%}

@@ -1,12 +1,16 @@
-- name: Compute effective IPAM config (prepend ULA private subnet)
+- name: Compute IPAM for the bridge
+  # Docker's bridge driver only supports a single IPv6 subnet per network. When
+  # a ULA private subnet is configured, that becomes the bridge's IPAM (Docker
+  # auto-assigns from it). Public IPv6 addresses are injected per-container by
+  # docker-public-ipv6-injector via the org.ethpandaops.public_ipv6 label, and
+  # reachability is provided by ndppd plus the on-link bridge route.
   ansible.builtin.set_fact:
-    docker_network_ipam_config_effective: >-
-      {{ ([{'subnet': docker_network_ipv6_private_subnet,
-             'gateway': docker_network_ipv6_private_gateway}]
-          if (docker_network_enable_ipv6 | bool
-              and (docker_network_ipv6_private_subnet | default('') | length > 0))
-          else [])
-         + (docker_network_ipam_config | default([])) }}
+    docker_network_ipam_for_bridge: >-
+      {{ [{'subnet': docker_network_ipv6_private_subnet,
+            'gateway': docker_network_ipv6_private_gateway}]
+         if (docker_network_enable_ipv6 | bool
+             and (docker_network_ipv6_private_subnet | default('') | length > 0))
+         else (docker_network_ipam_config | default([])) }}
 
 - name: Setup NDP proxy for routed IPv6
   ansible.builtin.include_tasks: ndppd_setup.yaml
@@ -21,7 +25,7 @@
   community.docker.docker_network:
     name: "{{ docker_network_name }}"
     enable_ipv6: "{{ docker_network_enable_ipv6 }}"
-    ipam_config: "{{ docker_network_ipam_config_effective }}"
+    ipam_config: "{{ docker_network_ipam_for_bridge }}"
     driver_options: "{{ docker_network_driver_options | default(omit) }}"
 
 - name: Setup persistent bridge IPv6 route fix
@@ -73,4 +77,34 @@
           {{ 'restarted'
           if (docker_network_route_fix_service.changed
           or docker_network_route_fix_script.changed)
+          else 'started' }}
+
+- name: Setup docker-public-ipv6-injector
+  when:
+    - docker_network_enable_ipv6 | bool
+    - docker_network_ipv6_private_subnet | default('') | length > 0
+  block:
+    - name: Install docker-public-ipv6-injector script
+      ansible.builtin.template:
+        src: docker-public-ipv6-injector.sh.j2
+        dest: /usr/local/bin/docker-public-ipv6-injector.sh
+        mode: "0755"
+      register: docker_network_injector_script
+
+    - name: Install docker-public-ipv6-injector service
+      ansible.builtin.template:
+        src: docker-public-ipv6-injector.service.j2
+        dest: /etc/systemd/system/docker-public-ipv6-injector.service
+        mode: "0644"
+      register: docker_network_injector_service
+
+    - name: Enable and start docker-public-ipv6-injector service
+      ansible.builtin.systemd:
+        name: docker-public-ipv6-injector
+        daemon_reload: true
+        enabled: true
+        state: >-
+          {{ 'restarted'
+          if (docker_network_injector_script.changed
+          or docker_network_injector_service.changed)
           else 'started' }}
