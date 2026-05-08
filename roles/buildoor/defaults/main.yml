@@ -52,7 +52,11 @@ buildoor_builder_api_port: 18550
 
 buildoor_log_level: info
 
-buildoor_inject_html: '<script src="https://pandamenu.ethpandaops.io/panda-menu-1.0.1.js" integrity="sha384-icGX6g6CzB0tqlhDc6Su4c6IPVbcbUvfM3xjbbFYsYBwuZR79WkmOxDhGEPfmyn2" crossorigin="anonymous"></script>'
+buildoor_inject_html: >-
+  <script src="https://pandamenu.ethpandaops.io/panda-menu-1.0.1.js"
+  integrity="sha384-icGX6g6CzB0tqlhDc6Su4c6IPVbcbUvfM3xjbbFYsYBwuZR79WkmOxDhGEPfmyn2"
+  crossorigin="anonymous"></script>
+
 buildoor_overview_url: ""
 
 # URL of the authenticatoor service. When set, API requests must carry a
