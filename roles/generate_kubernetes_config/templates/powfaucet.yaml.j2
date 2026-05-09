@@ -83,7 +83,7 @@ powfaucet:
 {% if gen_kubernetes_config_powfaucet_authenticatoor_enabled %}
   faucetAuthenticatoorEnabled: true
   faucetAuthenticatoorAuthUrl: "https://auth.{{ network_subdomain }}"
-  faucetAuthenticatoorExpectedAudience: "{{ gen_kubernetes_domain }}"
+  faucetAuthenticatoorExpectedAudience: "{{ network_subdomain }}"
 {% if gen_kubernetes_config_powfaucet_authenticatoor_grants %}
   faucetAuthenticatoorGrants:
 {{ gen_kubernetes_config_powfaucet_authenticatoor_grants | to_nice_yaml(indent=2) | indent(4, true) }}
