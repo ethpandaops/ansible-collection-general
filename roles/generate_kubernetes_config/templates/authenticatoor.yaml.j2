@@ -1,0 +1,37 @@
+# {{ ansible_managed }}
+
+authenticatoor:
+  fullnameOverride: authenticatoor
+
+  image:
+    repository: {{ default_tooling_images.authenticatoor.split(':') | first }}
+    tag: {{ default_tooling_images.authenticatoor.split(':') | last }}
+    pullPolicy: {% if "latest" in (default_tooling_images.authenticatoor.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+  issuer: "https://auth.{{ network_subdomain }}"
+
+  cloudflareAccess:
+    verifyJWT: true
+    teamDomain: "{{ gen_kubernetes_config_authenticatoor_cf_team_domain }}"
+    audTag: "{{ gen_kubernetes_config_authenticatoor_cf_aud_tag }}"
+
+  persistence:
+    enabled: true
+    size: "{{ gen_kubernetes_config_authenticatoor_persistence_size }}"
+
+  ingress:
+    enabled: true
+    className: ingress-nginx-public
+    hosts:
+      - host: auth.{{ network_subdomain }}
+        paths:
+          - path: /
+            pathType: Prefix
