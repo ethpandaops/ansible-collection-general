@@ -40,6 +40,34 @@ powfaucet:
   faucetTitle: "{{ ethereum_network_name }} PoW Faucet"
   faucetPrivkey: "<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.faucet_private_key}>"
   faucetRpcUrl: "https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_rpc_prefix }}{{ primary_bootnode }}.{{ network_server_subdomain }}"
+{# Multi-RPC endpoint list. If the operator set gen_kubernetes_config_powfaucet_rpc_endpoints, that wins.
+   Otherwise auto-generate from inventory: tooling/bootnode first, then ethereum_node clients sorted
+   by reverse hostname so consecutive entries cover different client pair types. Total capped at 20. #}
+{% if gen_kubernetes_config_powfaucet_rpc_endpoints %}
+  faucetRpcEndpoints:
+{% for ep in gen_kubernetes_config_powfaucet_rpc_endpoints %}
+    - url: "{{ ep.url }}"
+{% if ep.name is defined %}      name: "{{ ep.name }}"
+{% endif %}      priority: {{ ep.priority | default(1) }}
+      metered: {{ ep.metered | default(false) }}
+{% endfor %}
+{% else %}
+{%   set _client_pairs = [] %}
+{%   for host in (groups['ethereum_node'] | default([])) %}
+{%     set _hostname = hostvars[host]['inventory_hostname'] %}
+{%     set _ = _client_pairs.append([_hostname[::-1], _hostname]) %}
+{%   endfor %}
+{%   set _clients_sorted = (_client_pairs | sort) %}
+  faucetRpcEndpoints:
+    - url: "https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_rpc_prefix }}{{ primary_bootnode }}.{{ network_server_subdomain }}"
+      name: "{{ primary_bootnode }}"
+      priority: 10
+{%   for pair in _clients_sorted[:19] %}
+    - url: "https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_rpc_prefix }}{{ pair[1] }}.{{ network_server_subdomain }}"
+      name: "{{ pair[1] }}"
+      priority: 5
+{%   endfor %}
+{% endif %}
   faucetExplorerLink: "https://explorer.{{ network_subdomain }}/tx/{txid}"
   faucetTxGasLimit: 100000
 
@@ -51,3 +79,13 @@ powfaucet:
   faucetPowEnabled: true
   faucetPowRewardPerHash: 1000000000000000000 # 1 ETH
   faucetPowDifficulty: 10
+
+{% if gen_kubernetes_config_powfaucet_authenticatoor_enabled %}
+  faucetAuthenticatoorEnabled: true
+  faucetAuthenticatoorAuthUrl: "https://auth.{{ network_subdomain }}"
+  faucetAuthenticatoorExpectedAudience: "{{ network_subdomain }}"
+{% if gen_kubernetes_config_powfaucet_authenticatoor_grants %}
+  faucetAuthenticatoorGrants:
+{{ gen_kubernetes_config_powfaucet_authenticatoor_grants | to_nice_yaml(indent=2) | indent(4, true) }}
+{% endif %}
+{% endif %}
