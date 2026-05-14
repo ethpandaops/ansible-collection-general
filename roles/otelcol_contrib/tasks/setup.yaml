@@ -12,7 +12,7 @@
   notify: Restart otelcol container
 
 - name: Run otelcol container
-  community.general.docker_container:
+  community.docker.docker_container:
     name: "{{ otelcol_container_name }}"
     image: "{{ otelcol_container_image }}"
     image_name_mismatch: recreate
