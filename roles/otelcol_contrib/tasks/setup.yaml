@@ -1,0 +1,25 @@
+- name: Create required directories
+  ansible.builtin.file:
+    path: "{{ otelcol_datadir }}"
+    state: directory
+    mode: "0755"
+
+- name: Create otelcol config
+  ansible.builtin.copy:
+    content: "{{ otelcol_config }}"
+    dest: "{{ otelcol_datadir }}/config.yaml"
+    mode: '0644'
+  notify: Restart otelcol container
+
+- name: Run otelcol container
+  community.general.docker_container:
+    name: "{{ otelcol_container_name }}"
+    image: "{{ otelcol_container_image }}"
+    image_name_mismatch: recreate
+    command: "{{ otelcol_container_command }}"
+    ports: "{{ otelcol_container_ports }}"
+    restart_policy: "{{ otelcol_container_restart_policy }}"
+    networks: "{{ otelcol_container_networks }}"
+    volumes: "{{ otelcol_container_volumes }}"
+    env: "{{ otelcol_container_env }}"
+    user: "{{ otelcol_container_user }}"

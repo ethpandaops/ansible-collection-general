@@ -1,0 +1,7 @@
+- name: Setup otelcol
+  ansible.builtin.import_tasks: setup.yaml
+  when: not otelcol_cleanup
+
+- name: Cleanup otelcol
+  ansible.builtin.import_tasks: cleanup.yaml
+  when: otelcol_cleanup
