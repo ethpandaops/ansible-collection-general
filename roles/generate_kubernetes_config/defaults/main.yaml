@@ -180,7 +180,7 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
     dependencies:
       - name: assertoor
         repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 1.1.0
+        version: 1.2.0
   authenticatoor:
     valuesTemplatePath: templates/authenticatoor.yaml.j2
     dependencies:

@@ -37,6 +37,8 @@ assertoor:
   persistence:
     enabled: true
 
+  authProviderUrl: "https://auth.{{ network_subdomain }}"
+
   endpoints:
 {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
     - name:  {{ hostvars[host]['inventory_hostname'] }}
