@@ -1,4 +1,4 @@
 - name: Stop otelcol container
   community.docker.docker_container:
-    name: "{{ otelcol_container_name }}"
+    name: "{{ otelcol_contrib_container_name }}"
     state: absent
