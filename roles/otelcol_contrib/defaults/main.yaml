@@ -2,7 +2,7 @@ otelcol_datadir: /data/otelcol
 
 otelcol_cleanup: false
 
-otelcol_container_image: otel/opentelemetry-collector-contrib:0.151.0
+otelcol_container_image: otel/opentelemetry-collector-contrib:0.152.0
 otelcol_container_name: otelcol
 otelcol_container_command: ["--config", "/etc/otelcol/config.yaml"]
 otelcol_container_ports: []
