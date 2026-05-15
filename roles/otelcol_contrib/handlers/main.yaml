@@ -1,0 +1,5 @@
+- name: Restart otelcol container
+  community.docker.docker_container:
+    name: "{{ otelcol_contrib_container_name }}"
+    state: started
+    restart: true
