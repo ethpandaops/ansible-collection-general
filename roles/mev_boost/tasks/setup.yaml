@@ -1,3 +1,34 @@
+- name: Build mev_boost runtime vars
+  ansible.builtin.set_fact:
+    mev_boost_volumes: >-
+      {{
+        mev_boost_container_volumes +
+        (mev_boost_config_enabled | ternary([mev_boost_config_dir + '/config.yaml:/config.yaml:ro'], []))
+      }}
+    mev_boost_managed_command: >-
+      {{
+        mev_boost_container_command +
+        (mev_boost_config_enabled | ternary(['-config', '/config.yaml'], []))
+      }}
+
+- name: Validate mev_boost extra args
+  vars:
+    mev_boost_conflicting_flags: >-
+      {{
+        mev_boost_container_command_extra_args | ethpandaops.general.command_conflicting_flags(
+          mev_boost_managed_command,
+          mev_boost_container_command_pair_flags,
+          (mev_boost_config_enabled | ternary(mev_boost_config_incompatible_flag_keys, []))
+        )
+      }}
+  ansible.builtin.assert:
+    that:
+      - mev_boost_conflicting_flags | length == 0
+    fail_msg: >-
+      mev_boost_container_command_extra_args redefines managed or incompatible flags:
+      {{ mev_boost_conflicting_flags | join(', ') }}.
+      Configure these through mev_boost role variables instead of re-adding them in extra args.
+
 - name: Add mev_boost user
   ansible.builtin.user:
     name: "{{ mev_boost_user }}"
@@ -28,34 +59,12 @@
   when: mev_boost_config_enabled
   notify: Restart mev_boost container
 
-- name: Set volumes with config file
-  ansible.builtin.set_fact:
-    mev_boost_volumes: >-
-      {{
-        mev_boost_container_volumes + [mev_boost_config_dir + '/config.yaml:/config.yaml:ro']
-      }}
-  when: mev_boost_config_enabled
-
-- name: Set volumes without config file
-  ansible.builtin.set_fact:
-    mev_boost_volumes: "{{ mev_boost_container_volumes }}"
-  when: not mev_boost_config_enabled
-
-- name: Set command with config flag
+- name: Set final mev_boost command
   ansible.builtin.set_fact:
     mev_boost_command: >-
       {{
-        mev_boost_container_command + ['-config', '/config.yaml'] + mev_boost_container_command_extra_args
+        mev_boost_managed_command + mev_boost_container_command_extra_args
       }}
-  when: mev_boost_config_enabled
-
-- name: Set command without config flag
-  ansible.builtin.set_fact:
-    mev_boost_command: >-
-      {{
-        mev_boost_container_command + mev_boost_container_command_extra_args
-      }}
-  when: not mev_boost_config_enabled
 
 - name: Run mev_boost container
   community.docker.docker_container:

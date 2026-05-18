@@ -1,0 +1,56 @@
+- name: Validate lodestar beacon extra args
+  vars:
+    lodestar_reserved_flag_keys: >-
+      {{
+        (
+          lodestar_container_command_default +
+          lodestar_container_command_v6 +
+          lodestar_container_supernode_command +
+          lodestar_container_command_checkpoint_args +
+          lodestar_mev_boost_beacon_command
+        ) | ethpandaops.general.command_flag_keys(lodestar_container_command_pair_flags)
+      }}
+    lodestar_container_conflicting_flags: >-
+      {{
+        lodestar_container_command_extra_args | ethpandaops.general.command_conflicting_flags(
+          lodestar_container_command +
+          (lodestar_checkpoint_sync_enabled | ternary(lodestar_container_command_checkpoint_args, [])) +
+          (lodestar_mev_boost_enabled | ternary(lodestar_mev_boost_beacon_command, [])),
+          lodestar_container_command_pair_flags,
+          lodestar_reserved_flag_keys
+        )
+      }}
+  ansible.builtin.assert:
+    that:
+      - lodestar_container_conflicting_flags | length == 0
+    fail_msg: >-
+      lodestar_container_command_extra_args redefines managed flags:
+      {{ lodestar_container_conflicting_flags | join(', ') }}.
+      Configure these through lodestar role variables instead of re-adding them in extra args.
+
+- name: Validate lodestar validator extra args
+  when: lodestar_validator_enabled
+  vars:
+    lodestar_validator_reserved_flag_keys: >-
+      {{
+        (
+          lodestar_validator_container_command +
+          lodestar_mev_boost_validator_command
+        ) | ethpandaops.general.command_flag_keys(lodestar_validator_container_command_pair_flags)
+      }}
+    lodestar_validator_conflicting_flags: >-
+      {{
+        lodestar_validator_container_command_extra_args | ethpandaops.general.command_conflicting_flags(
+          lodestar_validator_container_command +
+          (lodestar_mev_boost_enabled | ternary(lodestar_mev_boost_validator_command, [])),
+          lodestar_validator_container_command_pair_flags,
+          lodestar_validator_reserved_flag_keys
+        )
+      }}
+  ansible.builtin.assert:
+    that:
+      - lodestar_validator_conflicting_flags | length == 0
+    fail_msg: >-
+      lodestar validator extra args redefine managed flags:
+      {{ lodestar_validator_conflicting_flags | join(', ') }}.
+      Configure these through lodestar validator vars instead of re-adding them in extra args.

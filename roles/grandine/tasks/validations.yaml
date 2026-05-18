@@ -1,0 +1,31 @@
+- name: Validate grandine extra args
+  vars:
+    grandine_reserved_flag_keys: >-
+      {{
+        (
+          grandine_container_command_default +
+          grandine_container_command_v6 +
+          grandine_container_supernode_command +
+          grandine_container_validator_args +
+          grandine_container_command_checkpoint_args +
+          grandine_mev_boost_beacon_command
+        ) | ethpandaops.general.command_flag_keys(grandine_container_command_pair_flags)
+      }}
+    grandine_container_conflicting_flags: >-
+      {{
+        grandine_container_command_extra_args | ethpandaops.general.command_conflicting_flags(
+          grandine_container_command +
+          (grandine_validator_enabled | ternary(grandine_container_validator_args, [])) +
+          (grandine_mev_boost_enabled | ternary(grandine_mev_boost_beacon_command, [])) +
+          (grandine_checkpoint_sync_enabled | ternary(grandine_container_command_checkpoint_args, [])),
+          grandine_container_command_pair_flags,
+          grandine_reserved_flag_keys
+        )
+      }}
+  ansible.builtin.assert:
+    that:
+      - grandine_container_conflicting_flags | length == 0
+    fail_msg: >-
+      grandine_container_command_extra_args redefines managed flags:
+      {{ grandine_container_conflicting_flags | join(', ') }}.
+      Configure these through grandine role variables instead of re-adding them in extra args.

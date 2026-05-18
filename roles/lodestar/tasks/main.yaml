@@ -1,3 +1,7 @@
+- name: Validate lodestar
+  ansible.builtin.import_tasks: validations.yaml
+  when: not lodestar_cleanup
+
 - name: Setup lodestar
   ansible.builtin.import_tasks: setup.yaml
   when: not lodestar_cleanup
