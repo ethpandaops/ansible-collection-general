@@ -21,3 +21,63 @@ otelcol_contrib_container_env: {}
 otelcol_contrib_container_user: "0:0"
 
 otelcol_contrib_config: ""
+
+# --- Docker log collection (composable building blocks) -------------------
+# Reusable config fragments for collecting Docker container logs with rich
+# per-container metadata read live from the Docker socket — no container
+# restarts and no log-driver changes. Interpolate them into your
+# `otelcol_contrib_config` under `extensions:` / `receivers:` (see README),
+# then add `receiver_creator/docker` to your logs pipeline.
+#
+# The receiver_creator + docker_observer pair discovers running containers via
+# the socket (already mounted by otelcol_contrib_container_volumes) and spawns
+# one filelog receiver per container, attaching `container.name`,
+# `container.image.name` and `container.id` as resource attributes. New
+# containers are picked up automatically (fixes the static-filelog problem of
+# not noticing new files without a restart).
+
+# Container names excluded from log collection. A list; each entry is a regex
+# fragment matched anchored against the container name. Defaults to just the
+# collector's own container so it doesn't ingest its own logs. Override with
+# your own noise list, e.g. ["otelcol", "node_exporter", "my-sidecar-.*"].
+otelcol_contrib_docker_logs_excluded_names:
+  - "{{ otelcol_contrib_container_name }}"
+
+# docker_observer extension — discovers containers + metadata via the socket.
+otelcol_contrib_docker_observer:
+  docker_observer:
+    endpoint: "unix:///var/run/docker.sock"
+    cache_sync_interval: 60s
+
+# receiver_creator that tails each discovered container's json-file log with
+# Docker metadata attached, parses the docker format, and maps the json `level`
+# field to OTel severity.
+otelcol_contrib_docker_logs_receiver:
+  receiver_creator/docker:
+    watch_observers: ["docker_observer"]
+    receivers:
+      filelog:
+        rule: 'type == "container" && not (name matches "^({{ otelcol_contrib_docker_logs_excluded_names | join("|") }})$")'
+        resource_attributes:
+          container.name: "`name`"
+          container.image.name: "`image`"
+          container.id: "`container_id`"
+        config:
+          include: ["/var/lib/docker/containers/`container_id`/`container_id`-json.log"]
+          include_file_path: true
+          start_at: end
+          operators:
+            - type: container
+              format: docker
+              add_metadata_from_filepath: false
+            - type: json_parser
+              if: 'body matches "^\\s*\\{"'
+              on_error: send
+              severity:
+                parse_from: attributes.level
+                overwrite_text: true
+                mapping:
+                  fatal4: ["emergency", "emerg"]
+                  fatal3: ["alert"]
+                  fatal2: ["critical", "crit"]
+                  fatal: ["panic"]
