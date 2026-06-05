@@ -56,12 +56,14 @@ gen_kubernetes_config_dora_execution_indexer_retention: "336h" # noqa var-naming
 gen_kubernetes_config_dora_execution_indexer_details_max_size: "100GB" # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_dora_postgres_size: >- # noqa var-naming[no-role-prefix]
   {{ "80Gi" if gen_kubernetes_config_dora_execution_indexer_enabled else "10Gi" }}
-# Override to [] on networks without an MEV relay (e.g. ePBS devnets where the
-# protocol-native builder market replaces external mev-boost relays).
-gen_kubernetes_config_dora_mev_relays: # noqa var-naming[no-role-prefix]
-  - index: 0
-    name: "Flashbots"
-    url: "http://mev-relay-1.{{ network_subdomain }}:9062/"
+# Default empty: ePBS devnets (e.g. glamsterdam) deliver the builder market
+# via the protocol itself and don't deploy mev-boost relays. Networks that DO
+# run a relay should override in inventory, e.g.:
+#   gen_kubernetes_config_dora_mev_relays:
+#     - index: 0
+#       name: "Flashbots"
+#       url: "http://mev-relay-1.{{ network_subdomain }}:9062/"
+gen_kubernetes_config_dora_mev_relays: [] # noqa var-naming[no-role-prefix]
 
 # authenticatoor configuration
 gen_kubernetes_config_authenticatoor_cf_team_domain: "ethpandaops.cloudflareaccess.com" # noqa var-naming[no-role-prefix]
