@@ -76,10 +76,10 @@ dora:
       persistence:
         size: "{{ gen_kubernetes_config_dora_postgres_size }}"
 
+{% if gen_kubernetes_config_dora_mev_relays %}
   mevRelays:
-    - index: 0
-      name: "Flashbots"
-      url: "http://mev-relay-1.{{ network_subdomain }}:9062/"
+{{ gen_kubernetes_config_dora_mev_relays | to_nice_yaml(indent=2) | indent(4, True) }}
+{% endif %}
 
   authGroups:
     pandaops:
