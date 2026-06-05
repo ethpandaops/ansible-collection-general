@@ -89,6 +89,7 @@
         command: >-
           {{
             prysm_validator_container_command +
+            prysm_validator_container_command_gas_limit_args +
             prysm_validator_container_command_extra_args +
             (prysm_mev_boost_enabled | ternary(prysm_mev_boost_validator_command, []))
           }}

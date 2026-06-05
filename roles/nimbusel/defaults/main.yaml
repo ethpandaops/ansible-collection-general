@@ -88,5 +88,10 @@ nimbusel_container_command_extra_args: []
 #  - --rpc-api=eth,debug
 #  - --http.vhosts=*
 
+# Optional block builder gas limit (in gas units). Empty string keeps the nimbus-eth1 default.
+nimbusel_gas_limit: ""
+nimbusel_container_command_gas_limit_args: >-
+  {{ ['--gas-limit=' ~ (nimbusel_gas_limit | string)] if (nimbusel_gas_limit | string | length > 0) else [] }}
+
 # Default image pull policy
 nimbusel_container_pull: false

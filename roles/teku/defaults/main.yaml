@@ -109,6 +109,11 @@ teku_container_command_extra_args:
 # - --logging=INFO
 # - ---validators-graffiti=hello-world
 
+# Optional validator builder-registration gas limit (in gas units). Empty string keeps the teku default.
+teku_gas_limit: ""
+teku_container_command_gas_limit_args: >-
+  {{ ['--validators-builder-registration-default-gas-limit=' ~ (teku_gas_limit | string)] if (teku_gas_limit | string | length > 0) else [] }}
+
 checkpoint_sync_url: https://beaconstate.ethstaker.cc # noqa var-naming[no-role-prefix]
 teku_checkpoint_sync_enabled: true
 teku_container_command_checkpoint_args:
@@ -136,6 +141,7 @@ teku_validator_container_command: >-
     ] +
     teku_validator_container_args +
     teku_container_command_metrics +
+    teku_container_command_gas_limit_args +
     teku_container_command_extra_args
   }}
 

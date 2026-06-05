@@ -12,6 +12,7 @@
     besu_container_pull: "{{ ethereum_node_images_always_pull }}"
     besu_ipv6_enabled: "{{ ethereum_node_ipv6_enabled }}"
     besu_public_ipv6: "{{ ethereum_node_el_public_ipv6 }}"
+    besu_gas_limit: "{{ ethereum_node_gas_limit }}"
 
 - name: "Execution client: geth"
   when: ethereum_node_el == "geth"
@@ -27,6 +28,7 @@
     geth_container_pull: "{{ ethereum_node_images_always_pull }}"
     geth_ipv6_enabled: "{{ ethereum_node_ipv6_enabled }}"
     geth_public_ipv6: "{{ ethereum_node_el_public_ipv6 }}"
+    geth_gas_limit: "{{ ethereum_node_gas_limit }}"
 
 - name: "Execution client: erigon"
   when: ethereum_node_el == "erigon"
@@ -42,6 +44,7 @@
     erigon_container_pull: "{{ ethereum_node_images_always_pull }}"
     erigon_ipv6_enabled: "{{ ethereum_node_ipv6_enabled }}"
     erigon_public_ipv6: "{{ ethereum_node_el_public_ipv6 }}"
+    erigon_gas_limit: "{{ ethereum_node_gas_limit }}"
 
 - name: "Execution client: nethermind"
   when: ethereum_node_el == "nethermind"
@@ -57,6 +60,7 @@
     nethermind_container_pull: "{{ ethereum_node_images_always_pull }}"
     nethermind_ipv6_enabled: "{{ ethereum_node_ipv6_enabled }}"
     nethermind_public_ipv6: "{{ ethereum_node_el_public_ipv6 }}"
+    nethermind_gas_limit: "{{ ethereum_node_gas_limit }}"
 
 - name: "Execution client: ethereumjs"
   when: ethereum_node_el == "ethereumjs"
@@ -85,6 +89,7 @@
     reth_container_pull: "{{ ethereum_node_images_always_pull }}"
     reth_ipv6_enabled: "{{ ethereum_node_ipv6_enabled }}"
     reth_public_ipv6: "{{ ethereum_node_el_public_ipv6 }}"
+    reth_gas_limit: "{{ ethereum_node_gas_limit }}"
 
 - name: "Execution client: nimbusel"
   when: ethereum_node_el == "nimbusel"
@@ -100,6 +105,7 @@
     nimbusel_container_pull: "{{ ethereum_node_images_always_pull }}"
     nimbusel_ipv6_enabled: "{{ ethereum_node_ipv6_enabled }}"
     nimbusel_public_ipv6: "{{ ethereum_node_el_public_ipv6 }}"
+    nimbusel_gas_limit: "{{ ethereum_node_gas_limit }}"
 
 - name: "Execution client: ethrex"
   when: ethereum_node_el == "ethrex"
@@ -115,3 +121,4 @@
     ethrex_container_pull: "{{ ethereum_node_images_always_pull }}"
     ethrex_ipv6_enabled: "{{ ethereum_node_ipv6_enabled }}"
     ethrex_public_ipv6: "{{ ethereum_node_el_public_ipv6 }}"
+    ethrex_gas_limit: "{{ ethereum_node_gas_limit }}"
