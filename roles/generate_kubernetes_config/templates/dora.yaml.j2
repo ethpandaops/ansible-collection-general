@@ -34,6 +34,7 @@ dora:
   name: {{ ethereum_network_name }}
   configPath: "https://config.{{ network_subdomain }}/cl/config.yaml"
   validatorNamesInventory: "https://config.{{ network_subdomain }}/api/v1/nodes/validator-ranges"
+  buildoorOverviewUrl: "{{ gen_kubernetes_config_dora_buildoor_overview_url }}"
   ethExplorerLink: "{{ gen_kubernetes_config_dora_frontend_explorer_link }}"
   publicRpcUrl: "{{ gen_kubernetes_config_dora_frontend_public_rpc }}"
   rainbowkitProjectId: "{{ gen_kubernetes_config_dora_frontend_rainbowkit_id }}"
