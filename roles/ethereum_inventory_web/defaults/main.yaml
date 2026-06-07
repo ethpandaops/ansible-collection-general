@@ -13,13 +13,72 @@ eth_inventory_web_container_volumes: # noqa var-naming[no-role-prefix]
   - "{{ eth_inventory_web_dir }}/content:/usr/share/nginx/html:ro"
   - "{{ eth_inventory_web_dir }}/nginx-conf/default.conf:/etc/nginx/conf.d/default.conf:ro"
 
+# Optional validator names mapping file produced by the genesis generator when
+# validator shuffling is enabled. Defaults to the network config metadata
+# directory (empty when that is unknown, which disables mapping translation).
+eth_inventory_web_validator_names_file: >- # noqa var-naming[no-role-prefix]
+  {{ ((eth_testnet_config_local_dir_src | regex_replace('/$', '')) ~ '/validator_names.yaml')
+     if eth_testnet_config_local_dir_src is defined else '' }}
+
+# Parsed validator names mapping (a list of {on-chain-range: {src, from, to}}),
+# or an empty list when no mapping file is present.
+eth_inventory_web_validator_names_mapping: >- # noqa var-naming[no-role-prefix]
+  {%- set raw = lookup('file', eth_inventory_web_validator_names_file, errors='ignore')
+        if (eth_inventory_web_validator_names_file | length > 0) else '' -%}
+  {%- if raw -%}
+  {{ raw | from_yaml }}
+  {%- else -%}
+  {{ [] }}
+  {%- endif -%}
+
+# Final on-chain validator ranges as a list of {range, name, start}. When a
+# mapping file is present each mapping entry is translated: "main-mnemonic"
+# derivation ranges are resolved to the owning host (splitting on host
+# boundaries that don't align with the mapping groups and shifting into the
+# on-chain index space), while other sources are passed through under their own
+# name. Without a mapping file the mnemonic-index keyranges are emitted directly
+# (mnemonic index == on-chain index).
+eth_inventory_web_validator_ranges: >- # noqa var-naming[no-role-prefix]
+  {%- set ns = namespace(ranges=[]) -%}
+  {%- set mapping = eth_inventory_web_validator_names_mapping | default([]) -%}
+  {%- set keyranges = ethereum_genesis_validator_keyranges | default({}) -%}
+  {%- if mapping | length > 0 -%}
+  {%-   for entry in mapping -%}
+  {%-     for onchain_range, val in entry.items() -%}
+  {%-       set oc = (onchain_range | string).split('-') -%}
+  {%-       set oc_start = oc[0] | int -%}
+  {%-       set oc_end = oc[1] | int -%}
+  {%-       if val['src'] != 'main-mnemonic' -%}
+  {%-         set _ = ns.ranges.append({'range': (oc_start | string) ~ '-' ~ (oc_end | string), 'name': val['src'], 'start': oc_start}) -%}
+  {%-       else -%}
+  {%-         set dfrom = val['from'] | int -%}
+  {%-         set dto = val['to'] | int -%}
+  {%-         for host, kr in keyranges.items() -%}
+  {%-           set ov_start = [dfrom, kr.start | int] | max -%}
+  {%-           set ov_end = [dto, (kr.end | int) - 1] | min -%}
+  {%-           if ov_start <= ov_end -%}
+  {%-             set rstart = oc_start + ov_start - dfrom -%}
+  {%-             set rend = oc_start + ov_end - dfrom -%}
+  {%-             set _ = ns.ranges.append({'range': (rstart | string) ~ '-' ~ (rend | string), 'name': host, 'start': rstart}) -%}
+  {%-           endif -%}
+  {%-         endfor -%}
+  {%-       endif -%}
+  {%-     endfor -%}
+  {%-   endfor -%}
+  {%- else -%}
+  {%-   for host, kr in keyranges.items() -%}
+  {%-     set _ = ns.ranges.append({'range': (kr.start | string) ~ '-' ~ ((kr.end | int - 1) | string), 'name': host, 'start': kr.start | int}) -%}
+  {%-   endfor -%}
+  {%- endif -%}
+  {{ ns.ranges }}
+
 eth_inventory_web_content: # noqa var-naming[no-role-prefix]
   - file: v1/validator-ranges.json
     content: |
       {
         "ranges": {
-          {% for k, v in ethereum_genesis_validator_keyranges.items() | sort(attribute='1.start') %}
-          "{{ v.start }}-{{ v.end - 1 }}": "{{ k }}"{% if not loop.last %},{% endif %}
+          {% for item in eth_inventory_web_validator_ranges | sort(attribute='start') %}
+          "{{ item.range }}": "{{ item.name }}"{% if not loop.last %},{% endif %}
           {% endfor %}
         }
       }
