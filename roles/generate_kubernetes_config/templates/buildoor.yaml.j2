@@ -1,0 +1,38 @@
+# {{ ansible_managed }}
+
+buildoor-overview:
+  fullnameOverride: buildoor-overview
+  image:
+    repository: {{ default_tooling_images.buildoor.split(':') | first }}
+    tag: {{ default_tooling_images.buildoor.split(':') | last }}
+    pullPolicy: {% if "latest" in (default_tooling_images.buildoor.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
+
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+  ingress:
+    enabled: true
+    className: ingress-nginx-public
+{% if gen_kubernetes_config_pandamenu_enabled %}
+    annotations:
+      nginx.ingress.kubernetes.io/proxy-body-size: "0"
+      nginx.ingress.kubernetes.io/configuration-snippet: |
+        sub_filter '</head>' '{{ gen_kubernetes_config_buildoor_pandamenu | default('') }}{{ gen_kubernetes_config_pandamenu_script }}</head>';
+        sub_filter_types text/html;
+        sub_filter_once off;
+{% endif %}
+    hosts:
+      - host: buildoor.{{ network_subdomain }}
+        paths:
+          - path: /
+            pathType: Prefix
+
+  hosts:
+{% for host in groups.get('buildoor', []) | sort %}
+    - https://api-{{ hostvars[host]['inventory_hostname'] }}.{{ network_server_subdomain }}
+{% endfor %}

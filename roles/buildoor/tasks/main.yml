@@ -1,0 +1,8 @@
+---
+# tasks file for buildoor
+- name: Setup buildoor
+  ansible.builtin.import_tasks: setup.yaml
+  when: not buildoor_cleanup
+
+- name: Cleanup buildoor
+  ansible.builtin.import_tasks: cleanup.yaml

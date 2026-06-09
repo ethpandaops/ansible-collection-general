@@ -1,0 +1,5 @@
+- name: Restart buildoor container
+  community.docker.docker_container:
+    name: "{{ buildoor_container_name }}"
+    state: started
+    restart: true

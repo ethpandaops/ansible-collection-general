@@ -1,0 +1,23 @@
+otelcol_contrib_datadir: /data/otelcol
+
+otelcol_contrib_cleanup: false
+
+otelcol_contrib_container_image: otel/opentelemetry-collector-contrib:0.152.0
+otelcol_contrib_container_name: otelcol
+otelcol_contrib_container_command: ["--config", "/etc/otelcol/config.yaml"]
+otelcol_contrib_container_ports: []
+otelcol_contrib_container_restart_policy: always
+otelcol_contrib_container_networks: []
+otelcol_contrib_container_volumes:
+  - "{{ otelcol_contrib_datadir }}/config.yaml:/etc/otelcol/config.yaml:ro"
+  - "/var/lib/docker/containers:/var/lib/docker/containers:ro"
+  - "/var/run/docker.sock:/var/run/docker.sock:ro"
+otelcol_contrib_container_env: {}
+
+# Run as root by default so the filelog receiver can read root-owned
+# /var/lib/docker/containers/*.log files. Override to a non-root UID/GID
+# (e.g. "1000:999") if your host setup makes those paths readable to a
+# specific user/group.
+otelcol_contrib_container_user: "0:0"
+
+otelcol_contrib_config: ""
