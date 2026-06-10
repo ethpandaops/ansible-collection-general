@@ -133,8 +133,6 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
       - name: dora
         repository: https://ethpandaops.github.io/ethereum-helm-charts
         version: 1.0.10
-  chat: disabled for now — uncomment to enable (needs the chart published +
-  services.enc.yaml#chat + a Cloudflare Access app on chat.<network_subdomain>).
   chat:
     valuesTemplatePath: templates/chat.yaml.j2
     dependencies:
