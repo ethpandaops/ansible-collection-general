@@ -87,6 +87,24 @@ gen_kubernetes_config_powfaucet_authenticatoor_grants: # noqa var-naming[no-role
 gen_kubernetes_config_pandamenu_enabled: true # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_pandamenu_script: '<script src="https://pandamenu.ethpandaops.io/panda-menu-1.0.1.js" integrity="sha384-icGX6g6CzB0tqlhDc6Su4c6IPVbcbUvfM3xjbbFYsYBwuZR79WkmOxDhGEPfmyn2" crossorigin="anonymous"></script>' # noqa var-naming[no-role-prefix] yaml[line-length]
 
+# Chat (panda-chat) — Open-WebUI + Hermes + panda CLI. Opt-IN (unlike the other
+# charts, which are opt-out via gen_kubernetes_config_disabled_services): flip
+# gen_kubernetes_config_chat_enabled on per inventory. Minimum prereq is a
+# `chat` section in services.enc.yaml with llm_api_key + langfuse keys; the
+# panda integration (chat_panda_enabled) additionally needs panda_bot_username/
+# panda_bot_token (Authentik service account + app password, chat repo
+# docs/panda-bot-setup.md) and panda-chat chart >= 0.2.0. With panda off the
+# agent is a plain LLM chat (faucet/join-devnet skills still work), so a devnet
+# can spin chat up before the bot identity exists. Auth at the edge is a
+# Cloudflare Access app on chat.<network_subdomain> (chat_auth_enabled; off =
+# public with password login). Everything else uses the panda-chat chart
+# defaults; only these knobs are exposed:
+gen_kubernetes_config_chat_enabled: false # noqa var-naming[no-role-prefix]
+# Panda integration: panda-server sidecar + Authentik bot credentials.
+gen_kubernetes_config_chat_panda_enabled: false # noqa var-naming[no-role-prefix]
+# panda-chat chart version (>= 0.2.0 required when chat_panda_enabled).
+gen_kubernetes_config_chat_chart_version: "0.1.1" # noqa var-naming[no-role-prefix]
+# Optional image pin; empty = chart default tag (appVersion).
 gen_kubernetes_config_chat_image: "" # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_chat_llm_model: "claude-sonnet-4-6" # noqa var-naming[no-role-prefix]
 # Cloudflare Access trusted-header SSO.
@@ -95,7 +113,8 @@ gen_kubernetes_config_chat_auth_enabled: true # noqa var-naming[no-role-prefix]
 
 # Enabled charts configuration
 gen_kubernetes_config_disabled_services: [] # noqa var-naming[no-role-prefix]
-gen_kubernetes_config_enabled_charts: "{{ gen_kubernetes_config_helm_charts.keys() | reject('in', gen_kubernetes_config_disabled_services) | list }}" # noqa var-naming[no-role-prefix] yaml[line-length]
+# chat is opt-in: rejected here unless gen_kubernetes_config_chat_enabled.
+gen_kubernetes_config_enabled_charts: "{{ gen_kubernetes_config_helm_charts.keys() | reject('in', gen_kubernetes_config_disabled_services) | reject('in', [] if gen_kubernetes_config_chat_enabled else ['chat']) | list }}" # noqa var-naming[no-role-prefix] yaml[line-length]
 
 gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
   config:
@@ -133,12 +152,14 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
       - name: dora
         repository: https://ethpandaops.github.io/ethereum-helm-charts
         version: 1.0.10
+  # chat is opt-in via gen_kubernetes_config_chat_enabled (see the chat
+  # section above); listed here so the registry stays declarative.
   chat:
     valuesTemplatePath: templates/chat.yaml.j2
     dependencies:
       - name: panda-chat
         repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 0.1.1
+        version: "{{ gen_kubernetes_config_chat_chart_version }}"
   forky:
     valuesTemplatePath: templates/forky.yaml.j2
     dependencies:

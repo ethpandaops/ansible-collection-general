@@ -15,6 +15,13 @@ image:
 llm:
   model: {{ gen_kubernetes_config_chat_llm_model }}
 
+# Panda integration (panda-server sidecar + Authentik bot identity). Off =
+# plain LLM chat; the bot credentials are only referenced when on, so the
+# devnet can run chat before services.enc.yaml#chat has panda_bot_* keys.
+panda:
+  enabled: {{ gen_kubernetes_config_chat_panda_enabled | lower }}
+
+# LLM-call tracing → EthPandaOps Langfuse (keys from services.enc.yaml#chat).
 langfuse:
   enabled: true
   baseUrl: "https://langfuse.analytics.production.platform.ethpandaops.io"
@@ -30,9 +37,11 @@ devnetTools:
 
 credentials:
   llmApiKey: "<path:/secrets/services/services.enc.yaml#chat | jsonPath {.llm_api_key}>"
+{% if gen_kubernetes_config_chat_panda_enabled %}
   panda:
     botUsername: "<path:/secrets/services/services.enc.yaml#chat | jsonPath {.panda_bot_username}>"
     botToken: "<path:/secrets/services/services.enc.yaml#chat | jsonPath {.panda_bot_token}>"
+{% endif %}
   langfuse:
     publicKey: "<path:/secrets/services/services.enc.yaml#chat | jsonPath {.langfuse_public_key}>"
     secretKey: "<path:/secrets/services/services.enc.yaml#chat | jsonPath {.langfuse_secret_key}>"
