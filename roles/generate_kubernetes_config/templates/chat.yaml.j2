@@ -1,17 +1,10 @@
 # {{ ansible_managed }}
-# panda-chat — Open-WebUI + Hermes (panda CLI) at https://chat.{{ network_subdomain }}
-# Only per-devnet values + EthPandaOps infra are set here; everything else
-# (image repo, llm provider/key env, panda proxy/issuer/sandbox, resources,
-# persistence, open-webui front end) uses the panda-chat chart defaults.
-
-# Fixed name so the front end can target the agent service (chat-hermes:8642).
 fullnameOverride: chat
 
 network: {{ ethereum_network_name }}
-chainId: "{{ chainId | default('') }}"
+chainId: "{{ ethereum_genesis_chain_id }}"
 {% if gen_kubernetes_config_chat_image %}
 
-# Pinned agent image (otherwise the chart default tag = appVersion).
 image:
   repository: {{ gen_kubernetes_config_chat_image.split(':') | first }}
   tag: {{ gen_kubernetes_config_chat_image.split(':') | last }}
@@ -22,24 +15,19 @@ image:
 llm:
   model: {{ gen_kubernetes_config_chat_llm_model }}
 
-# LLM-call tracing → EthPandaOps Langfuse (keys from services.enc.yaml#chat).
 langfuse:
   enabled: true
   baseUrl: "https://langfuse.analytics.production.platform.ethpandaops.io"
-  env: "{{ ethereum_network_name }}"
 
-# Devnet tooling endpoints for the agent skills, derived from sibling services.
 devnetTools:
   faucet:
     enabled: {{ ('faucet' in gen_kubernetes_config_enabled_charts) | lower }}
     url: "https://faucet.{{ network_subdomain }}"
   join:
-    enabled: true
     configUrl: "https://config.{{ network_subdomain }}"
     rpcUrl: "{{ gen_kubernetes_config_dora_frontend_public_rpc }}"
     explorerUrl: "{{ gen_kubernetes_config_dora_frontend_explorer_link }}"
 
-# From services.enc.yaml#chat.
 credentials:
   llmApiKey: "<path:/secrets/services/services.enc.yaml#chat | jsonPath {.llm_api_key}>"
   panda:
@@ -49,8 +37,6 @@ credentials:
     publicKey: "<path:/secrets/services/services.enc.yaml#chat | jsonPath {.langfuse_public_key}>"
     secretKey: "<path:/secrets/services/services.enc.yaml#chat | jsonPath {.langfuse_secret_key}>"
 
-# Front end (subchart). Wired to the in-chart Hermes service; gated at the
-# Cloudflare Access edge via trusted-header SSO. The rest is chart default.
 open-webui:
   sso:
     enabled: {{ gen_kubernetes_config_chat_auth_enabled | lower }}
@@ -61,10 +47,8 @@ open-webui:
   extraEnvVars:
     - name: ENABLE_OLLAMA_API
       value: "false"
-    # No password login when SSO is on; fall back to it when chat is public.
     - name: ENABLE_LOGIN_FORM
       value: "{{ (not gen_kubernetes_config_chat_auth_enabled) | lower }}"
-    # Bearer for the in-cluster Hermes endpoint, read from the agent Secret.
     - name: OPENAI_API_KEYS
       valueFrom:
         secretKeyRef:
