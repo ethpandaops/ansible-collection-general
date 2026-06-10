@@ -1,45 +1,34 @@
 # {{ ansible_managed }}
 # panda-chat — Open-WebUI + Hermes (panda CLI) at https://chat.{{ network_subdomain }}
+# Only per-devnet values + EthPandaOps infra are set here; everything else
+# (image repo, llm provider/key env, panda proxy/issuer/sandbox, resources,
+# persistence, open-webui front end) uses the panda-chat chart defaults.
 
-# Fixed names so the front end can target the agent service.
+# Fixed name so the front end can target the agent service (chat-hermes:8642).
 fullnameOverride: chat
 
 network: {{ ethereum_network_name }}
 chainId: "{{ chainId | default('') }}"
+{% if gen_kubernetes_config_chat_image %}
 
+# Pinned agent image (otherwise the chart default tag = appVersion).
 image:
   repository: {{ gen_kubernetes_config_chat_image.split(':') | first }}
   tag: {{ gen_kubernetes_config_chat_image.split(':') | last }}
   pullPolicy: {% if "latest" in (gen_kubernetes_config_chat_image.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
 
+{% endif %}
 
 llm:
-  provider: {{ gen_kubernetes_config_chat_llm_provider }}
   model: {{ gen_kubernetes_config_chat_llm_model }}
-  baseUrl: "{{ gen_kubernetes_config_chat_llm_base_url }}"
-  apiMode: "{{ gen_kubernetes_config_chat_llm_api_mode }}"
-  apiKeyEnv: {{ gen_kubernetes_config_chat_llm_api_key_env }}
 
-systemPrompt: |
-  You are the EthPandaOps assistant for the Ethereum devnet "{{ ethereum_network_name }}"
-  (chain id {{ chainId | default('unknown') }}). Help users understand devnet state and use
-  the EthPandaOps tooling: query live data with the `panda` skill, fund accounts with the
-  `faucet` skill, and join the network with the `join-devnet` skill. Always scope data
-  queries to this devnet and be concise.
-
-panda:
-  enabled: {{ gen_kubernetes_config_chat_panda_enabled | lower }}
-  proxyUrl: "{{ gen_kubernetes_config_chat_panda_proxy_url }}"
-  issuerUrl: "{{ gen_kubernetes_config_chat_panda_issuer_url }}"
-  clientId: "{{ gen_kubernetes_config_chat_panda_client_id }}"
-  sandboxImage: "{{ gen_kubernetes_config_chat_panda_sandbox_image }}"
-  storageDriver: "{{ gen_kubernetes_config_chat_panda_storage_driver }}"
-
+# LLM-call tracing → EthPandaOps Langfuse (keys from services.enc.yaml#chat).
 langfuse:
-  enabled: {{ gen_kubernetes_config_chat_langfuse_enabled | lower }}
-  baseUrl: "{{ gen_kubernetes_config_chat_langfuse_base_url }}"
+  enabled: true
+  baseUrl: "https://langfuse.analytics.production.platform.ethpandaops.io"
   env: "{{ ethereum_network_name }}"
 
+# Devnet tooling endpoints for the agent skills, derived from sibling services.
 devnetTools:
   faucet:
     enabled: {{ ('faucet' in gen_kubernetes_config_enabled_charts) | lower }}
@@ -50,7 +39,7 @@ devnetTools:
     rpcUrl: "{{ gen_kubernetes_config_dora_frontend_public_rpc }}"
     explorerUrl: "{{ gen_kubernetes_config_dora_frontend_explorer_link }}"
 
-# From services.enc.yaml#chat: llm_api_key, panda_credentials_json, panda_credentials_file.
+# From services.enc.yaml#chat.
 credentials:
   llmApiKey: "<path:/secrets/services/services.enc.yaml#chat | jsonPath {.llm_api_key}>"
   panda:
@@ -60,47 +49,21 @@ credentials:
     publicKey: "<path:/secrets/services/services.enc.yaml#chat | jsonPath {.langfuse_public_key}>"
     secretKey: "<path:/secrets/services/services.enc.yaml#chat | jsonPath {.langfuse_secret_key}>"
 
-resources:
-  requests:
-    cpu: 300m
-    memory: 1Gi
-  limits:
-    cpu: 3000m
-    memory: 6Gi
-
-persistence:
-  enabled: true
-  size: "{{ gen_kubernetes_config_chat_persistence_size }}"
-
-# Front end. Wired to the in-chart Hermes service (chat-hermes:8642).
+# Front end (subchart). Wired to the in-chart Hermes service; gated at the
+# Cloudflare Access edge via trusted-header SSO. The rest is chart default.
 open-webui:
-  enabled: true
-  ollama:
-    enabled: false
-  pipelines:
-    enabled: false
-  websocket:
-    enabled: false
-    redis:
-      enabled: false
-  persistence:
-    enabled: true
-    size: 5Gi
-  # Org gating: Cloudflare Access (edge) -> Open-WebUI trusted-header SSO.
-  # Requires a CF Access application on chat.{{ network_subdomain }} scoped to the org.
   sso:
     enabled: {{ gen_kubernetes_config_chat_auth_enabled | lower }}
-    enableSignup: true
     trustedHeader:
       enabled: {{ gen_kubernetes_config_chat_auth_enabled | lower }}
-      emailHeader: Cf-Access-Authenticated-User-Email
   openaiBaseApiUrls:
     - "http://chat-hermes:8642/v1"
   extraEnvVars:
     - name: ENABLE_OLLAMA_API
       value: "false"
+    # No password login when SSO is on; fall back to it when chat is public.
     - name: ENABLE_LOGIN_FORM
-      value: "{{ gen_kubernetes_config_chat_enable_login_form | lower }}"
+      value: "{{ (not gen_kubernetes_config_chat_auth_enabled) | lower }}"
     # Bearer for the in-cluster Hermes endpoint, read from the agent Secret.
     - name: OPENAI_API_KEYS
       valueFrom:
@@ -108,8 +71,6 @@ open-webui:
           name: chat-hermes-secret
           key: API_SERVER_KEY
   ingress:
-    enabled: true
-    class: ingress-nginx-public
     host: chat.{{ network_subdomain }}
 {% if gen_kubernetes_config_pandamenu_enabled %}
     annotations:

@@ -91,34 +91,19 @@ gen_kubernetes_config_powfaucet_authenticatoor_grants: # noqa var-naming[no-role
 gen_kubernetes_config_pandamenu_enabled: true # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_pandamenu_script: '<script src="https://pandamenu.ethpandaops.io/panda-menu-1.0.1.js" integrity="sha384-icGX6g6CzB0tqlhDc6Su4c6IPVbcbUvfM3xjbbFYsYBwuZR79WkmOxDhGEPfmyn2" crossorigin="anonymous"></script>' # noqa var-naming[no-role-prefix] yaml[line-length]
 
-# Chat (panda-chat) — Open-WebUI + Hermes + panda CLI. Needs a `chat` section in
-# services.enc.yaml: llm_api_key, panda_credentials_json, panda_credentials_file,
-# langfuse_public_key, langfuse_secret_key.
-gen_kubernetes_config_chat_image: "ethpandaops/hermes-agent-panda:latest" # noqa var-naming[no-role-prefix]
-gen_kubernetes_config_chat_llm_provider: "anthropic" # noqa var-naming[no-role-prefix]
+# Chat (panda-chat) — Open-WebUI + Hermes + panda CLI. Disabled for now (its
+# registry entry below is commented out). When enabled it needs a `chat` section
+# in services.enc.yaml (llm_api_key, panda_credentials_json, panda_credentials_file,
+# langfuse_public_key, langfuse_secret_key) and a Cloudflare Access app gating
+# chat.<network_subdomain>. Everything else uses the panda-chat chart defaults;
+# only these knobs are exposed:
+# Optional image pin; empty = chart default tag (appVersion).
+gen_kubernetes_config_chat_image: "" # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_chat_llm_model: "claude-sonnet-4-6" # noqa var-naming[no-role-prefix]
-gen_kubernetes_config_chat_llm_base_url: "" # noqa var-naming[no-role-prefix]
-gen_kubernetes_config_chat_llm_api_mode: "" # noqa var-naming[no-role-prefix]
-gen_kubernetes_config_chat_llm_api_key_env: "ANTHROPIC_API_KEY" # noqa var-naming[no-role-prefix]
-gen_kubernetes_config_chat_enable_login_form: false # noqa var-naming[no-role-prefix]
-# Gate chat behind Cloudflare Access (trusted-header SSO). Requires a CF Access
-# application on chat.<network_subdomain> scoped to the org.
+# Cloudflare Access trusted-header SSO.
 gen_kubernetes_config_chat_auth_enabled: true # noqa var-naming[no-role-prefix]
-gen_kubernetes_config_chat_persistence_size: "8Gi" # noqa var-naming[no-role-prefix]
-# Panda integration. issuer_url/client_id are the panda-proxy *bot* OIDC identity
-# (machine auth to the analytics data plane) — NOT user login, which is the
-# Cloudflare Access trusted-header gate above.
-gen_kubernetes_config_chat_panda_enabled: true # noqa var-naming[no-role-prefix]
-gen_kubernetes_config_chat_panda_proxy_url: "https://panda-proxy.analytics.production.platform.ethpandaops.io" # noqa var-naming[no-role-prefix] yaml[line-length]
-gen_kubernetes_config_chat_panda_issuer_url: "https://dex.primary.production.platform.ethpandaops.io" # noqa var-naming[no-role-prefix] yaml[line-length]
-gen_kubernetes_config_chat_panda_client_id: "panda-proxy" # noqa var-naming[no-role-prefix]
-gen_kubernetes_config_chat_panda_sandbox_image: "ethpandaops/panda:sandbox-v0.31.0" # noqa var-naming[no-role-prefix]
-gen_kubernetes_config_chat_panda_storage_driver: "overlay2" # noqa var-naming[no-role-prefix]
+# Extra panda-menu HTML, prefixed to the global snippet.
 gen_kubernetes_config_chat_pandamenu: "" # noqa var-naming[no-role-prefix]
-# Langfuse tracing (Hermes observability/langfuse plugin). Keys come from
-# services.enc.yaml#chat (langfuse_public_key, langfuse_secret_key).
-gen_kubernetes_config_chat_langfuse_enabled: true # noqa var-naming[no-role-prefix]
-gen_kubernetes_config_chat_langfuse_base_url: "https://langfuse.analytics.production.platform.ethpandaops.io" # noqa var-naming[no-role-prefix] yaml[line-length]
 
 # Enabled charts configuration
 gen_kubernetes_config_disabled_services: [] # noqa var-naming[no-role-prefix]
@@ -188,12 +173,14 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
       - name: dora
         repository: https://ethpandaops.github.io/ethereum-helm-charts
         version: 1.0.10
+  # chat: disabled for now — uncomment to enable (needs the chart published +
+  # services.enc.yaml#chat + a Cloudflare Access app on chat.<network_subdomain>).
   # chat:
   #   valuesTemplatePath: templates/chat.yaml.j2
   #   dependencies:
   #     - name: panda-chat
   #       repository: https://ethpandaops.github.io/ethereum-helm-charts
-  #       version: 0.1.0
+  #       version: 0.1.1
   forky:
     valuesTemplatePath: templates/forky.yaml.j2
     dependencies:
