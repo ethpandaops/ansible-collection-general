@@ -83,27 +83,15 @@ gen_kubernetes_config_powfaucet_authenticatoor_grants: # noqa var-naming[no-role
     skipModules: ["pow", "recurring-limits", "faucet-outflow"]
     overrideMaxDrop: 100000000000000000000  # 100 ETH
 
-# Chaos Mesh configuration
-# gen_kubernetes_config_chaos_mesh_dashboard_security_mode: false # noqa var-naming[no-role-prefix]
-# gen_kubernetes_config_chaos_mesh_chaosd_security_mode: false # noqa var-naming[no-role-prefix]
-
 # PandaMenu configuration
 gen_kubernetes_config_pandamenu_enabled: true # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_pandamenu_script: '<script src="https://pandamenu.ethpandaops.io/panda-menu-1.0.1.js" integrity="sha384-icGX6g6CzB0tqlhDc6Su4c6IPVbcbUvfM3xjbbFYsYBwuZR79WkmOxDhGEPfmyn2" crossorigin="anonymous"></script>' # noqa var-naming[no-role-prefix] yaml[line-length]
 
-# Chat (panda-chat) — Open-WebUI + Hermes + panda CLI. Disabled for now (its
-# registry entry below is commented out). When enabled it needs a `chat` section
-# in services.enc.yaml (llm_api_key, panda_credentials_json, panda_credentials_file,
-# langfuse_public_key, langfuse_secret_key) and a Cloudflare Access app gating
-# chat.<network_subdomain>. Everything else uses the panda-chat chart defaults;
-# only these knobs are exposed:
-# Optional image pin; empty = chart default tag (appVersion).
 gen_kubernetes_config_chat_image: "" # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_chat_llm_model: "claude-sonnet-4-6" # noqa var-naming[no-role-prefix]
 # Cloudflare Access trusted-header SSO.
 gen_kubernetes_config_chat_auth_enabled: true # noqa var-naming[no-role-prefix]
-# Extra panda-menu HTML, prefixed to the global snippet.
-gen_kubernetes_config_chat_pandamenu: "" # noqa var-naming[no-role-prefix]
+
 
 # Enabled charts configuration
 gen_kubernetes_config_disabled_services: [] # noqa var-naming[no-role-prefix]
@@ -112,34 +100,6 @@ gen_kubernetes_config_enabled_charts: "{{ gen_kubernetes_config_helm_charts.keys
 gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
   config:
     valuesTemplatePath: templates/config.yaml.j2
-  # beacon-metrics-gazer:
-  #   valuesTemplatePath: templates/beacon-metrics-gazer.yaml.j2
-  #   dependencies:
-  #     - name: beacon-metrics-gazer
-  #       repository: https://ethpandaops.github.io/ethereum-helm-charts
-  #       version: 0.1.3
-  # blobscan:
-  #   valuesTemplatePath: templates/blobscan.yaml.j2
-  #   dependencies:
-  #     - name: blobscan
-  #       repository: https://blobscan.github.io/blobscan-helm-charts/
-  #       version: 0.2.12
-  #     - name: blobscan-api
-  #       repository: https://blobscan.github.io/blobscan-helm-charts/
-  #       version: 0.2.8
-  #     - name: blobscan-indexer
-  #       repository: https://blobscan.github.io/blobscan-helm-charts/
-  #       version: 0.2.9
-  # blockscout:
-  #   valuesTemplatePath: templates/blockscout.yaml.j2
-  #   dependencies:
-  #     - name: blockscout-stack
-  #       repository: https://blockscout.github.io/helm-charts
-  #       version: 2.0.0
-  #     - name: postgresql
-  #       repository: https://charts.bitnami.com/bitnami
-  #       version: "14.x.x"
-  #       condition: postgresql.enabled
   checkpointz:
     valuesTemplatePath: templates/checkpointz.yaml.j2
     dependencies:
@@ -173,14 +133,14 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
       - name: dora
         repository: https://ethpandaops.github.io/ethereum-helm-charts
         version: 1.0.10
-  # chat: disabled for now — uncomment to enable (needs the chart published +
-  # services.enc.yaml#chat + a Cloudflare Access app on chat.<network_subdomain>).
-  # chat:
-  #   valuesTemplatePath: templates/chat.yaml.j2
-  #   dependencies:
-  #     - name: panda-chat
-  #       repository: https://ethpandaops.github.io/ethereum-helm-charts
-  #       version: 0.1.1
+  chat: disabled for now — uncomment to enable (needs the chart published +
+  services.enc.yaml#chat + a Cloudflare Access app on chat.<network_subdomain>).
+  chat:
+    valuesTemplatePath: templates/chat.yaml.j2
+    dependencies:
+      - name: panda-chat
+        repository: https://ethpandaops.github.io/ethereum-helm-charts
+        version: 0.1.1
   forky:
     valuesTemplatePath: templates/forky.yaml.j2
     dependencies:
@@ -193,12 +153,6 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
       - name: testnet-homepage
         repository: https://ethpandaops.github.io/ethereum-helm-charts
         version: 0.2.3
-  # rpc:
-  #   valuesTemplatePath: templates/rpc-proxy.yaml.j2
-  #   dependencies:
-  #     - name: rpc-proxy
-  #       repository: https://ethpandaops.github.io/ethereum-helm-charts
-  #       version: 0.1.2
   assertoor:
     valuesTemplatePath: templates/assertoor.yaml.j2
     dependencies:
@@ -223,13 +177,6 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
       - name: tracoor-single
         repository: https://ethpandaops.github.io/ethereum-helm-charts
         version: 0.0.5
-  # "{{ gen_kubernetes_config_ethereum_node_name }}":
-  #   valuesTemplatePath: templates/ethereum-node.yaml.j2
-  #   dependencies:
-  #     - name: ethereum-node
-  #       repository: https://ethpandaops.github.io/ethereum-helm-charts
-  #       version: 0.0.27
-  #       alias: "{{ gen_kubernetes_config_ethereum_node_name }}"
   erpc:
     valuesTemplatePath: templates/erpc.yaml.j2
     dependencies:
@@ -260,12 +207,6 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
       - name: xatu-cl-mimicry
         repository: https://ethpandaops.github.io/ethereum-helm-charts
         version: 0.0.2
-  # chaos-mesh:
-  #   valuesTemplatePath: templates/chaos-mesh.yaml.j2
-  #   dependencies:
-  #     - name: chaos-mesh
-  #       repository: https://ethpandaops.github.io/ethereum-helm-charts
-  #       version: 0.0.3
   syncoor-server:
     valuesTemplatePath: templates/syncoor-server.yaml.j2
     dependencies:
