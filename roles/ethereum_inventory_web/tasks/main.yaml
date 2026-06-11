@@ -12,6 +12,77 @@
     group: "root"
     mode: "0644"
 
+- name: Build validator ranges from genesis mapping
+  vars:
+    ansible_connection: local
+  delegate_to: 127.0.0.1
+  run_once: true
+  become: false
+  when: ethereum_genesis_validator_keyranges is defined
+  block:
+    - name: Create temp dir for validator ranges merge # noqa var-naming[no-role-prefix]
+      ansible.builtin.tempfile:
+        state: directory
+        suffix: validator-ranges-merge
+      register: eth_inventory_web_merge_tmp
+
+    - name: Write client key segments
+      ansible.builtin.copy:
+        content: "{{ eth_inventory_web_segments_json }}"
+        dest: "{{ eth_inventory_web_merge_tmp.path }}/segments.json"
+        mode: "0644"
+
+    - name: Check for validator names mapping file # noqa var-naming[no-role-prefix]
+      ansible.builtin.stat:
+        path: "{{ eth_inventory_web_validator_names_file }}"
+      register: eth_inventory_web_mapping_stat
+      when: eth_inventory_web_validator_names_file | length > 0
+
+    - name: Copy validator names mapping into merge input
+      ansible.builtin.copy:
+        src: "{{ eth_inventory_web_validator_names_file }}"
+        dest: "{{ eth_inventory_web_merge_tmp.path }}/validator_names.yaml"
+        mode: "0644"
+      when: eth_inventory_web_mapping_stat.stat.exists | default(false)
+
+    - name: Check if Docker is rootless # noqa var-naming[no-role-prefix]
+      ansible.builtin.command: docker info -f '{{ "{{json .SecurityOptions}}" }}'
+      register: eth_inventory_web_docker_secopts
+      changed_when: false
+
+    - name: Compute merge arguments # noqa var-naming[no-role-prefix]
+      ansible.builtin.set_fact:
+        eth_inventory_web_docker_user_flag: >-
+          {{ ('name=rootless' in eth_inventory_web_docker_secopts.stdout)
+          | ternary('', '-u ' ~ (ansible_effective_user_id | default(ansible_uid, true))) }}
+        eth_inventory_web_mapping_arg: >-
+          {{ (eth_inventory_web_mapping_stat.stat.exists | default(false))
+          | ternary('--mapping /in/validator_names.yaml', '') }}
+
+    - name: Run validator ranges merge # noqa var-naming[no-role-prefix]
+      ansible.builtin.shell: >
+        docker run --rm {{ eth_inventory_web_docker_user_flag }}
+        --entrypoint bash
+        -v {{ eth_inventory_web_merge_tmp.path }}:/in
+        {{ eth_inventory_web_merge_image }}
+        /apps/validator-mapping/merge.sh {{ eth_inventory_web_mapping_arg }}
+        --segments /in/segments.json --format json
+      register: eth_inventory_web_merge_cmd
+      changed_when: false
+      failed_when: (eth_inventory_web_merge_cmd.rc != 0) or (eth_inventory_web_merge_cmd.stdout == "")
+
+    - name: Clean up merge temp dir
+      ansible.builtin.file:
+        path: "{{ eth_inventory_web_merge_tmp.path }}"
+        state: absent
+
+- name: Set validator ranges fact # noqa var-naming[no-role-prefix]
+  ansible.builtin.set_fact:
+    eth_inventory_web_validator_ranges: "{{ (eth_inventory_web_merge_cmd.stdout | from_json).ranges }}"
+  when:
+    - ethereum_genesis_validator_keyranges is defined
+    - eth_inventory_web_merge_cmd.stdout is defined
+
 - name: Create directories
   ansible.builtin.file:
     path: "{{ (eth_inventory_web_dir + '/content/' + item.file) | dirname }}"
