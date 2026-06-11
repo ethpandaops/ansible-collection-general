@@ -68,7 +68,7 @@ powfaucet:
       priority: 5
 {%   endfor %}
 {% endif %}
-  faucetExplorerLink: "https://explorer.{{ network_subdomain }}/tx/{txid}"
+  faucetExplorerLink: "{{ gen_kubernetes_config_dora_frontend_explorer_link }}/tx/{txid}"
   faucetTxGasLimit: 100000
 
   faucetCaptchaEnabled: true
