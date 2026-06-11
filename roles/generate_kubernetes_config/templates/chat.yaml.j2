@@ -42,6 +42,9 @@ panda-chat:
       explorerUrl: "{{ gen_kubernetes_config_dora_frontend_explorer_link }}"
 
   credentials:
+    # Stable OW<->Hermes bearer: the chart can't preserve a generated one under
+    # ArgoCD (client-side `helm template`), so it must be a fixed sops value.
+    apiServerKey: "<path:/secrets/services/services.enc.yaml#chat | jsonPath {.api_server_key}>"
     llmApiKey: "<path:/secrets/services/services.enc.yaml#chat | jsonPath {.llm_api_key}>"
 {% if gen_kubernetes_config_chat_panda_enabled %}
     panda:
