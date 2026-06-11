@@ -68,14 +68,15 @@ powfaucet:
       priority: 5
 {%   endfor %}
 {% endif %}
-  faucetExplorerLink: "https://explorer.{{ network_subdomain }}/tx/{txid}"
+  faucetExplorerLink: "{{ gen_kubernetes_config_dora_frontend_explorer_link }}/tx/{txid}"
   faucetTxGasLimit: 100000
 
   faucetCaptchaEnabled: true
   faucetCaptchaSitekey: "<path:/secrets/services/services.enc.yaml#hcaptcha | jsonPath {.site_key}>"
   faucetCaptchaSecret: "<path:/secrets/services/services.enc.yaml#hcaptcha | jsonPath {.secret_key}>"
 
-  faucetRecurringLimitsAmountWei: 500000000000000000000 # 500 ETH
+  faucetRecurringLimitsAmountWei: 5000000000000000000000 # 5000 ETH
+  faucetMaxDropWei: 500000000000000000000 # 500 ETH
   faucetPowEnabled: true
   faucetPowRewardPerHash: 1000000000000000000 # 1 ETH
   faucetPowDifficulty: 10
