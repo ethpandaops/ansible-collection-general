@@ -20,7 +20,7 @@
   become: false
   when: ethereum_genesis_validator_keyranges is defined
   block:
-    - name: Create temp dir for validator ranges merge
+    - name: Create temp dir for validator ranges merge # noqa var-naming[no-role-prefix]
       ansible.builtin.tempfile:
         state: directory
         suffix: validator-ranges-merge
@@ -32,7 +32,7 @@
         dest: "{{ eth_inventory_web_merge_tmp.path }}/segments.json"
         mode: "0644"
 
-    - name: Check for validator names mapping file
+    - name: Check for validator names mapping file # noqa var-naming[no-role-prefix]
       ansible.builtin.stat:
         path: "{{ eth_inventory_web_validator_names_file }}"
       register: eth_inventory_web_mapping_stat
@@ -45,12 +45,12 @@
         mode: "0644"
       when: eth_inventory_web_mapping_stat.stat.exists | default(false)
 
-    - name: Check if Docker is rootless
+    - name: Check if Docker is rootless # noqa var-naming[no-role-prefix]
       ansible.builtin.command: docker info -f '{{ "{{json .SecurityOptions}}" }}'
       register: eth_inventory_web_docker_secopts
       changed_when: false
 
-    - name: Compute merge arguments
+    - name: Compute merge arguments # noqa var-naming[no-role-prefix]
       ansible.builtin.set_fact:
         eth_inventory_web_docker_user_flag: >-
           {{ ('name=rootless' in eth_inventory_web_docker_secopts.stdout)
@@ -59,7 +59,7 @@
           {{ (eth_inventory_web_mapping_stat.stat.exists | default(false))
           | ternary('--mapping /in/validator_names.yaml', '') }}
 
-    - name: Run validator ranges merge
+    - name: Run validator ranges merge # noqa var-naming[no-role-prefix]
       ansible.builtin.shell: >
         docker run --rm {{ eth_inventory_web_docker_user_flag }}
         --entrypoint bash
@@ -76,7 +76,7 @@
         path: "{{ eth_inventory_web_merge_tmp.path }}"
         state: absent
 
-- name: Set validator ranges fact
+- name: Set validator ranges fact # noqa var-naming[no-role-prefix]
   ansible.builtin.set_fact:
     eth_inventory_web_validator_ranges: "{{ (eth_inventory_web_merge_cmd.stdout | from_json).ranges }}"
   when:
