@@ -43,8 +43,7 @@ devnetTools:
 credentials:
   llmApiKey: "<path:/secrets/services/services.enc.yaml#chat | jsonPath {.llm_api_key}>"
   panda:
-    credentialsJson: "<path:/secrets/services/services.enc.yaml#chat | jsonPath {.panda_credentials_json}>"
-    credentialsFile: "<path:/secrets/services/services.enc.yaml#chat | jsonPath {.panda_credentials_file}>"
+    botToken: "<path:/secrets/services/services.enc.yaml#chat | jsonPath {.panda_bot_token}>"
   langfuse:
     publicKey: "<path:/secrets/services/services.enc.yaml#chat | jsonPath {.langfuse_public_key}>"
     secretKey: "<path:/secrets/services/services.enc.yaml#chat | jsonPath {.langfuse_secret_key}>"

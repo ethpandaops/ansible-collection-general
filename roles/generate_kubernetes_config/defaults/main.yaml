@@ -93,7 +93,7 @@ gen_kubernetes_config_pandamenu_script: '<script src="https://pandamenu.ethpanda
 
 # Chat (panda-chat) — Open-WebUI + Hermes + panda CLI. Disabled for now (its
 # registry entry below is commented out). When enabled it needs a `chat` section
-# in services.enc.yaml (llm_api_key, panda_credentials_json, panda_credentials_file,
+# in services.enc.yaml (llm_api_key, panda_bot_token,
 # langfuse_public_key, langfuse_secret_key) and a Cloudflare Access app gating
 # chat.<network_subdomain>. Everything else uses the panda-chat chart defaults;
 # only these knobs are exposed:
@@ -180,7 +180,7 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
   #   dependencies:
   #     - name: panda-chat
   #       repository: https://ethpandaops.github.io/ethereum-helm-charts
-  #       version: 0.1.1
+  #       version: 0.2.0
   forky:
     valuesTemplatePath: templates/forky.yaml.j2
     dependencies:
