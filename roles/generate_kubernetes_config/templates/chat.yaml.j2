@@ -1,75 +1,79 @@
 # {{ ansible_managed }}
-fullnameOverride: chat
+# Everything nests under the dependency chart's name — the generated wrapper
+# chart (Chart.yaml.j2) has no templates of its own, so top-level values
+# never reach the panda-chat subchart.
+panda-chat:
+  fullnameOverride: chat
 
-network: {{ ethereum_network_name }}
-chainId: "{{ ethereum_genesis_chain_id }}"
+  network: {{ ethereum_network_name }}
+  chainId: "{{ ethereum_genesis_chain_id }}"
 {% if gen_kubernetes_config_chat_image %}
 
-image:
-  repository: {{ gen_kubernetes_config_chat_image.split(':') | first }}
-  tag: {{ gen_kubernetes_config_chat_image.split(':') | last }}
-  pullPolicy: {% if "latest" in (gen_kubernetes_config_chat_image.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
+  image:
+    repository: {{ gen_kubernetes_config_chat_image.split(':') | first }}
+    tag: {{ gen_kubernetes_config_chat_image.split(':') | last }}
+    pullPolicy: {% if "latest" in (gen_kubernetes_config_chat_image.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
 
 {% endif %}
 
-llm:
-  model: {{ gen_kubernetes_config_chat_llm_model }}
+  llm:
+    model: {{ gen_kubernetes_config_chat_llm_model }}
 
-# Panda integration (panda-server sidecar + Authentik bot identity). Off =
-# plain LLM chat; the bot credentials are only referenced when on, so the
-# devnet can run chat before services.enc.yaml#chat has panda_bot_* keys.
-panda:
-  enabled: {{ gen_kubernetes_config_chat_panda_enabled | lower }}
-
-# LLM-call tracing → EthPandaOps Langfuse (keys from services.enc.yaml#chat).
-langfuse:
-  enabled: true
-  baseUrl: "https://langfuse.analytics.production.platform.ethpandaops.io"
-
-devnetTools:
-  faucet:
-    enabled: {{ ('faucet' in gen_kubernetes_config_enabled_charts) | lower }}
-    url: "https://faucet.{{ network_subdomain }}"
-  join:
-    configUrl: "https://config.{{ network_subdomain }}"
-    rpcUrl: "{{ gen_kubernetes_config_dora_frontend_public_rpc }}"
-    explorerUrl: "{{ gen_kubernetes_config_dora_frontend_explorer_link }}"
-
-credentials:
-  llmApiKey: "<path:/secrets/services/services.enc.yaml#chat | jsonPath {.llm_api_key}>"
-{% if gen_kubernetes_config_chat_panda_enabled %}
+  # Panda integration (panda-server sidecar + Authentik bot identity). Off =
+  # plain LLM chat; the bot credentials are only referenced when on, so the
+  # devnet can run chat before services.enc.yaml#chat has panda_bot_* keys.
   panda:
-    botUsername: "<path:/secrets/services/services.enc.yaml#chat | jsonPath {.panda_bot_username}>"
-    botToken: "<path:/secrets/services/services.enc.yaml#chat | jsonPath {.panda_bot_token}>"
-{% endif %}
-  langfuse:
-    publicKey: "<path:/secrets/services/services.enc.yaml#chat | jsonPath {.langfuse_public_key}>"
-    secretKey: "<path:/secrets/services/services.enc.yaml#chat | jsonPath {.langfuse_secret_key}>"
+    enabled: {{ gen_kubernetes_config_chat_panda_enabled | lower }}
 
-open-webui:
-  sso:
-    enabled: {{ gen_kubernetes_config_chat_auth_enabled | lower }}
-    trustedHeader:
+  # LLM-call tracing → EthPandaOps Langfuse (keys from services.enc.yaml#chat).
+  langfuse:
+    enabled: true
+    baseUrl: "https://langfuse.analytics.production.platform.ethpandaops.io"
+
+  devnetTools:
+    faucet:
+      enabled: {{ ('faucet' in gen_kubernetes_config_enabled_charts) | lower }}
+      url: "https://faucet.{{ network_subdomain }}"
+    join:
+      configUrl: "https://config.{{ network_subdomain }}"
+      rpcUrl: "{{ gen_kubernetes_config_dora_frontend_public_rpc }}"
+      explorerUrl: "{{ gen_kubernetes_config_dora_frontend_explorer_link }}"
+
+  credentials:
+    llmApiKey: "<path:/secrets/services/services.enc.yaml#chat | jsonPath {.llm_api_key}>"
+{% if gen_kubernetes_config_chat_panda_enabled %}
+    panda:
+      botUsername: "<path:/secrets/services/services.enc.yaml#chat | jsonPath {.panda_bot_username}>"
+      botToken: "<path:/secrets/services/services.enc.yaml#chat | jsonPath {.panda_bot_token}>"
+{% endif %}
+    langfuse:
+      publicKey: "<path:/secrets/services/services.enc.yaml#chat | jsonPath {.langfuse_public_key}>"
+      secretKey: "<path:/secrets/services/services.enc.yaml#chat | jsonPath {.langfuse_secret_key}>"
+
+  open-webui:
+    sso:
       enabled: {{ gen_kubernetes_config_chat_auth_enabled | lower }}
-  openaiBaseApiUrls:
-    - "http://chat-hermes:8642/v1"
-  extraEnvVars:
-    - name: ENABLE_OLLAMA_API
-      value: "false"
-    - name: ENABLE_LOGIN_FORM
-      value: "{{ (not gen_kubernetes_config_chat_auth_enabled) | lower }}"
-    - name: OPENAI_API_KEYS
-      valueFrom:
-        secretKeyRef:
-          name: chat-hermes-secret
-          key: API_SERVER_KEY
-  ingress:
-    host: chat.{{ network_subdomain }}
+      trustedHeader:
+        enabled: {{ gen_kubernetes_config_chat_auth_enabled | lower }}
+    openaiBaseApiUrls:
+      - "http://chat-hermes:8642/v1"
+    extraEnvVars:
+      - name: ENABLE_OLLAMA_API
+        value: "false"
+      - name: ENABLE_LOGIN_FORM
+        value: "{{ (not gen_kubernetes_config_chat_auth_enabled) | lower }}"
+      - name: OPENAI_API_KEYS
+        valueFrom:
+          secretKeyRef:
+            name: chat-hermes-secret
+            key: API_SERVER_KEY
+    ingress:
+      host: chat.{{ network_subdomain }}
 {% if gen_kubernetes_config_pandamenu_enabled %}
-    annotations:
-      nginx.ingress.kubernetes.io/proxy-body-size: "0"
-      nginx.ingress.kubernetes.io/configuration-snippet: |
-        sub_filter '</head>' '{{ gen_kubernetes_config_chat_pandamenu | default('') }}{{ gen_kubernetes_config_pandamenu_script }}</head>';
-        sub_filter_types text/html;
-        sub_filter_once off;
+      annotations:
+        nginx.ingress.kubernetes.io/proxy-body-size: "0"
+        nginx.ingress.kubernetes.io/configuration-snippet: |
+          sub_filter '</head>' '{{ gen_kubernetes_config_chat_pandamenu | default('') }}{{ gen_kubernetes_config_pandamenu_script }}</head>';
+          sub_filter_types text/html;
+          sub_filter_once off;
 {% endif %}
