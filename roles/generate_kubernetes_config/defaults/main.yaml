@@ -106,6 +106,12 @@ gen_kubernetes_config_chat_panda_enabled: false # noqa var-naming[no-role-prefix
 gen_kubernetes_config_chat_chart_version: "0.1.1" # noqa var-naming[no-role-prefix]
 # Optional image pin; empty = chart default tag (appVersion).
 gen_kubernetes_config_chat_image: "" # noqa var-naming[no-role-prefix]
+# Hermes inference provider (anthropic / openrouter / openai / custom / ...)
+# and the env var the chart materializes credentials.llmApiKey into — hermes
+# resolves the key from that env. Model ID format follows the provider
+# (anthropic: claude-sonnet-4-6, openrouter: anthropic/claude-sonnet-4.6).
+gen_kubernetes_config_chat_llm_provider: "anthropic" # noqa var-naming[no-role-prefix]
+gen_kubernetes_config_chat_llm_api_key_env: "ANTHROPIC_API_KEY" # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_chat_llm_model: "claude-sonnet-4-6" # noqa var-naming[no-role-prefix]
 # Cloudflare Access trusted-header SSO.
 gen_kubernetes_config_chat_auth_enabled: true # noqa var-naming[no-role-prefix]

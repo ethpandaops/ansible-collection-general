@@ -17,7 +17,9 @@ panda-chat:
 {% endif %}
 
   llm:
+    provider: {{ gen_kubernetes_config_chat_llm_provider }}
     model: {{ gen_kubernetes_config_chat_llm_model }}
+    apiKeyEnv: {{ gen_kubernetes_config_chat_llm_api_key_env }}
 
   # Panda integration (panda-server sidecar + Authentik bot identity). Off =
   # plain LLM chat; the bot credentials are only referenced when on, so the
