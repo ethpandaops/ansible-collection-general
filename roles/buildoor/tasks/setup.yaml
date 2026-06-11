@@ -42,6 +42,6 @@
     env: "{{ buildoor_container_env }}"
     networks: "{{ buildoor_container_networks }}"
     ports: "{{ buildoor_container_ports }}"
-    command: "{{ buildoor_container_command + buildoor_container_command_extra_args }}"
+    command: "{{ (buildoor_container_command + buildoor_container_command_extra_args) | flatten }}"
     user: "{{ buildoor_user_meta.uid }}"
     pull: "{{ buildoor_container_pull | bool }}"
