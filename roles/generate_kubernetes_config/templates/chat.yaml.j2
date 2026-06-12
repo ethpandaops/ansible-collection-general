@@ -26,6 +26,7 @@ panda-chat:
   # devnet can run chat before services.enc.yaml#chat has panda_bot_* keys.
   panda:
     enabled: {{ gen_kubernetes_config_chat_panda_enabled | lower }}
+    storageDriver: "{{ gen_kubernetes_config_chat_panda_storage_driver }}"
 
   # LLM-call tracing → EthPandaOps Langfuse (keys from services.enc.yaml#chat).
   langfuse:

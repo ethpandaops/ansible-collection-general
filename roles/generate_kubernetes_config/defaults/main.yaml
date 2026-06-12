@@ -102,6 +102,10 @@ gen_kubernetes_config_pandamenu_script: '<script src="https://pandamenu.ethpanda
 gen_kubernetes_config_chat_enabled: false # noqa var-naming[no-role-prefix]
 # Panda integration: panda-server sidecar + Authentik bot credentials.
 gen_kubernetes_config_chat_panda_enabled: false # noqa var-naming[no-role-prefix]
+# dockerd storage driver for the panda-server sidecar. vfs works everywhere;
+# the chart's overlay2 default fails on nodes whose pod rootfs is already
+# overlayfs (nested overlay2 -> "driver not supported"), as on the devnet k8s.
+gen_kubernetes_config_chat_panda_storage_driver: "vfs" # noqa var-naming[no-role-prefix]
 # panda-chat chart version (>= 0.2.0 required when chat_panda_enabled).
 gen_kubernetes_config_chat_chart_version: "0.1.1" # noqa var-naming[no-role-prefix]
 # Optional image pin; empty = chart default tag (appVersion).
