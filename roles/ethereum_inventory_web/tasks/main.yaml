@@ -54,7 +54,7 @@
       ansible.builtin.set_fact:
         eth_inventory_web_docker_user_flag: >-
           {{ ('name=rootless' in eth_inventory_web_docker_secopts.stdout)
-          | ternary('', '-u ' ~ (ansible_effective_user_id | default(ansible_uid, true))) }}
+          | ternary('', '-u ' ~ lookup('ansible.builtin.pipe', 'id -u')) }}
         eth_inventory_web_mapping_arg: >-
           {{ (eth_inventory_web_mapping_stat.stat.exists | default(false))
           | ternary('--mapping /in/validator_names.yaml', '') }}
