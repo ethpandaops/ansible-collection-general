@@ -43,7 +43,7 @@
     - name: Compute docker user flag
       ansible.builtin.set_fact:
         ethereum_genesis_docker_user_flag: >-
-          {{ ethereum_genesis_docker_is_rootless | ternary('', '-u ' ~ (ansible_effective_user_id | default(ansible_uid, true))) }}
+          {{ ethereum_genesis_docker_is_rootless | ternary('', '-u ' ~ lookup('ansible.builtin.pipe', 'id -u')) }}
 
     - name: Run genesis generator
       ansible.builtin.shell: >
