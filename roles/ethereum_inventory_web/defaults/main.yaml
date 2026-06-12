@@ -13,13 +13,40 @@ eth_inventory_web_container_volumes: # noqa var-naming[no-role-prefix]
   - "{{ eth_inventory_web_dir }}/content:/usr/share/nginx/html:ro"
   - "{{ eth_inventory_web_dir }}/nginx-conf/default.conf:/etc/nginx/conf.d/default.conf:ro"
 
+# Optional validator names mapping file produced by the genesis generator when
+# validator shuffling is enabled. Defaults to the network config metadata
+# directory (empty when that is unknown, which disables mapping translation).
+eth_inventory_web_validator_names_file: >- # noqa var-naming[no-role-prefix]
+  {{ ((eth_testnet_config_local_dir_src | regex_replace('/$', '')) ~ '/validator_names.yaml')
+     if eth_testnet_config_local_dir_src is defined else '' }}
+
+# Genesis generator image carrying the shared validator-mapping merge script
+# (/apps/validator-mapping/merge.sh). The merge runs in this image so the
+# translation logic is shared with the ethereum-package rather than reimplemented.
+eth_inventory_web_merge_image: >- # noqa var-naming[no-role-prefix]
+  {{ ethereum_genesis_generator_container_image | default('ethpandaops/ethereum-genesis-generator:latest') }}
+
+# Client/host key segments fed to the merge script: the inclusive mnemonic
+# key-index range each host owns, derived from ethereum_genesis_validator_keyranges
+# (whose end index is exclusive).
+eth_inventory_web_segments_json: >- # noqa var-naming[no-role-prefix]
+  {%- set segs = [] -%}
+  {%- for host, kr in (ethereum_genesis_validator_keyranges | default({})).items() -%}
+  {%-   set _ = segs.append({'name': host, 'start': kr.start | int, 'end': (kr.end | int) - 1}) -%}
+  {%- endfor -%}
+  {{ segs | to_json }}
+
+# Final on-chain validator ranges ({ "<start>-<end>": "<name>" }). Computed at
+# run time by the shared merge script (see tasks/main.yaml); empty until then.
+eth_inventory_web_validator_ranges: {} # noqa var-naming[no-role-prefix]
+
 eth_inventory_web_content: # noqa var-naming[no-role-prefix]
   - file: v1/validator-ranges.json
     content: |
       {
         "ranges": {
-          {% for k, v in ethereum_genesis_validator_keyranges.items() | sort(attribute='1.start') %}
-          "{{ v.start }}-{{ v.end - 1 }}": "{{ k }}"{% if not loop.last %},{% endif %}
+          {% for rng, name in eth_inventory_web_validator_ranges.items() %}
+          "{{ rng }}": "{{ name }}"{% if not loop.last %},{% endif %}
           {% endfor %}
         }
       }

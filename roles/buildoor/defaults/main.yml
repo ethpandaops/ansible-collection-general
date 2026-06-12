@@ -28,6 +28,10 @@ buildoor_jwt_path: ""
 ################################################################################
 # Builder BLS private key (32 bytes hex)
 buildoor_builder_privkey: ""
+# Builder BLS mnemonic. When set, it takes precedence over buildoor_builder_privkey
+# and the builder key is derived from this mnemonic at buildoor_builder_mnemonic_index.
+buildoor_builder_mnemonic: ""
+buildoor_builder_mnemonic_index: 0
 # Wallet ECDSA private key (used for lifecycle deposits/top-ups; pre-funded)
 buildoor_wallet_privkey: ""
 
@@ -78,7 +82,9 @@ buildoor_container_volumes:
 # to buildoor_container_command_extra_args.
 buildoor_container_command:
   - run
-  - --builder-privkey={{ buildoor_builder_privkey }}
+  - "{{ ['--builder-mnemonic=' ~ buildoor_builder_mnemonic, '--builder-key-index=' ~ buildoor_builder_mnemonic_index]
+        if buildoor_builder_mnemonic | length > 0
+        else ['--builder-privkey=' ~ buildoor_builder_privkey] }}"
   - --cl-client={{ buildoor_cl_client }}
   - --el-engine-api={{ buildoor_el_engine_api }}
   - --el-jwt-secret=/execution-auth.jwt
