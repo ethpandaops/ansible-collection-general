@@ -49,10 +49,6 @@ buildoor_container_networks: "{{ buildoor_docker_networks }}"
 
 # WebUI / management API port (0 = disabled)
 buildoor_api_port: 8080
-# Builder API port (0 = disabled). Setting > 0 makes the legacy Builder API
-# *available*; the mode itself stays off until --builder-api-enabled is passed
-# (e.g. via the WebUI or buildoor_container_command_extra_args).
-buildoor_builder_api_port: 18550
 
 buildoor_log_level: info
 
@@ -71,9 +67,9 @@ buildoor_auth_provider_url: ""
 
 buildoor_container_ports:
   - "127.0.0.1:{{ buildoor_api_port }}:{{ buildoor_api_port }}"
-  - "127.0.0.1:{{ buildoor_builder_api_port }}:{{ buildoor_builder_api_port }}"
 
 buildoor_container_volumes:
+  - "{{ buildoor_datadir }}:/data"
   - "{{ buildoor_jwt_path }}:/execution-auth.jwt:ro"
 
 # Pre-requisites are wired here. ePBS, Builder API and lifecycle remain
@@ -82,6 +78,7 @@ buildoor_container_volumes:
 # to buildoor_container_command_extra_args.
 buildoor_container_command:
   - run
+  - --state-db=/data/buildoor.sqlite
   - "{{ ['--builder-mnemonic=' ~ buildoor_builder_mnemonic, '--builder-key-index=' ~ buildoor_builder_mnemonic_index]
         if buildoor_builder_mnemonic | length > 0
         else ['--builder-privkey=' ~ buildoor_builder_privkey] }}"
@@ -91,7 +88,6 @@ buildoor_container_command:
   - --el-rpc={{ buildoor_el_rpc }}
   - --wallet-privkey={{ buildoor_wallet_privkey }}
   - --api-port={{ buildoor_api_port }}
-  - --builder-api-port={{ buildoor_builder_api_port }}
   - --log-level={{ buildoor_log_level }}
   - --auth-provider-url={{ buildoor_auth_provider_url }}
   - --inject-head-html='{{ buildoor_inject_html }}'
