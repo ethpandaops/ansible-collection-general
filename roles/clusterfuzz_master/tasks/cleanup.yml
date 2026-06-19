@@ -1,0 +1,28 @@
+---
+# cleanup tasks for clusterfuzz-master
+
+- name: Stop and disable clusterfuzz service
+  ansible.builtin.systemd:
+    name: clusterfuzz
+    state: stopped
+    enabled: false
+    daemon_reload: true
+
+- name: Remove clusterfuzz service file
+  ansible.builtin.file:
+    path: /etc/systemd/system/clusterfuzz.service
+    state: absent
+
+- name: Remove clusterfuzz repository
+  ansible.builtin.file:
+    path: "{{ clusterfuzz_master_repo_path }}"
+    state: absent
+
+- name: Remove clusterfuzz storage directory
+  ansible.builtin.file:
+    path: "{{ clusterfuzz_master_storage_path }}"
+    state: absent
+
+- name: Reload systemd daemon
+  ansible.builtin.systemd:
+    daemon_reload: true
