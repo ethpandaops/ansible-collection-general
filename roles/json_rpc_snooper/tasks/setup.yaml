@@ -13,6 +13,7 @@
     volumes: "{{ json_rpc_snooper_container_volumes }}"
     env: "{{ json_rpc_snooper_container_env }}"
     networks: "{{ json_rpc_snooper_container_networks }}"
+    labels: "{{ json_rpc_snooper_container_labels | default(omit) }}"
     ports: "{{ json_rpc_snooper_container_ports }}"
     command: "{{ json_rpc_snooper_container_command + json_rpc_snooper_container_command_extra_args }}"
     user: "{{ json_rpc_snooper_user_meta.uid }}"

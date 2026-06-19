@@ -7,6 +7,9 @@ erigon_announced_ipv6: >-
   {{ erigon_public_ipv6 if (erigon_public_ipv6 | length > 0)
   else (ansible_default_ipv6.address
   if erigon_ipv6_enabled and ansible_default_ipv6.address is defined else '') }}
+erigon_container_labels: >-
+  {{ {'org.ethpandaops.public_ipv6': erigon_public_ipv6}
+     if (erigon_public_ipv6 | default('') | length > 0) else {} }}
 
 erigon_cleanup: false # when set to "true" it will remove the container
 

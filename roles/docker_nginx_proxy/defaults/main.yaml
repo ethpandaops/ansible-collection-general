@@ -16,6 +16,9 @@ docker_nginx_proxy_container_restart_policy: always
 docker_nginx_proxy_container_networks_cli_compatible: true
 docker_nginx_proxy_container_network_mode: default
 docker_nginx_proxy_container_networks: []
+docker_nginx_proxy_container_labels: >-
+  {{ {'org.ethpandaops.public_ipv6': docker_nginx_proxy_public_ipv6}
+     if (docker_nginx_proxy_public_ipv6 | default('') | length > 0) else {} }}
 docker_nginx_proxy_container_env: {}
 docker_nginx_proxy_container_volumes_from: []
 docker_nginx_proxy_container_volumes:
