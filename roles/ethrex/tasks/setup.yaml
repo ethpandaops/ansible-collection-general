@@ -29,7 +29,7 @@
     env: "{{ ethrex_container_env }}"
     networks: "{{ ethrex_container_networks }}"
     entrypoint: "{{ ethrex_container_entrypoint | default(omit) }}"
-    command: "{{ ethrex_container_command + ethrex_container_command_extra_args }}"
+    command: "{{ ethrex_container_command + ethrex_container_command_gas_limit_args + ethrex_container_command_extra_args }}"
     user: "{{ ethrex_user_meta.uid }}"
     pull: "{{ ethrex_container_pull | bool }}"
     security_opts: "{{ ethrex_container_security_opts }}"

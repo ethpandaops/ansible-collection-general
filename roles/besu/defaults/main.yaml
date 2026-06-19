@@ -79,5 +79,10 @@ besu_container_command: >-
 
 besu_container_command_extra_args: []
 
+# Optional block builder gas limit (in gas units). Empty string keeps the besu default.
+besu_gas_limit: ""
+besu_container_command_gas_limit_args: >-
+  {{ ['--target-gas-limit=' ~ (besu_gas_limit | string)] if (besu_gas_limit | string | length > 0) else [] }}
+
 # Default image pull policy
 besu_container_pull: false

@@ -116,6 +116,11 @@ grandine_container_command_extra_args: []
 # - --network=mainnet
 # - --graffiti=hello-world
 
+# Optional validator suggested gas limit (in gas units). Empty string keeps the grandine default.
+grandine_gas_limit: ""
+grandine_container_command_gas_limit_args: >-
+  {{ ['--default-gas-limit=' ~ (grandine_gas_limit | string)] if (grandine_gas_limit | string | length > 0) else [] }}
+
 checkpoint_sync_url: https://beaconstate.ethstaker.cc # noqa var-naming[no-role-prefix]
 grandine_checkpoint_sync_enabled: true
 grandine_container_command_checkpoint_args:

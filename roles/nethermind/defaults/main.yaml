@@ -83,5 +83,10 @@ nethermind_container_command: >-
 
 nethermind_container_command_extra_args: []
 
+# Optional block builder gas limit (in gas units). Empty string keeps the nethermind default.
+nethermind_gas_limit: ""
+nethermind_container_command_gas_limit_args: >-
+  {{ ['--Blocks.TargetBlockGasLimit=' ~ (nethermind_gas_limit | string)] if (nethermind_gas_limit | string | length > 0) else [] }}
+
 # Default image pull policy
 nethermind_container_pull: false
