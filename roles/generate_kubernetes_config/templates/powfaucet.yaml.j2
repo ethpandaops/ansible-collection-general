@@ -1,12 +1,13 @@
 # {{ ansible_managed }}
 
 powfaucet:
-  fullnameOverride: powfaucet
+  fullnameOverride: {{ item.value.faucetOverride.fullnameOverride | default('powfaucet') }}
 
+{% set _img = default_tooling_images[item.value.faucetOverride.imageVar | default('powfaucet')] %}
   image:
-    repository: {{ default_tooling_images.powfaucet.split(':') | first }}
-    tag: {{ default_tooling_images.powfaucet.split(':') | last}}
-    pullPolicy: {% if "latest" in (default_tooling_images.powfaucet.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
+    repository: {{ _img.split(':') | first }}
+    tag: {{ _img.split(':') | last}}
+    pullPolicy: {% if "latest" in (_img.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
 
 
   resources:
@@ -21,7 +22,7 @@ powfaucet:
     enabled: true
 
     className: ingress-nginx-public
-{% if gen_kubernetes_config_pandamenu_enabled %}
+{% if (item.value.faucetOverride.pandamenuEnabled | default(true)) and gen_kubernetes_config_pandamenu_enabled %}
     annotations:
       nginx.ingress.kubernetes.io/proxy-body-size: "0"
       nginx.ingress.kubernetes.io/configuration-snippet: |
@@ -31,14 +32,14 @@ powfaucet:
 {% endif %}
 
     hosts:
-      - host: faucet.{{ network_subdomain }}
+      - host: {{ item.value.faucetOverride.dnsPrefix | default('faucet') }}.{{ network_subdomain }}
         paths:
           - path: /
             pathType: Prefix
   httpProxyCount: 2
 
-  faucetTitle: "{{ ethereum_network_name }} PoW Faucet"
-  faucetPrivkey: "<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.faucet_private_key}>"
+  faucetTitle: "{{ ethereum_network_name }} {{ item.value.faucetOverride.titleSuffix | default('PoW Faucet') }}"
+  faucetPrivkey: "{{ item.value.faucetOverride.privkeySopsRef | default('<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.' + devnet_name + '-devnets.' + (item.value.faucetOverride.privkeySopsKey | default('faucet_private_key')) + '}>') }}"
   faucetRpcUrl: "https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_rpc_prefix }}{{ primary_bootnode }}.{{ network_server_subdomain }}"
 {# Multi-RPC endpoint list. If the operator set gen_kubernetes_config_powfaucet_rpc_endpoints, that wins.
    Otherwise auto-generate from inventory: tooling/bootnode first, then ethereum_node clients sorted
@@ -71,7 +72,7 @@ powfaucet:
   faucetExplorerLink: "{{ gen_kubernetes_config_dora_frontend_explorer_link }}/tx/{txid}"
   faucetTxGasLimit: 100000
 
-  faucetCaptchaEnabled: true
+  faucetCaptchaEnabled: {{ item.value.faucetOverride.captchaEnabled | default(true) | lower }}
   faucetCaptchaSitekey: "<path:/secrets/services/services.enc.yaml#hcaptcha | jsonPath {.site_key}>"
   faucetCaptchaSecret: "<path:/secrets/services/services.enc.yaml#hcaptcha | jsonPath {.secret_key}>"
 
@@ -81,7 +82,7 @@ powfaucet:
   faucetPowRewardPerHash: 1000000000000000000 # 1 ETH
   faucetPowDifficulty: 10
 
-{% if gen_kubernetes_config_powfaucet_authenticatoor_enabled %}
+{% if (item.value.faucetOverride.authenticatoorEnabled | default(true)) and gen_kubernetes_config_powfaucet_authenticatoor_enabled %}
   faucetAuthenticatoorEnabled: true
   faucetAuthenticatoorAuthUrl: "https://auth.{{ network_subdomain }}"
   faucetAuthenticatoorExpectedAudience: "{{ network_subdomain }}"
@@ -89,4 +90,14 @@ powfaucet:
   faucetAuthenticatoorGrants:
 {{ gen_kubernetes_config_powfaucet_authenticatoor_grants | to_nice_yaml(indent=2) | indent(4, true) }}
 {% endif %}
+{% endif %}
+
+{% if item.value.faucetOverride.restWalletSopsRef is defined %}
+  extraEnv:
+    - name: FAUCET_ETH_REST_WALLET_KEY
+      value: "{{ item.value.faucetOverride.restWalletSopsRef }}"
+{% elif item.value.faucetOverride.restWalletSopsKey is defined %}
+  extraEnv:
+    - name: FAUCET_ETH_REST_WALLET_KEY
+      value: "{{ '<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.' + devnet_name + '-devnets.' + item.value.faucetOverride.restWalletSopsKey + '}>' }}"
 {% endif %}
