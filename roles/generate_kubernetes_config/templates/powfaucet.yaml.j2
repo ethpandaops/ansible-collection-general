@@ -91,6 +91,10 @@ powfaucet:
   # panda proxy (every request carries the proxy's IP), so agents disable it.
   faucetIpinfoEnabled: {{ item.value.faucetOverride.ipinfoEnabled | default(true) | lower }}
 
+  # Same reason: behind the proxy all traffic shares one IP, so per-IP
+  # concurrency collapses to one global session. Limit per target address only.
+  faucetConcurrencyByAddrOnly: {{ item.value.faucetOverride.concurrencyByAddrOnly | default(false) | lower }}
+
   faucetRecurringLimitsAmountWei: 5000000000000000000000 # 5000 ETH
   faucetMaxDropWei: 500000000000000000000 # 500 ETH
   faucetPowEnabled: true
