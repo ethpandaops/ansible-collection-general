@@ -76,6 +76,10 @@ powfaucet:
   faucetCaptchaSitekey: "<path:/secrets/services/services.enc.yaml#hcaptcha | jsonPath {.site_key}>"
   faucetCaptchaSecret: "<path:/secrets/services/services.enc.yaml#hcaptcha | jsonPath {.secret_key}>"
 
+  # IP-reputation checks make no sense when the faucet is only reached via the
+  # panda proxy (every request carries the proxy's IP), so agents disable it.
+  faucetIpinfoEnabled: {{ item.value.faucetOverride.ipinfoEnabled | default(true) | lower }}
+
   faucetRecurringLimitsAmountWei: 5000000000000000000000 # 5000 ETH
   faucetMaxDropWei: 500000000000000000000 # 500 ETH
   faucetPowEnabled: true
