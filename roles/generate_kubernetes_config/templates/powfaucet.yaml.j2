@@ -80,7 +80,7 @@ powfaucet:
   faucetMaxDropWei: 500000000000000000000 # 500 ETH
   faucetPowEnabled: true
   faucetPowRewardPerHash: 1000000000000000000 # 1 ETH
-  faucetPowDifficulty: 10
+  faucetPowDifficulty: {{ item.value.faucetOverride.powDifficulty | default(10) }}
 
 {% if (item.value.faucetOverride.authenticatoorEnabled | default(true)) and gen_kubernetes_config_powfaucet_authenticatoor_enabled %}
   faucetAuthenticatoorEnabled: true
