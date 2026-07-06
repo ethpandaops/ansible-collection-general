@@ -41,6 +41,27 @@ panda-chat:
       configUrl: "https://config.{{ network_subdomain }}"
       rpcUrl: "{{ gen_kubernetes_config_dora_frontend_public_rpc }}"
       explorerUrl: "{{ gen_kubernetes_config_dora_frontend_explorer_link }}"
+    # Declared tool map for the agent's context briefing (DEVNET_TOOL_URLS):
+    # only tools this role actually deploys for the devnet — the agent never
+    # probes or guesses URLs.
+    observability:
+{% for tool in ['dora', 'forky', 'tracoor', 'assertoor'] %}
+{% if tool in gen_kubernetes_config_enabled_charts %}
+      {{ tool }}: "https://{{ tool }}.{{ network_subdomain }}"
+{% endif %}
+{% endfor %}
+{% if gen_kubernetes_config_chat_telegram_enabled %}
+
+  # Telegram gateway: the SAME Hermes agent, reachable from Telegram on the go.
+  # Shared team bot per devnet (BotFather token in sops); the adapter long-polls
+  # Telegram so no ingress/webhook is needed and CF Access stays untouched.
+  telegram:
+    enabled: true
+    allowedUsers: "{{ gen_kubernetes_config_chat_telegram_allowed_users }}"
+{% if gen_kubernetes_config_chat_telegram_group_chats %}
+    groupAllowedChats: {{ gen_kubernetes_config_chat_telegram_group_chats | to_json }}
+{% endif %}
+{% endif %}
 
   credentials:
     # Stable OW<->Hermes bearer: the chart can't preserve a generated one under
@@ -55,6 +76,10 @@ panda-chat:
     langfuse:
       publicKey: "<path:/secrets/services/services.enc.yaml#chat | jsonPath {.langfuse_public_key}>"
       secretKey: "<path:/secrets/services/services.enc.yaml#chat | jsonPath {.langfuse_secret_key}>"
+{% if gen_kubernetes_config_chat_telegram_enabled %}
+    telegram:
+      botToken: "<path:/secrets/services/services.enc.yaml#chat | jsonPath {.telegram_bot_token}>"
+{% endif %}
 
   open-webui:
     sso:
@@ -73,6 +98,13 @@ panda-chat:
           secretKeyRef:
             name: chat-hermes-secret
             key: API_SERVER_KEY
+      # Branding + mobile quick-start prompts. NOTE: OW persists these on first
+      # boot (PersistentConfig) — changes need a fresh OW DB or an in-app edit.
+      - name: WEBUI_NAME
+        value: "{{ ethereum_network_name }} chat"
+      - name: DEFAULT_PROMPT_SUGGESTIONS
+        value: '[{"title": ["Devnet health check", "finality, slots, nodes"], "content": "Give me a health check of this devnet: finality status, recent missed slots, and any nodes that look unhealthy."}, {"title": ["Recent errors", "last hour, all clients"], "content": "Show error logs from the last hour across all clients and summarize what is failing."}, {"title": ["Node status", "head slot + sync per node"], "content": "List the nodes on this devnet with head slot and sync status for each."}, {"title": ["Fund my account", "faucet drip"], "content": "Fund my account with test ETH from the faucet: "}]'
+
     ingress:
       host: chat.{{ network_subdomain }}
 {% if gen_kubernetes_config_pandamenu_enabled %}

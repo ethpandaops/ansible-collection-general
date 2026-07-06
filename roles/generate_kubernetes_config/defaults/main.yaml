@@ -98,6 +98,12 @@ gen_kubernetes_config_chat_panda_enabled: false # noqa var-naming[no-role-prefix
 # ext4/xfs), not the pod's overlay rootfs — so overlay2 stacks fine (fast CoW).
 # Fall back to vfs only on exotic nodes whose kubelet dir is itself overlayfs/NFS.
 gen_kubernetes_config_chat_panda_storage_driver: "overlay2" # noqa var-naming[no-role-prefix]
+# Telegram gateway for the chat agent (shared team bot per devnet). Needs
+# telegram_bot_token in services.enc.yaml#chat; allowed users are numeric
+# Telegram ids (comma-separated), group chats a list of chat ids.
+gen_kubernetes_config_chat_telegram_enabled: false # noqa var-naming[no-role-prefix]
+gen_kubernetes_config_chat_telegram_allowed_users: "" # noqa var-naming[no-role-prefix]
+gen_kubernetes_config_chat_telegram_group_chats: [] # noqa var-naming[no-role-prefix]
 # panda-chat chart version (>= 0.2.0 required when chat_panda_enabled).
 gen_kubernetes_config_chat_chart_version: "0.1.1" # noqa var-naming[no-role-prefix]
 # Optional image pin; empty = chart default tag (appVersion).
