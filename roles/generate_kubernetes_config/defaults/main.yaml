@@ -132,7 +132,7 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
     dependencies:
       - name: dora
         repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 1.0.10
+        version: 1.0.11
   # chat:
   #   valuesTemplatePath: templates/chat.yaml.j2
   #   dependencies:
@@ -186,7 +186,7 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
     dependencies:
       - name: spamoor
         repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 1.0.0
+        version: 1.0.1
   xatu-cannon:
     valuesTemplatePath: templates/xatu-cannon.yaml.j2
     dependencies:

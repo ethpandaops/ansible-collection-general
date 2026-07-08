@@ -47,8 +47,7 @@ spamoor:
     enabled: true
 
   privateKey: "<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.spamoor_private_key}>"
-  enableAuth: true
-  authTokenKey: "<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.spamoor_private_key}>-spamoor-jwt"
+  authProviderUrl: "https://auth.{{ network_subdomain }}"
   rpcEndpoints:
 {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
 {% set host_name = hostvars[host]['inventory_hostname'] %}
