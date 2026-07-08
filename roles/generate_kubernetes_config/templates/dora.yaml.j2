@@ -96,6 +96,11 @@ dora:
     bucket: <path:/secrets/services/services.enc.yaml#dora | jsonPath {.s3_bucket}>
     path: "{{ ethereum_network_name }}"
 
+  enableEnsResolver: true
+  ensRegistries:
+  - "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e" # official address
+  - "0xd9d427CE03c05eFA28C7420e2D11f6fb44eE95eF" # devnet registry (spamoor)
+
 {% if gen_kubernetes_config_dora_consensus_endpoints_url %}
   endpointsUrl: "{{ gen_kubernetes_config_dora_consensus_endpoints_url }}"
 {% else %}
