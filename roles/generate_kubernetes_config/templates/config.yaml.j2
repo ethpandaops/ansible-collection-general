@@ -81,3 +81,8 @@ config:
     - path: /api/v1/nodes/validator-ranges
       upstream: {{ primary_bootnode }}.{{ network_server_subdomain }}
       target: /meta/api/v1/validator-ranges.json
+
+{% if default_tooling_images is defined and default_tooling_images.xatu_sentry is defined %}
+xatu:
+  tag: {{ default_tooling_images.xatu_sentry.split(':') | last }}
+{% endif %}
