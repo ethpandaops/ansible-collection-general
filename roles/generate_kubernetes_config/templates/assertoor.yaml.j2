@@ -60,4 +60,9 @@ assertoor:
 {% endif %}
 {% endfor %}
 
+{% if gen_kubernetes_config_assertoor_tests | length > 0 %}
+  assertoorTests:
+{{ gen_kubernetes_config_assertoor_tests | to_nice_yaml(indent=2) | indent(4, true) }}
+{%- else %}
   assertoorTests: []
+{% endif %}

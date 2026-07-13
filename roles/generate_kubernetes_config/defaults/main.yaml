@@ -57,6 +57,7 @@ gen_kubernetes_config_dora_execution_indexer_details_max_size: "100GB" # noqa va
 gen_kubernetes_config_dora_postgres_size: >- # noqa var-naming[no-role-prefix]
   {{ "80Gi" if gen_kubernetes_config_dora_execution_indexer_enabled else "10Gi" }}
 gen_kubernetes_config_dora_mev_relays: [] # noqa var-naming[no-role-prefix]
+gen_kubernetes_config_assertoor_tests: [] # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_dora_buildoor_overview_url: "https://buildoor.{{ network_subdomain }}" # noqa var-naming[no-role-prefix]
 
 # authenticatoor configuration
