@@ -47,6 +47,11 @@
   when: ethereum_node_cl_enabled
   tags: [ethereum_node_cl]
 
+- name: Setup validator client
+  ansible.builtin.import_tasks: setup_vc.yaml
+  when: ethereum_node_cl_validator_enabled
+  tags: [ethereum_node_vc, ethereum_node_validator_client]
+
 - name: Collect and set facts about the nodes
   ansible.builtin.include_role:
     name: ethpandaops.general.ethereum_node_fact_discovery
