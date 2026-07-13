@@ -85,6 +85,11 @@ erigon_container_command: >-
 erigon_container_command_extra_args: []
 #  - --prune=htc
 
+# Optional block builder gas limit (in gas units). Empty string keeps the erigon default.
+erigon_gas_limit: ""
+erigon_container_command_gas_limit_args: >-
+  {{ ['--miner.gaslimit=' ~ (erigon_gas_limit | string)] if (erigon_gas_limit | string | length > 0) else [] }}
+
 
 # Only required changing when running custom networks
 erigon_init_custom_network: false

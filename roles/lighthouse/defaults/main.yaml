@@ -168,6 +168,11 @@ lighthouse_validator_container_command_extra_args: []
   # - --http-port=5062
   # - --graffiti=hello-world
 
+# Optional validator suggested gas limit (in gas units). Empty string keeps the lighthouse default.
+lighthouse_gas_limit: ""
+lighthouse_validator_container_command_gas_limit_args: >-
+  {{ ['--gas-limit=' ~ (lighthouse_gas_limit | string)] if (lighthouse_gas_limit | string | length > 0) else [] }}
+
 # Default image pull policy
 lighthouse_container_pull: false
 

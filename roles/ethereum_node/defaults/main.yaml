@@ -26,6 +26,11 @@ ethereum_node_cl_supernode_enabled: false
 
 ethereum_node_ipv6_enabled: false
 
+# Block builder / validator suggested gas limit (in gas units).
+# When set, the wrapper translates this into the correct per-client cli flag for
+# the active EL and CL. Leave empty to keep each client's built-in default.
+ethereum_node_gas_limit: ""
+
 # Public IPv6 — set per-role IPs to assign static IPv6 on the shared bridge
 ethereum_node_el_public_ipv6: ""
 ethereum_node_cl_public_ipv6: ""
