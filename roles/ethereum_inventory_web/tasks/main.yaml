@@ -83,6 +83,32 @@
     - ethereum_genesis_validator_keyranges is defined
     - eth_inventory_web_merge_cmd.stdout is defined
 
+- name: Read previously published validator ranges # noqa var-naming[no-role-prefix]
+  ansible.builtin.slurp:
+    src: "{{ eth_inventory_web_dir }}/content/v1/validator-ranges.json"
+  register: eth_inventory_web_prev_ranges
+  failed_when: false
+  when: ethereum_genesis_validator_keyranges is defined
+
+# Append-only assignment history: seeded from the previous file (effective_from 0
+# means "since genesis"), extended with a timestamped entry whenever the computed
+# ranges differ from the last published snapshot. Re-runs without changes are
+# idempotent and never mutate existing entries.
+- name: Build validator ranges history # noqa var-naming[no-role-prefix]
+  vars:
+    eth_inventory_web_prev_doc: >-
+      {{ (eth_inventory_web_prev_ranges.content | b64decode | from_json)
+         if eth_inventory_web_prev_ranges.content is defined else {} }}
+    eth_inventory_web_seed_history: >-
+      {{ eth_inventory_web_prev_doc.history
+         | default([{'effective_from': 0, 'ranges': eth_inventory_web_prev_doc.ranges | default(eth_inventory_web_validator_ranges)}], true) }}
+  ansible.builtin.set_fact:
+    eth_inventory_web_validator_ranges_history: >-
+      {{ eth_inventory_web_seed_history
+         if (eth_inventory_web_seed_history | last)['ranges'] == eth_inventory_web_validator_ranges
+         else eth_inventory_web_seed_history + [{'effective_from': now(utc=true).timestamp() | int, 'ranges': eth_inventory_web_validator_ranges}] }}
+  when: ethereum_genesis_validator_keyranges is defined
+
 - name: Create directories
   ansible.builtin.file:
     path: "{{ (eth_inventory_web_dir + '/content/' + item.file) | dirname }}"

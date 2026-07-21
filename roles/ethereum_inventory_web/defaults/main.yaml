@@ -40,16 +40,17 @@ eth_inventory_web_segments_json: >- # noqa var-naming[no-role-prefix]
 # run time by the shared merge script (see tasks/main.yaml); empty until then.
 eth_inventory_web_validator_ranges: {} # noqa var-naming[no-role-prefix]
 
+# Assignment history: list of { effective_from: <unix seconds>, ranges: {...} }
+# snapshots, accrued at run time by diffing against the previously published
+# file (see tasks/main.yaml). effective_from 0 means "since genesis". Consumed
+# by dora to resolve validator names at historical slots.
+eth_inventory_web_validator_ranges_history: [] # noqa var-naming[no-role-prefix]
+
 eth_inventory_web_content: # noqa var-naming[no-role-prefix]
   - file: v1/validator-ranges.json
     content: |
-      {
-        "ranges": {
-          {% for rng, name in eth_inventory_web_validator_ranges.items() %}
-          "{{ rng }}": "{{ name }}"{% if not loop.last %},{% endif %}
-          {% endfor %}
-        }
-      }
+      {{ {'ranges': eth_inventory_web_validator_ranges,
+          'history': eth_inventory_web_validator_ranges_history} | to_nice_json }}
     when: ethereum_genesis_validator_keyranges is defined
   - file: v1/inventory.json
     content: |
