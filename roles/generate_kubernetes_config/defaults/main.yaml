@@ -119,6 +119,32 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
       - name: powfaucet
         repository: https://ethpandaops.github.io/ethereum-helm-charts
         version: 1.0.0
+  faucet-agents:
+    valuesTemplatePath: templates/powfaucet.yaml.j2
+    dependencies:
+      - name: powfaucet
+        repository: https://ethpandaops.github.io/ethereum-helm-charts
+        version: 1.1.0 # >=1.1.0 for the faucetConcurrencyByAddrOnly value below
+    faucetOverride:
+      fullnameOverride: powfaucet-agents
+      dnsPrefix: faucet-agents
+      titleSuffix: Agent Faucet
+      privkeySopsKey: faucet_agents_private_key
+      imageVar: powfaucet_agents
+      captchaEnabled: false
+      pandamenuEnabled: false
+      authenticatoorEnabled: false
+      restWalletSopsKey: faucet_agents_rest_private_key
+      powDifficulty: 8 # lower than the browser faucet (10): agents mine on CPU, keep claims quick
+      ipinfoEnabled: false # reached only via the panda proxy; per-IP checks don't apply
+      concurrencyByAddrOnly: true # proxy shares one IP; limit concurrency per target address, not per IP
+      # Faucet lockdown — enable ONLY after the panda proxy is deployed with the
+      # faucet handler, else both the direct and proxy paths break (see PR #277
+      # deploy order). Then create the htpasswd secret holding the shared srv
+      # basic-auth credential the proxy forwards, and uncomment:
+      #   kubectl -n <ns> create secret generic powfaucet-agents-basic-auth \
+      #     --from-literal=auth="$(htpasswd -nbB "$SRV_USER" "$SRV_PASS")"
+      # ingressAuthSecret: powfaucet-agents-basic-auth
   forkmon:
     valuesTemplatePath: templates/forkmon.yaml.j2
     dependencies:
