@@ -1,3 +1,43 @@
 validator_keys_sync_files:
  - src: /path/to/local/keydir
    dest: /path/to/remote/keydir
+
+# --- Reshuffle support ---------------------------------------------------------
+# Opt-in switch for replacing already-deployed keys when the host's assigned
+# validator range changed in the inventory. Enable per run:
+#   ansible-playbook playbook.yaml --tags ethereum_genesis,validator_keys \
+#     -l '<affected hosts>' -e validator_keys_reshuffle=true
+# The flow relies on the LINEAR strategy for a play-wide barrier between
+# "all drifted validator clients stopped" and "any of them started again":
+# run it from a play with `strategy: linear` (NOT a free strategy) and keep
+# all affected hosts (donors AND recipients of moved keys) in the same play
+# batch (do not set batch_count / serial for a reshuffle run).
+validator_keys_reshuffle: false
+
+# The validator range this host is supposed to run, from the inventory.
+validator_keys_expected_range: "{{ validator_start | default(0) }}-{{ validator_end | default(0) }}"
+
+# Marker file recording which range is currently deployed on the host. The
+# default resolves to the validator datadir for every supported client layout
+# (parent directory of the first sync destination).
+validator_keys_range_marker: "{{ validator_keys_sync_files[0].dest | regex_replace('/+$', '') | dirname }}/.validator_keyrange"
+
+# Local directory holding this host's generated keys (written by the
+# ethereum_genesis role, which maintains a matching .keyrange marker in it).
+validator_keys_local_dir: "{{ inventory_dir }}/files/validator_keys/{{ inventory_hostname }}"
+
+# Name of the validator-client docker container to stop/start around a key
+# replacement. If the container does not exist yet (fresh host), the reshuffle
+# only stages the keys and leaves starting the client to the node role.
+validator_keys_container_name: validator
+
+# A drifted host with deployed keys but no matching container is refused (an
+# unknown client could still be serving those keys). Set to true only when the
+# deployed keys are provably not being served by anything.
+validator_keys_container_missing_ok: false
+
+# Seconds to hold ALL drifted validator clients stopped before any of them is
+# started with reassigned keys. Must cover at least 2 full epochs so a key
+# that moved between hosts can never double-sign inside its slashing window
+# (2 epochs at 12s slots = 768s; default adds a little slack).
+validator_keys_reshuffle_wait_seconds: 800

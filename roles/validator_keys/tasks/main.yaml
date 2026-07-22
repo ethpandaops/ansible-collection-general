@@ -14,7 +14,7 @@
 #   register: validator_bls_change_file
 
 - name: Copy key directories
-  when: not validator_keys_dir_0.stat.exists
+  when: not validator_keys_dir_0.stat.exists and not (validator_keys_reshuffle | bool)
   block:
     - name: Create dest dir
       ansible.builtin.file:
@@ -27,6 +27,188 @@
         src: "{{ item.src }}"
         dest: "{{ item.dest }}"
       loop: "{{ validator_keys_sync_files }}"
+
+# Record which range is deployed so a later reshuffle run can detect drift.
+# Never overwrite an existing marker here: outside reshuffle mode the inventory
+# may already have moved ahead of what is actually deployed on the host.
+- name: Check reshuffle range marker
+  ansible.builtin.stat:
+    path: "{{ validator_keys_range_marker }}"
+  register: validator_keys_marker_stat
+
+- name: Seed reshuffle range marker from inventory
+  when: not (validator_keys_reshuffle | bool) and not validator_keys_marker_stat.stat.exists
+  ansible.builtin.copy:
+    content: "{{ validator_keys_expected_range }}"
+    dest: "{{ validator_keys_range_marker }}"
+    mode: "0644"
+
+- name: Reshuffle validator keys
+  when: validator_keys_reshuffle | bool
+  block:
+    - name: Read deployed range marker
+      when: validator_keys_marker_stat.stat.exists
+      ansible.builtin.slurp:
+        src: "{{ validator_keys_range_marker }}"
+      register: validator_keys_marker_content
+
+    - name: Determine range drift
+      ansible.builtin.set_fact:
+        validator_keys_drifted: >-
+          {{ not validator_keys_marker_stat.stat.exists
+             or (validator_keys_marker_content.content | b64decode | trim) != (validator_keys_expected_range | trim) }}
+
+    - name: Report reshuffle decision
+      ansible.builtin.debug:
+        msg: >-
+          deployed={{ validator_keys_marker_stat.stat.exists
+                      | ternary(validator_keys_marker_content.content | default('') | b64decode | trim, 'none') }}
+          expected={{ validator_keys_expected_range }}
+          drifted={{ validator_keys_drifted }}
+
+    # The ethereum_genesis role regenerates local keys on range changes and
+    # maintains files/validator_keys/<host>/.keyrange. Refuse to push keys that
+    # do not match the inventory (e.g. the genesis play was skipped).
+    - name: Verify locally generated keys match the expected range
+      when: validator_keys_drifted
+      delegate_to: 127.0.0.1
+      become: false
+      vars:
+        validator_keys_local_marker: "{{ lookup('file', validator_keys_local_dir + '/.keyrange', errors='ignore') }}"
+      ansible.builtin.assert:
+        that:
+          - validator_keys_local_marker | trim == validator_keys_expected_range | trim
+        fail_msg: >-
+          Local keys in {{ validator_keys_local_dir }} are '{{ validator_keys_local_marker }}',
+          inventory expects '{{ validator_keys_expected_range }}'. Run the ethereum_genesis
+          play first (--tags ethereum_genesis) to regenerate them.
+
+    - name: Check validator container
+      community.docker.docker_container_info:
+        name: "{{ validator_keys_container_name }}"
+      register: validator_keys_container_info
+
+    # Node roles may pre-create empty key directories, so "directory exists" is
+    # not evidence of deployed keys — look for actual files inside the sync
+    # destinations (-print -quit: stop at the first one).
+    - name: Count deployed key files
+      ansible.builtin.shell: >-
+        set -o pipefail;
+        find {{ validator_keys_sync_files | map(attribute='dest')
+                | map('regex_replace', '/+$', '') | map('quote') | join(' ') }}
+        -type f -print -quit 2>/dev/null | wc -l
+      args:
+        executable: /bin/bash
+      register: validator_keys_deployed_files
+      changed_when: false
+      failed_when: false
+
+    # Keys are deployed but no container matches validator_keys_container_name:
+    # wiping now would leave an unknown validator client signing from memory
+    # while another host loads the same keys. Refuse instead of guessing (note
+    # teku/nimbus-style clients load keys in the BEACON container — point
+    # validator_keys_container_name at it). Override with
+    # validator_keys_container_missing_ok=true only when the deployed keys are
+    # provably not being served (e.g. staged on a host whose validator client
+    # was never created).
+    - name: Fail if deployed keys have no known validator container
+      when: >-
+        validator_keys_drifted
+        and (validator_keys_deployed_files.stdout | trim | int) > 0
+        and not validator_keys_container_info.exists
+        and not (validator_keys_container_missing_ok | bool)
+      ansible.builtin.fail:
+        msg: >-
+          Keys are deployed on this host but no container named
+          '{{ validator_keys_container_name }}' exists. Set
+          validator_keys_container_name to this host's validator client
+          container before reshuffling.
+
+    # Linear strategy: every task below completes on ALL play hosts before the
+    # next task starts. Stopping here and starting at the end of the block
+    # therefore gives a play-wide stop -> wait -> start barrier.
+    - name: Stop validator container
+      when: validator_keys_drifted and validator_keys_container_info.exists
+      community.docker.docker_container:
+        name: "{{ validator_keys_container_name }}"
+        state: stopped
+        comparisons:
+          "*": ignore
+
+    - name: Remove deployed keys
+      when: validator_keys_drifted
+      ansible.builtin.file:
+        path: "{{ item.dest | regex_replace('/+$', '') }}"
+        state: absent
+      loop: "{{ validator_keys_sync_files }}"
+
+    - name: Remove range marker
+      when: validator_keys_drifted
+      ansible.builtin.file:
+        path: "{{ validator_keys_range_marker }}"
+        state: absent
+
+    # Holds every drifted validator client stopped for >= 2 epochs so moved
+    # keys cannot double-sign. Under the linear strategy the task boundary is a
+    # play-wide barrier: no host starts its client again until every host has
+    # finished waiting. Run reshuffles with a linear-strategy play (per-host
+    # waits under a free strategy do not synchronize across hosts).
+    - name: Wait for moved keys to leave their slashing window
+      when: validator_keys_drifted and validator_keys_reshuffle_wait_seconds | int > 0
+      ansible.builtin.wait_for:
+        timeout: "{{ validator_keys_reshuffle_wait_seconds }}"
+
+    - name: Create dest dir
+      when: validator_keys_drifted
+      ansible.builtin.file:
+        path: "{{ item.dest | dirname }}"
+        state: directory
+        recurse: true
+      loop: "{{ validator_keys_sync_files }}"
+
+    - name: Copy reshuffled keys
+      when: validator_keys_drifted
+      ansible.posix.synchronize:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+      loop: "{{ validator_keys_sync_files }}"
+
+    # rsync writes the keys as the ansible user, but validator clients run as
+    # the datadir's owner and need to write inside the key dirs (keystore
+    # lockfiles, slashing DBs). On first provisioning the client role's setup
+    # fixes ownership afterwards; a reshuffle copies into an already-set-up
+    # datadir, so match ownership here.
+    - name: Stat validator datadir
+      when: validator_keys_drifted
+      ansible.builtin.stat:
+        path: "{{ validator_keys_range_marker | dirname }}"
+      register: validator_keys_datadir_stat
+
+    - name: Match reshuffled key ownership to the datadir # noqa: command-instead-of-module
+      when: validator_keys_drifted and validator_keys_datadir_stat.stat.exists
+      ansible.builtin.command:
+        argv:
+          - chown
+          - -R
+          - "{{ validator_keys_datadir_stat.stat.uid }}:{{ validator_keys_datadir_stat.stat.gid }}"
+          - "{{ item.dest | regex_replace('/+$', '') }}"
+      loop: "{{ validator_keys_sync_files }}"
+      changed_when: true
+
+    - name: Write range marker
+      when: validator_keys_drifted
+      ansible.builtin.copy:
+        content: "{{ validator_keys_expected_range }}"
+        dest: "{{ validator_keys_range_marker }}"
+        mode: "0644"
+
+    - name: Start validator container
+      when: validator_keys_drifted and validator_keys_container_info.exists
+      community.docker.docker_container:
+        name: "{{ validator_keys_container_name }}"
+        state: started
+        comparisons:
+          "*": ignore
 
 # - name: Copy change bls key change file
 #   when: not validator_bls_change_file.stat.exists
