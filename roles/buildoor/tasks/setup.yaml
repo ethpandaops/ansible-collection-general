@@ -1,15 +1,16 @@
 - name: Validate required buildoor configuration
   ansible.builtin.assert:
     that:
-      - buildoor_builder_privkey | length > 0
+      - (buildoor_builder_privkey | length > 0) or (buildoor_builder_mnemonic | length > 0)
       - buildoor_wallet_privkey | length > 0
       - buildoor_cl_client | length > 0
       - buildoor_el_engine_api | length > 0
       - buildoor_el_rpc | length > 0
       - buildoor_jwt_path | length > 0
     fail_msg: >-
-      buildoor requires builder/wallet keys, CL/EL endpoints and a JWT secret path
-      to be configured.
+      buildoor requires a builder key (buildoor_builder_privkey or
+      buildoor_builder_mnemonic), a wallet key, CL/EL endpoints and a JWT secret
+      path to be configured.
 
 - name: Add buildoor user
   ansible.builtin.user:
@@ -42,6 +43,6 @@
     env: "{{ buildoor_container_env }}"
     networks: "{{ buildoor_container_networks }}"
     ports: "{{ buildoor_container_ports }}"
-    command: "{{ buildoor_container_command + buildoor_container_command_extra_args }}"
+    command: "{{ (buildoor_container_command + buildoor_container_command_extra_args) | flatten }}"
     user: "{{ buildoor_user_meta.uid }}"
     pull: "{{ buildoor_container_pull | bool }}"

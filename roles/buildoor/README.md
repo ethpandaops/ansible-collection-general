@@ -24,12 +24,21 @@ The following variables MUST be set by the caller (no sensible defaults):
 
 | Variable | Description |
 |----------|-------------|
-| `buildoor_builder_privkey` | Builder BLS private key (32 bytes hex) |
 | `buildoor_wallet_privkey` | Wallet ECDSA private key (must be pre-funded for lifecycle deposits) |
 | `buildoor_cl_client` | Beacon node URL |
 | `buildoor_el_engine_api` | Execution Engine API URL |
 | `buildoor_el_rpc` | Execution JSON-RPC URL |
 | `buildoor_jwt_path` | Host path to the JWT secret used by the EL Engine API |
+
+The builder BLS key MUST be supplied via **one** of the following. When
+`buildoor_builder_mnemonic` is set it takes precedence over
+`buildoor_builder_privkey`:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `buildoor_builder_privkey` | `""` | Builder BLS private key (32 bytes hex) |
+| `buildoor_builder_mnemonic` | `""` | Builder BLS mnemonic; the key is derived from it |
+| `buildoor_builder_mnemonic_index` | `0` | Derivation index used with `buildoor_builder_mnemonic` |
 
 ## Dependencies
 
