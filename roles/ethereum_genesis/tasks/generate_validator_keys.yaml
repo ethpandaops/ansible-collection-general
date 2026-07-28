@@ -35,6 +35,23 @@
       ansible.builtin.set_fact:
         ethereum_genesis_docker_platform: "{{ 'linux/arm64' if ansible_architecture == 'aarch64' or ansible_architecture == 'arm64' else 'linux/amd64' }}"
 
+    # Each generated key dir carries a .keyrange marker ("start-end"). If a
+    # host's assigned range changed in the inventory (or the marker is missing,
+    # e.g. keys generated before markers existed), drop the dir so the guarded
+    # generation task below regenerates it. Regeneration is deterministic from
+    # the mnemonic, so this is always safe locally.
+    - name: Remove locally generated keys whose range changed
+      loop: "{{ ethereum_genesis_validator_keyranges | dict2items }}"
+      vars:
+        ethereum_genesis_keydir: "{{ ethereum_genesis_validator_keys_output_dir }}/{{ item.key }}"
+        ethereum_genesis_keyrange: "{{ item.value.start }}-{{ item.value.end }}"
+      ansible.builtin.shell: >
+        if [ -d "{{ ethereum_genesis_keydir }}" ] &&
+           [ "$(cat "{{ ethereum_genesis_keydir }}/.keyrange" 2>/dev/null)" != "{{ ethereum_genesis_keyrange }}" ];
+        then rm -rf "{{ ethereum_genesis_keydir }}" && echo removed; fi
+      register: ethereum_genesis_stale_keys
+      changed_when: "'removed' in ethereum_genesis_stale_keys.stdout"
+
     - name: Create validator keys
       loop: "{{ ethereum_genesis_validator_keyranges | dict2items }}"
       ansible.builtin.shell: >
@@ -52,6 +69,13 @@
         --source-mnemonic="{{ ethereum_genesis_validator_mnemonic }}"
       args:
         creates: "{{ ethereum_genesis_validator_keys_output_dir }}/{{ item.key }}"
+
+    - name: Record generated key range
+      loop: "{{ ethereum_genesis_validator_keyranges | dict2items }}"
+      ansible.builtin.copy:
+        content: "{{ item.value.start }}-{{ item.value.end }}"
+        dest: "{{ ethereum_genesis_validator_keys_output_dir }}/{{ item.key }}/.keyrange"
+        mode: "0644"
 
     - name: Create bls address change operations
       when:
