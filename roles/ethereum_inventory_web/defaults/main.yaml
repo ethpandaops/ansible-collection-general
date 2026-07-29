@@ -80,6 +80,7 @@ eth_inventory_web_content: # noqa var-naming[no-role-prefix]
                 "client": "{{ hostvars[host]['ethereum_node_el'] }}",
                 "image": "{{ hostvars[host][(hostvars[host]['ethereum_node_el']) + '_container_image'] | default('') }}",
                 "enode": "{{ hostvars[host]['ethereum_node_fact_discovery_el_enode'] }}",
+                "enr": "{{ hostvars[host]['ethereum_node_fact_discovery_el_enr'] | default('') }}",
                 "rpc_uri": "{{ 'https://' + hostvars[host]['ethereum_node_rcp_hostname'] if hostvars[host]['ethereum_node_rcp_hostname'] is defined else '' }}"
               }
             }{% if not loop.last %},{% endif %}

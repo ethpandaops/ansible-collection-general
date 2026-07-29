@@ -27,6 +27,27 @@
         ethereum_node_fact_discovery_el_enode: enode://{{ ethereum_node_fact_discovery_el_pubkey.stdout }}@{{ ansible_host }}:{{ ethereum_node_el_ports_p2p_tcp }}?discport={{ ethereum_node_el_ports_p2p_udp }} # noqa yaml[line-length]
         cacheable: true
 
+    - name: Turn EL nodekey into ENR
+      ansible.builtin.command: >-
+        docker run --rm ethereum/client-go:alltools-latest
+        sh -c 'devp2p key to-enr
+        --ip {{ ansible_host }}
+        --tcp {{ ethereum_node_el_ports_p2p_tcp }}
+        --udp {{ ethereum_node_el_ports_p2p_udp }}
+        <(echo "{{ ethereum_node_fact_discovery_el_nodekey.stdout }}")'
+      vars:
+        ansible_connection: local
+      delegate_to: 127.0.0.1
+      become: false
+      register: ethereum_node_fact_discovery_el_enr_raw
+      changed_when: false
+      failed_when: (ethereum_node_fact_discovery_el_enr_raw.rc != 0) or (ethereum_node_fact_discovery_el_enr_raw.stdout == "")
+
+    - name: Store ENR var "ethereum_node_fact_discovery_el_enr"
+      ansible.builtin.set_fact:
+        ethereum_node_fact_discovery_el_enr: "{{ ethereum_node_fact_discovery_el_enr_raw.stdout | trim }}"
+        cacheable: true
+
 - name: Handle EthereumJS enode
   when: ethereum_node_el in ["ethereumjs"]
   block:
@@ -48,3 +69,4 @@
     var: "{{ item }}"
   loop:
     - ethereum_node_fact_discovery_el_enode
+    - ethereum_node_fact_discovery_el_enr
