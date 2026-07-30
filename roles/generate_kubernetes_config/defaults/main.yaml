@@ -118,7 +118,7 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
     dependencies:
       - name: powfaucet
         repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 1.0.0
+        version: 1.1.0 # >=1.1.0 omits ethTxGasLimit unless set, so the faucet's own default applies
   faucet-agents:
     valuesTemplatePath: templates/powfaucet.yaml.j2
     dependencies:

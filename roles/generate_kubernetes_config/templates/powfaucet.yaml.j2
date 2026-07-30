@@ -84,7 +84,6 @@ powfaucet:
 {%   endfor %}
 {% endif %}
   faucetExplorerLink: "{{ gen_kubernetes_config_dora_frontend_explorer_link }}/tx/{txid}"
-  faucetTxGasLimit: 100000
 
   faucetCaptchaEnabled: {{ item.value.faucetOverride.captchaEnabled | default(true) | lower }}
   faucetCaptchaSitekey: "<path:/secrets/services/services.enc.yaml#hcaptcha | jsonPath {.site_key}>"
