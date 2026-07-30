@@ -124,13 +124,14 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
     dependencies:
       - name: powfaucet
         repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 1.1.0 # >=1.1.0 for the faucetConcurrencyByAddrOnly value below
+        version: 1.1.0 # >=1.1.0 for the ConcurrencyByAddrOnly / RecurringLimitsByAddrOnly values below
     faucetOverride:
       fullnameOverride: powfaucet-agents
       dnsPrefix: faucet-agents
       titleSuffix: Agent Faucet
       privkeySopsKey: faucet_agents_private_key
-      imageVar: powfaucet_agents
+      imageVar: powfaucet_agents # inventory override; falls back to imageDefault below
+      imageDefault: ghcr.io/qu0b/powfaucet:v2.5.0-agent.4 # PoWFaucet fork with the agent REST mining API
       captchaEnabled: false
       pandamenuEnabled: false
       authenticatoorEnabled: false
@@ -138,6 +139,7 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
       powDifficulty: 8 # lower than the browser faucet (10): agents mine on CPU, keep claims quick
       ipinfoEnabled: false # reached only via the panda proxy; per-IP checks don't apply
       concurrencyByAddrOnly: true # proxy shares one IP; limit concurrency per target address, not per IP
+      recurringLimitsByAddrOnly: true # same: per-IP recurring limits would be a global budget behind the proxy
       # Staged lockdown — set only after the panda proxy ships its faucet
       # handler (it breaks both access paths before that), pointing at the
       # htpasswd secret holding the credential the proxy forwards:

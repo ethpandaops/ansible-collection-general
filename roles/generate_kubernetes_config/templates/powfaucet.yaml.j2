@@ -3,7 +3,10 @@
 powfaucet:
   fullnameOverride: {{ item.value.faucetOverride.fullnameOverride | default('powfaucet') }}
 
-{% set _img = default_tooling_images[item.value.faucetOverride.imageVar | default('powfaucet')] %}
+{# Inventory image var wins; else the chart entry's pinned default. No further
+   fallback — an unresolvable image should fail the template, not deploy the
+   wrong faucet build. #}
+{% set _img = default_tooling_images[item.value.faucetOverride.imageVar | default('powfaucet')] | default(item.value.faucetOverride.imageDefault) %}
   image:
     repository: {{ _img.split(':') | first }}
     tag: {{ _img.split(':') | last}}
@@ -94,6 +97,9 @@ powfaucet:
   # Same reason: behind the proxy all traffic shares one IP, so per-IP
   # concurrency collapses to one global session. Limit per target address only.
   faucetConcurrencyByAddrOnly: {{ item.value.faucetOverride.concurrencyByAddrOnly | default(false) | lower }}
+
+  # And per-IP recurring limits would be one global budget for all agents.
+  faucetRecurringLimitsByAddrOnly: {{ item.value.faucetOverride.recurringLimitsByAddrOnly | default(false) | lower }}
 
   faucetRecurringLimitsAmountWei: 5000000000000000000000 # 5000 ETH
   faucetMaxDropWei: 500000000000000000000 # 500 ETH
