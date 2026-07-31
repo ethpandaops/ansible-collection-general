@@ -2,16 +2,19 @@ ethereum_node_skip_cleanup: true
 ethereum_node_announced_ip: 127.0.0.1
 docker_daemon_options: # noqa: var-naming[no-role-prefix]
   storage-driver: "vfs"
-# Checkpoint sync the consensus client instead of syncing mainnet from genesis,
-# which clients refuse to do:
-#   lighthouse: The current head state is outside the weak subjectivity period
-#   teku:       Cannot sync outside of weak subjectivity period
-# The beacon node then never starts and ethereum_node_fact_discovery cannot
-# reach its API. The endpoint comes from the checkpoint_sync_url role default,
-# see https://eth-clients.github.io/checkpoint-sync-endpoints/ for alternatives.
-ethereum_node_cl_checkpoint_sync_enabled: true
-# Downloading the state and initializing the chain takes a few minutes before
-# the beacon API accepts connections (~3m for lighthouse in CI), so wait longer
-# than the 25 x 5s the fact discovery role defaults to.
-ethereum_node_fact_discovery_cl_retries: 60
-ethereum_node_fact_discovery_cl_delay: 10
+# Fixes for integration tests to be able to run
+lighthouse_container_command_extra_args: # noqa: var-naming[no-role-prefix]
+# Fixes: Failed to start beacon node reason: Syncing from genesis is insecure and
+# incompatible with data availability checks. You should instead perform a checkpoint
+# sync from a trusted node using the --checkpoint-sync-url option. For a list of public endpoints,
+#  see: https://eth-clients.github.io/checkpoint-sync-endpoints/
+# Alternatively, use --allow-insecure-genesis-sync if the risks are understood.",
+  - --allow-insecure-genesis-sync
+# Fixes: Failed to build beacon chain: The current head state is outside the weak
+# subjectivity period. Genesis sync always trips this on mainnet, and it is a separate
+# check from the genesis sync guard above.
+  - --ignore-ws-check
+teku_container_command_extra_args: # noqa: var-naming[no-role-prefix]
+  # Fixes: Cannot sync outside of weak subjectivity period.
+  # Consider re-syncing your node using --checkpoint-sync-url or use --ignore-weak-subjectivity-period-enabled to ignore this check
+  - --ignore-weak-subjectivity-period-enabled
