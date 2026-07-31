@@ -62,6 +62,8 @@ reth_container_command_default:
   - --datadir=/data
   - --log.file.directory=/data/logs
   - --port={{ reth_ports_p2p }}
+  - --discovery.port={{ reth_ports_p2p }}
+  - --discovery.v5.port={{ reth_ports_p2p }}
   - --http
   - --http.addr=0.0.0.0
   - --http.port={{ reth_ports_http_rpc }}

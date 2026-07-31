@@ -10,6 +10,10 @@ lighthouse_container_command_extra_args: # noqa: var-naming[no-role-prefix]
 #  see: https://eth-clients.github.io/checkpoint-sync-endpoints/
 # Alternatively, use --allow-insecure-genesis-sync if the risks are understood.",
   - --allow-insecure-genesis-sync
+# Fixes: Failed to build beacon chain: The current head state is outside the weak
+# subjectivity period. Genesis sync always trips this on mainnet, and it is a separate
+# check from the genesis sync guard above.
+  - --ignore-ws-check
 teku_container_command_extra_args: # noqa: var-naming[no-role-prefix]
   # Fixes: Cannot sync outside of weak subjectivity period.
   # Consider re-syncing your node using --checkpoint-sync-url or use --ignore-weak-subjectivity-period-enabled to ignore this check

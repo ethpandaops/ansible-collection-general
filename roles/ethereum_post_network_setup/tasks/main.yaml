@@ -29,6 +29,19 @@
           {% endfor %}
         dest: "{{ ethereum_genesis_generator_output_dir }}/metadata/enodes.txt"
         mode: "0644"
+    - name: Generate el_enrs.txt for EL clients
+      ansible.builtin.copy:
+        content: |-
+          {% for host in ((groups['ethereum_node'] + groups['bootnode']) | sort | unique)[:20] -%}
+          {% if hostvars[host]['ethereum_node_fact_discovery_el_enr'] is defined %}
+          {{ hostvars[host]['ethereum_node_fact_discovery_el_enr'] }}
+          {%- if not loop.last %}
+
+          {% endif %}
+          {% endif %}
+          {% endfor %}
+        dest: "{{ ethereum_genesis_generator_output_dir }}/metadata/el_enrs.txt"
+        mode: "0644"
     - name: Generate "bootstrap_nodes.txt" for CL clients
       ansible.builtin.copy:
         content: |-
