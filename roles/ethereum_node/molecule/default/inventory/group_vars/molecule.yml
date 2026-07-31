@@ -10,3 +10,8 @@ docker_daemon_options: # noqa: var-naming[no-role-prefix]
 # reach its API. The endpoint comes from the checkpoint_sync_url role default,
 # see https://eth-clients.github.io/checkpoint-sync-endpoints/ for alternatives.
 ethereum_node_cl_checkpoint_sync_enabled: true
+# Downloading the state and initializing the chain takes a few minutes before
+# the beacon API accepts connections (~3m for lighthouse in CI), so wait longer
+# than the 25 x 5s the fact discovery role defaults to.
+ethereum_node_fact_discovery_cl_retries: 60
+ethereum_node_fact_discovery_cl_delay: 10
