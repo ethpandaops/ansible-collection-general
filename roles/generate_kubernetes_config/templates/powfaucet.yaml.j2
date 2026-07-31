@@ -89,15 +89,11 @@ powfaucet:
   faucetCaptchaSitekey: "<path:/secrets/services/services.enc.yaml#hcaptcha | jsonPath {.site_key}>"
   faucetCaptchaSecret: "<path:/secrets/services/services.enc.yaml#hcaptcha | jsonPath {.secret_key}>"
 
-  # IP-reputation checks make no sense when the faucet is only reached via the
-  # panda proxy (every request carries the proxy's IP), so agents disable it.
+  # Per-IP checks only make sense when the faucet sees real client IPs. The
+  # agents faucet sits behind the panda proxy (one shared IP), so it disables
+  # ipinfo and scopes concurrency + recurring limits per target address.
   faucetIpinfoEnabled: {{ item.value.faucetOverride.ipinfoEnabled | default(true) | lower }}
-
-  # Same reason: behind the proxy all traffic shares one IP, so per-IP
-  # concurrency collapses to one global session. Limit per target address only.
   faucetConcurrencyByAddrOnly: {{ item.value.faucetOverride.concurrencyByAddrOnly | default(false) | lower }}
-
-  # And per-IP recurring limits would be one global budget for all agents.
   faucetRecurringLimitsByAddrOnly: {{ item.value.faucetOverride.recurringLimitsByAddrOnly | default(false) | lower }}
 
   faucetRecurringLimitsAmountWei: 5000000000000000000000 # 5000 ETH
@@ -105,22 +101,23 @@ powfaucet:
   faucetPowEnabled: true
   faucetPowRewardPerHash: 1000000000000000000 # 1 ETH
   faucetPowDifficulty: {{ item.value.faucetOverride.powDifficulty | default(10) }}
-
 {% if (item.value.faucetOverride.authenticatoorEnabled | default(true)) and gen_kubernetes_config_powfaucet_authenticatoor_enabled %}
+
   faucetAuthenticatoorEnabled: true
   faucetAuthenticatoorAuthUrl: "https://auth.{{ network_subdomain }}"
   faucetAuthenticatoorExpectedAudience: "{{ network_subdomain }}"
 {% if gen_kubernetes_config_powfaucet_authenticatoor_grants %}
   faucetAuthenticatoorGrants:
-{{ gen_kubernetes_config_powfaucet_authenticatoor_grants | to_nice_yaml(indent=2) | indent(4, true) }}
+{{ gen_kubernetes_config_powfaucet_authenticatoor_grants | to_nice_yaml(indent=2) | trim | indent(4, true) }}
 {% endif %}
 {% endif %}
-
 {% if item.value.faucetOverride.restWalletSopsRef is defined %}
+
   extraEnv:
     - name: FAUCET_ETH_REST_WALLET_KEY
       value: "{{ item.value.faucetOverride.restWalletSopsRef }}"
 {% elif item.value.faucetOverride.restWalletSopsKey is defined %}
+
   extraEnv:
     - name: FAUCET_ETH_REST_WALLET_KEY
       value: "{{ '<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.' + devnet_name + '-devnets.' + item.value.faucetOverride.restWalletSopsKey + '}>' }}"
