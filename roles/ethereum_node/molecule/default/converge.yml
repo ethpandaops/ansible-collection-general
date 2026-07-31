@@ -2,7 +2,10 @@
   hosts: molecule
   become: true
   environment:
-    DOCKER_TIMEOUT: "120"
+    # Nimbus checkpoint syncs with a blocking trustedNodeSync container and the
+    # module waits for it with the docker client timeout, so keep this well
+    # above the time it takes to download a finalized state.
+    DOCKER_TIMEOUT: "600"
   pre_tasks:
     - name: Update apt cache
       ansible.builtin.apt:
