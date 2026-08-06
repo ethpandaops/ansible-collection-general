@@ -1,0 +1,49 @@
+# {{ ansible_managed }}
+{% set slashoor_image = default_tooling_images.slashoor | default('ethpandaops/slashoor:latest') %}
+
+slashoor:
+  fullnameOverride: slashoor
+  replicas: 1
+
+  image:
+    repository: {{ slashoor_image.split(':') | first }}
+    tag: {{ slashoor_image.split(':') | last }}
+    pullPolicy: {% if "latest" in (slashoor_image.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+
+  config:
+    beacon:
+      endpoints:
+{% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
+        - https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_beacon_prefix }}{{ hostvars[host]['inventory_hostname'] }}.{{ network_server_subdomain }}
+{% endfor %}
+      timeout: 30s
+
+    indexer:
+      max_epochs_to_keep: 54000
+
+    detector:
+      enabled: true
+
+    submitter:
+      enabled: true
+      dry_run: false
+
+    proposer:
+      enabled: true
+
+    dora:
+      enabled: true
+      url: https://dora.{{ network_subdomain }}
+      scan_on_startup: true
+
+    # Committee resolution for deep history needs archive states; the Dora
+    # scan covers older proposer slashings, so keep the backfill shallow.
+    backfill_slots: 320

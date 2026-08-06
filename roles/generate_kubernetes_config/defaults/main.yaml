@@ -249,3 +249,9 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
       - name: xatu-relay-monitor
         repository: https://ethpandaops.github.io/ethereum-helm-charts
         version: 0.0.1
+  slashoor:
+    valuesTemplatePath: templates/slashoor.yaml.j2
+    dependencies:
+      - name: slashoor
+        repository: https://ethpandaops.github.io/ethereum-helm-charts
+        version: 0.1.0
