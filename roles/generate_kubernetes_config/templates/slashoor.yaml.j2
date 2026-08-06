@@ -8,7 +8,7 @@ slashoor:
   image:
     repository: {{ slashoor_image.split(':') | first }}
     tag: {{ slashoor_image.split(':') | last }}
-    pullPolicy: {% if "latest" in (slashoor_image.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
+    pullPolicy: {% if "latest" in (slashoor_image.split(':') | last) or "master" in (slashoor_image.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
 
   resources:
     requests:
