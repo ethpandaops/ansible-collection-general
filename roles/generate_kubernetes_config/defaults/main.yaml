@@ -30,7 +30,7 @@ gen_kubernetes_config_helm_repositories: # noqa var-naming[no-role-prefix]
   - name: ethereum-helm-charts
     url: https://ethpandaops.github.io/ethereum-helm-charts
   - name: blobscan-helm-charts
-    url: https://blobscan.github.io/blobscan-helm-charts/
+    url: https://blobscan.github.io/blobscan-helm-charts
   - name: blockscout-helm-charts
     url: https://blockscout.github.io/helm-charts
   - name: bitnami
