@@ -71,3 +71,12 @@ bootstrap_hostname_set: true
 bootstrap_harden_sshd_config: true
 bootstrap_rpcbind_disable: false
 bootstrap_swap_disable: true
+
+# Container registry credentials written to /root/.docker/config.json during
+# bootstrap, so image pulls are authenticated from the first docker run —
+# before docker itself is installed. Map of registry host to credentials:
+# bootstrap_docker_registry_auths:
+#   registry-1.docker.io:
+#     username: myuser
+#     password: mytoken
+bootstrap_docker_registry_auths: {}
