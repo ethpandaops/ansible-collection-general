@@ -32,13 +32,14 @@ spamoor:
             pathType: Prefix
 
 {% set cl_config = lookup('ansible.builtin.file', cl_config_path) | from_yaml %}
+{% set seconds_per_slot = (cl_config.SLOT_DURATION_MS | int // 1000) if cl_config.SLOT_DURATION_MS is defined else seconds_per_slot %}
 {% if cl_config.FULU_FORK_EPOCH != 18446744073709551615 %}
 {% set min_genesis_plus_delay = cl_config.MIN_GENESIS_TIME + cl_config.GENESIS_DELAY %}
   customArgs:
     - --fulu-activation={{
       (cl_config.PRESET_BASE == 'mainnet') | ternary(
-        min_genesis_plus_delay + (32 * cl_config.SECONDS_PER_SLOT * cl_config.FULU_FORK_EPOCH),
-        min_genesis_plus_delay + (8 * cl_config.SECONDS_PER_SLOT * cl_config.FULU_FORK_EPOCH)
+        min_genesis_plus_delay + (32 * seconds_per_slot * cl_config.FULU_FORK_EPOCH),
+        min_genesis_plus_delay + (8 * seconds_per_slot * cl_config.FULU_FORK_EPOCH)
       )
     }}
 {% endif %}

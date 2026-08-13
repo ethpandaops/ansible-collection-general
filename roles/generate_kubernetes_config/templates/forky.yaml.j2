@@ -77,7 +77,8 @@ forky:
         network:
           name: "{{ ethereum_network_name }}"
           spec:
-            seconds_per_slot: {{ (lookup('ansible.builtin.file', cl_config_path) | from_yaml).SECONDS_PER_SLOT }}
+{% set forky_cl_spec = lookup('ansible.builtin.file', cl_config_path) | from_yaml %}
+            seconds_per_slot: {{ (forky_cl_spec.SLOT_DURATION_MS | int // 1000) if forky_cl_spec.SLOT_DURATION_MS is defined else forky_cl_spec.SECONDS_PER_SLOT }}
 {% if (lookup('ansible.builtin.file', cl_config_path) | from_yaml).PRESET_BASE == "mainnet"%}
             slots_per_epoch: 32
 {% else %}
