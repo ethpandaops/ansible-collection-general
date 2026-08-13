@@ -174,6 +174,27 @@
     state: present
   when: bootstrap_default_pip_packages | length > 0
 
+# Configure container registry credentials
+- name: Configure docker registry credentials
+  when: bootstrap_docker_registry_auths | length > 0
+  no_log: true
+  block:
+    - name: Create /root/.docker directory
+      ansible.builtin.file:
+        path: /root/.docker
+        state: directory
+        owner: root
+        group: root
+        mode: "0700"
+
+    - name: Write /root/.docker/config.json
+      ansible.builtin.template:
+        src: docker-config.json.j2
+        dest: /root/.docker/config.json
+        owner: root
+        group: root
+        mode: "0600"
+
 # Reboot the machine if required
 - name: Check if reboot required
   ansible.builtin.stat:
