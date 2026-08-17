@@ -59,6 +59,10 @@ gen_kubernetes_config_dora_postgres_size: >- # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_dora_mev_relays: [] # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_assertoor_tests: [] # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_dora_buildoor_overview_url: "https://buildoor.{{ network_subdomain }}" # noqa var-naming[no-role-prefix]
+gen_kubernetes_config_dora_ens_remote_networks: # noqa var-naming[no-role-prefix]
+  - name: mainnet
+    endpoints:
+      - url: https://ethereum-rpc.publicnode.com
 
 # authenticatoor configuration
 gen_kubernetes_config_authenticatoor_cf_team_domain: "ethpandaops.cloudflareaccess.com" # noqa var-naming[no-role-prefix]
@@ -158,7 +162,7 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
     dependencies:
       - name: dora
         repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 1.0.11
+        version: 1.0.12
   # chat:
   #   valuesTemplatePath: templates/chat.yaml.j2
   #   dependencies:
