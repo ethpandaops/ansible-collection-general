@@ -1,6 +1,16 @@
-- name: Handle Besu, Geth, Erigon, Nethermind enode
+- name: Handle Besu, Geth, Erigon, Nethermind, Reth, NimbusEL, ethrex enode
   when: ethereum_node_el in ["besu", "geth", "erigon", "nethermind", "reth", "nimbusel", "ethrex"]
   block:
+    - name: Assert ethrex network subdirectory is defined
+      when: ethereum_node_el == "ethrex"
+      ansible.builtin.assert:
+        that:
+          - ethereum_node_fact_discovery_ethrex_chain_subdir | length > 0
+        fail_msg: >-
+          ethrex fact discovery requires ethereum_network_name to be one of
+          {{ ethereum_node_fact_discovery_ethrex_network_names | join(', ') }},
+          or ethereum_network_id must be set for other networks
+
     - name: Get EL node key
       ansible.builtin.shell: "{{ ethereum_node_fact_discovery_el_key_cmd[ethereum_node_el] }}" # noqa command-instead-of-shell
       register: ethereum_node_fact_discovery_el_nodekey

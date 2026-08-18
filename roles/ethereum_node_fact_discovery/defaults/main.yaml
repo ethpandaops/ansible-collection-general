@@ -1,6 +1,27 @@
 ethereum_node_fact_discovery_el: true
 ethereum_node_fact_discovery_cl: true
 
+# ethrex network names
+ethereum_node_fact_discovery_ethrex_network_names:
+  - mainnet
+  - hoodi
+  - sepolia
+
+# ethrex stores node keys under <datadir>/<suffix>/node.key
+# Public networks use the network name; custom networks use chain-<id>
+# See crates/common/config/networks.rs in the ethrex repo for the logic
+# At time of writing, https://github.com/lambdaclass/ethrex/blob/2367dc810d82c2e3c3d098c9d1e10070fbaf63c1/crates/common/config/networks.rs#L126-L139
+ethereum_node_fact_discovery_ethrex_chain_subdir: |-
+  {%- set name = ethereum_network_name | default('') | trim -%}
+  {%- if name in ethereum_node_fact_discovery_ethrex_network_names -%}
+  {{ name }}
+  {%- elif ethereum_network_id is defined and (ethereum_network_id | string | trim | length) > 0 -%}
+  chain-{{ ethereum_network_id | string | trim }}
+  {%- endif -%}
+
+ethereum_node_fact_discovery_ethrex_chain_dir: |-
+  {{ ethrex_datadir | default('/data/ethrex') }}/{{ ethereum_node_fact_discovery_ethrex_chain_subdir }}
+
 # How to find the EL node key on the target system
 ethereum_node_fact_discovery_el_key_cmd:
   besu: cat {{ besu_datadir | default('/data/besu') }}/key | cut -d 'x' -f2
@@ -9,7 +30,7 @@ ethereum_node_fact_discovery_el_key_cmd:
   nethermind: xxd -p -c32 {{ nethermind_datadir | default('/data/nethermind') }}/keystore/node.key.plain
   reth: cat {{ reth_datadir | default('/data/reth') }}/discovery-secret
   nimbusel: cat {{ nimbusel_datadir | default('/data/nimbusel') }}/nodekey | cut -d 'x' -f2
-  ethrex: xxd -p -c32 {{ ethrex_datadir | default('/data/ethrex') }}/chain-{{ ethereum_network_id | trim }}/node.key
+  ethrex: xxd -p -c32 {{ ethereum_node_fact_discovery_ethrex_chain_dir }}/node.key
 
 # How to find the EL enode on the target system
 ethereum_node_fact_discovery_el_enode_cmd:
