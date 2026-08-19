@@ -52,6 +52,15 @@
     dest: "{{ gen_kubernetes_config_default_output_dir }}/{{ item.key }}/values.yaml"
     mode: "0644"
 
+# Has to run before the additionalTemplates below: those can target templates/,
+# and ansible.builtin.template does not create missing parent directories.
+- name: Make sure the templates folder is created for {{ item.key }}
+  ansible.builtin.file:
+    path: "{{ gen_kubernetes_config_default_output_dir }}/{{ item.key }}/templates"
+    state: directory
+    mode: "0755"
+  when: item.key == 'config' or item.value.additionalTemplates | default({}) | length > 0
+
 - name: Generate additional templates for {{ item.key }}
   ansible.builtin.template:
     src: "{{ template_item.value }}"
@@ -61,13 +70,6 @@
   loop_control:
     loop_var: template_item
   when: item.value.additionalTemplates | default({}) | length > 0
-
-- name: Make sure the template folder is created for {{ item.key }}
-  ansible.builtin.file:
-    path: "{{ gen_kubernetes_config_default_output_dir }}/{{ item.key }}/templates"
-    state: directory
-    mode: "0755"
-  when: item.key == 'config'
 
 - name: Copy ingress config to {{ item.key }}
   ansible.builtin.copy:
