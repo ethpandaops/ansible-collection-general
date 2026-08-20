@@ -87,7 +87,7 @@ testnet-homepage:
   config:
     baseURL: https://{{ network_subdomain }}
     languageCode: en-us
-    title: {{ ethereum_network_name }}
+    title: "{{ gen_kubernetes_config_network_display_name }}"
     theme: PaperMod
     markup:
       highlight:
@@ -110,7 +110,7 @@ testnet-homepage:
         blobscanUrl: https://blobscan.com
         blobscanethpandaUrl: https://blobscan.{{ network_subdomain }}
         ethstatsUrl: https://ethstats.{{ network_subdomain }}
-        chainName: "{{ ethereum_network_name }}"
+        chainName: "{{ gen_kubernetes_config_network_display_name }}"
         chainId: "{{ ethereum_genesis_chain_id }}"
         github: https://github.com/ethpandaops/{{ devnet_name }}-devnets/tree/master/network-configs/{{ ethereum_network_name  | replace(devnet_name + "-", '')}}/metadata
         syncoorUrl: https://syncoor.{{ network_subdomain }}

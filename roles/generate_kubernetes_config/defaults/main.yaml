@@ -3,8 +3,10 @@ devnet_name: "template" # noqa var-naming[no-role-prefix]
 primary_bootnode: "bootnode-1" # noqa var-naming[no-role-prefix]
 
 gen_kubernetes_config_default_output_dir: ../kubernetes/{{ ethereum_network_name | replace(devnet_name + "-", '') }} # noqa var-naming[no-role-prefix]
-# Name shown to humans: faucet titles, the dora and forkmon network labels.
-# Used verbatim, so write it exactly as it should be displayed.
+# Name shown to humans: faucet titles, the homepage title and chain name, the
+# dora/forkmon/forky network labels. Used verbatim, so write it exactly as it
+# should be displayed. Host names and identifiers keep using
+# ethereum_network_name.
 gen_kubernetes_config_network_display_name: "{{ ethereum_network_name }}" # noqa var-naming[no-role-prefix]
 
 cl_config_path: ../network-configs/{{ ethereum_network_name | replace(devnet_name + "-", '') }}/metadata/config.yaml # noqa var-naming[no-role-prefix]

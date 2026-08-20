@@ -31,7 +31,7 @@ dora:
           - path: /
             pathType: Prefix
 
-  name: {{ gen_kubernetes_config_network_display_name }}
+  name: "{{ gen_kubernetes_config_network_display_name }}"
   configPath: "https://config.{{ network_subdomain }}/cl/config.yaml"
   validatorNamesInventory: "https://config.{{ network_subdomain }}/api/v1/nodes/validator-ranges"
   buildoorOverviewUrl: "{{ gen_kubernetes_config_dora_buildoor_overview_url }}"
