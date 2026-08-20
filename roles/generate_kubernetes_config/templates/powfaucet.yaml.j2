@@ -52,7 +52,7 @@ powfaucet:
             pathType: Prefix
   httpProxyCount: 2
 
-  faucetTitle: "{{ ethereum_network_name }} {{ item.value.faucetOverride.titleSuffix | default('PoW Faucet') }}"
+  faucetTitle: "{{ gen_kubernetes_config_network_display_name }} {{ item.value.faucetOverride.titleSuffix | default('PoW Faucet') }}"
   faucetPrivkey: "{{ item.value.faucetOverride.privkeySopsRef | default('<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.' + devnet_name + '-devnets.' + (item.value.faucetOverride.privkeySopsKey | default('faucet_private_key')) + '}>') }}"
   faucetRpcUrl: "https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_rpc_prefix }}{{ primary_bootnode }}.{{ network_server_subdomain }}"
 {# Multi-RPC endpoint list. If the operator set gen_kubernetes_config_powfaucet_rpc_endpoints, that wins.
