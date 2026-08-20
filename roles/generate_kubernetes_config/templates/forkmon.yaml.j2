@@ -23,7 +23,7 @@ forkmon:
         paths:
           - path: /
             pathType: Prefix
-  network: {{ ethereum_network_name }}
+  network: "{{ gen_kubernetes_config_network_display_name }}"
   endpoints:
 {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
   - addr: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_rpc_prefix }}{{ hostvars[host]['inventory_hostname'] }}.{{ network_server_subdomain }}
