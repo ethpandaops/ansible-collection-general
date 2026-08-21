@@ -127,13 +127,13 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
     dependencies:
       - name: powfaucet
         repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 1.1.0 # >=1.1.0 omits ethTxGasLimit unless set, so the faucet's own default applies
+        version: 1.2.0 # >=1.1.0 omits ethTxGasLimit unless set, so the faucet's own default applies
   faucet-agents:
     valuesTemplatePath: templates/powfaucet.yaml.j2
     dependencies:
       - name: powfaucet
         repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 1.1.0 # >=1.1.0 for the ConcurrencyByAddrOnly / RecurringLimitsByAddrOnly values below
+        version: 1.2.0 # >=1.2.0 for ingress.basicAuth, which creates the ingress' auth secret
     faucetOverride:
       fullnameOverride: powfaucet-agents
       dnsPrefix: faucet-agents
@@ -150,9 +150,8 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
       concurrencyByAddrOnly: true # proxy shares one IP; limit concurrency per target address, not per IP
       recurringLimitsByAddrOnly: true # same: per-IP recurring limits would be a global budget behind the proxy
       # The faucet has no captcha (agents mine via REST), so the ingress is
-      # locked behind basic auth only the panda proxy holds — create the
-      # htpasswd secret with the srv credential in the network's namespace.
-      ingressAuthSecret: powfaucet-agents-basic-auth
+      # locked behind basic auth only the panda proxy holds.
+      ingressBasicAuth: true
   forkmon:
     valuesTemplatePath: templates/forkmon.yaml.j2
     dependencies:
