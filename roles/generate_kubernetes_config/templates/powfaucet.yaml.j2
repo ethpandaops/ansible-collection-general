@@ -26,23 +26,18 @@ powfaucet:
 
     className: ingress-nginx-public
 {% set _pandamenu = (item.value.faucetOverride.pandamenuEnabled | default(true)) and gen_kubernetes_config_pandamenu_enabled %}
-{% set _ingress_auth_secret = item.value.faucetOverride.ingressAuthSecret | default('') %}
-{% if _pandamenu or _ingress_auth_secret %}
-    annotations:
 {% if _pandamenu %}
+    annotations:
       nginx.ingress.kubernetes.io/proxy-body-size: "0"
       nginx.ingress.kubernetes.io/configuration-snippet: |
         sub_filter '</head>' '{{ gen_kubernetes_config_powfaucet_pandamenu | default('') }}{{ gen_kubernetes_config_pandamenu_script }}</head>';
         sub_filter_types text/html;
         sub_filter_once off;
 {% endif %}
-{% if _ingress_auth_secret %}
-      # Lock the faucet behind basic auth that only the panda proxy holds, so it
-      # is reachable solely via the proxy (which authenticates the caller first).
-      nginx.ingress.kubernetes.io/auth-type: basic
-      nginx.ingress.kubernetes.io/auth-secret: {{ _ingress_auth_secret }}
-      nginx.ingress.kubernetes.io/auth-realm: "panda proxy only"
-{% endif %}
+{% if item.value.faucetOverride.ingressBasicAuth | default(false) %}
+    # Lock the faucet behind basic auth that only the panda proxy holds, so it is
+    # reachable solely via the proxy (which authenticates the caller first).
+    basicAuth: "<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.username}>:{PLAIN}<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.password}>"
 {% endif %}
 
     hosts:
