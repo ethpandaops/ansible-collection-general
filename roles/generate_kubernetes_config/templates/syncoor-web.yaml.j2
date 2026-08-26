@@ -68,10 +68,12 @@ syncoor-web:
           sub_filter_once off;
 {% endif %}
       hosts:
-        - host: syncoor.{{ network_subdomain }}
+{% for _sub in gen_kubernetes_config_network_subdomains %}
+        - host: syncoor.{{ _sub }}
           paths:
             - path: /
               pathType: Prefix
               service:
                 identifier: main
                 port: http
+{% endfor %}

@@ -8,6 +8,18 @@ gen_kubernetes_config_default_output_dir: ../kubernetes/{{ ethereum_network_name
 # should be displayed. Host names and identifiers keep using
 # ethereum_network_name.
 gen_kubernetes_config_network_display_name: "{{ ethereum_network_name }}" # noqa var-naming[no-role-prefix]
+# Extra subdomains every public ingress answers on next to network_subdomain.
+# Defaults to "<display name, lowercased>.<domain>" whenever the display name
+# differs from ethereum_network_name, so a nicknamed devnet is also reachable
+# under its nickname (dora.<nickname>.<domain>, rpc.<nickname>.<domain>, ...);
+# otherwise empty. DNS for the alias (a "*.<nickname>.<domain>" record) is not
+# managed here. Set explicitly to use other aliases, or [] to opt out.
+gen_kubernetes_config_network_alias_name: "{{ gen_kubernetes_config_network_display_name | lower | regex_replace('[^a-z0-9-]+', '-') }}" # noqa var-naming[no-role-prefix] yaml[line-length]
+gen_kubernetes_config_network_alias_subdomains: >- # noqa var-naming[no-role-prefix]
+  {{ [gen_kubernetes_config_network_alias_name ~ '.' ~ gen_kubernetes_domain]
+     if gen_kubernetes_config_network_alias_name != ethereum_network_name else [] }}
+# Every subdomain the ingresses serve, canonical first. Templates loop over this.
+gen_kubernetes_config_network_subdomains: "{{ [network_subdomain] + gen_kubernetes_config_network_alias_subdomains }}" # noqa var-naming[no-role-prefix] yaml[line-length]
 
 cl_config_path: ../network-configs/{{ ethereum_network_name | replace(devnet_name + "-", '') }}/metadata/config.yaml # noqa var-naming[no-role-prefix]
 

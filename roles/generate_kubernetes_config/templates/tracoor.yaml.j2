@@ -26,10 +26,12 @@ tracoor-single:
           sub_filter_once off;
 {% endif %}
       hosts:
-        - host: tracoor.{{ network_subdomain }}
+{% for _sub in gen_kubernetes_config_network_subdomains %}
+        - host: tracoor.{{ _sub }}
           paths:
             - path: /
               pathType: Prefix
+{% endfor %}
 
   postgresql:
     enabled: true

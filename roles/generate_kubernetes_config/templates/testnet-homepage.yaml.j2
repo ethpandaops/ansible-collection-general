@@ -28,10 +28,12 @@ testnet-homepage:
 {% endif %}
 
     hosts:
-      - host: {{ network_subdomain }}
+{% for _sub in gen_kubernetes_config_network_subdomains %}
+      - host: {{ _sub }}
         paths:
           - path: /
             pathType: Prefix
+{% endfor %}
 
   customMarkdown: |-
     ## Network Spec

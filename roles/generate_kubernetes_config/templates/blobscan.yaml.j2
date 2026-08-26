@@ -19,7 +19,8 @@ blobscan:
         sub_filter_once off;
 {% endif %}
     hosts:
-      - host: blobscan.{{ network_subdomain }}
+{% for _sub in gen_kubernetes_config_network_subdomains %}
+      - host: blobscan.{{ _sub }}
         paths:
           - path: /
             pathType: Prefix
@@ -28,6 +29,7 @@ blobscan:
                 name: blobscan
                 port:
                   number: 3000
+{% endfor %}
   config:
     NEXTAUTH_URL: https://blobscan.{{ network_subdomain }}
     NEXT_PUBLIC_NETWORK_NAME: {{ ethereum_network_name }}
@@ -62,7 +64,8 @@ blobscan-api:
     enabled: true
     className: ingress-nginx-public
     hosts:
-      - host: blobscan-api.{{ network_subdomain }}
+{% for _sub in gen_kubernetes_config_network_subdomains %}
+      - host: blobscan-api.{{ _sub }}
         paths:
           - path: /
             pathType: Prefix
@@ -71,3 +74,4 @@ blobscan-api:
                 name: blobscan-api
                 port:
                   number: 3001
+{% endfor %}
