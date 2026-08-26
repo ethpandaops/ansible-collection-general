@@ -17,6 +17,14 @@ authenticatoor:
       memory: 128Mi
 
   issuer: "https://auth.{{ network_subdomain }}"
+{% if gen_kubernetes_config_network_alias_subdomains %}
+  # Logins must be allowed to return to the alias hosts too. Setting this
+  # replaces the chart default of "*.<issuer parent zone>", so list that as well.
+  allowedReturnHosts:
+{% for _sub in gen_kubernetes_config_network_subdomains %}
+    - "*.{{ _sub }}"
+{% endfor %}
+{% endif %}
 
   cloudflareAccess:
     verifyJWT: true
@@ -31,7 +39,9 @@ authenticatoor:
     enabled: true
     className: ingress-nginx-public
     hosts:
-      - host: auth.{{ network_subdomain }}
+{% for _sub in gen_kubernetes_config_network_subdomains %}
+      - host: auth.{{ _sub }}
         paths:
           - path: /
             pathType: Prefix
+{% endfor %}

@@ -26,10 +26,12 @@ dugtrio:
         sub_filter_once off;
 {% endif %}
     hosts:
-      - host: beacon.{{ network_subdomain }}
+{% for _sub in gen_kubernetes_config_network_subdomains %}
+      - host: beacon.{{ _sub }}
         paths:
           - path: /
             pathType: Prefix
+{% endfor %}
 
   dugtrioFrontendTitle: "Dugtrio: {{ ethereum_network_name }}"
   dugtrioProxyCount: 2

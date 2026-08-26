@@ -26,10 +26,12 @@ spamoor:
         sub_filter_once off;
 {% endif %}
     hosts:
-      - host: spamoor.{{ network_subdomain }}
+{% for _sub in gen_kubernetes_config_network_subdomains %}
+      - host: spamoor.{{ _sub }}
         paths:
           - path: /
             pathType: Prefix
+{% endfor %}
 
 {% set cl_config = lookup('ansible.builtin.file', cl_config_path) | from_yaml %}
 {% set seconds_per_slot = (cl_config.SLOT_DURATION_MS | int // 1000) if cl_config.SLOT_DURATION_MS is defined else seconds_per_slot %}

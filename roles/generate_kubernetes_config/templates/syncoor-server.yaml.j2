@@ -30,10 +30,12 @@ syncoor-server:
       className: ingress-nginx-public
       enabled: true
       hosts:
-        - host: syncoor-api.{{ network_subdomain }}
+{% for _sub in gen_kubernetes_config_network_subdomains %}
+        - host: syncoor-api.{{ _sub }}
           paths:
             - path: /
               pathType: Prefix
               service:
                 identifier: main
                 port: http
+{% endfor %}

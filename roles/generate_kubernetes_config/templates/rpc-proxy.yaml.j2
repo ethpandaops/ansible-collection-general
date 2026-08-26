@@ -18,10 +18,12 @@ rpc-proxy:
     className: ingress-nginx-public
 
     hosts:
-      - host: rpc.{{ network_subdomain }}
+{% for _sub in gen_kubernetes_config_network_subdomains %}
+      - host: rpc.{{ _sub }}
         paths:
           - path: /
             pathType: Prefix
+{% endfor %}
 
   args:
     - --url={{ default_el_endpoint }}
