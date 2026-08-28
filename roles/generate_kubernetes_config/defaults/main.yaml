@@ -141,13 +141,13 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
     dependencies:
       - name: powfaucet
         repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 1.2.0 # >=1.1.0 omits ethTxGasLimit unless set, so the faucet's own default applies
+        version: 1.2.1 # >=1.2.1 defaults the ENS resolver RPC to publicnode (rpc.flashbots.net dropped eth_call)
   faucet-agents:
     valuesTemplatePath: templates/powfaucet.yaml.j2
     dependencies:
       - name: powfaucet
         repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 1.2.0 # >=1.2.0 for ingress.basicAuth, which creates the ingress' auth secret
+        version: 1.2.1 # >=1.2.0 for ingress.basicAuth; >=1.2.1 for the ENS resolver RPC default
     faucetOverride:
       fullnameOverride: powfaucet-agents
       dnsPrefix: faucet-agents
