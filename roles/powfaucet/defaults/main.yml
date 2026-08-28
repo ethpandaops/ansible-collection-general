@@ -33,7 +33,7 @@ powfaucet_captcha_secret: "0xCensoredHCaptchaSecretKey"
 
 # ens module (allow/require ENS names)
 powfaucet_ens_enabled: true
-powfaucet_ens_rpcurl: "https://rpc.flashbots.net/"
+powfaucet_ens_rpcurl: "https://ethereum-rpc.publicnode.com"
 powfaucet_ens_required: false
 
 # ipinfo module (check ip-api.com)
@@ -64,7 +64,7 @@ powfaucet_github_limit_duration: 86400 # 1 day
 
 # mainnet module (check mainnet wallet balance / nonce)
 powfaucet_mainnet_enabled: false
-powfaucet_mainnet_rpcurl: "https://rpc.flashbots.net/"
+powfaucet_mainnet_rpcurl: "https://ethereum-rpc.publicnode.com"
 powfaucet_mainnet_min_balance_wei: 10000000000000000 # 0.01 ETH
 powfaucet_mainnet_min_tx_count: 5
 
