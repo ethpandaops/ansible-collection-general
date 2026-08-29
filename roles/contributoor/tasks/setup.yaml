@@ -1,0 +1,25 @@
+- name: Add contributoor user
+  ansible.builtin.user:
+    name: "{{ contributoor_user }}"
+    shell: /bin/nologin
+
+- name: Get contributoor uid
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ contributoor_user }}"
+  register: contributoor_user_getent
+
+- name: Run contributoor container
+  community.docker.docker_container:
+    name: "{{ contributoor_container_name }}"
+    image: "{{ contributoor_container_image }}"
+    image_name_mismatch: recreate
+    user: "{{ contributoor_user_getent.ansible_facts.getent_passwd[contributoor_user][1] }}"
+    state: started
+    restart_policy: always
+    stop_timeout: "{{ contributoor_container_stop_timeout }}"
+    ports: "{{ contributoor_container_ports }}"
+    volumes: "{{ contributoor_container_volumes }}"
+    env: "{{ contributoor_container_env }}"
+    networks: "{{ contributoor_container_networks }}"
+    command: "{{ contributoor_container_command }}"
