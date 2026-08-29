@@ -37,8 +37,13 @@ config:
       upstream: raw.githubusercontent.com
       target: /ethpandaops/{{ devnet_name }}-devnets/master/network-configs/{{ ethereum_network_name | replace(devnet_name + "-", '') }}/metadata/genesis.ssz
     - path: /parsed/parsedConsensusGenesis.json
+{% if gen_kubernetes_config_parsed_genesis_lfs %}
+      upstream: media.githubusercontent.com
+      target: /media/ethpandaops/{{ devnet_name }}-devnets/master/network-configs/{{ ethereum_network_name | replace(devnet_name + "-", '') }}/parsed/parsedConsensusGenesis.json
+{% else %}
       upstream: raw.githubusercontent.com
       target: /ethpandaops/{{ devnet_name }}-devnets/master/network-configs/{{ ethereum_network_name | replace(devnet_name + "-", '') }}/parsed/parsedConsensusGenesis.json
+{% endif %}
 
     # Execution Layer specific redirects
     - path: /el/enodes.txt
