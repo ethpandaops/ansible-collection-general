@@ -40,5 +40,6 @@
     networks: "{{ vector_container_networks }}"
     volumes: "{{ vector_container_volumes }}"
     env: "{{ vector_container_env }}"
+    memory: "{{ vector_container_memory | default(omit) }}"
     user: "{{ vector_user_meta.uid }}"
     groups: "{{ vector_docker_group_meta.ansible_facts.getent_group.docker[1] }}"
