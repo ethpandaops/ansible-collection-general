@@ -16,6 +16,7 @@ vector_container_volumes:
   - "/var/run/docker.sock:/var/run/docker.sock:ro"
 vector_container_env: {}
 # vector_container_memory: 1g
+# vector_container_memory_swap: 1g
 
 vector_config: |
   [sources.in]
