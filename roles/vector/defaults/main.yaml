@@ -15,6 +15,7 @@ vector_container_volumes:
   - "{{ vector_datadir }}/vector.toml:/etc/vector/vector.toml:ro"
   - "/var/run/docker.sock:/var/run/docker.sock:ro"
 vector_container_env: {}
+# vector_container_memory: 1g
 
 vector_config: |
   [sources.in]
