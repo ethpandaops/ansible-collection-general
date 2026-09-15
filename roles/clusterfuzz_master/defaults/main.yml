@@ -1,0 +1,14 @@
+---
+# Cleanup
+clusterfuzz_master_cleanup: false
+
+# Storage configuration
+clusterfuzz_master_storage_path: /data/clusterfuzz
+clusterfuzz_master_repo_path: "{{ clusterfuzz_master_storage_path }}/clusterfuzz"
+clusterfuzz_master_repo_url: https://github.com/ethpandaops/clusterfuzz.git
+
+# Port configurations
+clusterfuzz_master_web_port: 9000
+clusterfuzz_master_datastore_port: 9004
+clusterfuzz_master_pubsub_port: 9006
+clusterfuzz_master_storage_port: 9008
