@@ -111,6 +111,14 @@ gen_kubernetes_config_powfaucet_authenticatoor_grants: # noqa var-naming[no-role
 gen_kubernetes_config_pandamenu_enabled: true # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_pandamenu_script: '<script src="https://pandamenu.ethpandaops.io/panda-menu-1.0.1.js" integrity="sha384-icGX6g6CzB0tqlhDc6Su4c6IPVbcbUvfM3xjbbFYsYBwuZR79WkmOxDhGEPfmyn2" crossorigin="anonymous"></script>' # noqa var-naming[no-role-prefix] yaml[line-length]
 
+# mempool-lens configuration
+# Inventory hostname of the geth node whose WS API (txtracker/peerstats
+# namespaces) the lens should watch. Empty picks the first geth host.
+gen_kubernetes_config_mempool_lens_node: "" # noqa var-naming[no-role-prefix]
+# Full override for the upstream WebSocket RPC URL; takes precedence over
+# gen_kubernetes_config_mempool_lens_node when set.
+gen_kubernetes_config_mempool_lens_rpc_url: "" # noqa var-naming[no-role-prefix]
+
 gen_kubernetes_config_chat_image: "" # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_chat_llm_model: "claude-sonnet-4-6" # noqa var-naming[no-role-prefix]
 # Cloudflare Access trusted-header SSO.
@@ -275,5 +283,11 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
     valuesTemplatePath: templates/slashoor.yaml.j2
     dependencies:
       - name: slashoor
+        repository: https://ethpandaops.github.io/ethereum-helm-charts
+        version: 0.1.0
+  mempool-lens:
+    valuesTemplatePath: templates/mempool-lens.yaml.j2
+    dependencies:
+      - name: mempool-lens
         repository: https://ethpandaops.github.io/ethereum-helm-charts
         version: 0.1.0
