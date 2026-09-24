@@ -60,6 +60,7 @@
     network_mode: "{{ docker_nginx_proxy_container_network_mode }}"
     volumes: "{{ docker_nginx_proxy_container_volumes }}"
     env: "{{ docker_nginx_proxy_container_env }}"
+    labels: "{{ docker_nginx_proxy_container_labels | default(omit) }}"
 
 - name: Run docker-gen container
   community.general.docker_container:

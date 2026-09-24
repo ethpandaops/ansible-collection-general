@@ -31,6 +31,7 @@
         volumes: "{{ prysm_container_volumes }}"
         env: "{{ prysm_container_env }}"
         networks: "{{ prysm_container_networks }}"
+        labels: "{{ prysm_container_labels | default(omit) }}"
         tty: "{{ prysm_container_tty }}"
         entrypoint: "{{ prysm_container_entrypoint | default(omit) }}"
         command: >-
@@ -84,6 +85,7 @@
         volumes: "{{ prysm_validator_container_volumes }}"
         env: "{{ prysm_validator_container_env }}"
         networks: "{{ prysm_validator_container_networks }}"
+        labels: "{{ prysm_validator_container_labels | default(omit) }}"
         tty: "{{ prysm_validator_container_tty }}"
         entrypoint: "{{ prysm_validator_container_entrypoint | default(omit) }}"
         command: >-
