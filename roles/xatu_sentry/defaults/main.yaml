@@ -26,18 +26,54 @@ xatu_sentry_config_server_auth_user: xatu-user
 xatu_sentry_config_server_auth_password: xatu-password
 xatu_sentry_config_network_name_override: ""
 
-xatu_sentry_config: |
-  logging: "info"
-  metricsAddr: ":9090"
-  name: "{{ xatu_sentry_config_name }}"
-  ethereum:
-    beaconNodeAddress: {{ xatu_sentry_config_beacon_uri }}
-    overrideNetworkName: {{ xatu_sentry_config_network_name_override }}
-  outputs:
-  - name: grpc
-    type: xatu
-    config:
-      address: {{ xatu_sentry_config_server_address }}
-      tls: {{ xatu_sentry_config_server_tls_enabled }}
-      headers:
-        authorization: "Basic {{ (xatu_sentry_config_server_auth_user + ":" + xatu_sentry_config_server_auth_password) | b64encode }}"
+# Empty list omits the key so the sentry uses its built-in topic set.
+xatu_sentry_config_beacon_subscriptions: []
+xatu_sentry_config_beacon_committees_enabled: false
+xatu_sentry_config_proposer_duty_enabled: false
+# Omitted from the config when null, leaving the sentry's own defaults.
+xatu_sentry_config_output_max_queue_size: null
+xatu_sentry_config_output_workers: null
+# Deep-merged over the assembled config for anything without a dedicated var.
+xatu_sentry_config_extra: {}
+
+# Assembled from the vars above. Override this with a raw config string only
+# when the structure itself has to change — a full override drops every
+# assembled key, including ones added to this role later.
+xatu_sentry_config_data: >-
+  {{
+    {
+      'logging': 'info',
+      'metricsAddr': ':9090',
+      'name': xatu_sentry_config_name,
+      'ethereum': {
+        'beaconNodeAddress': xatu_sentry_config_beacon_uri,
+        'overrideNetworkName': xatu_sentry_config_network_name_override,
+      } | combine(
+        {'beaconSubscriptions': xatu_sentry_config_beacon_subscriptions}
+        if xatu_sentry_config_beacon_subscriptions else {}
+      ),
+      'beaconCommittees': {'enabled': xatu_sentry_config_beacon_committees_enabled | bool},
+      'proposerDuty': {'enabled': xatu_sentry_config_proposer_duty_enabled | bool},
+      'outputs': [
+        {
+          'name': 'grpc',
+          'type': 'xatu',
+          'config': {
+            'address': xatu_sentry_config_server_address,
+            'tls': xatu_sentry_config_server_tls_enabled | bool,
+            'headers': {
+              'authorization': 'Basic ' + ((xatu_sentry_config_server_auth_user + ':' + xatu_sentry_config_server_auth_password) | b64encode),
+            },
+          } | combine(
+            {'maxQueueSize': xatu_sentry_config_output_max_queue_size}
+            if xatu_sentry_config_output_max_queue_size is not none else {}
+          ) | combine(
+            {'workers': xatu_sentry_config_output_workers}
+            if xatu_sentry_config_output_workers is not none else {}
+          ),
+        },
+      ],
+    } | combine(xatu_sentry_config_extra, recursive=True)
+  }}
+
+xatu_sentry_config: "{{ xatu_sentry_config_data | to_nice_yaml(indent=2) }}"
