@@ -42,7 +42,7 @@
         networks: "{{ erigon_container_networks }}"
         entrypoint: "{{ erigon_init_custom_network_container_entrypoint | default(omit) }}"
         command: "{{ erigon_init_custom_network_container_command }}"
-        user: "{{ erigon_user_meta.uid }}"
+        user: "{{ erigon_user_meta.uid }}:{{ erigon_user_meta.group }}"
         pull: "{{ erigon_container_pull | bool }}"
         security_opts: "{{ erigon_container_security_opts }}"
 
@@ -69,7 +69,7 @@
     networks: "{{ erigon_container_networks }}"
     entrypoint: "{{ erigon_container_entrypoint | default(omit) }}"
     command: "{{ erigon_container_command + erigon_container_command_extra_args }}"
-    user: "{{ erigon_user_meta.uid }}"
+    user: "{{ erigon_user_meta.uid }}:{{ erigon_user_meta.group }}"
     pull: "{{ erigon_container_pull | bool }}"
     security_opts: "{{ erigon_container_security_opts }}"
     memory: "{{ erigon_container_memory | default(omit) }}"
