@@ -79,8 +79,17 @@ erigon_container_command_default:
 erigon_container_command_v6:
   - --nat=extip:{{ erigon_announced_ipv6 }}
 
+# Pass --externalcl: the beacon node drives erigon over the engine API.
+# Without it erigon starts its embedded CL (caplin) on known network ids
+# (e.g. a sepolia or mainnet shadowfork), syncs the public chain on its own
+# and answers engine API calls with "caplin is enabled".
+# Set to false only to run erigon with caplin.
+erigon_externalcl_enabled: true
+
 erigon_container_command: >-
-  {{ erigon_container_command_default + (erigon_container_command_v6 if erigon_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
+  {{ erigon_container_command_default
+     + (['--externalcl'] if erigon_externalcl_enabled | bool else [])
+     + (erigon_container_command_v6 if erigon_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
 
 erigon_container_command_extra_args: []
 #  - --prune=htc
