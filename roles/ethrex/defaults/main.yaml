@@ -56,6 +56,9 @@ ethrex_container_command_default:
   - --metrics.addr=0.0.0.0
   - --metrics.port={{ ethrex_ports_metrics }}
   - --p2p.addr=0.0.0.0
+  # Announce the host IP. With only --p2p.addr=0.0.0.0, ethrex advertises the container's
+  # bridge IP (e.g. 172.18.0.5) in its enode/ENR, so no peer can dial it. Needs ethrex >= v10.0.0.
+  - --nat.extip={{ ethrex_announced_ip }}
 
 ethrex_container_command_v6: []
 
