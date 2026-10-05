@@ -1,5 +1,6 @@
 ethereum_node_skip_cleanup: true
 ethereum_node_announced_ip: 127.0.0.1
+ethereum_network_name: mainnet # noqa: var-naming[no-role-prefix]
 docker_daemon_options: # noqa: var-naming[no-role-prefix]
   storage-driver: "vfs"
 # Fixes for integration tests to be able to run
