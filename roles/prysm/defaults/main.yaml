@@ -16,6 +16,7 @@ prysm_cleanup: false # when set to "true" it will remove the container(s)
 
 prysm_ports_p2p_tcp: 13000
 prysm_ports_p2p_udp: 12000
+prysm_ports_quic: 13000
 prysm_ports_http_beacon: 3500
 prysm_ports_metrics: 8080
 prysm_ports_grpc: 4000
@@ -43,6 +44,7 @@ prysm_container_ports_ipv4:
   - "127.0.0.1:{{ prysm_ports_metrics }}:{{ prysm_ports_metrics }}"
   - "0.0.0.0:{{ prysm_ports_p2p_tcp }}:{{ prysm_ports_p2p_tcp }}"
   - "0.0.0.0:{{ prysm_ports_p2p_udp }}:{{ prysm_ports_p2p_udp }}/udp"
+  - "0.0.0.0:{{ prysm_ports_quic }}:{{ prysm_ports_quic }}/udp"
 
 prysm_container_ports_pprof:
   - "127.0.0.1:{{ prysm_ports_pprof }}:{{ prysm_ports_pprof }}"
@@ -50,6 +52,7 @@ prysm_container_ports_pprof:
 prysm_container_ports_ipv6:
   - "[::]:{{ prysm_ports_p2p_tcp }}:{{ prysm_ports_p2p_tcp }}"
   - "[::]:{{ prysm_ports_p2p_udp }}:{{ prysm_ports_p2p_udp }}/udp"
+  - "[::]:{{ prysm_ports_quic }}:{{ prysm_ports_quic }}/udp"
 
 prysm_container_ports: >-
   {{

@@ -19,6 +19,8 @@ lodestar_ports_p2p_tcp: 9000
 lodestar_ports_p2p_udp: 9000
 lodestar_ports_p2p_udp_ipv6: 9002 # temporary until we have a fix for https://github.com/ChainSafe/lodestar/issues/6531#issuecomment-1995707028
 lodestar_ports_p2p_tcp_ipv6: 9002
+lodestar_ports_quic: "{{ lodestar_ports_p2p_tcp | int + 1 }}"
+lodestar_ports_quic_ipv6: "{{ lodestar_ports_p2p_tcp_ipv6 | int + 1 }}"
 lodestar_ports_http_beacon: 9596
 lodestar_ports_metrics: 8008
 
@@ -43,10 +45,12 @@ lodestar_container_ports_ipv4:
   - "127.0.0.1:{{ lodestar_ports_metrics }}:{{ lodestar_ports_metrics }}"
   - "0.0.0.0:{{ lodestar_ports_p2p_tcp }}:{{ lodestar_ports_p2p_tcp }}"
   - "0.0.0.0:{{ lodestar_ports_p2p_udp }}:{{ lodestar_ports_p2p_udp }}/udp"
+  - "0.0.0.0:{{ lodestar_ports_quic }}:{{ lodestar_ports_quic }}/udp"
 
 lodestar_container_ports_ipv6:
   - "[::]:{{ lodestar_ports_p2p_tcp_ipv6 }}:{{ lodestar_ports_p2p_tcp_ipv6 }}"
   - "[::]:{{ lodestar_ports_p2p_udp_ipv6 }}:{{ lodestar_ports_p2p_udp_ipv6 }}/udp"
+  - "[::]:{{ lodestar_ports_quic_ipv6 }}:{{ lodestar_ports_quic_ipv6 }}/udp"
 
 lodestar_container_ports: >-
   {{ lodestar_container_ports_ipv4 +
