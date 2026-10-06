@@ -116,6 +116,15 @@ gen_kubernetes_config_chat_llm_model: "claude-sonnet-4-6" # noqa var-naming[no-r
 # Cloudflare Access trusted-header SSO.
 gen_kubernetes_config_chat_auth_enabled: true # noqa var-naming[no-role-prefix]
 
+# Resources of the tracoor server container (not its postgresql subchart).
+gen_kubernetes_config_tracoor_resources: # noqa var-naming[no-role-prefix]
+  requests:
+    cpu: 1000m
+    memory: 2Gi
+  limits:
+    cpu: 2000m
+    memory: 4Gi
+
 
 # Enabled charts configuration
 gen_kubernetes_config_disabled_services: [] # noqa var-naming[no-role-prefix]
