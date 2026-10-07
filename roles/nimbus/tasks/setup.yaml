@@ -49,6 +49,7 @@
     volumes: "{{ nimbus_container_volumes }}"
     env: "{{ nimbus_container_env }}"
     networks: "{{ nimbus_checkpoint_container_networks }}"
+    labels: "{{ nimbus_container_labels | default(omit) }}"
     command: "{{ nimbus_checkpoint_container_command + nimbus_checkpoint_container_command_extra_args }}"
     user: "{{ nimbus_user_meta.uid }}"
     security_opts: "{{ nimbus_container_security_opts }}"
@@ -72,6 +73,7 @@
       }}
     env: "{{ nimbus_container_env }}"
     networks: "{{ nimbus_container_networks }}"
+    labels: "{{ nimbus_container_labels | default(omit) }}"
     entrypoint: "{{ nimbus_container_entrypoint | default(omit) }}"
     command: >-
       {{
@@ -109,6 +111,7 @@
     volumes: "{{ nimbus_validator_container_volumes }}"
     env: "{{ nimbus_container_env }}"
     networks: "{{ nimbus_container_networks }}"
+    labels: "{{ nimbus_validator_container_labels | default(omit) }}"
     entrypoint: "{{ nimbus_container_entrypoint | default(omit) }}"
     command: "{{ nimbus_validator_container_command }}"
     user: "{{ nimbus_user_meta.uid }}"
