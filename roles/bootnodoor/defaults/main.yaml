@@ -28,6 +28,20 @@ bootnodoor_cl_gvr: /data/cl-gvr.txt
 
 bootnodoor_container_stop_timeout: "30"
 bootnodoor_container_networks: []
+
+# Optional IP -> name mapping for the bootnodoor web UI (--ip-names).
+# When enabled, bootnodoor_ip_names_src (a file on the ansible controller,
+# by default the inventory itself) is uploaded to the bootnode and the flag
+# is added to the container command. Bootnodoor auto-detects the format
+# (ansible INI inventory, or a YAML map of IPs/CIDRs to names) and re-reads
+# the file on change, so re-running the role after inventory updates
+# refreshes the names without restarting the container.
+bootnodoor_ip_names_enabled: false
+bootnodoor_ip_names_src: "{{ inventory_file }}"
+bootnodoor_ip_names_host_file: "{{ bootnodoor_datadir }}/inventory.ini"
+bootnodoor_ip_names_container_file: /data/inventory.ini
+bootnodoor_container_command_ip_names_args: >-
+  {{ ['--ip-names=' ~ bootnodoor_ip_names_container_file] if bootnodoor_ip_names_enabled else [] }}
 bootnodoor_container_command_default:
   - --private-key={{ bootnodoor_privkey }}
   - --enr-ip={{ bootnodoor_enr_ip }}
@@ -44,4 +58,4 @@ bootnodoor_container_command_default:
   - --web-port={{ bootnodoor_ui_port }}
 bootnodoor_container_command_extra_args: []
 bootnodoor_container_command: >-
-  {{ bootnodoor_container_command_default + bootnodoor_container_command_extra_args }}
+  {{ bootnodoor_container_command_default + bootnodoor_container_command_ip_names_args + bootnodoor_container_command_extra_args }}
