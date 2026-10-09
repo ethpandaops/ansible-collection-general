@@ -25,6 +25,9 @@ xatu_sentry_config_server_tls_enabled: true
 xatu_sentry_config_server_auth_user: xatu-user
 xatu_sentry_config_server_auth_password: xatu-password
 xatu_sentry_config_network_name_override: ""
+# Extra beacon event topics to subscribe to. When empty, the sentry uses its
+# built-in default subscription set.
+xatu_sentry_config_beacon_subscriptions: []
 
 xatu_sentry_config: |
   logging: "info"
@@ -33,6 +36,12 @@ xatu_sentry_config: |
   ethereum:
     beaconNodeAddress: {{ xatu_sentry_config_beacon_uri }}
     overrideNetworkName: {{ xatu_sentry_config_network_name_override }}
+  {%- if xatu_sentry_config_beacon_subscriptions %}
+    beaconSubscriptions:
+  {%- for topic in xatu_sentry_config_beacon_subscriptions %}
+      - {{ topic }}
+  {%- endfor %}
+  {%- endif %}
   outputs:
   - name: grpc
     type: xatu
