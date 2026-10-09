@@ -1,5 +1,10 @@
+# kubernetes.core.helm_repository strips the trailing slash from the requested
+# URL but compares it against the stored URL verbatim, so a repo previously
+# added with a trailing slash fails with "Repository already have a repository
+# named ..." on every run. force_update re-adds instead of failing.
 - name: Add helm repository for {{ item.name }}
   kubernetes.core.helm_repository:
     name: "{{ item.name }}"
     url: "{{ item.url }}"
     state: present
+    force_update: true
