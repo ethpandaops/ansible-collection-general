@@ -1,3 +1,17 @@
+- name: Create dir for IP names file
+  ansible.builtin.file:
+    path: "{{ bootnodoor_ip_names_host_file | dirname }}"
+    state: directory
+    mode: "0755"
+  when: bootnodoor_ip_names_enabled
+
+- name: Upload IP names file for the web UI
+  ansible.builtin.copy:
+    src: "{{ bootnodoor_ip_names_src }}"
+    dest: "{{ bootnodoor_ip_names_host_file }}"
+    mode: "0644"
+  when: bootnodoor_ip_names_enabled
+
 - name: Run bootnodoor container
   community.docker.docker_container:
     name: "{{ bootnodoor_container_name }}"
