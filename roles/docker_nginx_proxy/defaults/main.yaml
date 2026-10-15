@@ -68,6 +68,7 @@ docker_nginx_proxy_docker_gen_container_image: nginxproxy/docker-gen
 docker_nginx_proxy_docker_gen_container_name: nginx-proxy-gen
 docker_nginx_proxy_docker_gen_container_command: >-
   -notify-sighup nginx-proxy
+  -wait 2s:10s
   -watch /etc/docker-gen/templates/nginx.tmpl /etc/nginx/conf.d/default.conf
 docker_nginx_proxy_docker_gen_container_restart_policy: always
 docker_nginx_proxy_docker_gen_container_networks_cli_compatible: true
