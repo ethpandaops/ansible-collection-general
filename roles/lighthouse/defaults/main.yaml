@@ -12,6 +12,12 @@ lighthouse_announced_ipv6: >-
   {{ lighthouse_public_ipv6 if (lighthouse_public_ipv6 | length > 0)
   else (ansible_default_ipv6.address
   if lighthouse_ipv6_enabled and ansible_default_ipv6.address is defined else '') }}
+lighthouse_container_labels: >-
+  {{ {'org.ethpandaops.public_ipv6': lighthouse_public_ipv6}
+     if (lighthouse_public_ipv6 | default('') | length > 0) else {} }}
+# Set by caller (e.g. ethereum_node) when the validator container needs a
+# public IPv6 — the docker-public-ipv6-injector consumes this label.
+lighthouse_validator_container_labels: {}
 
 lighthouse_cleanup: false # when set to "true" it will remove the container(s)
 

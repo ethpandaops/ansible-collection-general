@@ -33,6 +33,9 @@ json_rpc_snooper_container_ports: >-
   }}
 
 json_rpc_snooper_container_networks: []
+json_rpc_snooper_container_labels: >-
+  {{ {'org.ethpandaops.public_ipv6': json_rpc_snooper_public_ipv6}
+     if (json_rpc_snooper_public_ipv6 | default('') | length > 0) else {} }}
 json_rpc_snooper_container_volumes: []
 json_rpc_snooper_container_command:
   - "./json_rpc_snoop"

@@ -28,6 +28,7 @@
     volumes: "{{ ethrex_container_volumes }}"
     env: "{{ ethrex_container_env }}"
     networks: "{{ ethrex_container_networks }}"
+    labels: "{{ ethrex_container_labels | default(omit) }}"
     entrypoint: "{{ ethrex_container_entrypoint | default(omit) }}"
     command: "{{ ethrex_container_command + ethrex_container_command_extra_args }}"
     user: "{{ ethrex_user_meta.uid }}"

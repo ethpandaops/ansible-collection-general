@@ -1,6 +1,6 @@
 {% set iface = docker_network_ndppd_interface | default(ansible_default_ipv6.interface | default('eth0')) %}
 {% for ipam in docker_network_ipam_config %}
-{% if ':' in (ipam.subnet | default('')) %}
+{% if ':' in (ipam.subnet | default('')) and ipam.subnet != docker_network_ipv6_private_subnet %}
 proxy {{ iface }} {
     rule {{ ipam.subnet }} {
         static
