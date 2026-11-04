@@ -26,10 +26,29 @@ authenticatoor:
 {% endfor %}
 {% endif %}
 
+{% if gen_kubernetes_config_authenticatoor_bearer_issuer_url %}
+  # Browsers keep logging in through Cloudflare Access; the bearer provider
+  # serves non-interactive clients at /authentik/token (outside the CF-covered
+  # /auth/*) and is not offered on the login page.
+  authMode:
+    - cfaccess
+  providers:
+    - name: cfaccess
+      type: cloudflare
+      cloudflareAccess:
+        teamDomain: "{{ gen_kubernetes_config_authenticatoor_cf_team_domain }}"
+        audTag: "{{ gen_kubernetes_config_authenticatoor_cf_aud_tag }}"
+    - name: authentik
+      type: bearer
+      bearer:
+        issuerURL: "{{ gen_kubernetes_config_authenticatoor_bearer_issuer_url }}"
+        audiences: {{ gen_kubernetes_config_authenticatoor_bearer_audiences | to_json }}
+{% else %}
   cloudflareAccess:
     verifyJWT: true
     teamDomain: "{{ gen_kubernetes_config_authenticatoor_cf_team_domain }}"
     audTag: "{{ gen_kubernetes_config_authenticatoor_cf_aud_tag }}"
+{% endif %}
 
   persistence:
     enabled: true

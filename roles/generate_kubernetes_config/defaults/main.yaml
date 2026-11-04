@@ -87,6 +87,14 @@ gen_kubernetes_config_dora_ens_remote_networks: # noqa var-naming[no-role-prefix
 gen_kubernetes_config_authenticatoor_cf_team_domain: "ethpandaops.cloudflareaccess.com" # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_authenticatoor_cf_aud_tag: "" # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_authenticatoor_persistence_size: "32Mi" # noqa var-naming[no-role-prefix]
+# Bearer provider: accept tokens of this IdP application at /authentik/token, so
+# its access policy (Authentik binds devnet-authenticatoor to ethpandaops:Core)
+# decides who may act on devnet services without a browser — e.g. panda's devnet
+# relay, which exchanges the caller's panda token for one. Empty disables it.
+# authenticatoor fetches the issuer's discovery document at startup.
+gen_kubernetes_config_authenticatoor_bearer_issuer_url: "https://authentik.analytics.production.platform.ethpandaops.io/application/o/devnet-authenticatoor/" # noqa var-naming[no-role-prefix] yaml[line-length]
+gen_kubernetes_config_authenticatoor_bearer_audiences: # noqa var-naming[no-role-prefix]
+  - devnet-authenticatoor
 
 # powfaucet configuration
 # Multi-RPC endpoints — when non-empty, replaces the default single-bootnode RPC.
@@ -210,7 +218,7 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
     dependencies:
       - name: authenticatoor
         repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 0.1.0
+        version: 0.2.0
   buildoor:
     valuesTemplatePath: templates/buildoor.yaml.j2
     dependencies:
