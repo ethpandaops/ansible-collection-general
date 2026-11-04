@@ -2,6 +2,11 @@
 
 This role downloads and extracts Ethereum node snapshots from ethpandaops.io. Supports multiple networks and clients.
 
+The snapshot is streamed straight into `tar`, resuming by byte offset if the
+connection drops, so only the extracted datadir needs disk space. A snapshot
+server that does not support HTTP range requests cannot be resumed and the
+download fails with that message rather than retrying indefinitely.
+
 ## Requirements
 
 - curl

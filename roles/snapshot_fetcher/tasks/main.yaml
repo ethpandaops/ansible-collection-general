@@ -27,6 +27,14 @@
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
 
+- name: Copy resumable snapshot stream script
+  ansible.builtin.copy:
+    src: stream_snapshot.sh
+    dest: "{{ snapshot_fetcher_out_dir }}/stream_snapshot.sh"
+    mode: '0755'
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+
 - name: Run script
   ansible.builtin.command: "./download_snapshot.sh"
   args:
