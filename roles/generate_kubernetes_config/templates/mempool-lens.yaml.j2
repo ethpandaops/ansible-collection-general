@@ -1,0 +1,51 @@
+# {{ ansible_managed }}
+{% set mempool_lens_image = default_tooling_images.mempool_lens | default('bbusa/mempool-lens:latest') %}
+{% if gen_kubernetes_config_mempool_lens_rpc_url | length > 0 %}
+{% set mempool_lens_rpc_url = gen_kubernetes_config_mempool_lens_rpc_url %}
+{% else %}
+{% set mempool_lens_node = gen_kubernetes_config_mempool_lens_node
+   if gen_kubernetes_config_mempool_lens_node | length > 0
+   else (groups['geth'] | sort | first) %}
+{% set mempool_lens_rpc_url = "wss://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets." ~ devnet_name ~ "-devnets.node_ingress.combined}>@" ~ ethereum_node_rpc_prefix ~ mempool_lens_node ~ "." ~ network_server_subdomain %}
+{% endif %}
+
+mempool-lens:
+  fullnameOverride: mempool-lens
+  replicas: 1
+
+  image:
+    repository: {{ mempool_lens_image.split(':') | first }}
+    tag: {{ mempool_lens_image.split(':') | last }}
+    pullPolicy: {% if "latest" in (mempool_lens_image.split(':') | last) or "master" in (mempool_lens_image.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
+
+  # Upstream geth WS endpoint; needs the txtracker (and ideally
+  # peerstats/admin) namespaces enabled on the WS API. Geth serves WS on the
+  # rpc- ingress when ws.port == http.port.
+  rpcUrl: "{{ mempool_lens_rpc_url }}"
+
+  # Browsers only talk to the lens; it proxies the geth WebSocket via /ws.
+  proxy: true
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  ingress:
+    enabled: true
+    className: ingress-nginx-public
+{% if gen_kubernetes_config_pandamenu_enabled %}
+    annotations:
+      nginx.ingress.kubernetes.io/configuration-snippet: |
+        sub_filter '</head>' '{{ gen_kubernetes_config_pandamenu_script }}</head>';
+        sub_filter_types text/html;
+        sub_filter_once off;
+{% endif %}
+    hosts:
+      - host: mempool-lens.{{ network_subdomain }}
+        paths:
+          - path: /
+            pathType: Prefix
