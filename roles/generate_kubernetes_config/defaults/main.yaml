@@ -87,6 +87,13 @@ gen_kubernetes_config_dora_ens_remote_networks: # noqa var-naming[no-role-prefix
 gen_kubernetes_config_authenticatoor_cf_team_domain: "ethpandaops.cloudflareaccess.com" # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_authenticatoor_cf_aud_tag: "" # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_authenticatoor_persistence_size: "32Mi" # noqa var-naming[no-role-prefix]
+# Access groups: [{name, members, services}]. A member is
+# <provider>/team:<team>, <provider>/user:<id> or <provider>/<attribute>:<value>,
+# the providers being "authentik" and "cfaccess" (cfaccess/principal:user and
+# cfaccess/principal:service name everyone passing Cloudflare Access).
+# null: no gate, tokens carry no services claim. A list, even an empty one,
+# turns the gate on: a login that no group names gets no token.
+gen_kubernetes_config_authenticatoor_grants: null # noqa var-naming[no-role-prefix]
 
 # powfaucet configuration
 # Multi-RPC endpoints — when non-empty, replaces the default single-bootnode RPC.
@@ -96,13 +103,15 @@ gen_kubernetes_config_powfaucet_rpc_endpoints: [] # noqa var-naming[no-role-pref
 gen_kubernetes_config_powfaucet_authenticatoor_enabled: true # noqa var-naming[no-role-prefix]
 # Default grants for authenticated users (evaluated in order; later grants override perks of earlier ones):
 #   1. Baseline: 10x mining-reward factor for all logged-in users.
-#   2. One free 100 ETH drop per day, no mining required (skips PoW + recurring/outflow limits).
+#   2. For logins holding the feature drop_100eth: one free 100 ETH drop per
+#      day, no mining required (skips PoW + recurring/outflow limits).
 gen_kubernetes_config_powfaucet_authenticatoor_grants: # noqa var-naming[no-role-prefix]
   - limitCount: 0
     limitAmount: 0
     duration: 86400
     rewardFactor: 10
-  - limitCount: 1
+  - feature: drop_100eth
+    limitCount: 1
     duration: 86400
     skipModules: ["pow", "recurring-limits", "faucet-outflow"]
     overrideMaxDrop: 100000000000000000000  # 100 ETH
@@ -141,13 +150,13 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
     dependencies:
       - name: powfaucet
         repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 1.2.1 # >=1.2.1 defaults the ENS resolver RPC to publicnode (rpc.flashbots.net dropped eth_call)
+        version: 1.3.0
   faucet-agents:
     valuesTemplatePath: templates/powfaucet.yaml.j2
     dependencies:
       - name: powfaucet
         repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 1.2.1 # >=1.2.0 for ingress.basicAuth; >=1.2.1 for the ENS resolver RPC default
+        version: 1.3.0
     faucetOverride:
       fullnameOverride: powfaucet-agents
       dnsPrefix: faucet-agents
@@ -210,7 +219,7 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
     dependencies:
       - name: authenticatoor
         repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 0.1.0
+        version: 0.2.0
   buildoor:
     valuesTemplatePath: templates/buildoor.yaml.j2
     dependencies:
