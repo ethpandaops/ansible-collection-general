@@ -89,12 +89,23 @@ gen_kubernetes_config_authenticatoor_cf_aud_tag: "" # noqa var-naming[no-role-pr
 gen_kubernetes_config_authenticatoor_persistence_size: "32Mi" # noqa var-naming[no-role-prefix]
 # Access groups: [{name, members, services}]. A member is
 # <provider>/team:<team>, <provider>/user:<id> or <provider>/<attribute>:<value>,
-# the providers being "authentik" and "cfaccess" (cfaccess/principal:user and
-# cfaccess/principal:service name everyone passing Cloudflare Access).
-# null: no gate, tokens carry no services claim and so no feature (the faucet's
-# drop_100eth below then applies to nobody). A list, even an empty one, turns
-# the gate on: a login that no group names gets no token.
-gen_kubernetes_config_authenticatoor_grants: null # noqa var-naming[no-role-prefix]
+# the providers being "authentik" and "cfaccess". A service is <name>,
+# <name>:<feature>, <name>:<prefix>* or all:all. A login that no group names
+# gets no token.
+# Default: staff (the ethpandaops team, and everyone and every service token
+# passing Cloudflare Access) may use everything; everyone else the IdP lets in
+# (its panda-access group) may use the faucet.
+gen_kubernetes_config_authenticatoor_grants: # noqa var-naming[no-role-prefix]
+  - name: staff
+    members:
+      - "authentik/team:ethpandaops"
+      - "cfaccess/principal:user"
+      - "cfaccess/principal:service"
+    services: ["all:all"]
+  - name: core-devs
+    members:
+      - "authentik/groups:panda-access"
+    services: [faucet]
 
 # powfaucet configuration
 # Multi-RPC endpoints — when non-empty, replaces the default single-bootnode RPC.
