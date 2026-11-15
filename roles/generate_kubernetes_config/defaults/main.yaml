@@ -91,8 +91,9 @@ gen_kubernetes_config_authenticatoor_persistence_size: "32Mi" # noqa var-naming[
 # <provider>/team:<team>, <provider>/user:<id> or <provider>/<attribute>:<value>,
 # the providers being "authentik" and "cfaccess" (cfaccess/principal:user and
 # cfaccess/principal:service name everyone passing Cloudflare Access).
-# null: no gate, tokens carry no services claim. A list, even an empty one,
-# turns the gate on: a login that no group names gets no token.
+# null: no gate, tokens carry no services claim and so no feature (the faucet's
+# drop_100eth below then applies to nobody). A list, even an empty one, turns
+# the gate on: a login that no group names gets no token.
 gen_kubernetes_config_authenticatoor_grants: null # noqa var-naming[no-role-prefix]
 
 # powfaucet configuration
