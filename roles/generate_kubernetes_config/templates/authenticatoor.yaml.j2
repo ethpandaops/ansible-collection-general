@@ -26,10 +26,36 @@ authenticatoor:
 {% endfor %}
 {% endif %}
 
-  cloudflareAccess:
-    verifyJWT: true
-    teamDomain: "{{ gen_kubernetes_config_authenticatoor_cf_team_domain }}"
-    audTag: "{{ gen_kubernetes_config_authenticatoor_cf_aud_tag }}"
+  authMode: [authentik]
+  providers:
+    - name: authentik
+      type: oidc
+      oidc:
+        issuerURL: "https://authentik.analytics.production.platform.ethpandaops.io/application/o/authenticatoor/"
+        callbackURL: "https://auth.{{ network_subdomain }}/authentik/callback"
+        clientId: "authenticatoor"
+        clientSecretFile: "/etc/authenticatoor/secrets/oidc-client-secret"
+{% if gen_kubernetes_config_authenticatoor_bearer_issuer_url and gen_kubernetes_config_authenticatoor_grants is not none %}
+        # Non-browser clients (panda's devnet relay) present a token of this
+        # IdP application at /authentik/token and get the same grants. Off
+        # without grants: tokens would carry no services claim (full access).
+        bearer:
+          issuerURL: "{{ gen_kubernetes_config_authenticatoor_bearer_issuer_url }}"
+          audiences: {{ gen_kubernetes_config_authenticatoor_bearer_audiences | to_json }}
+{% endif %}
+        # A group "team:<name>" of the IdP becomes the team <name>.
+        teamRules:
+          - claim: groups
+            prefix: "team:"
+
+  providerSecrets:
+    files:
+      oidc-client-secret: "<path:/secrets/services/services.enc.yaml#authenticatoor | jsonPath {.oidc_client_secret}>"
+{% if gen_kubernetes_config_authenticatoor_grants is not none %}
+
+  grants:
+    {{ gen_kubernetes_config_authenticatoor_grants | to_nice_yaml(indent=2, width=4096) | indent(4) | trim }}
+{% endif %}
 
   persistence:
     enabled: true
