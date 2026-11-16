@@ -87,19 +87,30 @@ gen_kubernetes_config_dora_ens_remote_networks: # noqa var-naming[no-role-prefix
 gen_kubernetes_config_authenticatoor_cf_team_domain: "ethpandaops.cloudflareaccess.com" # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_authenticatoor_cf_aud_tag: "" # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_authenticatoor_persistence_size: "32Mi" # noqa var-naming[no-role-prefix]
+# Tokens of this IdP application are accepted at /authentik/token (oidc.bearer),
+# so panda can act on devnet services as the caller. Authentik's policy on the
+# application decides who can get one; the grants below decide what they may do.
+# authenticatoor fetches the issuer's discovery document at startup. Empty
+# disables it; so does grants: null.
+gen_kubernetes_config_authenticatoor_bearer_issuer_url: "https://authentik.analytics.production.platform.ethpandaops.io/application/o/devnet-authenticatoor/" # noqa var-naming[no-role-prefix] yaml[line-length]
+gen_kubernetes_config_authenticatoor_bearer_audiences: # noqa var-naming[no-role-prefix]
+  - devnet-authenticatoor
 # Access groups: [{name, members, services}]. A member is
 # <provider>/team:<team>, <provider>/user:<id> or <provider>/<attribute>:<value>,
 # the providers being "authentik" and "cfaccess". A service is <name>,
 # <name>:<feature>, <name>:<prefix>* or all:all. A login that no group names
-# gets no token.
-# Default: staff (the ethpandaops team, and everyone and every service token
-# passing Cloudflare Access) may use everything; everyone else the IdP lets in
-# (its panda-access group) may use the faucet, with the free 100 ETH drop per
-# day.
+# gets no token. Features: faucet:drop_100eth; spamoor:write, :plugins,
+# :wallet, :clients, :pprof; assertoor:write, :test_registry, :pprof. A bare
+# spamoor or assertoor grant is read-only (on images with those features).
+# Default: staff (the ethpandaops team or the ethpandaops:Core GitHub team, and
+# everyone and every service token passing Cloudflare Access) may use
+# everything; everyone else the IdP lets in (its panda-access group) may use
+# the faucet, with the free 100 ETH drop per day.
 gen_kubernetes_config_authenticatoor_grants: # noqa var-naming[no-role-prefix]
   - name: staff
     members:
       - "authentik/team:ethpandaops"
+      - "authentik/groups:ethpandaops:Core"
       - "cfaccess/principal:user"
       - "cfaccess/principal:service"
     services: ["all:all"]
