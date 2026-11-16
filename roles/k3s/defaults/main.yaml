@@ -9,6 +9,11 @@ k3s_server_extra_args: >-
 k3s_agent_extra_args: >-
   --node-external-ip={{ ansible_host }}
 
+# Root-only file the agent reads its join token from (k3s --token-file)
+k3s_agent_token_file: /etc/rancher/k3s/agent-token
+# How many agents the role restarts at the same time when their binary, unit or token changed
+k3s_restart_throttle: 1
+
 # --flannel-iface=wg0
 
 # On an agent node:

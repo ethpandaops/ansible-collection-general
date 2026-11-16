@@ -1,4 +1,24 @@
+- name: Create dir for the agent token file
+  ansible.builtin.file:
+    path: "{{ k3s_agent_token_file | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+# The token goes in a root-only file instead of the world-readable unit file and the process arguments.
+- name: Write K3s agent token file
+  register: k3s_agent_token
+  ansible.builtin.copy:
+    content: "{{ hostvars[groups['k3s_server'][0]]['k3s_token'] }}\n"
+    dest: "{{ k3s_agent_token_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
 - name: Copy K3s service file
+  register: k3s_agent_service
   ansible.builtin.template:
     src: "k3s-agent.service.j2"
     dest: "{{ k3s_systemd_dir }}/k3s-agent.service"
@@ -6,9 +26,13 @@
     group: root
     mode: "0644"
 
+# Restart only agents whose binary, unit or token changed, and at most k3s_restart_throttle at a time,
+# so one run of the role cannot restart every agent at once. The unit is Type=notify, so each restart
+# returns only once that agent reports ready.
 - name: Enable and check K3s service
   ansible.builtin.systemd:
     name: k3s-agent
     daemon_reload: true
-    state: restarted
+    state: "{{ 'restarted' if (k3s_agent_service is changed or k3s_agent_token is changed or k3s_binary_changed | default(false)) else 'started' }}"
     enabled: true
+  throttle: "{{ k3s_restart_throttle }}"
