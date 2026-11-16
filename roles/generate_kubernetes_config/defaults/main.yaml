@@ -105,7 +105,8 @@ gen_kubernetes_config_authenticatoor_bearer_audiences: # noqa var-naming[no-role
 # Default: staff (the ethpandaops team or the ethpandaops:Core GitHub team, and
 # everyone and every service token passing Cloudflare Access) may use
 # everything; everyone else the IdP lets in (its panda-access group) may use
-# the faucet, with the free 100 ETH drop per day.
+# the faucet, with the free 100 ETH drop per day, and read spamoor and
+# assertoor (writes need spamoor:write / assertoor:write).
 gen_kubernetes_config_authenticatoor_grants: # noqa var-naming[no-role-prefix]
   - name: staff
     members:
@@ -117,7 +118,7 @@ gen_kubernetes_config_authenticatoor_grants: # noqa var-naming[no-role-prefix]
   - name: core-devs
     members:
       - "authentik/groups:panda-access"
-    services: ["faucet:drop_100eth"]
+    services: ["faucet:drop_100eth", "spamoor", "assertoor"]
 
 # powfaucet configuration
 # Multi-RPC endpoints — when non-empty, replaces the default single-bootnode RPC.
