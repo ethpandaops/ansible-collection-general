@@ -35,6 +35,13 @@ authenticatoor:
         callbackURL: "https://auth.{{ network_subdomain }}/authentik/callback"
         clientId: "authenticatoor"
         clientSecretFile: "/etc/authenticatoor/secrets/oidc-client-secret"
+{% if gen_kubernetes_config_authenticatoor_bearer_issuer_url %}
+        # Non-browser clients (panda's devnet relay) present a token of this
+        # IdP application at /authentik/token and get the same grants.
+        bearer:
+          issuerURL: "{{ gen_kubernetes_config_authenticatoor_bearer_issuer_url }}"
+          audiences: {{ gen_kubernetes_config_authenticatoor_bearer_audiences | to_json }}
+{% endif %}
         # A group "team:<name>" of the IdP becomes the team <name>.
         teamRules:
           - claim: groups
