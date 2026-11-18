@@ -1,0 +1,37 @@
+- name: Add observoor user
+  ansible.builtin.user:
+    name: "{{ observoor_user }}"
+    shell: /bin/nologin
+
+- name: Create observoor dirs
+  ansible.builtin.file:
+    path: "{{ observoor_dir_config }}"
+    state: directory
+    mode: '0777'
+    owner: "{{ observoor_user }}"
+    group: "{{ observoor_user }}"
+
+- name: Create observoor config file
+  ansible.builtin.copy:
+    content: "{{ observoor_config }}"
+    dest: "{{ observoor_dir_config }}/config.yaml"
+    owner: "{{ observoor_user }}"
+    group: "{{ observoor_user }}"
+    mode: '0640'
+  notify: Restart observoor container
+
+- name: Run observoor container
+  community.docker.docker_container:
+    name: "{{ observoor_container_name }}"
+    image: "{{ observoor_container_image }}"
+    image_name_mismatch: recreate
+    state: started
+    restart_policy: always
+    stop_timeout: "{{ observoor_container_stop_timeout }}"
+    ports: "{{ observoor_container_ports }}"
+    volumes: "{{ observoor_container_volumes }}"
+    env: "{{ observoor_container_env }}"
+    networks: "{{ observoor_container_networks }}"
+    command: "{{ observoor_container_command }}"
+    privileged: "{{ observoor_container_privileged }}"
+    pid_mode: "{{ observoor_container_pid_mode }}"

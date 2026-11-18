@@ -1,0 +1,81 @@
+observoor_cleanup: false
+
+observoor_user: observoor
+observoor_dir_config: /data/observoor/
+
+observoor_cl_endpoint: http://your-cl-node:5052
+
+observoor_meta_client_name: ""
+observoor_meta_network_name: ""
+
+observoor_container_name: "observoor"
+observoor_container_image: "ethpandaops/observoor:latest"
+observoor_container_env: {}
+observoor_container_ports: []
+observoor_container_default_volumes:
+  - "{{ observoor_dir_config }}:/etc/observoor:ro"
+  - /sys/kernel/debug:/sys/kernel/debug:ro
+  - /sys/fs/bpf:/sys/fs/bpf:rw
+  - /proc:/host/proc:ro
+  - /sys/kernel/btf:/sys/kernel/btf:ro
+observoor_container_extra_volumes: []
+observoor_container_volumes: "{{ observoor_container_default_volumes + observoor_container_extra_volumes }}"
+observoor_container_stop_timeout: "30"
+observoor_container_networks: []
+observoor_container_command:
+  - --config
+  - /etc/observoor/config.yaml
+observoor_container_privileged: true
+observoor_container_pid_mode: host
+
+observoor_config: |
+  log_level: info
+
+  meta_client_name: "{{ observoor_meta_client_name }}"
+  meta_network_name: "{{ observoor_meta_network_name }}"
+
+  beacon:
+    endpoint: "{{ observoor_cl_endpoint }}"
+    timeout: 30s
+
+  pid:
+    process_names:
+      # Execution layer clients
+      - geth
+      - reth
+      - besu
+      - nethermind
+      - erigon
+      # Consensus layer clients
+      - lighthouse
+      - prysm
+      - beacon-chain
+      - teku
+      - lodestar
+      - nimbus
+      - nimbus_beacon_node
+      - nimbus_beacon_n
+      # Java-based clients (besu, teku)
+      - java
+      # Node.js clients (lodestar)
+      - node
+      - MainThread
+
+  sinks:
+    aggregated:
+      enabled: true
+      resolution:
+        interval: 100ms
+        slot_aligned: true
+      clickhouse:
+        enabled: true
+        endpoint: "localhost:9000"
+        database: default
+        table: aggregated_metrics
+        batch_size: 5000
+        flush_interval: 500ms
+        migrations:
+          enabled: true
+
+  health:
+    addr: ":9090"
