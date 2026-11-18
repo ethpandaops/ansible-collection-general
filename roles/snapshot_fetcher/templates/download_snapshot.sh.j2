@@ -42,9 +42,10 @@ if [ ! -f "$DATA_DIR/.snapshot_fetcher_started" ]; then
   docker run -d --name $CONTAINER_NAME \
     -v $DATA_DIR:/data \
     --entrypoint "/bin/sh" \
+    -e "URL=$BASE_URL/$NETWORK/$CLIENT/$BLOCK/$SNAPSHOT_FILENAME" \
     docker.ethquokkaops.io/dh/library/alpine -c "cd /data && \
-    apk add --no-cache wget curl tar zstd && \
-    wget --tries=0 --retry-connrefused -O - $BASE_URL/$NETWORK/$CLIENT/$BLOCK/$SNAPSHOT_FILENAME | tar -I zstd -xvf - -C /data"
+    apk add --no-cache curl tar zstd && \
+    sh /data/stream_snapshot.sh"
 {% endif %}
 
   touch $DATA_DIR/.snapshot_fetcher_started
