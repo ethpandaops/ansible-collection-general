@@ -7,12 +7,7 @@ tracoor-single:
     pullPolicy: {% if "latest" in (default_tooling_images.tracoor.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
 
   resources:
-    requests:
-      cpu: 1000m
-      memory: 2Gi
-    limits:
-      cpu: 2000m
-      memory: 4Gi
+{{ gen_kubernetes_config_tracoor_resources | to_nice_yaml(indent=2, sort_keys=False) | trim | indent(4, true) }}
   ingress:
     http:
       enabled: true
