@@ -8,6 +8,8 @@ The `url_cached` lookup plugin is an enhancement to Ansible's built-in `url` loo
 - **Configurable TTL**: Control how long cached responses remain valid
 - **Thread-safe**: Uses file locking to prevent race conditions when multiple tasks request the same URL simultaneously
 - **Force refresh**: Option to bypass cache and force a fresh request
+- **Retries**: Transient failures are retried with exponential backoff
+- **Stale fallback**: An expired cache entry is used when the URL can not be fetched
 - **Custom cache directory**: Configure where cached responses are stored
 - **Full HTTP options**: Supports all the same options as Ansible's standard URL lookup
 
@@ -30,6 +32,9 @@ The plugin supports several options to customize behavior:
 | `cache_dir` | `/tmp/ansible/url_cache` | Directory to store cached responses |
 | `cache_ttl` | 600 | Time in seconds to consider cached responses valid |
 | `force_refresh` | False | Whether to bypass cache and force a new request |
+| `retries` | 3 | Additional attempts after a transient failure (timeout, connection error, HTTP 408/429/5xx) |
+| `retry_delay` | 2 | Seconds before the first retry; doubles on every further retry, plus jitter |
+| `stale_if_error` | True | Return an expired cache entry (with a warning) if the URL still fails after all retries |
 | `split_lines` | True | Return content as line-by-line list or as a single string |
 
 Additionally, all standard URL lookup options are supported:

@@ -14,6 +14,8 @@ short_description: return contents from URL with local file caching
 description:
     - Returns the content of the URL requested to be used as data in play.
     - Caches the content locally to avoid repeated HTTP requests.
+    - Retries transient failures (timeouts, connection errors, HTTP 408/429/5xx) with exponential backoff.
+    - Falls back to an expired cache entry when the URL can not be fetched.
 options:
   _terms:
     description: urls to query
@@ -190,6 +192,45 @@ options:
     ini:
         - section: url_lookup
           key: force_refresh
+  retries:
+    description:
+      - Number of additional attempts after a transient failure (timeout, connection error, HTTP 408/429/5xx).
+      - Other HTTP errors and certificate validation errors are never retried.
+    type: int
+    default: 3
+    vars:
+        - name: ansible_lookup_url_retries
+    env:
+        - name: ANSIBLE_LOOKUP_URL_RETRIES
+    ini:
+        - section: url_lookup
+          key: retries
+  retry_delay:
+    description:
+      - Seconds to wait before the first retry.
+      - The delay doubles with every further retry and gets a random jitter added.
+    type: float
+    default: 2
+    vars:
+        - name: ansible_lookup_url_retry_delay
+    env:
+        - name: ANSIBLE_LOOKUP_URL_RETRY_DELAY
+    ini:
+        - section: url_lookup
+          key: retry_delay
+  stale_if_error:
+    description:
+      - Return an expired cache entry (with a warning) if the URL still fails with a transient error after all retries.
+      - Ignored when O(force_refresh) is set.
+    type: boolean
+    default: True
+    vars:
+        - name: ansible_lookup_url_stale_if_error
+    env:
+        - name: ANSIBLE_LOOKUP_URL_STALE_IF_ERROR
+    ini:
+        - section: url_lookup
+          key: stale_if_error
 """
 
 EXAMPLES = """
@@ -221,11 +262,13 @@ RETURN = """
 
 import os
 import time
+import random
 import hashlib
 import tempfile
 import pathlib
 import fcntl  # Add fcntl for file locking
 
+from http.client import HTTPException
 from urllib.error import HTTPError, URLError
 
 from ansible.errors import AnsibleError
@@ -235,6 +278,17 @@ from ansible.plugins.lookup import LookupBase
 from ansible.utils.display import Display
 
 display = Display()
+
+# HTTP status codes that are worth retrying
+RETRYABLE_HTTP_CODES = frozenset({408, 425, 429, 500, 502, 503, 504})
+
+
+class _FetchError(AnsibleError):
+    """Fetch failure, flagged with whether it was transient (worth a retry / stale fallback)."""
+
+    def __init__(self, message, transient):
+        super().__init__(message)
+        self.transient = transient
 
 
 class LookupModule(LookupBase):
@@ -250,17 +304,16 @@ class LookupModule(LookupBase):
         return f"{cache_file}.lock"
 
     def _read_cache(self, cache_file, ttl):
-        """Read content from cache file if valid."""
+        """Read content from cache file if valid. A ttl of None ignores the age."""
         if not os.path.exists(cache_file):
             return None
 
-        # Check if cache is still valid
-        file_mtime = os.path.getmtime(cache_file)
-        if time.time() - file_mtime > ttl:
-            display.vvvv(f"Cache expired for {cache_file}")
-            return None
-
         try:
+            # Check if cache is still valid (ttl=None accepts entries of any age)
+            if ttl is not None and time.time() - os.path.getmtime(cache_file) > ttl:
+                display.vvvv(f"Cache expired for {cache_file}")
+                return None
+
             with open(cache_file, 'rb') as f:
                 display.vvvv(f"Using cached content from {cache_file}")
                 return f.read()
@@ -333,6 +386,55 @@ class LookupModule(LookupBase):
         except (KeyError, TypeError):
             return default_value
 
+    def _fetch_once(self, term):
+        """Fetch the URL once, raising _FetchError on failure."""
+        try:
+            response = open_url(
+                term, validate_certs=self.get_option('validate_certs'),
+                use_proxy=self.get_option('use_proxy'),
+                url_username=self.get_option('username'),
+                url_password=self.get_option('password'),
+                headers=self.get_option('headers'),
+                force=self.get_option('force'),
+                timeout=self.get_option('timeout'),
+                follow_redirects='urllib2',
+                http_agent=self.get_option('http_agent'),
+                force_basic_auth=self.get_option('force_basic_auth'),
+                use_gssapi=self.get_option('use_gssapi'),
+                unix_socket=self.get_option('unix_socket'),
+                ca_path=self.get_option('ca_path'),
+                unredirected_headers=self.get_option('unredirected_headers'),
+                ciphers=self.get_option('ciphers'),
+                use_netrc=self.get_option('use_netrc')
+            )
+            return response.read()
+        except HTTPError as e:
+            raise _FetchError(f"Received HTTP error for {term} : {to_native(e)}", e.code in RETRYABLE_HTTP_CODES)
+        except SSLValidationError as e:
+            raise _FetchError(f"Error validating the server's certificate for {term}: {to_native(e)}", False)
+        except URLError as e:
+            raise _FetchError(f"Failed lookup url for {term} : {to_native(e)}", True)
+        except ConnectionError as e:
+            raise _FetchError(f"Error connecting to {term}: {to_native(e)}", True)
+        except (OSError, HTTPException) as e:
+            # e.g. read timeouts or connections dropped while reading the body
+            raise _FetchError(f"Failed lookup url for {term} : {to_native(e)}", True)
+
+    def _fetch(self, term, retries, retry_delay):
+        """Fetch the URL, retrying transient failures with exponential backoff."""
+        attempt = 0
+        while True:
+            try:
+                return self._fetch_once(term)
+            except _FetchError as e:
+                if not e.transient or attempt >= retries:
+                    raise
+                delay = retry_delay * (2 ** attempt)
+                delay += random.uniform(0, delay / 2)
+                attempt += 1
+                display.vvv(f"{to_native(e)} - retry {attempt}/{retries} in {delay:.1f}s")
+                time.sleep(delay)
+
     def run(self, terms, variables=None, **kwargs):
         self.set_options(var_options=variables, direct=kwargs)
 
@@ -340,6 +442,9 @@ class LookupModule(LookupBase):
         cache_dir = self._get_option_with_default('cache_dir', '/tmp/ansible/url_cache')
         cache_ttl = self._get_option_with_default('cache_ttl', 600)
         force_refresh = self._get_option_with_default('force_refresh', False)
+        retries = max(0, int(self._get_option_with_default('retries', 3)))
+        retry_delay = max(0.0, float(self._get_option_with_default('retry_delay', 2)))
+        stale_if_error = self._get_option_with_default('stale_if_error', True)
 
         ret = []
         for term in terms:
@@ -369,37 +474,17 @@ class LookupModule(LookupBase):
                     # Still no content, now we can safely fetch
                     if content is None:
                         try:
-                            response = open_url(
-                                term, validate_certs=self.get_option('validate_certs'),
-                                use_proxy=self.get_option('use_proxy'),
-                                url_username=self.get_option('username'),
-                                url_password=self.get_option('password'),
-                                headers=self.get_option('headers'),
-                                force=self.get_option('force'),
-                                timeout=self.get_option('timeout'),
-                                follow_redirects='urllib2',
-                                http_agent=self.get_option('http_agent'),
-                                force_basic_auth=self.get_option('force_basic_auth'),
-                                use_gssapi=self.get_option('use_gssapi'),
-                                unix_socket=self.get_option('unix_socket'),
-                                ca_path=self.get_option('ca_path'),
-                                unredirected_headers=self.get_option('unredirected_headers'),
-                                ciphers=self.get_option('ciphers'),
-                                use_netrc=self.get_option('use_netrc')
-                            )
-                            content = response.read()
-
+                            content = self._fetch(term, retries, retry_delay)
+                        except _FetchError as e:
+                            if not (e.transient and stale_if_error and not force_refresh):
+                                raise
+                            content = self._read_cache(cache_file, None)
+                            if content is None:
+                                raise
+                            display.warning(f"{to_native(e)} - using expired cache entry instead")
+                        else:
                             # Cache the response
                             self._write_cache(cache_file, content)
-
-                        except HTTPError as e:
-                            raise AnsibleError(f"Received HTTP error for {term} : {to_native(e)}")
-                        except URLError as e:
-                            raise AnsibleError(f"Failed lookup url for {term} : {to_native(e)}")
-                        except SSLValidationError as e:
-                            raise AnsibleError(f"Error validating the server's certificate for {term}: {to_native(e)}")
-                        except ConnectionError as e:
-                            raise AnsibleError(f"Error connecting to {term}: {to_native(e)}")
 
                 # Process the content similar to original url plugin
                 if self.get_option('split_lines'):
