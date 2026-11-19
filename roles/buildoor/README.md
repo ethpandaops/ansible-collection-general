@@ -40,6 +40,14 @@ The builder BLS key MUST be supplied via **one** of the following. When
 | `buildoor_builder_mnemonic` | `""` | Builder BLS mnemonic; the key is derived from it |
 | `buildoor_builder_mnemonic_index` | `0` | Derivation index used with `buildoor_builder_mnemonic` |
 
+The keys are written to `buildoor_secrets_file` on the host (mode `0600`) and
+passed to buildoor with `--config`, so they do not appear on the container
+command line.
+
+The role refuses to deploy when `buildoor_auth_provider_url` is empty, because
+buildoor then serves its whole API without authentication. Set
+`buildoor_allow_unauthenticated: true` to deploy it that way on purpose.
+
 ## Dependencies
 
 You'll need docker to run this role. One way of installing docker could be via ansible galaxy with the following dependencies set within `requirements.yaml`:
@@ -70,4 +78,5 @@ roles:
       buildoor_el_engine_api: "http://execution:8551"
       buildoor_el_rpc: "http://execution:8545"
       buildoor_jwt_path: "/data/execution-auth.secret"
+      buildoor_auth_provider_url: "https://auth.example.com"
 ```
