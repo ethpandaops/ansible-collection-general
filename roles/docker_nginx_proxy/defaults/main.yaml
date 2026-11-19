@@ -23,6 +23,17 @@ docker_nginx_proxy_container_volumes:
   - "{{ docker_nginx_proxy_datadir }}/vhost:/etc/nginx/vhost.d"
   - "{{ docker_nginx_proxy_datadir }}/certs:/etc/nginx/certs:ro"
   - html:/usr/share/nginx/html
+# OpenResty images (needed for Lua, e.g. generate_basic_auth_nginx's JSON-RPC
+# filter) differ from nginx:alpine: no /var/log/nginx, which nginx.tmpl logs to,
+# and one worker by default. This command fixes both when the image is OpenResty.
+docker_nginx_proxy_openresty_command:
+  - sh
+  - -c
+  - >-
+    mkdir -p /var/log/nginx &&
+    ln -sf /dev/stdout /var/log/nginx/access.log &&
+    ln -sf /dev/stderr /var/log/nginx/error.log &&
+    exec /usr/local/openresty/bin/openresty -g 'daemon off; worker_processes auto;'
 docker_nginx_proxy_container_custom_config_files: # Will be added to /etc/nginx/conf.d/{key}
   client_max_body_size.conf: |
     client_max_body_size 100M;

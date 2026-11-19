@@ -6,6 +6,14 @@
       - name: passlib
         extra_args: --break-system-packages
 
+- name: Require an OpenResty nginx-proxy image for the Lua JSON-RPC filter
+  ansible.builtin.assert:
+    that: docker_nginx_proxy_container_image is search('openresty')
+    fail_msg: >-
+      gen_jsonrpc_filter_nginx_enabled needs an OpenResty nginx-proxy image,
+      but docker_nginx_proxy_container_image is {{ docker_nginx_proxy_container_image }}
+  when: gen_jsonrpc_filter_nginx_enabled | bool
+
 - name: Generate htpasswd files for nginx auth
   community.general.htpasswd:
     path: "{{ item }}"
@@ -14,9 +22,44 @@
     mode: "0644"
   loop: "{{ gen_basic_auth_nginx_paths }}"
 
-- name: Add CORS config for beacon endpoint
+- name: Add CORS config and JSON-RPC filter to the node vhosts
   ansible.builtin.copy:
     dest: "{{ item }}"
     mode: "0644"
-    content: "{{ gen_cors_nginx_config }}"
-  loop: "{{ gen_cors_nginx_paths }}"
+    content: >-
+      {{ (gen_cors_nginx_config if item in gen_cors_nginx_paths else '')
+         ~ (lookup('ansible.builtin.template', 'jsonrpc-filter.conf.j2')
+            if (gen_jsonrpc_filter_nginx_enabled | bool and item in gen_jsonrpc_filter_nginx_paths) else '') }}
+  loop: >-
+    {{ (gen_cors_nginx_paths + (gen_jsonrpc_filter_nginx_paths if gen_jsonrpc_filter_nginx_enabled | bool else []))
+       | unique }}
+  register: gen_basic_auth_nginx_vhost_files
+
+- name: Add rpc-snooper API proxy config
+  ansible.builtin.template:
+    src: snooper-api.conf.j2
+    dest: "{{ docker_nginx_proxy_datadir }}/conf/snooper-api.conf"
+    mode: "0644"
+  when: gen_snooper_api_nginx_enabled | bool
+  register: gen_basic_auth_nginx_snooper_conf
+
+- name: Remove rpc-snooper API proxy config
+  ansible.builtin.file:
+    path: "{{ docker_nginx_proxy_datadir }}/conf/snooper-api.conf"
+    state: absent
+  when: not (gen_snooper_api_nginx_enabled | bool)
+  register: gen_basic_auth_nginx_snooper_conf_removed
+
+- name: Reload nginx-proxy when the filter or snooper config changed
+  when: >-
+    (docker_nginx_proxy_container_image is search('openresty') and gen_basic_auth_nginx_vhost_files is changed)
+    or gen_basic_auth_nginx_snooper_conf is changed
+    or gen_basic_auth_nginx_snooper_conf_removed is changed
+  block:
+    - name: Test the nginx config
+      ansible.builtin.command: docker exec {{ docker_nginx_proxy_container_name }} nginx -t
+      changed_when: false
+
+    - name: Reload nginx
+      ansible.builtin.command: docker kill --signal=HUP {{ docker_nginx_proxy_container_name }}
+      changed_when: true

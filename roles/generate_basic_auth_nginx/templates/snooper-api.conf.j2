@@ -1,0 +1,39 @@
+# Public rpc-snooper API (ansible managed). nginx-proxy publishes port
+# {{ gen_snooper_api_nginx_port }} instead of the snooper container and passes only
+# {{ gen_snooper_api_nginx_allowed_paths | join(', ') }}. Flow control
+# (/_snooper/start, stop, block, unblock) and every other path get 403.
+# The snooper still checks its own basic auth.
+map $http_upgrade $snooper_api_connection {
+  default upgrade;
+  ''      close;
+}
+
+server {
+  listen {{ gen_snooper_api_nginx_port }};
+{% if gen_snooper_api_nginx_ipv6 | bool %}
+  listen [::]:{{ gen_snooper_api_nginx_port }};
+{% endif %}
+  server_name _;
+
+  # Resolve the snooper at request time so nginx still starts when it is down.
+  resolver 127.0.0.11 valid=10s ipv6=off;
+  set $snooper_api_upstream "{{ gen_snooper_api_nginx_upstream_host }}:{{ gen_snooper_api_nginx_upstream_port }}";
+
+{% for path in gen_snooper_api_nginx_allowed_paths %}
+  location = {{ path }} {
+    proxy_pass http://$snooper_api_upstream{{ path }}$is_args$args;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection $snooper_api_connection;
+    proxy_buffering off;
+    proxy_read_timeout 1d;
+    proxy_send_timeout 1d;
+  }
+
+{% endfor %}
+  location / {
+    default_type application/json;
+    return 403 '{"status":"error","message":"path not allowed"}';
+  }
+}

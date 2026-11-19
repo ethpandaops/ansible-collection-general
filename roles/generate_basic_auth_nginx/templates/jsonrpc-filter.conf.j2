@@ -1,0 +1,52 @@
+# JSON-RPC method filter (ansible managed). Only the allowed read-only
+# namespaces and methods reach the execution client; admin_*, debug_* writes,
+# miner_*, personal_*, engine_* and everything else get 403. Anything that is
+# not a JSON POST is refused too, which also blocks WebSocket upgrades.
+# Needs OpenResty (lua-nginx-module and cjson) as the nginx-proxy image.
+access_by_lua_block {
+  local function deny(status, msg)
+    ngx.status = status
+    ngx.header["Content-Type"] = "application/json"
+    ngx.say('{"jsonrpc":"2.0","id":null,"error":{"code":-32601,"message":"' .. msg .. '"}}')
+    return ngx.exit(status)
+  end
+  if ngx.req.get_method() ~= "POST" then return deny(405, "only POST is allowed") end
+  local enc = ngx.var.http_content_encoding
+  if enc and enc ~= "" and enc:lower() ~= "identity" then return deny(415, "content-encoding not allowed") end
+  ngx.req.read_body()
+  local body = ngx.req.get_body_data()
+  if not body then
+    local path = ngx.req.get_body_file()
+    if path then
+      local f = io.open(path, "rb")
+      if f then body = f:read("*a"); f:close() end
+    end
+  end
+  if not body then return deny(400, "empty request") end
+  local req = require("cjson.safe").decode(body)
+  if type(req) ~= "table" then return deny(400, "invalid JSON") end
+  local list = req
+  if #req == 0 then list = { req } end
+  local exact = { {% for m in gen_jsonrpc_filter_nginx_allowed_methods %}{{ m | lower }} = true{{ ", " if not loop.last }}{% endfor %} }
+  local prefixes = { {% for p in gen_jsonrpc_filter_nginx_allowed_prefixes %}"{{ p | lower }}"{{ ", " if not loop.last }}{% endfor %} }
+  for _, item in ipairs(list) do
+    if type(item) ~= "table" then return deny(400, "invalid request") end
+    local seen = false
+    for k, v in pairs(item) do
+      if type(k) ~= "string" or k:find("[\128-\255]") then return deny(400, "invalid request") end
+      if k:lower() == "method" then
+        if type(v) ~= "string" then return deny(400, "invalid method") end
+        local m = v:lower()
+        local ok = exact[m] == true
+        if not ok then
+          for _, p in ipairs(prefixes) do
+            if m:sub(1, #p) == p then ok = true; break end
+          end
+        end
+        if not ok then return deny(403, "method not allowed") end
+        seen = true
+      end
+    end
+    if not seen then return deny(400, "missing method") end
+  end
+}

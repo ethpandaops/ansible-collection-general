@@ -48,11 +48,30 @@
   loop: "{{ docker_nginx_proxy_container_custom_vhost_files | dict2items }}"
 
 
+- name: Check that the nginx config needs no Lua when the image is not OpenResty
+  ansible.builtin.command: grep -rlE '_by_lua' {{ docker_nginx_proxy_datadir }}/conf {{ docker_nginx_proxy_datadir }}/vhost
+  register: docker_nginx_proxy_lua_files
+  changed_when: false
+  failed_when: docker_nginx_proxy_lua_files.rc == 0 or docker_nginx_proxy_lua_files.rc > 1
+  when: docker_nginx_proxy_container_image is not search('openresty')
+
+- name: Check that no other container publishes the nginx proxy ports
+  ansible.builtin.command: >-
+    docker ps --format '{{ '{{' }}.Names{{ '}}' }}'
+    --filter publish={{ item.split(':')[-2] if (item.split(':') | length > 1) else item }}
+  loop: "{{ docker_nginx_proxy_container_published_ports }}"
+  register: docker_nginx_proxy_port_users
+  changed_when: false
+  failed_when: >-
+    docker_nginx_proxy_port_users.rc != 0 or
+    (docker_nginx_proxy_port_users.stdout_lines | reject('equalto', docker_nginx_proxy_container_name) | list | length > 0)
+
 - name: Run nginx proxy container
   community.general.docker_container:
     name: "{{ docker_nginx_proxy_container_name }}"
     image: "{{ docker_nginx_proxy_container_image }}"
     image_name_mismatch: recreate
+    command: "{{ docker_nginx_proxy_openresty_command if docker_nginx_proxy_container_image is search('openresty') else omit }}"
     published_ports: "{{ docker_nginx_proxy_container_published_ports }}"
     restart_policy: "{{ docker_nginx_proxy_container_restart_policy }}"
     networks: "{{ docker_nginx_proxy_container_networks }}"

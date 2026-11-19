@@ -42,3 +42,42 @@ gen_cors_nginx_config: | # noqa var-naming[no-role-prefix]
     add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization' always;
     add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range' always;
   }
+
+# JSON-RPC method filter on the execution RPC vhost. Appended to that vhost's
+# _location file after the CORS config. Needs an OpenResty nginx-proxy image
+# (docker_nginx_proxy_container_image), because the filter is Lua.
+gen_jsonrpc_filter_nginx_enabled: false # noqa var-naming[no-role-prefix]
+gen_jsonrpc_filter_nginx_paths: # noqa var-naming[no-role-prefix]
+  - "{{ docker_nginx_proxy_datadir }}/vhost/{{ ethereum_node_rcp_hostname }}_location"
+# Methods are matched case-insensitively.
+gen_jsonrpc_filter_nginx_allowed_prefixes: # noqa var-naming[no-role-prefix]
+  - eth_
+  - net_
+  - web3_
+  - txpool_
+  - trace_
+  - erigon_
+  - ots_
+  - debug_trace # debug_traceTransaction, debug_traceBlockByHash, debug_traceCall, ...
+gen_jsonrpc_filter_nginx_allowed_methods: # noqa var-naming[no-role-prefix]
+  - rpc_modules
+  - debug_getBadBlocks # tracoor
+  - debug_getRawBlock
+  - debug_getRawHeader
+  - debug_getRawReceipts
+  - debug_getRawTransaction
+  - admin_nodeInfo # dora EL client peer view
+  - admin_peers # dora EL client peer view
+
+# Serve the public rpc-snooper API through nginx-proxy so only its read-only
+# endpoints are reachable. When enabled, publish gen_snooper_api_nginx_port on
+# nginx-proxy (docker_nginx_proxy_container_published_ports) instead of on the
+# snooper container (ethereum_node_json_rpc_snooper_engine_public_port: 0).
+gen_snooper_api_nginx_enabled: false # noqa var-naming[no-role-prefix]
+gen_snooper_api_nginx_port: 8961 # noqa var-naming[no-role-prefix]
+gen_snooper_api_nginx_ipv6: false # noqa var-naming[no-role-prefix]
+gen_snooper_api_nginx_upstream_host: snooper-engine # noqa var-naming[no-role-prefix]
+gen_snooper_api_nginx_upstream_port: 8961 # noqa var-naming[no-role-prefix]
+gen_snooper_api_nginx_allowed_paths: # noqa var-naming[no-role-prefix]
+  - /_snooper/control # dora engine snooper (WebSocket)
+  - /_snooper/status
