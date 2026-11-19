@@ -38,4 +38,4 @@
 
 - name: Record whether the k3s binary changed
   ansible.builtin.set_fact:
-    k3s_binary_changed: "{{ k3s_binary_x64 is changed or k3s_binary_arm64 is changed or k3s_binary_armhf is changed }}"
+    k3s_binary_changed: "{{ (k3s_binary_x64 is changed or k3s_binary_arm64 is changed or k3s_binary_armhf is changed) | bool }}"

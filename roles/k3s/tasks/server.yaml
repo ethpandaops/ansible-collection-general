@@ -47,7 +47,7 @@
   ansible.builtin.systemd:
     name: k3s-server
     daemon_reload: true
-    state: "{{ 'restarted' if (k3s_service is changed or k3s_etcd_backup_config is changed or k3s_binary_changed | default(false)) else 'started' }}"
+    state: "{{ 'restarted' if (k3s_service is changed or k3s_etcd_backup_config is changed or k3s_binary_changed | default(false) | bool) else 'started' }}"
     enabled: true
 
 - name: Wait for node-token
@@ -65,6 +65,22 @@
   ansible.builtin.set_fact:
     k3s_token: "{{ k3s_node_token.content | b64decode | regex_replace('\n', '') }}"
   no_log: true
+  when: not k3s_agent_bootstrap_token | bool
+
+# With bootstrap tokens agents only get the token's "K10<cluster CA hash>" prefix, which is not secret,
+# so they keep verifying the cluster CA when they restart.
+- name: Store the cluster CA hash prefix of the node-token
+  ansible.builtin.set_fact:
+    k3s_token_ca_prefix: "{{ k3s_node_token.content | b64decode | regex_replace('::.*', '') | trim }}"
+  no_log: true
+  when: k3s_agent_bootstrap_token | bool
+
+- name: List the nodes that have joined
+  ansible.builtin.command: k3s kubectl get nodes -o jsonpath={.items[*].metadata.name}
+  register: k3s_joined_nodes
+  changed_when: false
+  check_mode: false
+  when: k3s_agent_bootstrap_token | bool
 
 - name: Keep the server token readable by root only
   ansible.builtin.file:

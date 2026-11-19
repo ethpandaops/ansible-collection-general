@@ -14,6 +14,18 @@ k3s_agent_token_file: /etc/rancher/k3s/agent-token
 # How many agents the role restarts at the same time when their binary, unit or token changed
 k3s_restart_throttle: 1
 
+# Join agents with a short-lived bootstrap token (`k3s token create`) that the role mints on the server
+# for each agent that has not joined yet, and deletes once it has, instead of giving every agent the
+# server token. A joined agent authenticates with its kubelet client certificate (Node Authorization),
+# so its token file then only holds a placeholder that is not a credential. Needs k3s v1.26.2 or newer.
+# An agent whose Node object was deleted needs another run of the role to rejoin.
+k3s_agent_bootstrap_token: false
+# How long a join token stays valid if the run stops before deleting it
+k3s_agent_bootstrap_token_ttl: 15m
+# Used to tell whether an agent has joined: its kubelet client certificate and its Node object
+k3s_agent_data_dir: /var/lib/rancher/k3s
+k3s_agent_node_name: "{{ ansible_nodename | lower }}"
+
 # --flannel-iface=wg0
 
 # On an agent node:

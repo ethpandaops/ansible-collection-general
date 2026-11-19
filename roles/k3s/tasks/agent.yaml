@@ -6,11 +6,67 @@
     group: root
     mode: "0755"
 
+- name: Check whether the agent has a kubelet client certificate
+  ansible.builtin.stat:
+    path: "{{ k3s_agent_data_dir }}/agent/client-kubelet.crt"
+  register: k3s_agent_client_cert
+  when: k3s_agent_bootstrap_token | bool
+
+# The agent renews the certificate each time it starts, but one that ran for a year without a restart
+# holds an expired certificate and has to rejoin with a token.
+- name: Check that the kubelet client certificate is valid for another day
+  ansible.builtin.command: openssl x509 -checkend 86400 -noout -in {{ k3s_agent_data_dir }}/agent/client-kubelet.crt
+  register: k3s_agent_client_cert_valid
+  changed_when: false
+  failed_when: false
+  check_mode: false
+  when:
+    - k3s_agent_bootstrap_token | bool
+    - k3s_agent_client_cert.stat.exists
+
+# A joined agent authenticates with its kubelet client certificate, which works only while the
+# certificate is valid and its Node object exists, so an agent without those needs a join token.
+- name: Decide whether the agent needs a join token
+  ansible.builtin.set_fact:
+    k3s_agent_needs_join: >-
+      {{ (k3s_agent_bootstrap_token | bool) and
+         (not k3s_agent_client_cert.stat.exists or
+          k3s_agent_client_cert_valid.rc != 0 or
+          k3s_agent_node_name not in hostvars[groups['k3s_server'][0]]['k3s_joined_nodes'].stdout.split()) }}
+
+# k3s needs a token that parses even when it authenticates with its client certificate. This one keeps
+# the cluster CA hash, so the agent still verifies the server, and a bootstrap token ID that is never issued.
+- name: Set the placeholder token for joined agents
+  ansible.builtin.set_fact:
+    k3s_agent_placeholder_token: "{{ hostvars[groups['k3s_server'][0]]['k3s_token_ca_prefix'] }}::000000.0000000000000000"
+  when: k3s_agent_bootstrap_token | bool
+
+- name: Create a join token for the agent on the server
+  ansible.builtin.command:
+    argv:
+      - k3s
+      - token
+      - create
+      - --ttl
+      - "{{ k3s_agent_bootstrap_token_ttl }}"
+      - --description
+      - "ansible join of {{ k3s_agent_node_name }}"
+  delegate_to: "{{ groups['k3s_server'][0] }}"
+  register: k3s_agent_join_token
+  changed_when: true
+  no_log: true
+  when: k3s_agent_needs_join | bool
+
 # The token goes in a root-only file instead of the world-readable unit file and the process arguments.
 - name: Write K3s agent token file
   register: k3s_agent_token
+  vars:
+    k3s_agent_token_content: >-
+      {{ k3s_agent_join_token.stdout if k3s_agent_needs_join | bool
+         else k3s_agent_placeholder_token if k3s_agent_bootstrap_token | bool
+         else hostvars[groups['k3s_server'][0]]['k3s_token'] }}
   ansible.builtin.copy:
-    content: "{{ hostvars[groups['k3s_server'][0]]['k3s_token'] }}\n"
+    content: "{{ k3s_agent_token_content }}\n"
     dest: "{{ k3s_agent_token_file }}"
     owner: root
     group: root
@@ -26,13 +82,68 @@
     group: root
     mode: "0644"
 
+- name: Join the agent and remove its join token
+  when: k3s_agent_needs_join | bool
+  block:
+    - name: Start K3s agent with the join token
+      ansible.builtin.systemd:
+        name: k3s-agent
+        daemon_reload: true
+        state: restarted
+        enabled: true
+
+    - name: Wait for the agent's kubelet client certificate
+      ansible.builtin.wait_for:
+        path: "{{ k3s_agent_data_dir }}/agent/client-kubelet.crt"
+        timeout: 300
+
+    - name: Wait for the agent's Node object
+      ansible.builtin.command: k3s kubectl get node {{ k3s_agent_node_name }} -o name
+      delegate_to: "{{ groups['k3s_server'][0] }}"
+      register: k3s_agent_node
+      until: k3s_agent_node.rc == 0
+      retries: 30
+      delay: 10
+      changed_when: false
+  always:
+    - name: Delete the join token on the server
+      ansible.builtin.command:
+        argv:
+          - k3s
+          - token
+          - delete
+          - "{{ k3s_agent_join_token.stdout | regex_replace('^.*::', '') | regex_replace('\\..*$', '') }}"
+      delegate_to: "{{ groups['k3s_server'][0] }}"
+      changed_when: true
+      no_log: true
+      when: k3s_agent_join_token.stdout is defined
+
+    - name: Replace the join token with the placeholder
+      ansible.builtin.copy:
+        content: "{{ k3s_agent_placeholder_token }}\n"
+        dest: "{{ k3s_agent_token_file }}"
+        owner: root
+        group: root
+        mode: "0600"
+      no_log: true
+
 # Restart only agents whose binary, unit or token changed, and at most k3s_restart_throttle at a time,
 # so one run of the role cannot restart every agent at once. The unit is Type=notify, so each restart
-# returns only once that agent reports ready.
+# returns only once that agent reports ready. A newly joined agent was already started above.
+- name: Restart K3s agent
+  ansible.builtin.systemd:
+    name: k3s-agent
+    daemon_reload: true
+    state: restarted
+    enabled: true
+  throttle: "{{ k3s_restart_throttle }}"
+  when:
+    - not k3s_agent_needs_join | default(false) | bool
+    - k3s_agent_service is changed or k3s_agent_token is changed or k3s_binary_changed | default(false) | bool
+
 - name: Enable and check K3s service
   ansible.builtin.systemd:
     name: k3s-agent
     daemon_reload: true
-    state: "{{ 'restarted' if (k3s_agent_service is changed or k3s_agent_token is changed or k3s_binary_changed | default(false)) else 'started' }}"
+    state: started
     enabled: true
-  throttle: "{{ k3s_restart_throttle }}"
