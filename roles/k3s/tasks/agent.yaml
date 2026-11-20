@@ -8,21 +8,33 @@
 
 - name: Check whether the agent has a kubelet client certificate
   ansible.builtin.stat:
-    path: "{{ k3s_agent_data_dir }}/agent/client-kubelet.crt"
+    path: "{{ k3s_agent_client_cert_path }}"
   register: k3s_agent_client_cert
   when: k3s_agent_bootstrap_token | bool
 
+# One openssl call gives the node name the agent registered under (the certificate's CN is
+# system:node:<name>, whatever --node-name or --with-node-id set) and whether the certificate is valid
+# for another day: rc 0 if it is, 1 if it expires sooner. Any other rc, such as a missing openssl, fails.
 # The agent renews the certificate each time it starts, but one that ran for a year without a restart
 # holds an expired certificate and has to rejoin with a token.
-- name: Check that the kubelet client certificate is valid for another day
-  ansible.builtin.command: openssl x509 -checkend 86400 -noout -in {{ k3s_agent_data_dir }}/agent/client-kubelet.crt
+- name: Read the kubelet client certificate's node name and expiry
+  ansible.builtin.command: >-
+    openssl x509 -noout -subject -nameopt RFC2253 -checkend 86400 -in {{ k3s_agent_client_cert_path }}
   register: k3s_agent_client_cert_valid
   changed_when: false
-  failed_when: false
+  failed_when: k3s_agent_client_cert_valid.rc not in [0, 1]
   check_mode: false
   when:
     - k3s_agent_bootstrap_token | bool
     - k3s_agent_client_cert.stat.exists
+
+- name: Note whether the agent's Node object exists
+  ansible.builtin.set_fact:
+    k3s_agent_registered: >-
+      {{ k3s_agent_client_cert_valid.stdout is defined and
+         (k3s_agent_client_cert_valid.stdout | regex_findall('CN=system:node:[a-z0-9.-]+') | first | default('') | replace('CN=system:node:', ''))
+           in hostvars[groups['k3s_server'][0]]['k3s_joined_nodes'].stdout.split() }}
+  when: k3s_agent_bootstrap_token | bool
 
 # A joined agent authenticates with its kubelet client certificate, which works only while the
 # certificate is valid and its Node object exists, so an agent without those needs a join token.
@@ -32,7 +44,7 @@
       {{ (k3s_agent_bootstrap_token | bool) and
          (not k3s_agent_client_cert.stat.exists or
           k3s_agent_client_cert_valid.rc != 0 or
-          k3s_agent_node_name not in hostvars[groups['k3s_server'][0]]['k3s_joined_nodes'].stdout.split()) }}
+          not k3s_agent_registered | bool) }}
 
 # k3s needs a token that parses even when it authenticates with its client certificate. This one keeps
 # the cluster CA hash, so the agent still verifies the server, and a bootstrap token ID that is never issued.
@@ -50,7 +62,7 @@
       - --ttl
       - "{{ k3s_agent_bootstrap_token_ttl }}"
       - --description
-      - "ansible join of {{ k3s_agent_node_name }}"
+      - "ansible join of {{ inventory_hostname }}"
   delegate_to: "{{ groups['k3s_server'][0] }}"
   register: k3s_agent_join_token
   changed_when: true
@@ -58,11 +70,12 @@
   when: k3s_agent_needs_join | bool
 
 # The token goes in a root-only file instead of the world-readable unit file and the process arguments.
+# In check mode the join token is not created, so the file content is only a stand-in.
 - name: Write K3s agent token file
   register: k3s_agent_token
   vars:
     k3s_agent_token_content: >-
-      {{ k3s_agent_join_token.stdout if k3s_agent_needs_join | bool
+      {{ k3s_agent_join_token.stdout | default('') if k3s_agent_needs_join | bool
          else k3s_agent_placeholder_token if k3s_agent_bootstrap_token | bool
          else hostvars[groups['k3s_server'][0]]['k3s_token'] }}
   ansible.builtin.copy:
@@ -82,29 +95,63 @@
     group: root
     mode: "0644"
 
+# The unit is Type=notify with TimeoutStartSec=0, so a start that cannot complete the join would block
+# forever; async bounds it and turns that into a normal failure that still reaches the cleanup below.
 - name: Join the agent and remove its join token
   when: k3s_agent_needs_join | bool
   block:
-    - name: Start K3s agent with the join token
+    - name: Start a new K3s agent with the join token
       ansible.builtin.systemd:
         name: k3s-agent
         daemon_reload: true
         state: restarted
         enabled: true
+      async: "{{ k3s_agent_join_timeout }}"
+      poll: 5
+      when: not k3s_agent_registered | bool
 
-    - name: Wait for the agent's kubelet client certificate
-      ansible.builtin.wait_for:
-        path: "{{ k3s_agent_data_dir }}/agent/client-kubelet.crt"
-        timeout: 300
+    # An agent that still has its Node but an expiring certificate is usually running, so restart those
+    # at most k3s_restart_throttle at a time, like any other restart.
+    - name: Restart a registered K3s agent with the join token
+      ansible.builtin.systemd:
+        name: k3s-agent
+        daemon_reload: true
+        state: restarted
+        enabled: true
+      async: "{{ k3s_agent_join_timeout }}"
+      poll: 5
+      throttle: "{{ k3s_restart_throttle }}"
+      when: k3s_agent_registered | bool
+
+    # The certificate check runs again because on the expiring-certificate path the old certificate and
+    # Node already exist: only a renewed certificate shows the join worked.
+    - name: Wait for a kubelet client certificate valid for another day
+      ansible.builtin.command: >-
+        openssl x509 -noout -subject -nameopt RFC2253 -checkend 86400 -in {{ k3s_agent_client_cert_path }}
+      register: k3s_agent_joined_cert
+      until: k3s_agent_joined_cert.rc == 0
+      retries: 30
+      delay: 10
+      changed_when: false
+      when: not ansible_check_mode
 
     - name: Wait for the agent's Node object
-      ansible.builtin.command: k3s kubectl get node {{ k3s_agent_node_name }} -o name
+      ansible.builtin.command:
+        argv:
+          - k3s
+          - kubectl
+          - get
+          - node
+          - "{{ k3s_agent_joined_cert.stdout | regex_findall('CN=system:node:[a-z0-9.-]+') | first | replace('CN=system:node:', '') }}"
+          - -o
+          - name
       delegate_to: "{{ groups['k3s_server'][0] }}"
       register: k3s_agent_node
       until: k3s_agent_node.rc == 0
       retries: 30
       delay: 10
       changed_when: false
+      when: not ansible_check_mode
   always:
     - name: Delete the join token on the server
       ansible.builtin.command:

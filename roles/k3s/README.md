@@ -16,7 +16,10 @@ bootstrap token (`k3s token create --ttl k3s_agent_bootstrap_token_ttl`) on the 
 that has not joined yet, and deletes it once the agent's Node exists. Joined agents authenticate with
 their kubelet client certificate, so their token file holds only a placeholder with the cluster CA hash,
 and restarts and reboots need no token. An agent whose Node object was deleted needs another run of the
-role to rejoin. This needs k3s v1.26.2 or newer.
+role to rejoin. The role reads the agent's node name and certificate expiry with `openssl` on the agent,
+so it follows `--node-name` and `--with-node-id`. A join that doesn't finish within `k3s_agent_join_timeout`
+seconds fails the run, and the next run starts it again with a fresh token. This needs k3s v1.26.2 or
+newer; it was tested on v1.28.13 (the role's default) and v1.32.6.
 
 To clean up the installation you can use the `k3s_cleanup=true` variable.
 If you also want to remove the `local-path` provisioned volumes, you also need to set `k3s_cleanup_localpath_persistent_volumes=true`.

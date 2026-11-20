@@ -22,9 +22,12 @@ k3s_restart_throttle: 1
 k3s_agent_bootstrap_token: false
 # How long a join token stays valid if the run stops before deleting it
 k3s_agent_bootstrap_token_ttl: 15m
-# Used to tell whether an agent has joined: its kubelet client certificate and its Node object
+# Used to tell whether an agent has joined: its kubelet client certificate (whose CN names its Node)
+# and its Node object. Needs openssl on the agent.
 k3s_agent_data_dir: /var/lib/rancher/k3s
-k3s_agent_node_name: "{{ ansible_nodename | lower }}"
+k3s_agent_client_cert_path: "{{ k3s_agent_data_dir }}/agent/client-kubelet.crt"
+# How long a join may take before the role gives up on it (seconds)
+k3s_agent_join_timeout: 600
 
 # --flannel-iface=wg0
 
