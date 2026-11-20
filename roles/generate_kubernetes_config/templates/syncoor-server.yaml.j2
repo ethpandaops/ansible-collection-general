@@ -27,8 +27,12 @@ syncoor-server:
 
   ingress:
     main:
-      className: ingress-nginx-public
+      className: {{ gen_kubernetes_config_syncoor_ingress_class }}
       enabled: true
+{% if gen_kubernetes_config_syncoor_ingress_annotations %}
+      annotations:
+        {{ gen_kubernetes_config_syncoor_ingress_annotations | to_nice_yaml(indent=2) | trim | indent(8) }}
+{% endif %}
       hosts:
 {% for _sub in gen_kubernetes_config_network_subdomains %}
         - host: syncoor-api.{{ _sub }}

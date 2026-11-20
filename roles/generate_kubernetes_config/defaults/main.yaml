@@ -128,6 +128,12 @@ gen_kubernetes_config_powfaucet_authenticatoor_grants: # noqa var-naming[no-role
     rewardFactor: 1
     overrideMaxDrop: 100000000000000000000  # 100 ETH
 
+# Ingress class and extra annotations of the syncoor-web and syncoor-server
+# Ingresses. The PandaMenu snippet is an ingress-nginx annotation, so
+# syncoor-web adds it only for the ingress-nginx-public class.
+gen_kubernetes_config_syncoor_ingress_class: ingress-nginx-public # noqa var-naming[no-role-prefix]
+gen_kubernetes_config_syncoor_ingress_annotations: {} # noqa var-naming[no-role-prefix]
+
 # PandaMenu configuration
 gen_kubernetes_config_pandamenu_enabled: true # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_pandamenu_script: '<script src="https://pandamenu.ethpandaops.io/panda-menu-1.0.1.js" integrity="sha384-icGX6g6CzB0tqlhDc6Su4c6IPVbcbUvfM3xjbbFYsYBwuZR79WkmOxDhGEPfmyn2" crossorigin="anonymous"></script>' # noqa var-naming[no-role-prefix] yaml[line-length]
