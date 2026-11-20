@@ -1,4 +1,5 @@
 - name: Download k3s binary x64
+  register: k3s_binary_x64
   ansible.builtin.get_url:
     url: https://github.com/k3s-io/k3s/releases/download/{{ k3s_version }}/k3s
     checksum: sha256:https://github.com/k3s-io/k3s/releases/download/{{ k3s_version }}/sha256sum-amd64.txt
@@ -9,6 +10,7 @@
   when: ansible_facts.architecture == "x86_64"
 
 - name: Download k3s binary arm64
+  register: k3s_binary_arm64
   ansible.builtin.get_url:
     url: https://github.com/k3s-io/k3s/releases/download/{{ k3s_version }}/k3s-arm64
     checksum: sha256:https://github.com/k3s-io/k3s/releases/download/{{ k3s_version }}/sha256sum-arm64.txt
@@ -22,6 +24,7 @@
       ansible_facts.architecture is search("aarch64")
 
 - name: Download k3s binary armhf
+  register: k3s_binary_armhf
   ansible.builtin.get_url:
     url: https://github.com/k3s-io/k3s/releases/download/{{ k3s_version }}/k3s-armhf
     checksum: sha256:https://github.com/k3s-io/k3s/releases/download/{{ k3s_version }}/sha256sum-arm.txt
@@ -32,3 +35,7 @@
   when:
     - ansible_facts.architecture is search("arm")
     - ansible_facts.userspace_bits == "32"
+
+- name: Record whether the k3s binary changed
+  ansible.builtin.set_fact:
+    k3s_binary_changed: "{{ (k3s_binary_x64 is changed or k3s_binary_arm64 is changed or k3s_binary_armhf is changed) | bool }}"
