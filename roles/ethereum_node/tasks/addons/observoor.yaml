@@ -1,0 +1,14 @@
+- name: Setup observoor
+  ansible.builtin.include_role:
+    name: ethpandaops.general.observoor
+  vars:
+    observoor_cl_endpoint: "{{ ethereum_node_cl_beacon_endpoint }}"
+    observoor_container_networks: "{{ ethereum_node_docker_networks }}"
+  when: ethereum_node_observoor_enabled
+
+- name: Cleanup observoor
+  ansible.builtin.include_role:
+    name: ethpandaops.general.observoor
+  vars:
+    observoor_cleanup: true
+  when: not ethereum_node_observoor_enabled

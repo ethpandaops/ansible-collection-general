@@ -1,0 +1,4 @@
+- name: Remove observoor container
+  community.docker.docker_container:
+    name: "{{ observoor_container_name }}"
+    state: absent
