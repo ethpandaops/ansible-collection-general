@@ -53,7 +53,11 @@ blockscout-stack:
       port: 4000
     ingress:
       enabled: true
-      className: ingress-nginx-public
+      className: {{ gen_kubernetes_config_ingress_class }}
+{% if gen_kubernetes_config_ingress_traefik | bool %}
+      annotations:
+        ethpandaops.io/exposure: "public"
+{% endif %}
       hostname: explorer-api.{{ network_subdomain }}
       tls:
         enabled: true
@@ -97,8 +101,14 @@ blockscout-stack:
 
     ingress:
       enabled: true
-      className: ingress-nginx-public
+      className: {{ gen_kubernetes_config_ingress_class }}
+{% if gen_kubernetes_config_ingress_traefik | bool %}
+      annotations:
+        ethpandaops.io/exposure: "public"
 {% if gen_kubernetes_config_pandamenu_enabled %}
+        traefik.ingress.kubernetes.io/router.middlewares: {{ gen_kubernetes_config_ingress_pandamenu_middleware }}
+{% endif %}
+{% elif gen_kubernetes_config_pandamenu_enabled %}
       annotations:
         nginx.ingress.kubernetes.io/proxy-body-size: "0"
         nginx.ingress.kubernetes.io/configuration-snippet: |

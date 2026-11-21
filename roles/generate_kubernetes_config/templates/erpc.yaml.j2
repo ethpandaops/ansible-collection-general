@@ -16,7 +16,11 @@ erpc:
       memory: 256Mi
   ingress:
     enabled: true
-    className: ingress-nginx-public
+    className: {{ gen_kubernetes_config_ingress_class }}
+{% if gen_kubernetes_config_ingress_traefik | bool %}
+    annotations:
+      ethpandaops.io/exposure: "public"
+{% endif %}
     hosts:
 {% for _sub in gen_kubernetes_config_network_subdomains %}
       - host: rpc.{{ _sub }}
