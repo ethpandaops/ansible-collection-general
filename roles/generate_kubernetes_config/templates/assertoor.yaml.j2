@@ -20,7 +20,9 @@ assertoor:
     enabled: true
     className: {{ gen_kubernetes_config_ingress_class }}
     annotations:
+{% if not (gen_kubernetes_config_ingress_traefik | bool) %}
       cert-manager.io/cluster-issuer: letsencrypt-production
+{% endif %}
 {% if gen_kubernetes_config_ingress_traefik | bool %}
       ethpandaops.io/exposure: "public"
 {% if gen_kubernetes_config_pandamenu_enabled %}

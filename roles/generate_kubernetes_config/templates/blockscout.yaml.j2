@@ -18,8 +18,16 @@ blockscout-stack:
     nameService:
       enabled: true
       url: "https://explorer.{{ network_subdomain }}"
+    # Metrics off: the frontend answers /node-api/metrics with a 404, so the
+    # path stays closed on any class.
     prometheus:
       enabled: false
+{% if gen_kubernetes_config_ingress_traefik | bool %}
+      # The chart's metrics allow-list Ingress is nginx-only
+      # (whitelist-source-range), which Traefik classes refuse.
+      ingressWhitelist:
+        enabled: false
+{% endif %}
 
   blockscout:
     fullnameOverride: blockscout-backend
@@ -59,8 +67,9 @@ blockscout-stack:
         ethpandaops.io/exposure: "public"
 {% endif %}
       hostname: explorer-api.{{ network_subdomain }}
+      # TLS ends at Cloudflare; Traefik classes are reached through the tunnel.
       tls:
-        enabled: true
+        enabled: {{ 'false' if (gen_kubernetes_config_ingress_traefik | bool) else 'true' }}
 
     extraVolumes:
       - name: config-update
@@ -117,8 +126,9 @@ blockscout-stack:
           sub_filter_once off;
 {% endif %}
       hostname: explorer.{{ network_subdomain }}
+      # TLS ends at Cloudflare; Traefik classes are reached through the tunnel.
       tls:
-        enabled: true
+        enabled: {{ 'false' if (gen_kubernetes_config_ingress_traefik | bool) else 'true' }}
 
     env:
       NEXT_PUBLIC_API_HOST: explorer-api.{{ network_subdomain }}

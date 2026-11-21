@@ -132,14 +132,12 @@ gen_kubernetes_config_powfaucet_authenticatoor_grants: # noqa var-naming[no-role
 # (ethPandaOps gitops-deploys/deploys/traefik-devnets.yaml on services), which
 # admits every <name>-devnet-<n> namespace serving its own
 # *.<network>.ethpandaops.io hosts, so a launch needs no ethPandaOps change.
-# The networks below are the live devnets that stay on ingress-nginx-public
-# until they retire: never add a new devnet here. Set
-# gen_kubernetes_config_ingress_class in a devnet's group_vars to override.
-gen_kubernetes_config_ingress_nginx_networks: # noqa var-naming[no-role-prefix]
-  - bogota-devnet-2
-  - daisugi-devnet-0
-  - glamsterdam-devnet-8
-  - heze-devnet-2
+# Networks listed below stay on ingress-nginx-public. None: every devnet,
+# including the four that were live on nginx (bogota-devnet-2,
+# daisugi-devnet-0, glamsterdam-devnet-8, heze-devnet-2), is on
+# traefik-devnets; never add one. Set gen_kubernetes_config_ingress_class in a
+# devnet's group_vars to override.
+gen_kubernetes_config_ingress_nginx_networks: [] # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_ingress_class: >- # noqa var-naming[no-role-prefix]
   {{ 'ingress-nginx-public' if ethereum_network_name in gen_kubernetes_config_ingress_nginx_networks else 'traefik-devnets' }}
 # Traefik: the Middlewares the class's Traefik ships live in its namespace,
