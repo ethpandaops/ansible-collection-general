@@ -4,6 +4,9 @@ network: {{ ethereum_network_name | replace(devnet_name + "-", '') }}
 chainId: {{ ethereum_genesis_chain_id }}
 
 domain: {{ network_subdomain }}
+{% if gen_kubernetes_config_ingress_traefik | bool %}
+ingressClassName: {{ gen_kubernetes_config_ingress_class }}
+{% endif %}
 
 config:
   enabled: true

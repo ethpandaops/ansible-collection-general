@@ -128,6 +128,26 @@ gen_kubernetes_config_powfaucet_authenticatoor_grants: # noqa var-naming[no-role
     rewardFactor: 1
     overrideMaxDrop: 100000000000000000000  # 100 ETH
 
+# Ingress class of the public Ingresses. New devnets get traefik-devnets
+# (ethPandaOps gitops-deploys/deploys/traefik-devnets.yaml on services), which
+# admits every <name>-devnet-<n> namespace serving its own
+# *.<network>.ethpandaops.io hosts, so a launch needs no ethPandaOps change.
+# Networks listed below stay on ingress-nginx-public. None: every devnet,
+# including the four that were live on nginx (bogota-devnet-2,
+# daisugi-devnet-0, glamsterdam-devnet-8, heze-devnet-2), is on
+# traefik-devnets; never add one. Set gen_kubernetes_config_ingress_class in a
+# devnet's group_vars to override.
+gen_kubernetes_config_ingress_nginx_networks: [] # noqa var-naming[no-role-prefix]
+gen_kubernetes_config_ingress_class: >- # noqa var-naming[no-role-prefix]
+  {{ 'ingress-nginx-public' if ethereum_network_name in gen_kubernetes_config_ingress_nginx_networks else 'traefik-devnets' }}
+# Traefik: the Middlewares the class's Traefik ships live in its namespace,
+# named like the class (traefik-devnets-pandamenu@kubernetescrd).
+gen_kubernetes_config_ingress_traefik: "{{ gen_kubernetes_config_ingress_class != 'ingress-nginx-public' }}" # noqa var-naming[no-role-prefix]
+gen_kubernetes_config_ingress_pandamenu_middleware: "{{ gen_kubernetes_config_ingress_class }}-pandamenu@kubernetescrd" # noqa var-naming[no-role-prefix] yaml[line-length]
+# Basic auth for faucets with ingressBasicAuth (faucet-agents): the class's
+# per-repo gate, built from the same node_ingress credentials.
+gen_kubernetes_config_ingress_basic_auth_middleware: "{{ gen_kubernetes_config_ingress_class }}-basic-auth-{{ devnet_name }}@kubernetescrd" # noqa var-naming[no-role-prefix] yaml[line-length]
+
 # PandaMenu configuration
 gen_kubernetes_config_pandamenu_enabled: true # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_pandamenu_script: '<script src="https://pandamenu.ethpandaops.io/panda-menu-1.0.1.js" integrity="sha384-icGX6g6CzB0tqlhDc6Su4c6IPVbcbUvfM3xjbbFYsYBwuZR79WkmOxDhGEPfmyn2" crossorigin="anonymous"></script>' # noqa var-naming[no-role-prefix] yaml[line-length]

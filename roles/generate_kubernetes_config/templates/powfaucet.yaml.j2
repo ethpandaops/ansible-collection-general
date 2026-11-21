@@ -24,9 +24,23 @@ powfaucet:
   ingress:
     enabled: true
 
-    className: ingress-nginx-public
+    className: {{ gen_kubernetes_config_ingress_class }}
 {% set _pandamenu = (item.value.faucetOverride.pandamenuEnabled | default(true)) and gen_kubernetes_config_pandamenu_enabled %}
-{% if _pandamenu %}
+{% if gen_kubernetes_config_ingress_traefik | bool %}
+{%   set _basic_auth = item.value.faucetOverride.ingressBasicAuth | default(false) %}
+{%   set _middlewares = ([gen_kubernetes_config_ingress_basic_auth_middleware] if _basic_auth else []) + ([gen_kubernetes_config_ingress_pandamenu_middleware] if _pandamenu else []) %}
+    annotations:
+{%   if _basic_auth %}
+      # Behind the class's basic-auth gate (node_ingress credentials), which
+      # only the panda proxy holds: auth tier, priority 2000.
+      traefik.ingress.kubernetes.io/router.priority: "2000"
+{%   else %}
+      ethpandaops.io/exposure: "public"
+{%   endif %}
+{%   if _middlewares %}
+      traefik.ingress.kubernetes.io/router.middlewares: {{ _middlewares | join(',') }}
+{%   endif %}
+{% elif _pandamenu %}
     annotations:
       nginx.ingress.kubernetes.io/proxy-body-size: "0"
       nginx.ingress.kubernetes.io/configuration-snippet: |
@@ -34,7 +48,7 @@ powfaucet:
         sub_filter_types text/html;
         sub_filter_once off;
 {% endif %}
-{% if item.value.faucetOverride.ingressBasicAuth | default(false) %}
+{% if (item.value.faucetOverride.ingressBasicAuth | default(false)) and not (gen_kubernetes_config_ingress_traefik | bool) %}
     # Lock the faucet behind basic auth that only the panda proxy holds, so it is
     # reachable solely via the proxy (which authenticates the caller first).
     basicAuth: "<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.username}>:{PLAIN}<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.password}>"

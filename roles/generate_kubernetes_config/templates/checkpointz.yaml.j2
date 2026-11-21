@@ -15,10 +15,17 @@ checkpointz:
       memory: 256Mi
   ingress:
     enabled: true
-    className: ingress-nginx-public
+    className: {{ gen_kubernetes_config_ingress_class }}
     annotations:
+{% if not (gen_kubernetes_config_ingress_traefik | bool) %}
       cert-manager.io/cluster-issuer: letsencrypt-production
+{% endif %}
+{% if gen_kubernetes_config_ingress_traefik | bool %}
+      ethpandaops.io/exposure: "public"
 {% if gen_kubernetes_config_pandamenu_enabled %}
+      traefik.ingress.kubernetes.io/router.middlewares: {{ gen_kubernetes_config_ingress_pandamenu_middleware }}
+{% endif %}
+{% elif gen_kubernetes_config_pandamenu_enabled %}
       nginx.ingress.kubernetes.io/proxy-body-size: "0"
       nginx.ingress.kubernetes.io/configuration-snippet: |
         sub_filter '</head>' '{{ gen_kubernetes_config_chaos_mesh_pandamenu | default('') }}{{ gen_kubernetes_config_pandamenu_script }}</head>';
@@ -33,12 +40,14 @@ checkpointz:
             pathType: Prefix
 {% endfor %}
 
+{% if not (gen_kubernetes_config_ingress_traefik | bool) %}
     tls:
     - hosts:
 {% for _sub in gen_kubernetes_config_network_subdomains %}
       - checkpoint-sync.{{ _sub }}
 {% endfor %}
       secretName: {{ ethereum_network_name }}-checkpoint-sync-tls
+{% endif %}
 
   config:
     global:

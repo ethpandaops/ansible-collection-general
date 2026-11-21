@@ -9,8 +9,14 @@ blobscan:
 
   ingress:
     enabled: true
-    className: ingress-nginx-public
+    className: {{ gen_kubernetes_config_ingress_class }}
+{% if gen_kubernetes_config_ingress_traefik | bool %}
+    annotations:
+      ethpandaops.io/exposure: "public"
 {% if gen_kubernetes_config_pandamenu_enabled %}
+      traefik.ingress.kubernetes.io/router.middlewares: {{ gen_kubernetes_config_ingress_pandamenu_middleware }}
+{% endif %}
+{% elif gen_kubernetes_config_pandamenu_enabled %}
     annotations:
       nginx.ingress.kubernetes.io/proxy-body-size: "0"
       nginx.ingress.kubernetes.io/configuration-snippet: |
@@ -62,7 +68,11 @@ blobscan-api:
     CHAIN_ID: "{{ ethereum_genesis_chain_id }}"
   ingress:
     enabled: true
-    className: ingress-nginx-public
+    className: {{ gen_kubernetes_config_ingress_class }}
+{% if gen_kubernetes_config_ingress_traefik | bool %}
+    annotations:
+      ethpandaops.io/exposure: "public"
+{% endif %}
     hosts:
 {% for _sub in gen_kubernetes_config_network_subdomains %}
       - host: blobscan-api.{{ _sub }}

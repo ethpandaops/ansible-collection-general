@@ -69,9 +69,12 @@
     mode: "0755"
   when: item.key == 'config'
 
+# ingress-nginx: ExternalName Services and one Ingress per path. Traefik
+# classes: the config proxy pod behind one Ingress. Same file name, so a
+# devnet that changes class gets the other one in its place.
 - name: Copy ingress config to {{ item.key }}
   ansible.builtin.copy:
-    src: ingress.config.yaml.tpl
+    src: "{{ 'config-proxy.yaml.tpl' if (gen_kubernetes_config_ingress_traefik | bool) else 'ingress.config.yaml.tpl' }}"
     dest: "{{ gen_kubernetes_config_default_output_dir }}/{{ item.key }}/templates/ingress.config.yaml"
     mode: "0644"
   when: item.key == 'config'
