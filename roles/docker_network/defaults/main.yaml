@@ -7,3 +7,10 @@ docker_network_driver_options: {}
 # Use this when the bridge subnet overlaps with the host's interface subnet.
 # Example: "2a01:4f8:x:y::/124" to route only the container pool via the bridge.
 docker_network_ipv6_pool: ""
+
+# ULA IPv6 subnet auto-prepended to ipam_config so Docker auto-assigns from it
+# (containers with no explicit ipv6_address). Egress is masqueraded out via the
+# host's public IPv6, so internal-only containers don't burn public addresses.
+# Set to "" to opt out of the hybrid setup.
+docker_network_ipv6_private_subnet: "fde7:f00d::/64"
+docker_network_ipv6_private_gateway: "fde7:f00d::1"

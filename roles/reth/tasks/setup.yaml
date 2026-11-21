@@ -42,6 +42,7 @@
       }}
     env: "{{ reth_container_env }}"
     networks: "{{ reth_container_networks }}"
+    labels: "{{ reth_container_labels | default(omit) }}"
     entrypoint: "{{ reth_container_entrypoint | default(omit) }}"
     command: >-
       {{
