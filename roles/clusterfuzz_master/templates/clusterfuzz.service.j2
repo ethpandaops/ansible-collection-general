@@ -1,0 +1,15 @@
+[Unit]
+Description=ClusterFuzz Master Service
+After=network.target
+
+[Service]
+Type=simple
+User=devops
+Group=devops
+WorkingDirectory={{ clusterfuzz_master_repo_path }}
+ExecStart={{ clusterfuzz_master_repo_path }}/local/run_clusterfuzz.bash --storage-path {{ clusterfuzz_master_storage_path }}/datastore
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target 
