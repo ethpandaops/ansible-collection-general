@@ -1,12 +1,5 @@
 name: Install deps
 description: Install deps
-inputs:
-  dockerhub_username:
-    required: false
-    default: ''
-  dockerhub_password:
-    required: false
-    default: ''
 runs:
   using: composite
   steps:
@@ -29,11 +22,21 @@ runs:
       with:
         asdf_branch: v0.15.0
 
-    - name: Docker login
-      uses: ethpandaops/actions/docker-login@a91b7a8dd6a264f5e845ac2aa52d2d6f24e6d01d
-      with:
-        username: ${{ inputs.dockerhub_username }}
-        password: ${{ inputs.dockerhub_password }}
+    # Molecule creates its test containers with podman. Podman tries the
+    # ethpandaops pull-through cache first for Docker Hub images and falls
+    # back to Docker Hub.
+    - name: Use the Docker Hub pull-through cache
+      shell: bash
+      run: |
+        sudo mkdir -p /etc/containers/registries.conf.d
+        sudo tee /etc/containers/registries.conf.d/docker-hub-cache.conf <<'EOF'
+        [[registry]]
+        prefix = "docker.io"
+        location = "docker.io"
+
+        [[registry.mirror]]
+        location = "docker-cache.ethquokkaops.io"
+        EOF
 
     - name: Run setup
       shell: bash

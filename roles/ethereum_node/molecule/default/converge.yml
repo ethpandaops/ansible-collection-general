@@ -22,13 +22,6 @@
             pip_install_packages:
               - name: docker
                 extra_args: --break-system-packages
-        - name: Login to dockerhub
-          community.docker.docker_login:
-            username: "{{ DOCKERHUB_USERNAME }}"
-            password: "{{ DOCKERHUB_PASSWORD }}"
-          when: >-
-            (DOCKERHUB_USERNAME != None and DOCKERHUB_USERNAME | length > 0) and
-            (DOCKERHUB_PASSWORD != None and DOCKERHUB_PASSWORD | length > 0)
         - name: Run ethereum node
           ansible.builtin.import_role:
             name: ethereum_node

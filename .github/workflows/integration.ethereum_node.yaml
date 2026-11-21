@@ -116,9 +116,6 @@ jobs:
           path: ansible_collections/ethpandaops/general
 
       - uses: ./ansible_collections/ethpandaops/general/.github/actions/setup
-        with:
-          dockerhub_username: ethpandaops
-          dockerhub_password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Test ${{ matrix.consensus }} with all execution clients
         working-directory: ansible_collections/ethpandaops/general/roles/ethereum_node
@@ -127,8 +124,6 @@ jobs:
           ANSIBLE_DOCKER_TIMEOUT: '120'
           ANSIBLE_REMOTE_TMP: '/tmp/.ansible/tmp'
           CONSENSUS_CLIENT: ${{ matrix.consensus }}
-          DOCKERHUB_USERNAME: ethpandaops
-          DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
         run: |
           execution_clients_json='${{ needs.vars.outputs.EXECUTION_CLIENTS }}'
           execution_clients=($(echo $execution_clients_json | jq -r '.[]'))

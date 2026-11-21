@@ -1,6 +1,10 @@
 ---
 docker_daemon_options: # noqa: var-naming[no-role-prefix]
   storage-driver: "vfs"
+  # Pull Docker Hub images through the ethpandaops pull-through cache,
+  # falling back to Docker Hub.
+  registry-mirrors:
+    - https://docker-cache.ethquokkaops.io
 # Role specific variables
 mev_boost_container_name: mev-boost
 # Test config.yaml functionality
