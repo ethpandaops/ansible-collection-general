@@ -63,6 +63,9 @@ data:
         set $config_upstream {{ .upstream }};
         proxy_ssl_name {{ .upstream }};
         proxy_set_header Host {{ .upstream }};
+        # Uncompressed from upstream: the cache ignores Vary, so a gzip copy
+        # fetched for one client would be served to every client.
+        proxy_set_header Accept-Encoding "";
         proxy_pass https://$config_upstream{{ .target }};
       }
       {{- end }}
