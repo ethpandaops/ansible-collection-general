@@ -35,10 +35,39 @@
   changed_when: false
   when: teku_validator_enabled
 
+- name: Deploy through upgradoor {{ teku_container_name }}
+  ansible.builtin.command:
+    argv: >-
+      {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', teku_container_name,
+          '--image', teku_container_image, '--command',
+          (teku_container_command +
+           teku_container_command_extra_args +
+           (teku_validator_enabled | ternary(teku_validator_container_args, [])) +
+           (teku_checkpoint_sync_enabled | ternary(teku_container_command_checkpoint_args, [])) +
+           (teku_mev_boost_enabled | ternary(teku_mev_boost_beacon_command, []))) | to_json]
+         + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
+           | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+    removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
+  register: teku_upgradoor_deploy
+  changed_when: teku_upgradoor_deploy.stdout is match('{') and (teku_upgradoor_deploy.stdout | from_json).changed
+  when:
+    - teku_enabled
+    - secret_upgradoor_seed is defined
+
 - name: Run teku container
   when: teku_enabled
+  vars:
+    teku_upgradoor: >-
+      {{ teku_upgradoor_deploy.stdout | from_json
+         if teku_upgradoor_deploy.stdout | default('') is match('{') else {} }}
   community.docker.docker_container:
     name: "{{ teku_container_name }}"
+    comparisons: >-
+      {{ {} if upgradoor_deploy | default('soft') == 'immediate'
+         else dict(teku_upgradoor.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
+    labels: >-
+      {{ {'io.ethpandaops.upgradoor.group': teku_upgradoor_group, 'io.ethpandaops.upgradoor.kind': 'cl'}
+         if teku_upgradoor and teku_upgradoor_group else {} }}
     image: "{{ teku_container_image }}"
     image_name_mismatch: recreate
     state: started

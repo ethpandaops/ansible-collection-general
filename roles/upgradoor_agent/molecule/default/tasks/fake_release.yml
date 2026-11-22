@@ -1,0 +1,122 @@
+- name: Create the fake release on the controller - {{ upgradoor_agent_test_release.dir }}
+  ansible.builtin.file:
+    path: "{{ upgradoor_agent_test_dir }}"
+    state: directory
+    mode: "0700"
+  become: false
+  delegate_to: localhost
+  run_once: true
+
+# A trailing line keeps the binary runnable and its checksum unique.
+- name: Write the binary of the fake release - {{ upgradoor_agent_test_release.dir }}
+  ansible.builtin.shell:
+    cmd: >-
+      { cat {{ (upgradoor_agent_test_release_dir ~ '/bin/upgradoor') | quote }};
+      printf '\n# fake release %s\n' {{ upgradoor_agent_test_release.dir | quote }}; }
+      > {{ (upgradoor_agent_test_dir ~ '/upgradoor') | quote }}
+  changed_when: true
+  become: false
+  delegate_to: localhost
+  run_once: true
+
+- name: Stat the binary of the fake release - {{ upgradoor_agent_test_release.dir }}
+  ansible.builtin.stat:
+    path: "{{ upgradoor_agent_test_dir }}/upgradoor"
+    checksum_algorithm: sha256
+  register: upgradoor_agent_test_binary
+  become: false
+  delegate_to: localhost
+  run_once: true
+
+- name: Write the manifest of the fake release - {{ upgradoor_agent_test_release.dir }}
+  ansible.builtin.copy:
+    content: "{{ upgradoor_agent_test_manifest | sort | join('\n') }}\n"
+    dest: "{{ upgradoor_agent_test_dir }}/upgradoor-manifest.txt"
+    mode: "0600"
+  vars:
+    upgradoor_agent_test_sha: "{{ upgradoor_agent_test_binary.stat.checksum }}"
+    upgradoor_agent_test_co: "{{ upgradoor_agent_test_release.controller_only | default(false) }}"
+    # controller_only: the host's hash only on an upgradoor-controller line.
+    upgradoor_agent_test_host_amd64: "{{ upgradoor_agent_test_co | bool and upgradoor_agent_test_arch == 'amd64' }}"
+    upgradoor_agent_test_host_arm64: "{{ upgradoor_agent_test_co | bool and upgradoor_agent_test_arch == 'arm64' }}"
+    upgradoor_agent_test_lines:
+      - >-
+        {{ '' if upgradoor_agent_test_release.no_image | default(false)
+           else 'image ' ~ upgradoor_agent_test_seq ~ ' ghcr.io/ethpandaops/upgradoor ' ~ ('image' ~ upgradoor_agent_test_version) | hash('sha256') }}
+      - >-
+        {{ '' if upgradoor_agent_test_host_amd64 | bool
+           else 'upgradoor ' ~ upgradoor_agent_test_seq ~ ' linux-amd64 ' ~ upgradoor_agent_test_sha }}
+      - >-
+        {{ '' if upgradoor_agent_test_host_arm64 | bool
+           else 'upgradoor ' ~ upgradoor_agent_test_seq ~ ' linux-arm64 ' ~ upgradoor_agent_test_sha }}
+      - >-
+        upgradoor-controller {{ upgradoor_agent_test_seq }} linux-amd64
+        {{ upgradoor_agent_test_sha if upgradoor_agent_test_host_amd64 | bool else ('amd64' ~ upgradoor_agent_test_version) | hash('sha256') }}
+      - >-
+        upgradoor-controller {{ upgradoor_agent_test_seq }} linux-arm64
+        {{ upgradoor_agent_test_sha if upgradoor_agent_test_host_arm64 | bool else ('arm64' ~ upgradoor_agent_test_version) | hash('sha256') }}
+    upgradoor_agent_test_manifest: "{{ upgradoor_agent_test_lines | reject('equalto', '') | list + upgradoor_agent_test_release.extra | default([]) }}"
+  become: false
+  delegate_to: localhost
+  run_once: true
+
+# Jinja turns CR LF into LF, so the CRs are added afterwards.
+- name: End the manifest lines in CR LF - {{ upgradoor_agent_test_release.dir }}
+  ansible.builtin.replace:
+    path: "{{ upgradoor_agent_test_dir }}/upgradoor-manifest.txt"
+    regexp: '\n'
+    replace: "\r\n"
+  when: upgradoor_agent_test_release.crlf | default(false)
+  become: false
+  delegate_to: localhost
+  run_once: true
+
+- name: Remove the old signature of the fake release - {{ upgradoor_agent_test_release.dir }}
+  ansible.builtin.file:
+    path: "{{ upgradoor_agent_test_dir }}/upgradoor-manifest.txt.sig"
+    state: absent
+  become: false
+  delegate_to: localhost
+  run_once: true
+
+- name: Sign the fake release - {{ upgradoor_agent_test_release.dir }}
+  ansible.builtin.command:
+    cmd: >-
+      ssh-keygen -q -Y sign
+      -f {{ (upgradoor_agent_test_release_dir ~ '/keys/' ~ upgradoor_agent_test_release.key | default('release')) | quote }}
+      -n {{ upgradoor_agent_test_release.namespace | default('upgradoor-release') | quote }}
+      {{ (upgradoor_agent_test_dir ~ '/upgradoor-manifest.txt') | quote }}
+  changed_when: true
+  become: false
+  delegate_to: localhost
+  run_once: true
+
+- name: Change the signed manifest of the fake release - {{ upgradoor_agent_test_release.dir }}
+  ansible.builtin.replace:
+    path: "{{ upgradoor_agent_test_dir }}/upgradoor-manifest.txt"
+    regexp: ' ghcr.io/ethpandaops/upgradoor '
+    replace: ' ethpandaops/upgradoox '
+  when: upgradoor_agent_test_release.tamper | default(false)
+  become: false
+  delegate_to: localhost
+  run_once: true
+
+- name: Create the fake release on the host - {{ upgradoor_agent_test_release.dir }}
+  ansible.builtin.file:
+    path: "{{ upgradoor_agent_test_host_dir }}/{{ upgradoor_agent_test_release.dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Serve the binary of the fake release to the host - {{ upgradoor_agent_test_release.dir }}
+  ansible.builtin.copy:
+    src: >-
+      {{ upgradoor_agent_test_release_dir ~ '/bin/tampered' if upgradoor_agent_test_release.tampered | default(false)
+         else upgradoor_agent_test_dir ~ '/upgradoor' }}
+    dest: "{{ upgradoor_agent_test_host_dir }}/{{ upgradoor_agent_test_release.dir }}/upgradoor-linux-{{ item }}"
+    mode: "0755"
+  loop: [amd64, arm64]
+
+- name: Keep the checksum of the fake release - {{ upgradoor_agent_test_release.dir }}
+  ansible.builtin.set_fact:
+    upgradoor_agent_test_checksums: >-
+      {{ upgradoor_agent_test_checksums | default({}) | combine({upgradoor_agent_test_release.dir: upgradoor_agent_test_binary.stat.checksum}) }}

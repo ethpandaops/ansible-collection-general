@@ -1,0 +1,70 @@
+#!/bin/sh
+# {{ ansible_managed }}
+# Run as root via sudo: only the blocked packages are accepted. No time limit:
+# a killed dpkg leaves packages half configured.
+set -eu
+
+blocked="{{ upgradoor_agent_blocked_packages | join(' ') }}"
+
+if [ "$#" -eq 0 ]; then
+    echo "usage: upgrade-packages <package>..." >&2
+    exit 2
+fi
+
+for package in "$@"; do
+    allowed=no
+    for name in $blocked; do
+        if [ "$package" = "$name" ]; then
+            allowed=yes
+        fi
+    done
+
+    if [ "$allowed" != yes ]; then
+        echo "upgrade-packages: not a blocked package: $package" >&2
+        exit 2
+    fi
+done
+
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+export LC_ALL=C LANG=C
+export DEBIAN_FRONTEND=noninteractive APT_LISTCHANGES_FRONTEND=none
+
+lock=DPkg::Lock::Timeout=300
+
+# Only installed packages: apt-get reads an unknown name as a regular expression.
+packages=""
+for package in "$@"; do
+    if dpkg-query -W -f '${db:Status-Status}\n' "$package" 2>/dev/null | grep -qx installed; then
+        packages="$packages $package"
+    fi
+done
+
+if [ -z "$packages" ]; then
+    echo "none of the named packages is installed"
+    exit 0
+fi
+
+# apt-get update does not wait for the lock of the package lists.
+tries=0
+until out="$(apt-get update -o "$lock" 2>&1)"; do
+    printf '%s\n' "$out" >&2
+
+    case "$out" in
+        *"E: Could not get lock "* | *"E: Unable to lock directory "*) ;;
+        *) exit 1 ;;
+    esac
+
+    tries=$((tries + 1))
+    if [ "$tries" -ge 60 ]; then
+        exit 1
+    fi
+
+    sleep 5
+done
+
+# shellcheck disable=SC2086
+exec apt-get install --only-upgrade -y --no-remove \
+    -o "$lock" \
+    -o Dpkg::Options::=--force-confdef \
+    -o Dpkg::Options::=--force-confold \
+    $packages

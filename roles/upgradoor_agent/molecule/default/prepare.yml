@@ -1,0 +1,92 @@
+# Fails early when converge has no upgradoor binary or verify.yml no keygen
+# image.
+- name: Prepare the upgradoor binary
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  become: false
+  vars:
+    upgradoor_agent_binary: "{{ lookup('ansible.builtin.env', 'UPGRADOOR_AGENT_BINARY') }}"
+    upgradoor_agent_source: "{{ lookup('ansible.builtin.env', 'UPGRADOOR_AGENT_SOURCE') }}"
+    upgradoor_agent_built_binary: "{{ lookup('ansible.builtin.env', 'MOLECULE_EPHEMERAL_DIRECTORY') | default(playbook_dir, true) }}/upgradoor"
+    upgradoor_agent_image: "{{ lookup('ansible.builtin.env', 'UPGRADOOR_KEYGEN_IMAGE') }}"
+    # upgradoor_agent_molecule_built_image of inventory/group_vars/molecule.yml
+    upgradoor_agent_built_image: upgradoor-molecule:keygen
+  tasks:
+    - name: Assert the given binaries exist
+      ansible.builtin.assert:
+        that:
+          - upgradoor_agent_binary | length == 0 or upgradoor_agent_binary is file
+        fail_msg: "UPGRADOOR_AGENT_BINARY is not a file."
+        quiet: true
+
+    # Static, so the binary runs in the test container whatever libc it has.
+    - name: Build the binary from UPGRADOOR_AGENT_SOURCE
+      ansible.builtin.command:
+        cmd: go build -o {{ upgradoor_agent_built_binary | quote }} ./cmd/upgradoor
+        chdir: "{{ upgradoor_agent_source }}"
+      environment:
+        CGO_ENABLED: "0"
+        GOOS: linux
+      changed_when: true
+      when:
+        - upgradoor_agent_binary | length == 0
+        - upgradoor_agent_source | length > 0
+
+    - name: Check the release
+      when:
+        - upgradoor_agent_binary | length == 0
+        - upgradoor_agent_source | length == 0
+      block:
+        - name: Read the role defaults
+          ansible.builtin.include_vars:
+            file: ../../defaults/main.yaml
+
+        - name: Look for the release manifest
+          ansible.builtin.uri:
+            url: "{{ upgradoor_agent_manifest_url }}"
+            method: HEAD
+            follow_redirects: all
+            status_code: [200, 401, 403, 404]
+          register: upgradoor_agent_release
+
+        - name: Assert the release is published
+          ansible.builtin.assert:
+            that:
+              - upgradoor_agent_release.status == 200
+            fail_msg: >-
+              {{ upgradoor_agent_manifest_url }} answered {{ upgradoor_agent_release.status }}: set
+              UPGRADOOR_AGENT_SOURCE or UPGRADOOR_AGENT_BINARY.
+            quiet: true
+
+    - name: Build the keygen image from UPGRADOOR_AGENT_SOURCE
+      ansible.builtin.command:
+        argv: [docker, build, --tag, "{{ upgradoor_agent_built_image }}", "{{ upgradoor_agent_source }}"]
+      changed_when: true
+      when:
+        - upgradoor_agent_image | length == 0
+        - upgradoor_agent_source | length > 0
+
+    # The fake releases of verify.yml name images that do not exist.
+    - name: Assert there is a keygen image for verify.yml
+      ansible.builtin.assert:
+        that:
+          - upgradoor_agent_image | length > 0 or upgradoor_agent_source | length > 0
+        fail_msg: "verify.yml needs a keygen image: set UPGRADOOR_AGENT_SOURCE or UPGRADOOR_KEYGEN_IMAGE."
+        quiet: true
+
+# verify.yml deploys a client role through the agent.
+- name: Prepare Docker on the host
+  hosts: molecule
+  become: true
+  tasks:
+    - name: Install Docker
+      ansible.builtin.apt:
+        name: [docker.io, python3-docker]
+        update_cache: true
+
+    - name: Start Docker
+      ansible.builtin.systemd:
+        name: docker
+        state: started
+        enabled: true

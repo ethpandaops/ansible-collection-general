@@ -1,0 +1,17 @@
+# upgradoor_agent_signer_pubkey.stdout: the controller's signerPublicKey (generate_kubernetes_config).
+- name: Verify the upgradoor release {{ upgradoor_agent_version }}
+  ansible.builtin.import_tasks: release_verify.yaml
+  when: upgradoor_agent_keygen_image | length == 0
+
+- name: Derive the upgradoor signer public key
+  ansible.builtin.command:
+    argv: "{{ upgradoor_agent_keygen_argv + ['signer-pubkey'] }}"
+  environment:
+    UPGRADOOR_SEED: "{{ upgradoor_agent_seed }}"
+  register: upgradoor_agent_signer_pubkey
+  changed_when: false
+  check_mode: false
+  delegate_to: localhost
+  run_once: true
+  become: false
+  no_log: true

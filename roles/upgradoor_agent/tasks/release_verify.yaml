@@ -1,0 +1,126 @@
+- name: Verify the upgradoor release on the Ansible controller
+  delegate_to: localhost
+  run_once: true
+  become: false
+  vars:
+    upgradoor_agent_rv_dir: "{{ upgradoor_agent_rv_tmp.path }}"
+    upgradoor_agent_rv_tag: "{{ upgradoor_agent_version[1:].split('.') | map('int') | list }}"
+    upgradoor_agent_rv_seq: "{{ upgradoor_agent_rv_tag[0] * 1000000 + upgradoor_agent_rv_tag[1] * 1000 + upgradoor_agent_rv_tag[2] }}"
+    upgradoor_agent_rv_lines: "{{ upgradoor_agent_rv_text.splitlines() | map('split', ' ') | list }}"
+    upgradoor_agent_rv_hosts: "{{ upgradoor_agent_rv_lines | selectattr('0', 'equalto', 'upgradoor') | list }}"
+    upgradoor_agent_rv_images: "{{ upgradoor_agent_rv_lines | selectattr('0', 'equalto', 'image') | list }}"
+  block:
+    - name: Check the upgradoor release tag
+      ansible.builtin.assert:
+        that:
+          - upgradoor_agent_version is string
+          - upgradoor_agent_version is match('v(0|[1-9][0-9]{0,2})\.(0|[1-9][0-9]{0,2})\.(0|[1-9][0-9]{0,2})\Z')
+          - upgradoor_agent_version != 'v0.0.0'
+          - upgradoor_agent_allowed_signers_file is file
+        fail_msg: >-
+          upgradoor_agent_version must be a release tag, exactly vX.Y.Z (each part at most 999), got
+          '{{ upgradoor_agent_version }}'; upgradoor_agent_allowed_signers_file must be a file on the Ansible controller.
+        quiet: true
+      register: upgradoor_agent_rv_tag_check
+
+    - name: Create the directory of the upgradoor release on the Ansible controller
+      ansible.builtin.tempfile:
+        state: directory
+        path: "{{ lookup('ansible.builtin.config', 'DEFAULT_LOCAL_TMP') | dirname }}"
+        suffix: upgradoor-release
+      register: upgradoor_agent_rv_tmp
+      changed_when: false
+      check_mode: false
+
+    - name: Download the manifest and its signature of upgradoor {{ upgradoor_agent_version }}
+      ansible.builtin.get_url:
+        url: "{{ item.url }}"
+        dest: "{{ upgradoor_agent_rv_dir }}/{{ item.file }}"
+        force: true
+        mode: "0600"
+      loop:
+        - url: "{{ upgradoor_agent_manifest_url }}"
+          file: upgradoor-manifest.txt
+        - url: "{{ upgradoor_agent_manifest_signature_url }}"
+          file: upgradoor-manifest.txt.sig
+      loop_control:
+        label: "{{ item.file }}"
+      changed_when: false
+      check_mode: false
+
+    # Read once: the signature check and the parser see the same text.
+    - name: Read the manifest of upgradoor {{ upgradoor_agent_version }}
+      ansible.builtin.set_fact:
+        upgradoor_agent_rv_text: "{{ lookup('ansible.builtin.file', upgradoor_agent_rv_dir ~ '/upgradoor-manifest.txt', rstrip=false) }}"
+
+    - name: Verify the signature of upgradoor {{ upgradoor_agent_version }}
+      ansible.builtin.command:
+        argv:
+          - ssh-keygen
+          - -Y
+          - verify
+          - -f
+          - "{{ upgradoor_agent_allowed_signers_file }}"
+          - -I
+          - upgradoor-release
+          - -n
+          - upgradoor-release
+          - -s
+          - "{{ upgradoor_agent_rv_dir }}/upgradoor-manifest.txt.sig"
+        stdin: "{{ upgradoor_agent_rv_text }}"
+        stdin_add_newline: false
+      register: upgradoor_agent_rv_signature
+      changed_when: false
+      check_mode: false
+
+    # Format of scripts/release-manifest.sh, open to new artifact names.
+    - name: Check the manifest of upgradoor {{ upgradoor_agent_version }}
+      ansible.builtin.assert:
+        that:
+          - upgradoor_agent_rv_text is match('([a-z][a-z0-9-]* [1-9][0-9]* [a-z0-9/._-]+ [0-9a-f]{64}\n)+\Z')
+          - upgradoor_agent_rv_lines | map(attribute='1') | unique | list == [upgradoor_agent_rv_seq | string]
+          - upgradoor_agent_rv_hosts | map(attribute='2') | reject('match', 'linux-[a-z0-9]+\Z') | list | length == 0
+          - upgradoor_agent_rv_hosts | map(attribute='2') | unique | list | length == upgradoor_agent_rv_hosts | length
+          - upgradoor_agent_rv_images | length == 1
+          - upgradoor_agent_rv_images[0][2] == upgradoor_agent_image_repository
+        fail_msg: >-
+          The manifest of {{ upgradoor_agent_version }} must be canonical, carry seq {{ upgradoor_agent_rv_seq }} on
+          every line, one line per host platform and exactly one line 'image {{ upgradoor_agent_rv_seq }}
+          {{ upgradoor_agent_image_repository }} <sha256>'.
+        quiet: true
+      register: upgradoor_agent_rv_manifest_check
+
+    # Fail-closed under an inherited ignore_errors as well.
+    - name: Record the verified upgradoor release {{ upgradoor_agent_version }}
+      ansible.builtin.set_fact:
+        upgradoor_agent_release: "{{ upgradoor_agent_rv_result }}"
+        upgradoor_agent_rv_verified: "{{ upgradoor_agent_rv_result }}"
+      vars:
+        upgradoor_agent_rv_result:
+          version: "{{ upgradoor_agent_version }}"
+          seq: "{{ upgradoor_agent_rv_seq | int }}"
+          verified: true
+          manifest_url: "{{ upgradoor_agent_manifest_url }}"
+          binaries: "{{ dict(upgradoor_agent_rv_hosts | map(attribute='2') | map('replace', 'linux-', '', 1)
+                         | zip(upgradoor_agent_rv_hosts | map(attribute='3'))) }}"
+          image: "{{ upgradoor_agent_rv_images[0][2] }}@sha256:{{ upgradoor_agent_rv_images[0][3] }}"
+      when:
+        - upgradoor_agent_rv_tag_check is succeeded
+        - upgradoor_agent_rv_signature is succeeded
+        - upgradoor_agent_rv_manifest_check is succeeded
+
+    # Inventory, extra vars or role parameters would take precedence over the fact.
+    - name: Assert upgradoor_agent_release is the verified release of upgradoor {{ upgradoor_agent_version }}
+      ansible.builtin.assert:
+        that:
+          - upgradoor_agent_release | default({}) == upgradoor_agent_rv_verified | default('unset')
+        fail_msg: upgradoor_agent_release is an output of the role and must not be set.
+        quiet: true
+  always:
+    - name: Remove the directory of the upgradoor release on the Ansible controller
+      ansible.builtin.file:
+        path: "{{ upgradoor_agent_rv_tmp.path }}"
+        state: absent
+      when: upgradoor_agent_rv_tmp.path is defined
+      changed_when: false
+      check_mode: false

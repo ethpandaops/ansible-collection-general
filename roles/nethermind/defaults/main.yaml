@@ -53,6 +53,8 @@ nethermind_container_security_opts: []
 # nethermind_container_cpu_quota:
 # nethermind_container_cpu_period:
 nethermind_container_stop_timeout: "300"
+# upgradoor group label of the container; empty: not managed by upgradoor
+nethermind_upgradoor_group: execution
 nethermind_container_networks: []
 # nethermind_container_entrypoint:
 #   - /nethermind/nethermind

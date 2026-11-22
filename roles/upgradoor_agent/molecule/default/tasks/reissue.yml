@@ -1,0 +1,81 @@
+# Runs the role with the identity input of upgradoor_agent_case and checks the
+# certificate was kept or replaced and carries the input.
+- name: Read the certificate before - {{ upgradoor_agent_case.name }}
+  ansible.builtin.slurp:
+    src: /etc/upgradoor/host.crt
+  register: upgradoor_agent_case_before
+  no_log: true
+
+- name: Damage the certificate file - {{ upgradoor_agent_case.name }}
+  ansible.builtin.copy:
+    content: "{{ (upgradoor_agent_case_before.content | b64decode | trim)[:-8] }}AAAAAAAA\n"
+    dest: /etc/upgradoor/host.crt
+    owner: root
+    group: root
+    mode: "0600"
+  when: upgradoor_agent_case.damage | default(false)
+  no_log: true
+
+- name: Run upgradoor_agent - {{ upgradoor_agent_case.name }}
+  ansible.builtin.include_role:
+    name: upgradoor_agent
+  vars:
+    upgradoor_agent_seed: "{{ upgradoor_agent_case.seed | default(secret_upgradoor_seed) }}"
+    upgradoor_agent_hostname: "{{ upgradoor_agent_case.hostname | default('lighthouse-geth-1') }}"
+    upgradoor_agent_roles: "{{ upgradoor_agent_case.roles | default(['ethereum_node']) }}"
+
+- name: Read the certificate after - {{ upgradoor_agent_case.name }}
+  ansible.builtin.slurp:
+    src: /etc/upgradoor/host.crt
+  register: upgradoor_agent_case_after
+  no_log: true
+
+- name: Derive the signer public key - {{ upgradoor_agent_case.name }}
+  ansible.builtin.command:
+    argv:
+      - docker
+      - run
+      - --rm
+      - --network=none
+      - --env=UPGRADOOR_SEED
+      - "{{ upgradoor_agent_keygen_image }}"
+      - keygen
+      - --network={{ ethereum_network_name }}
+      - signer-pubkey
+  environment:
+    UPGRADOOR_SEED: "{{ upgradoor_agent_case.seed | default(secret_upgradoor_seed) }}"
+  register: upgradoor_agent_case_signer
+  changed_when: false
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Verify the certificate with upgradoor verify-cert - {{ upgradoor_agent_case.name }}
+  ansible.builtin.shell:
+    cmd: >-
+      /usr/local/bin/upgradoor verify-cert --network {{ item | quote }}
+      --signer-public-key {{ upgradoor_agent_case_signer.stdout | quote }}
+      < /etc/upgradoor/host.crt
+  loop:
+    - "{{ ethereum_network_name }}"
+    - another-network
+  register: upgradoor_agent_case_verify
+  changed_when: false
+  failed_when: false
+
+- name: Assert the certificate was kept or replaced - {{ upgradoor_agent_case.name }}
+  ansible.builtin.assert:
+    that:
+      - (upgradoor_agent_case_after.content != upgradoor_agent_case_before.content) == upgradoor_agent_case.reissued
+      - upgradoor_agent_case_verify.results[0].rc == 0
+      - upgradoor_agent_case_claims | list == ['iss', 'net', 'sub', 'cnf', 'roles']
+      - upgradoor_agent_case_claims.iss == 'upgradoor-signer'
+      - upgradoor_agent_case_claims.net == ethereum_network_name
+      - upgradoor_agent_case_claims.sub == upgradoor_agent_case.hostname | default('lighthouse-geth-1')
+      - upgradoor_agent_case_claims.roles == upgradoor_agent_case.roles | default(['ethereum_node'])
+      - upgradoor_agent_case_verify.results[1].rc != 0
+      - "'another network' in upgradoor_agent_case_verify.results[1].stderr"
+    fail_msg: "{{ upgradoor_agent_case.name }}: {{ upgradoor_agent_case_verify.results | map(attribute='stderr') | list }}"
+    quiet: true
+  vars:
+    upgradoor_agent_case_claims: "{{ upgradoor_agent_case_verify.results[0].stdout | from_json }}"

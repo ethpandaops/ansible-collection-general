@@ -1,6 +1,11 @@
 - name: Add used helm repositories
   loop: "{{ gen_kubernetes_config_helm_repositories | default([]) }}"
   ansible.builtin.include_tasks: helm_repositories.yaml
+- name: Derive the upgradoor signer public key
+  ansible.builtin.include_role:
+    name: ethpandaops.general.upgradoor_agent
+    tasks_from: signer_pubkey
+  when: "'upgradoor' in gen_kubernetes_config_enabled_charts"
 - name: Generate charts
   loop: "{{ gen_kubernetes_config_helm_charts | dict2items | selectattr('key', 'in', gen_kubernetes_config_enabled_charts) | list }}"
   ansible.builtin.include_tasks: generate_chart.yaml

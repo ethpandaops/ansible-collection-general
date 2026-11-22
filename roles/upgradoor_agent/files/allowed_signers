@@ -1,0 +1,2 @@
+# Pinned copy of deploy/allowed_signers of github.com/ethpandaops/upgradoor; changes only by review here.
+upgradoor-release namespaces="upgradoor-release" sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIMJRCy1En57mO15CjLFsiqy6cbUMF5ir0jADOpPXjKaqAAAAFXNzaDpyZXN0b2RpYW4tcmVsZWFzZQ== upgradoor release signing (pk910)

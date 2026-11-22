@@ -1,0 +1,26 @@
+- name: Converge
+  hosts: molecule
+  become: true
+  pre_tasks:
+    # The login user of a devnet host.
+    - name: Create the entry user
+      ansible.builtin.user:
+        name: devops
+
+    # As a client role leaves it: closed to others, the marker inside.
+    - name: Create the validator data directory
+      ansible.builtin.file:
+        path: /var/lib/validator
+        state: directory
+        owner: devops
+        group: devops
+        mode: "0750"
+
+    - name: Write the validator range marker
+      ansible.builtin.copy:
+        content: "0-100\n"
+        dest: /var/lib/validator/.validator_keyrange
+        mode: "0644"
+  roles:
+    - role: unattended_upgrades
+    - role: upgradoor_agent

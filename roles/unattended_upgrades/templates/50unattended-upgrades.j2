@@ -1,0 +1,38 @@
+// {{ ansible_managed }}
+
+#clear Unattended-Upgrade::Allowed-Origins;
+#clear Unattended-Upgrade::Origins-Pattern;
+#clear Unattended-Upgrade::Package-Blacklist;
+
+Unattended-Upgrade::Origins-Pattern {
+{% for origin in unattended_upgrades_origins + unattended_upgrades_extra_origins %}
+        "{{ origin }}";
+{% endfor %}
+};
+
+// Exact names are escaped and anchored.
+Unattended-Upgrade::Package-Blacklist {
+{% for package in unattended_upgrades_blocked_packages %}
+        "{{ package | regex_replace('([+.])', '\\\\\\1') }}$";
+{% endfor %}
+{% for pattern in unattended_upgrades_blocked_package_patterns %}
+        "{{ pattern }}";
+{% endfor %}
+};
+
+// Reboots are staggered by upgradoor.
+Unattended-Upgrade::Automatic-Reboot "false";
+Unattended-Upgrade::Automatic-Reboot-WithUsers "false";
+
+Unattended-Upgrade::MinimalSteps "{{ unattended_upgrades_minimal_steps | bool | to_json }}";
+Unattended-Upgrade::Remove-Unused-Kernel-Packages "{{ unattended_upgrades_remove_unused_kernel_packages | bool | to_json }}";
+Unattended-Upgrade::Remove-New-Unused-Dependencies "{{ unattended_upgrades_remove_new_unused_dependencies | bool | to_json }}";
+Unattended-Upgrade::Remove-Unused-Dependencies "{{ unattended_upgrades_remove_unused_dependencies | bool | to_json }}";
+Unattended-Upgrade::SyslogEnable "{{ unattended_upgrades_syslog_enable | bool | to_json }}";
+{% if unattended_upgrades_keep_conffiles | bool %}
+
+Dpkg::Options {
+        "--force-confdef";
+        "--force-confold";
+};
+{% endif %}

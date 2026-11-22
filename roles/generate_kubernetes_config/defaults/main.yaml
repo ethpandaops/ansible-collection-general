@@ -106,6 +106,16 @@ gen_kubernetes_config_authenticatoor_grants: # noqa var-naming[no-role-prefix]
       - "authentik/groups:panda-access"
     services: ["faucet:drop_100eth"]
 
+# upgradoor configuration; the chart is skipped without secret_upgradoor_seed.
+# "<repository>:<tag>" or "<repository>@sha256:<64 hex>" (the release manifest's image).
+gen_kubernetes_config_upgradoor_image: "{{ (default_tooling_images | default({})).upgradoor | default('ghcr.io/ethpandaops/upgradoor:latest') }}" # noqa var-naming[no-role-prefix] yaml[line-length]
+# Must hold the same seed as secret_upgradoor_controller_seed of the devnet repository.
+gen_kubernetes_config_upgradoor_controller_seed_ref: >- # noqa var-naming[no-role-prefix]
+  <path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.upgradoor_controller_seed}>
+# Controller settings overrides, e.g. {maxUnavailablePercent: 10, readyEpochs: 2}.
+gen_kubernetes_config_upgradoor_settings: {} # noqa var-naming[no-role-prefix]
+gen_kubernetes_config_upgradoor_persistence_size: "1Gi" # noqa var-naming[no-role-prefix]
+
 # powfaucet configuration
 # Multi-RPC endpoints — when non-empty, replaces the default single-bootnode RPC.
 # Each entry: { url, name?, priority?, metered? }
@@ -160,7 +170,8 @@ gen_kubernetes_config_chat_auth_enabled: true # noqa var-naming[no-role-prefix]
 
 # Enabled charts configuration
 gen_kubernetes_config_disabled_services: [] # noqa var-naming[no-role-prefix]
-gen_kubernetes_config_enabled_charts: "{{ gen_kubernetes_config_helm_charts.keys() | reject('in', gen_kubernetes_config_disabled_services) | list }}" # noqa var-naming[no-role-prefix] yaml[line-length]
+gen_kubernetes_config_unconfigured_services: "{{ [] if secret_upgradoor_seed is defined else ['upgradoor'] }}" # noqa var-naming[no-role-prefix]
+gen_kubernetes_config_enabled_charts: "{{ gen_kubernetes_config_helm_charts.keys() | reject('in', gen_kubernetes_config_disabled_services + gen_kubernetes_config_unconfigured_services) | list }}" # noqa var-naming[no-role-prefix] yaml[line-length]
 
 gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
   config:
@@ -316,5 +327,11 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
     valuesTemplatePath: templates/slashoor.yaml.j2
     dependencies:
       - name: slashoor
+        repository: https://ethpandaops.github.io/ethereum-helm-charts
+        version: 0.1.0
+  upgradoor:
+    valuesTemplatePath: templates/upgradoor.yaml.j2
+    dependencies:
+      - name: upgradoor
         repository: https://ethpandaops.github.io/ethereum-helm-charts
         version: 0.1.0

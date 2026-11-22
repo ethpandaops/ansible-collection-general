@@ -1,0 +1,29 @@
+ansible:
+  cfg:
+    defaults:
+      roles_path: ${MOLECULE_PROJECT_DIRECTORY}/..:${HOME}/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles
+  executor:
+    args:
+      ansible_playbook:
+        - --inventory=inventory/
+  playbooks:
+    create: ../../../../playbooks/molecule/create.yml
+    destroy: ../../../../playbooks/molecule/destroy.yml
+
+dependency:
+  name: galaxy
+  options:
+    role-file: ../../requirements.yaml
+    requirements-file: ../../requirements.yaml
+
+scenario:
+  test_sequence:
+    - dependency
+    - destroy
+    - syntax
+    - create
+    - prepare
+    - converge
+    - idempotence
+    - verify
+    - destroy

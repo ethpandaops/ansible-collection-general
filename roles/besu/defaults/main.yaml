@@ -54,6 +54,8 @@ besu_container_security_opts: []
 # besu_container_cpu_quota:
 # besu_container_cpu_period:
 besu_container_stop_timeout: "300"
+# upgradoor group label of the container; empty: not managed by upgradoor
+besu_upgradoor_group: execution
 besu_container_networks: []
 besu_container_command_default:
   - --data-path=/data

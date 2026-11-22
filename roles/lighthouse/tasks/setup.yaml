@@ -19,9 +19,35 @@
       failed_when: false
       changed_when: false
 
+    - name: Deploy through upgradoor {{ lighthouse_container_name }}
+      ansible.builtin.command:
+        argv: >-
+          {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', lighthouse_container_name,
+              '--image', lighthouse_container_image, '--command',
+              (lighthouse_container_command +
+               lighthouse_container_command_extra_args +
+               (lighthouse_checkpoint_sync_enabled | ternary(lighthouse_container_command_checkpoint_args, [])) +
+               (lighthouse_mev_boost_enabled | ternary(lighthouse_mev_boost_beacon_command, []))) | to_json]
+             + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
+               | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+        removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
+      register: lighthouse_upgradoor_deploy
+      changed_when: lighthouse_upgradoor_deploy.stdout is match('{') and (lighthouse_upgradoor_deploy.stdout | from_json).changed
+      when: secret_upgradoor_seed is defined
+
     - name: Run lighthouse container
+      vars:
+        lighthouse_upgradoor: >-
+          {{ lighthouse_upgradoor_deploy.stdout | from_json
+             if lighthouse_upgradoor_deploy.stdout | default('') is match('{') else {} }}
       community.docker.docker_container:
         name: "{{ lighthouse_container_name }}"
+        comparisons: >-
+          {{ {} if upgradoor_deploy | default('soft') == 'immediate'
+             else dict(lighthouse_upgradoor.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
+        labels: >-
+          {{ {'io.ethpandaops.upgradoor.group': lighthouse_upgradoor_group, 'io.ethpandaops.upgradoor.kind': 'cl'}
+             if lighthouse_upgradoor and lighthouse_upgradoor_group else {} }}
         image: "{{ lighthouse_container_image }}"
         image_name_mismatch: recreate
         state: started
@@ -75,9 +101,34 @@
       failed_when: false
       changed_when: false
 
+    - name: Deploy through upgradoor {{ lighthouse_validator_container_name }}
+      ansible.builtin.command:
+        argv: >-
+          {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', lighthouse_validator_container_name,
+              '--image', lighthouse_validator_container_image, '--command',
+              (lighthouse_validator_container_command +
+               lighthouse_validator_container_command_extra_args +
+               (lighthouse_mev_boost_enabled | ternary(lighthouse_mev_boost_validator_command, []))) | to_json]
+             + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
+               | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+        removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
+      register: lighthouse_validator_upgradoor_deploy
+      changed_when: lighthouse_validator_upgradoor_deploy.stdout is match('{') and (lighthouse_validator_upgradoor_deploy.stdout | from_json).changed
+      when: secret_upgradoor_seed is defined
+
     - name: Run lighthouse validator container
+      vars:
+        lighthouse_validator_upgradoor: >-
+          {{ lighthouse_validator_upgradoor_deploy.stdout | from_json
+             if lighthouse_validator_upgradoor_deploy.stdout | default('') is match('{') else {} }}
       community.docker.docker_container:
         name: "{{ lighthouse_validator_container_name }}"
+        comparisons: >-
+          {{ {} if upgradoor_deploy | default('soft') == 'immediate'
+             else dict(lighthouse_validator_upgradoor.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
+        labels: >-
+          {{ {'io.ethpandaops.upgradoor.group': lighthouse_validator_upgradoor_group, 'io.ethpandaops.upgradoor.kind': 'vc'}
+             if lighthouse_validator_upgradoor and lighthouse_validator_upgradoor_group else {} }}
         image: "{{ lighthouse_validator_container_image }}"
         image_name_mismatch: recreate
         state: started

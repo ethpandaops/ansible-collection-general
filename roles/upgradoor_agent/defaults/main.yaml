@@ -1,0 +1,238 @@
+upgradoor_agent_cleanup: false
+
+################################################################################
+## Binary
+################################################################################
+# Release tag, exactly vX.Y.Z.
+upgradoor_agent_version: "v0.1.0"
+upgradoor_agent_arch: "{{ {'x86_64': 'amd64', 'aarch64': 'arm64', 'arm64': 'arm64'}.get(ansible_facts['architecture'], ansible_facts['architecture']) }}"
+upgradoor_agent_release_url: "https://github.com/ethpandaops/upgradoor/releases/download/{{ upgradoor_agent_version }}"
+upgradoor_agent_manifest_url: "{{ upgradoor_agent_release_url }}/upgradoor-manifest.txt"
+upgradoor_agent_manifest_signature_url: "{{ upgradoor_agent_manifest_url }}.sig"
+upgradoor_agent_binary_url: "{{ upgradoor_agent_release_url }}/upgradoor-linux-{{ upgradoor_agent_arch }}"
+# Pinned release keys (principal and namespace upgradoor-release), on the Ansible controller.
+upgradoor_agent_allowed_signers_file: "{{ role_path }}/files/allowed_signers"
+# Repository the manifest's image line must name.
+upgradoor_agent_image_repository: ghcr.io/ethpandaops/upgradoor
+# Testing only: derive keys in this image instead of the verified release's image.
+upgradoor_agent_keygen_image: ""
+# Run with docker on the Ansible controller; seeds are passed in the environment.
+upgradoor_agent_keygen_argv:
+  - docker
+  - run
+  - --rm
+  - -i
+  - --network=none
+  - --env=UPGRADOOR_SEED
+  - --env=UPGRADOOR_CONTROLLER_SEED
+  - >-
+    {{ upgradoor_agent_keygen_image if upgradoor_agent_keygen_image | length > 0
+       else (upgradoor_agent_rv_verified | default({})).image | mandatory('upgradoor keygen needs a verified release or upgradoor_agent_keygen_image') }}
+  - keygen
+  - --network={{ upgradoor_agent_network }}
+# "<seq> <version>" of the installed release; a lower seq is refused unless downgrades are allowed.
+upgradoor_agent_release_seq_file: "{{ upgradoor_agent_config_dir }}/release-seq"
+upgradoor_agent_allow_downgrade: false
+# Testing only: install this binary from the Ansible controller, unverified.
+upgradoor_agent_binary_local_path: ""
+upgradoor_agent_binary_path: /usr/local/bin/upgradoor
+# Download directory; must not be the directory of upgradoor_agent_binary_path.
+upgradoor_agent_install_dir: /opt/upgradoor
+
+################################################################################
+## Files
+################################################################################
+upgradoor_agent_user: upgradoor
+upgradoor_agent_group: upgradoor
+upgradoor_agent_docker_group: docker
+upgradoor_agent_config_dir: /etc/upgradoor
+upgradoor_agent_config_file: "{{ upgradoor_agent_config_dir }}/agent.yaml"
+upgradoor_agent_key_file: "{{ upgradoor_agent_config_dir }}/host.key"
+upgradoor_agent_cert_file: "{{ upgradoor_agent_config_dir }}/host.crt"
+upgradoor_agent_state_dir: /var/lib/upgradoor
+# Login user; joins upgradoor_agent_group (overrides file and socket).
+upgradoor_agent_entry_user: devops
+# Own directory: the agent and the entry user both replace the file. The agent
+# creates the file and is its only writer of the generated block.
+upgradoor_agent_overrides_dir: "{{ upgradoor_agent_config_dir }}/overrides"
+upgradoor_agent_overrides_file: "{{ upgradoor_agent_overrides_dir }}/overrides.yaml"
+# Symlink to the overrides file; a regular file found here is moved there. Empty for none.
+upgradoor_agent_overrides_link: "/home/{{ upgradoor_agent_entry_user }}/overrides.yaml"
+upgradoor_agent_socket_path: /run/upgradoor/agent.sock
+# Must be a group the agent is a member of.
+upgradoor_agent_socket_group: "{{ upgradoor_agent_group }}"
+upgradoor_agent_audit_log_file: "{{ upgradoor_agent_state_dir }}/audit.log"
+upgradoor_agent_audit_log_max_size_bytes: 1048576
+upgradoor_agent_audit_log_max_files: 5
+
+################################################################################
+## Service
+################################################################################
+upgradoor_agent_service_name: upgradoor-agent
+upgradoor_agent_service_enabled: true
+upgradoor_agent_service_state: started
+upgradoor_agent_service_restart_sec: 5
+# A stopping agent finishes its current step (recreate, package upgrade).
+upgradoor_agent_service_stop_timeout_sec: 3600
+upgradoor_agent_log_level: info
+upgradoor_agent_log_format: text
+
+################################################################################
+## Identity
+################################################################################
+# Devnet seed; stays on the Ansible controller.
+upgradoor_agent_seed: "{{ secret_upgradoor_seed }}"
+upgradoor_agent_network: "{{ ethereum_network_name }}"
+upgradoor_agent_hostname: "{{ inventory_hostname }}"
+# Inventory groups that become certificate roles.
+upgradoor_agent_role_groups:
+  - bootnode
+  - ethereum_node
+  - buildoor
+  - mev_relay
+upgradoor_agent_roles: "{{ group_names | intersect(upgradoor_agent_role_groups) }}"
+
+################################################################################
+## Controller
+################################################################################
+upgradoor_agent_controller_url: "https://upgradoor.{{ network_subdomain }}"
+upgradoor_agent_controller_sync_interval: 30s
+upgradoor_agent_controller_lease_sync_interval: 5s
+# Plain http controller URL (development only).
+upgradoor_agent_controller_allow_insecure: false
+upgradoor_agent_controller_min_sync_interval: 1s
+upgradoor_agent_controller_max_sync_interval: 10m
+# Controller seed of the devnet group (not the devnet seed); only public keys reach a host.
+upgradoor_agent_controller_seed: "{{ secret_upgradoor_controller_seed }}"
+# Act on unsigned controller answers (development only); no controller seed needed.
+upgradoor_agent_controller_allow_unsigned_answers: false
+
+################################################################################
+## Validators
+################################################################################
+# Marker file of the validator_keys role ("<start>-<end>") on a host with validator keys.
+upgradoor_agent_has_validator_keys: >-
+  {{ (validator_end | default(0) | int) > (validator_start | default(0) | int)
+     and (validator_keys_range_marker is defined or validator_keys_sync_files is defined) }}
+upgradoor_agent_validators_marker_file: >-
+  {{ '' if not (upgradoor_agent_has_validator_keys | bool)
+     else validator_keys_range_marker if validator_keys_range_marker is defined
+     else (validator_keys_sync_files[0].dest | regex_replace('/+$', '') | dirname) ~ '/.validator_keyrange' }}
+# Static range [start, end), used only without a marker file.
+upgradoor_agent_validator_start: "{{ '' if upgradoor_agent_has_validator_keys | bool else validator_start | default('') }}"
+upgradoor_agent_validator_end: "{{ '' if upgradoor_agent_has_validator_keys | bool else validator_end | default('') }}"
+
+# What the controller may ask for.
+upgradoor_agent_verbs:
+  - roll
+  - packages
+  - reboot
+
+################################################################################
+## Groups
+################################################################################
+# Only inventory variables are visible here, not the client roles' defaults.
+upgradoor_agent_el: "{{ ethereum_node_el | default('') }}"
+upgradoor_agent_cl: "{{ ethereum_node_cl | default('') }}"
+upgradoor_agent_el_managed: "{{ (upgradoor_agent_el | length > 0) and (ethereum_node_el_enabled | default(true) | bool) }}"
+# Beacon node runs ("<client>_enabled" is false on a validator-only teku or nimbus host).
+upgradoor_agent_cl_managed: >-
+  {{ (upgradoor_agent_cl | length > 0) and (ethereum_node_cl_enabled | default(true) | bool)
+     and (lookup('ansible.builtin.vars', upgradoor_agent_cl ~ '_enabled', default=true) | bool) }}
+# Beacon node or validator client runs.
+upgradoor_agent_cl_group_managed: "{{ (upgradoor_agent_cl | length > 0) and (ethereum_node_cl_enabled | default(true) | bool) }}"
+upgradoor_agent_el_group: "{{ lookup('ansible.builtin.vars', upgradoor_agent_el ~ '_upgradoor_group', default='execution') }}"
+upgradoor_agent_cl_group: "{{ lookup('ansible.builtin.vars', upgradoor_agent_cl ~ '_upgradoor_group', default='consensus') }}"
+
+# Team names per client where they differ from the client name, e.g. {lighthouse: [sigp]}.
+upgradoor_agent_client_owners: {}
+upgradoor_agent_owners:
+  el: "{{ upgradoor_agent_client_owners[upgradoor_agent_el] | default([upgradoor_agent_el]) }}"
+  cl: "{{ upgradoor_agent_client_owners[upgradoor_agent_cl] | default([upgradoor_agent_cl]) }}"
+
+# Group keys: client, owners, overrides ([image, flags]), impact (node|slot|independent),
+# stop_timeout (whole seconds).
+upgradoor_agent_default_groups: >-
+  {{ ({upgradoor_agent_el_group: {'client': upgradoor_agent_el, 'owners': upgradoor_agent_owners.el}}
+      if (upgradoor_agent_el_managed | bool) and upgradoor_agent_el_group | length > 0 else {})
+     | combine({upgradoor_agent_cl_group: {'client': upgradoor_agent_cl, 'owners': upgradoor_agent_owners.cl}}
+               if (upgradoor_agent_cl_group_managed | bool) and upgradoor_agent_cl_group | length > 0 else {}) }}
+# Merged recursively over the default groups, e.g. {execution: {overrides: [image, flags]}}.
+upgradoor_agent_extra_groups: {}
+upgradoor_agent_groups: "{{ upgradoor_agent_default_groups | combine(upgradoor_agent_extra_groups, recursive=true) }}"
+
+################################################################################
+## Name map and default group
+################################################################################
+# Client roles that label their containers; the name map covers containers deployed before the labels.
+upgradoor_agent_labelling_roles:
+  el: [geth, besu, nethermind, reth]
+  cl: [lighthouse, prysm, lodestar, teku]
+  vc: [lighthouse, prysm, lodestar]
+upgradoor_agent_el_container: "{{ lookup('ansible.builtin.vars', upgradoor_agent_el ~ '_container_name', default=upgradoor_agent_el) }}"
+upgradoor_agent_cl_container: "{{ lookup('ansible.builtin.vars', upgradoor_agent_cl ~ '_container_name', default=upgradoor_agent_cl) }}"
+upgradoor_agent_vc_container: >-
+  {{ lookup('ansible.builtin.vars', upgradoor_agent_cl ~ '_validator_container_name', default=upgradoor_agent_cl_container ~ '-validator') }}
+upgradoor_agent_vc_group: "{{ lookup('ansible.builtin.vars', upgradoor_agent_cl ~ '_validator_upgradoor_group', default=upgradoor_agent_cl_group) }}"
+upgradoor_agent_client_containers: >-
+  {{ ([{'name': upgradoor_agent_el_container, 'group': upgradoor_agent_el_group, 'kind': 'el'}]
+      if (upgradoor_agent_el_managed | bool) and upgradoor_agent_el in upgradoor_agent_labelling_roles.el else [])
+     + ([{'name': upgradoor_agent_cl_container, 'group': upgradoor_agent_cl_group, 'kind': 'cl'}]
+        if (upgradoor_agent_cl_managed | bool) and upgradoor_agent_cl in upgradoor_agent_labelling_roles.cl else [])
+     + ([{'name': upgradoor_agent_vc_container, 'group': upgradoor_agent_vc_group, 'kind': 'vc'}]
+        if (upgradoor_agent_cl_group_managed | bool) and upgradoor_agent_cl in upgradoor_agent_labelling_roles.vc else []) }}
+# By container name, e.g. {dora: {group: tooling, kind: other}}; replaces a client role's entry.
+upgradoor_agent_extra_containers: {}
+
+# Let default group containers follow new digests of their tag.
+upgradoor_agent_default_group_roll: false
+# Names or path.Match patterns left out of the default group.
+upgradoor_agent_default_group_exclude: []
+
+################################################################################
+## Docker and registries
+################################################################################
+upgradoor_agent_docker_host: unix:///var/run/docker.sock
+# Copied on every run: the agent cannot read root's file. Missing source: anonymous pulls.
+upgradoor_agent_registry_auth_source: /root/.docker/config.json
+upgradoor_agent_registry_auth_file: "{{ upgradoor_agent_config_dir }}/registry-auth.json"
+
+################################################################################
+## Fallback without the controller
+################################################################################
+# Containers (names or patterns) that follow their tags, unstaggered, while the controller is silent.
+upgradoor_agent_fallback_containers: []
+upgradoor_agent_fallback_after: 24h
+upgradoor_agent_fallback_interval: 6h
+
+################################################################################
+## Packages
+################################################################################
+# Shared with unattended_upgrades through upgradoor_blocked_packages.
+upgradoor_agent_default_blocked_packages:
+  - docker-ce
+  - docker-ce-cli
+  - docker-ce-rootless-extras
+  - containerd.io
+  - docker-buildx-plugin
+  - docker-compose-plugin
+upgradoor_agent_blocked_packages: "{{ upgradoor_blocked_packages | default(upgradoor_agent_default_blocked_packages) }}"
+upgradoor_agent_lib_dir: /usr/local/lib/upgradoor
+upgradoor_agent_upgrade_script: "{{ upgradoor_agent_lib_dir }}/upgrade-packages"
+upgradoor_agent_reboot_command: [/usr/bin/systemctl, reboot]
+upgradoor_agent_sudo_path: /usr/bin/sudo
+upgradoor_agent_sudoers_file: /etc/sudoers.d/upgradoor-agent
+
+################################################################################
+## Probes (empty disables)
+################################################################################
+upgradoor_agent_probe_el: >-
+  {{ ('http://127.0.0.1:' ~ (ethereum_node_el_ports_http_rpc | default(8545))) if upgradoor_agent_el_managed | bool else '' }}
+upgradoor_agent_probe_cl: >-
+  {{ ('http://127.0.0.1:' ~ (ethereum_node_cl_ports_http_beacon | default(5052))) if upgradoor_agent_cl_managed | bool else '' }}
+
+################################################################################
+## Verification after an operation
+################################################################################
+upgradoor_agent_verify_window: 45s
+upgradoor_agent_verify_timeout: 10m

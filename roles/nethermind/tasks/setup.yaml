@@ -19,9 +19,32 @@
   failed_when: false
   changed_when: false
 
+- name: Deploy through upgradoor {{ nethermind_container_name }}
+  ansible.builtin.command:
+    argv: >-
+      {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', nethermind_container_name,
+          '--image', nethermind_container_image, '--command',
+          (nethermind_container_command + nethermind_container_command_extra_args) | to_json]
+         + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
+           | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+    removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
+  register: nethermind_upgradoor_deploy
+  changed_when: nethermind_upgradoor_deploy.stdout is match('{') and (nethermind_upgradoor_deploy.stdout | from_json).changed
+  when: secret_upgradoor_seed is defined
+
 - name: Run nethermind container
+  vars:
+    nethermind_upgradoor: >-
+      {{ nethermind_upgradoor_deploy.stdout | from_json
+         if nethermind_upgradoor_deploy.stdout | default('') is match('{') else {} }}
   community.docker.docker_container:
     name: "{{ nethermind_container_name }}"
+    comparisons: >-
+      {{ {} if upgradoor_deploy | default('soft') == 'immediate'
+         else dict(nethermind_upgradoor.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
+    labels: >-
+      {{ {'io.ethpandaops.upgradoor.group': nethermind_upgradoor_group, 'io.ethpandaops.upgradoor.kind': 'el'}
+         if nethermind_upgradoor and nethermind_upgradoor_group else {} }}
     image: "{{ nethermind_container_image }}"
     image_name_mismatch: recreate
     state: started

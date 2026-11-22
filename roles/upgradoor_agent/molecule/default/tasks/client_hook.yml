@@ -1,0 +1,55 @@
+# Runs the geth role in mode upgradoor_agent_case.mode and checks what the
+# agent answered and whether Ansible recreated the container.
+- name: Look at the container before - {{ upgradoor_agent_case.name }}
+  community.docker.docker_container_info:
+    name: geth
+  register: upgradoor_agent_hook_before
+
+- name: Add an override and a hold below the block - {{ upgradoor_agent_case.name }}
+  when: upgradoor_agent_case.mine | default(false)
+  block:
+    - name: Read the overrides file - {{ upgradoor_agent_case.name }}
+      ansible.builtin.slurp:
+        src: /etc/upgradoor/overrides/overrides.yaml
+      register: upgradoor_agent_hook_file
+
+    - name: Write the override and the hold - {{ upgradoor_agent_case.name }}
+      ansible.builtin.copy:
+        content: "{{ upgradoor_agent_hook_file.content | b64decode }}{{ upgradoor_agent_mine }}"
+        dest: /etc/upgradoor/overrides/overrides.yaml
+        owner: upgradoor
+        group: upgradoor
+        mode: "0664"
+
+- name: Run the geth role - {{ upgradoor_agent_case.name }}
+  ansible.builtin.include_role:
+    name: geth
+  vars:
+    upgradoor_deploy: "{{ upgradoor_agent_case.mode }}" # noqa: var-naming[no-role-prefix]
+    geth_container_image: "{{ upgradoor_agent_case.image }}" # noqa: var-naming[no-role-prefix]
+    geth_container_command: [sleep, "86400"] # noqa: var-naming[no-role-prefix]
+    geth_container_ports: [] # noqa: var-naming[no-role-prefix]
+    geth_container_volumes: [] # noqa: var-naming[no-role-prefix]
+    geth_container_stop_timeout: "1" # noqa: var-naming[no-role-prefix]
+
+- name: Look at the container after - {{ upgradoor_agent_case.name }}
+  community.docker.docker_container_info:
+    name: geth
+  register: upgradoor_agent_hook_after
+
+- name: Assert the deploy - {{ upgradoor_agent_case.name }}
+  ansible.builtin.assert:
+    that:
+      - upgradoor_agent_hook_deploy.container == 'geth'
+      - upgradoor_agent_hook_deploy.exists == upgradoor_agent_case.exists | default(true)
+      - upgradoor_agent_case.roll is not defined or upgradoor_agent_hook_deploy.roll == upgradoor_agent_case.roll
+      - (upgradoor_agent_hook_before.container.Id | default('') != upgradoor_agent_hook_after.container.Id) == upgradoor_agent_case.recreated
+      - upgradoor_agent_hook_after.container.Config.Image == upgradoor_agent_case.running
+      - upgradoor_agent_hook_after.container.State.Running
+      - upgradoor_agent_hook_labels['io.ethpandaops.upgradoor.group'] == 'execution'
+      - upgradoor_agent_hook_labels['io.ethpandaops.upgradoor.kind'] == 'el'
+    fail_msg: "{{ upgradoor_agent_case.name }}: {{ upgradoor_agent_hook_deploy }}, running {{ upgradoor_agent_hook_after.container.Config.Image }}"
+    quiet: true
+  vars:
+    upgradoor_agent_hook_deploy: "{{ geth_upgradoor_deploy.stdout | from_json }}"
+    upgradoor_agent_hook_labels: "{{ upgradoor_agent_hook_after.container.Config.Labels }}"

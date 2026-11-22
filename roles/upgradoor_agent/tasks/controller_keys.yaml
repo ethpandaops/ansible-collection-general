@@ -1,0 +1,30 @@
+# Devnet-wide input: checked and derived once, the key is set on every host.
+- name: Check the upgradoor controller seed
+  ansible.builtin.assert:
+    that:
+      - upgradoor_agent_controller_seed is defined
+      - upgradoor_agent_controller_seed is string
+      - upgradoor_agent_controller_seed != upgradoor_agent_seed
+    fail_msg: upgradoor_agent needs secret_upgradoor_controller_seed (not the devnet seed).
+    quiet: true
+  run_once: true
+  when: not upgradoor_agent_controller_allow_unsigned_answers | bool
+
+- name: Derive the upgradoor controller public key
+  ansible.builtin.command:
+    argv: "{{ upgradoor_agent_keygen_argv + ['controller-pubkey'] }}"
+  environment:
+    UPGRADOOR_CONTROLLER_SEED: "{{ upgradoor_agent_controller_seed }}"
+  register: upgradoor_agent_controller_keygen
+  changed_when: false
+  check_mode: false
+  delegate_to: localhost
+  run_once: true
+  become: false
+  no_log: true
+  when: not upgradoor_agent_controller_allow_unsigned_answers | bool
+
+- name: Set the upgradoor controller public key
+  ansible.builtin.set_fact:
+    upgradoor_agent_controller_public_key: "{{ upgradoor_agent_controller_keygen.stdout | default('') }}"
+  run_once: true

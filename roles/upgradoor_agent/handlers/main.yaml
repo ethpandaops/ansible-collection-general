@@ -1,0 +1,3 @@
+- name: Reload systemd for upgradoor-agent
+  ansible.builtin.systemd:
+    daemon_reload: true

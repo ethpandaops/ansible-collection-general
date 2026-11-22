@@ -1,0 +1,4 @@
+# {{ ansible_managed }}
+# The upgrade script checks its own arguments.
+{{ upgradoor_agent_user }} ALL=(root) NOPASSWD: {{ upgradoor_agent_upgrade_script }}
+{{ upgradoor_agent_user }} ALL=(root) NOPASSWD: {{ upgradoor_agent_reboot_command | join(' ') }}

@@ -1,0 +1,56 @@
+- name: Check the host and the blocked package names
+  ansible.builtin.assert:
+    that:
+      - ansible_facts.os_family | default('') == "Debian"
+      - unattended_upgrades_blocked_packages | select('string') | select('match', '^[a-z0-9][a-z0-9+.-]+$') | list
+        == unattended_upgrades_blocked_packages
+    fail_msg: >-
+      unattended_upgrades supports Debian family systems only (needs gathered facts) and takes exact package
+      names in unattended_upgrades_blocked_packages (regular expressions go into
+      unattended_upgrades_blocked_package_patterns); got '{{ ansible_facts.os_family | default('no facts') }}'
+      and {{ unattended_upgrades_blocked_packages | to_json }}.
+    quiet: true
+
+# The package cache is updated only when the packages cannot be installed from it.
+- name: Install unattended-upgrades
+  ansible.builtin.apt:
+    name: "{{ unattended_upgrades_packages }}"
+    state: present
+  register: unattended_upgrades_install
+  ignore_errors: true
+
+- name: Install unattended-upgrades with an updated package cache
+  ansible.builtin.apt:
+    name: "{{ unattended_upgrades_packages }}"
+    state: present
+    update_cache: true
+    cache_valid_time: "{{ unattended_upgrades_apt_cache_valid_time }}"
+  when: unattended_upgrades_install is failed
+
+- name: Write unattended-upgrades config
+  ansible.builtin.template:
+    src: 50unattended-upgrades.j2
+    dest: /etc/apt/apt.conf.d/50unattended-upgrades
+    owner: root
+    group: root
+    mode: "0644"
+    validate: apt-config -c %s dump
+
+- name: Write periodic apt config
+  ansible.builtin.template:
+    src: 20auto-upgrades.j2
+    dest: /etc/apt/apt.conf.d/20auto-upgrades
+    owner: root
+    group: root
+    mode: "0644"
+    validate: apt-config -c %s dump
+
+- name: Enable apt timers
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    enabled: true
+    state: started
+  loop: "{{ unattended_upgrades_timers }}"
+  when:
+    - unattended_upgrades_manage_timers | bool
+    - ansible_facts.service_mgr | default('') == "systemd"

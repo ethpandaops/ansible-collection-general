@@ -73,6 +73,8 @@ lighthouse_container_security_opts: []
 # lighthouse_container_cpu_quota:
 # lighthouse_container_cpu_period:
 lighthouse_container_stop_timeout: "300"
+# upgradoor group label of the container; empty: not managed by upgradoor
+lighthouse_upgradoor_group: consensus
 lighthouse_container_networks: []
 lighthouse_container_command_default:
   - lighthouse
@@ -150,6 +152,7 @@ lighthouse_validator_container_security_opts: []
 # lighthouse_validator_container_cpu_quota:
 # lighthouse_validator_container_cpu_period:
 lighthouse_validator_container_stop_timeout: "300"
+lighthouse_validator_upgradoor_group: "{{ lighthouse_upgradoor_group }}"
 lighthouse_validator_container_networks: []
 lighthouse_validator_container_command:
   - lighthouse

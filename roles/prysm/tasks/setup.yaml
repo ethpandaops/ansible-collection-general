@@ -19,9 +19,35 @@
       failed_when: false
       changed_when: false
 
+    - name: Deploy through upgradoor {{ prysm_container_name }}
+      ansible.builtin.command:
+        argv: >-
+          {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', prysm_container_name,
+              '--image', prysm_container_image, '--command',
+              (prysm_container_command +
+               prysm_container_command_extra_args +
+               (prysm_checkpoint_sync_enabled | ternary(prysm_container_command_checkpoint_args, [])) +
+               (prysm_mev_boost_enabled | ternary(prysm_mev_boost_beacon_command, []))) | to_json]
+             + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
+               | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+        removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
+      register: prysm_upgradoor_deploy
+      changed_when: prysm_upgradoor_deploy.stdout is match('{') and (prysm_upgradoor_deploy.stdout | from_json).changed
+      when: secret_upgradoor_seed is defined
+
     - name: Run prysm container
+      vars:
+        prysm_upgradoor: >-
+          {{ prysm_upgradoor_deploy.stdout | from_json
+             if prysm_upgradoor_deploy.stdout | default('') is match('{') else {} }}
       community.docker.docker_container:
         name: "{{ prysm_container_name }}"
+        comparisons: >-
+          {{ {} if upgradoor_deploy | default('soft') == 'immediate'
+             else dict(prysm_upgradoor.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
+        labels: >-
+          {{ {'io.ethpandaops.upgradoor.group': prysm_upgradoor_group, 'io.ethpandaops.upgradoor.kind': 'cl'}
+             if prysm_upgradoor and prysm_upgradoor_group else {} }}
         image: "{{ prysm_container_image }}"
         image_name_mismatch: recreate
         state: started
@@ -72,9 +98,34 @@
       failed_when: false
       changed_when: false
 
+    - name: Deploy through upgradoor {{ prysm_validator_container_name }}
+      ansible.builtin.command:
+        argv: >-
+          {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', prysm_validator_container_name,
+              '--image', prysm_validator_container_image, '--command',
+              (prysm_validator_container_command +
+               prysm_validator_container_command_extra_args +
+               (prysm_mev_boost_enabled | ternary(prysm_mev_boost_validator_command, []))) | to_json]
+             + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
+               | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+        removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
+      register: prysm_validator_upgradoor_deploy
+      changed_when: prysm_validator_upgradoor_deploy.stdout is match('{') and (prysm_validator_upgradoor_deploy.stdout | from_json).changed
+      when: secret_upgradoor_seed is defined
+
     - name: Run prysm validator container
+      vars:
+        prysm_validator_upgradoor: >-
+          {{ prysm_validator_upgradoor_deploy.stdout | from_json
+             if prysm_validator_upgradoor_deploy.stdout | default('') is match('{') else {} }}
       community.docker.docker_container:
         name: "{{ prysm_validator_container_name }}"
+        comparisons: >-
+          {{ {} if upgradoor_deploy | default('soft') == 'immediate'
+             else dict(prysm_validator_upgradoor.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
+        labels: >-
+          {{ {'io.ethpandaops.upgradoor.group': prysm_validator_upgradoor_group, 'io.ethpandaops.upgradoor.kind': 'vc'}
+             if prysm_validator_upgradoor and prysm_validator_upgradoor_group else {} }}
         image: "{{ prysm_validator_container_image }}"
         image_name_mismatch: recreate
         state: started

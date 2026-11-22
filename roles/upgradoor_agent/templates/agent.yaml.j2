@@ -1,0 +1,138 @@
+# {{ ansible_managed }}
+controller:
+  url: {{ upgradoor_agent_controller_url | to_json }}
+  syncInterval: {{ upgradoor_agent_controller_sync_interval | string | to_json }}
+  leaseSyncInterval: {{ upgradoor_agent_controller_lease_sync_interval | string | to_json }}
+  minSyncInterval: {{ upgradoor_agent_controller_min_sync_interval | string | to_json }}
+  maxSyncInterval: {{ upgradoor_agent_controller_max_sync_interval | string | to_json }}
+  allowInsecure: {{ upgradoor_agent_controller_allow_insecure | bool | to_json }}
+{% if upgradoor_agent_controller_allow_unsigned_answers | bool %}
+  allowUnsignedAnswers: true
+{% else %}
+  publicKey: {{ upgradoor_agent_controller_public_key | to_json }}
+{% endif %}
+
+keyFile: {{ upgradoor_agent_key_file | to_json }}
+certFile: {{ upgradoor_agent_cert_file | to_json }}
+stateDir: {{ upgradoor_agent_state_dir | to_json }}
+entryUser: {{ upgradoor_agent_entry_user | to_json }}
+overridesFile: {{ upgradoor_agent_overrides_file | to_json }}
+
+socket:
+  path: {{ upgradoor_agent_socket_path | to_json }}
+{% if upgradoor_agent_socket_group | length > 0 %}
+  group: {{ upgradoor_agent_socket_group | to_json }}
+{% endif %}
+
+auditLog:
+  file: {{ upgradoor_agent_audit_log_file | to_json }}
+  maxSizeBytes: {{ upgradoor_agent_audit_log_max_size_bytes | int }}
+  maxFiles: {{ upgradoor_agent_audit_log_max_files | int }}
+
+{% if upgradoor_agent_verbs | length > 0 %}
+verbs:
+{% for verb in upgradoor_agent_verbs %}
+  - {{ verb | to_json }}
+{% endfor %}
+{% else %}
+verbs: []
+{% endif %}
+
+{% set groups = {} %}
+{% for name, group in upgradoor_agent_groups.items() %}
+{% set group = group | default({}, true) | dict2items | selectattr('value') | items2dict %}
+{% if group | length > 0 %}
+{% set _ = groups.update({name: group}) %}
+{% endif %}
+{% endfor %}
+{% if groups | length > 0 %}
+groups:
+{% for name, group in groups | dictsort %}
+{% set stop_timeout = group.stop_timeout | default('', true) | string %}
+  {{ name | to_json }}:
+{% if group.client | default('', true) | length > 0 %}
+    client: {{ group.client | to_json }}
+{% endif %}
+{% if group.owners | default([], true) | length > 0 %}
+    owners: {{ group.owners | list | to_json }}
+{% endif %}
+{% if group.overrides | default([], true) | length > 0 %}
+    overrides: {{ group.overrides | list | to_json }}
+{% endif %}
+{% if group.impact | default('', true) | length > 0 %}
+    impact: {{ group.impact | to_json }}
+{% endif %}
+{% if stop_timeout | length > 0 %}
+    stopTimeout: {{ ((stop_timeout | int) ~ 's') | to_json }}
+{% endif %}
+{% endfor %}
+{% else %}
+groups: {}
+{% endif %}
+
+{% set containers = {} %}
+{% for c in upgradoor_agent_client_containers if c.group | length > 0 %}
+{% set _ = containers.update({c.name: {'group': c.group, 'kind': c.kind}}) %}
+{% endfor %}
+{% set _ = containers.update(upgradoor_agent_extra_containers) %}
+{% if containers | length > 0 %}
+containers:
+{% for name, c in containers | dictsort %}
+  {{ name | to_json }}: {group: {{ c.group | to_json }}, kind: {{ c.kind | default('other', true) | to_json }}}
+{% endfor %}
+{% else %}
+containers: {}
+{% endif %}
+
+{% set excluded = upgradoor_agent_default_group_exclude
+                  + (upgradoor_agent_client_containers | rejectattr('group') | map(attribute='name') | list) %}
+defaultGroup:
+  roll: {{ upgradoor_agent_default_group_roll | bool | to_json }}
+  exclude: {{ excluded | unique | list | to_json }}
+
+{% if upgradoor_agent_validators_marker_file | length > 0 %}
+validators:
+  markerFile: {{ upgradoor_agent_validators_marker_file | to_json }}
+{% elif (upgradoor_agent_validator_end | string | length > 0)
+        and (upgradoor_agent_validator_end | int) > (upgradoor_agent_validator_start | int) %}
+validators:
+  start: {{ upgradoor_agent_validator_start | int }}
+  end: {{ upgradoor_agent_validator_end | int }}
+{% else %}
+validators: {}
+{% endif %}
+
+docker:
+  host: {{ upgradoor_agent_docker_host | to_json }}
+
+registry:
+  authFile: {{ upgradoor_agent_registry_auth_file | to_json }}
+
+commands:
+  upgradePackages: {{ [upgradoor_agent_sudo_path, '-n', upgradoor_agent_upgrade_script] | to_json }}
+  reboot: {{ ([upgradoor_agent_sudo_path, '-n'] + upgradoor_agent_reboot_command) | to_json }}
+
+packages:
+{% if upgradoor_agent_blocked_packages | length > 0 %}
+  blocked:
+{% for package in upgradoor_agent_blocked_packages %}
+    - {{ package | to_json }}
+{% endfor %}
+{% else %}
+  blocked: []
+{% endif %}
+
+{% if upgradoor_agent_fallback_containers | length > 0 %}
+fallback:
+  containers: {{ upgradoor_agent_fallback_containers | to_json }}
+  after: {{ upgradoor_agent_fallback_after | to_json }}
+  interval: {{ upgradoor_agent_fallback_interval | to_json }}
+
+{% endif %}
+probes:
+  el: {{ upgradoor_agent_probe_el | to_json }}
+  cl: {{ upgradoor_agent_probe_cl | to_json }}
+
+verify:
+  window: {{ upgradoor_agent_verify_window | string | to_json }}
+  timeout: {{ upgradoor_agent_verify_timeout | string | to_json }}
