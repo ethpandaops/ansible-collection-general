@@ -52,7 +52,7 @@
   changed_when: teku_upgradoor_deploy.stdout is match('{') and (teku_upgradoor_deploy.stdout | from_json).changed
   when:
     - teku_enabled
-    - secret_upgradoor_seed is defined
+    - teku_upgradoor_enabled | bool
 
 - name: Run teku container
   when: teku_enabled
@@ -66,8 +66,9 @@
       {{ {} if upgradoor_deploy | default('soft') == 'immediate'
          else dict(teku_upgradoor.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
     labels: >-
-      {{ {'io.ethpandaops.upgradoor.group': teku_upgradoor_group, 'io.ethpandaops.upgradoor.kind': 'cl'}
-         if teku_upgradoor and teku_upgradoor_group else {} }}
+      {{ {'io.ethpandaops.upgradoor.kind': 'cl'}
+         | combine({'io.ethpandaops.upgradoor.team': teku_upgradoor_team} if teku_upgradoor_team else {})
+         if teku_upgradoor_enabled | bool else {} }}
     image: "{{ teku_container_image }}"
     image_name_mismatch: recreate
     state: started

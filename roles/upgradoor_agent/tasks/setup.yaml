@@ -1,137 +1,123 @@
-# Blocked packages are written into the script the agent runs as root; paths
-# and names are fields of the apply bundle (no whitespace).
 - name: Check the upgradoor input
   ansible.builtin.assert:
     that:
       - upgradoor_agent_seed is defined
-      - upgradoor_agent_seed is string
-      - upgradoor_agent_seed | length >= 32
-      - upgradoor_agent_network is defined
-      - (upgradoor_agent_validator_start | string | length > 0) == (upgradoor_agent_validator_end | string | length > 0)
-      - (upgradoor_agent_validator_end | default(0, true) | int) >= (upgradoor_agent_validator_start | default(0, true) | int)
-      - upgradoor_agent_verbs | difference(['roll', 'packages', 'reboot']) | length == 0
-      - upgradoor_agent_blocked_packages | reject('match', '^[a-z0-9][a-z0-9+.-]{0,126}[a-z0-9+.]$') | list | length == 0
-      - upgradoor_agent_service_state in ['started', 'stopped', 'restarted']
-      - upgradoor_agent_bundle_fields | map('string') | reject('match', '^\S+$') | list | length == 0
-      - upgradoor_agent_bad_groups | trim | length == 0
-    fail_msg: >-
-      {{ upgradoor_agent_bad_groups | trim }}
-      upgradoor_agent needs secret_upgradoor_seed (at least 32 bytes), ethereum_network_name, a validator range
-      [start, end), verbs out of roll, packages and reboot, plain package names as blocked packages, a service
-      state out of started, stopped and restarted, and paths and names without whitespace.
+      - upgradoor_agent_controller_allow_unsigned_answers | bool or upgradoor_agent_controller_public_key is defined
+    fail_msg: upgradoor_agent needs secret_upgradoor_seed and upgradoor_controller_public_key.
     quiet: true
-  vars:
-    upgradoor_agent_bundle_fields:
-      - "{{ upgradoor_agent_user }}"
-      - "{{ upgradoor_agent_group }}"
-      - "{{ upgradoor_agent_docker_group }}"
-      - "{{ upgradoor_agent_entry_user }}"
-      - "{{ upgradoor_agent_service_name }}"
-      - "{{ upgradoor_agent_config_dir }}"
-      - "{{ upgradoor_agent_config_file }}"
-      - "{{ upgradoor_agent_key_file }}"
-      - "{{ upgradoor_agent_cert_file }}"
-      - "{{ upgradoor_agent_state_dir }}"
-      - "{{ upgradoor_agent_overrides_dir }}"
-      - "{{ upgradoor_agent_overrides_file }}"
-      - "{{ upgradoor_agent_overrides_link or '-' }}"
-      - "{{ upgradoor_agent_socket_path }}"
-      - "{{ upgradoor_agent_lib_dir }}"
-      - "{{ upgradoor_agent_upgrade_script }}"
-      - "{{ upgradoor_agent_sudoers_file }}"
-      - "{{ upgradoor_agent_registry_auth_source or '-' }}"
-      - "{{ upgradoor_agent_registry_auth_file }}"
-      - "{{ upgradoor_agent_validators_marker_file or '-' }}"
-      - "{{ upgradoor_agent_binary_path }}"
-      - "{{ upgradoor_agent_install_dir }}"
-      - "{{ upgradoor_agent_release_seq_file }}"
-      - "{{ upgradoor_agent_binary_url }}"
-    upgradoor_agent_name_pattern: '^[a-z0-9][a-z0-9._-]{0,62}$'
-    # One sentence per group that fails.
-    upgradoor_agent_bad_groups: >-
-      {%- set ns = namespace(msg='') -%}
-      {%- for name, value in upgradoor_agent_groups.items() -%}
-      {%- set g = value if value is mapping else {} -%}
-      {%- set owners = g.owners | default([], true) -%}
-      {%- set overrides = g.overrides | default([], true) -%}
-      {%- if not (name is match(upgradoor_agent_name_pattern)
-                  and (value is mapping or value is none)
-                  and (g.client | default('', true) | length == 0 or g.client is match(upgradoor_agent_name_pattern))
-                  and owners is sequence and owners is not string and owners | length <= 8
-                  and owners | reject('match', upgradoor_agent_name_pattern) | list | length == 0
-                  and overrides is sequence and overrides is not string
-                  and overrides | difference(['image', 'flags']) | length == 0
-                  and g.impact | default('', true) in ['', 'node', 'slot', 'independent']
-                  and ('stop_timeout' not in g or g.stop_timeout | string is match('^[1-9][0-9]*$'))) -%}
-      {%- set ns.msg = ns.msg ~ "upgradoor group '" ~ name ~ "': name [a-z0-9][a-z0-9._-]{0,62}; keys client, owners "
-                       ~ "(at most 8), overrides (image, flags), impact (node, slot, independent), stop_timeout "
-                       ~ "(whole seconds, no unit); got " ~ (value | to_json) ~ ". " -%}
-      {%- endif -%}
-      {%- endfor -%}
-      {{ ns.msg }}
 
-- name: Verify the upgradoor release {{ upgradoor_agent_version }}
-  ansible.builtin.import_tasks: release_verify.yaml
-  when: upgradoor_agent_binary_local_path | length == 0
-
-- name: Check the upgradoor controller keys
-  ansible.builtin.import_tasks: controller_keys.yaml
-
-- name: Collect the upgradoor identity of the host
-  ansible.builtin.set_fact:
-    upgradoor_agent_keygen_host:
-      hostname: "{{ upgradoor_agent_hostname }}"
-      roles: "{{ upgradoor_agent_roles }}"
-
-- name: Derive the upgradoor host keys and certificates
-  ansible.builtin.command:
-    argv: "{{ upgradoor_agent_keygen_argv + ['host-certs'] }}"
-    stdin: >-
-      {{ ansible_play_hosts | map('extract', hostvars) | selectattr('upgradoor_agent_keygen_host', 'defined')
-         | map(attribute='upgradoor_agent_keygen_host') | list | to_json }}
-  environment:
-    UPGRADOOR_SEED: "{{ upgradoor_agent_seed }}"
-  register: upgradoor_agent_host_certs
-  changed_when: false
-  check_mode: false
-  delegate_to: localhost
-  run_once: true
-  become: false
-  no_log: true
-
-- name: Parse the upgradoor host keys and certificates
-  ansible.builtin.set_fact:
-    upgradoor_agent_host_files: "{{ upgradoor_agent_host_certs.stdout | from_json }}"
-  run_once: true
-  no_log: true
-
-# Testing only: unverified.
-- name: Install upgradoor binary from the Ansible controller
+- name: Copy the upgradoor install files
   ansible.builtin.copy:
-    src: "{{ upgradoor_agent_binary_local_path }}"
-    dest: "{{ upgradoor_agent_binary_path }}"
+    src: "{{ item.src | default(omit) }}"
+    content: "{{ item.content | default(omit) }}"
+    dest: "{{ item.dest }}"
     owner: root
     group: root
-    mode: "0755"
-  register: upgradoor_agent_local_binary
-  when: upgradoor_agent_binary_local_path | length > 0
+    mode: "{{ item.mode }}"
+  loop:
+    # The trailing slash creates the directory.
+    - {src: install.sh, dest: "{{ upgradoor_agent_lib_dir }}/", mode: "0755"}
+    - {src: "{{ upgradoor_agent_allowed_signers_file }}", dest: "{{ upgradoor_agent_lib_dir }}/allowed_signers", mode: "0644"}
+    - {content: "{{ lookup('ansible.builtin.template', 'upgrade-packages.sh.j2') }}", dest: "{{ upgradoor_agent_upgrade_script }}", mode: "0755"}
+  loop_control:
+    label: "{{ item.dest }}"
 
-# Release, user, files, ACL, overrides link and service in one round trip.
-# The bundle carries the host key: no_log, and only stderr is reported.
-- name: Apply the upgradoor agent # noqa: command-instead-of-shell
-  ansible.builtin.shell:
-    cmd: "{{ lookup('ansible.builtin.file', 'apply.sh') }}"
-    stdin: "{{ lookup('ansible.builtin.template', 'apply.j2') }}"
+# Downloads and verifies the release on the host; prints one JSON line.
+- name: Install the upgradoor release
+  ansible.builtin.command:
+    argv: "{{ [upgradoor_agent_lib_dir ~ '/install.sh'] + (['--check'] if ansible_check_mode else []) + [upgradoor_agent_version] }}"
   environment:
-    UPGRADOOR_CHECK: "{{ ansible_check_mode }}"
-    UPGRADOOR_RESTART: "{{ upgradoor_agent_local_binary is changed }}"
-  register: upgradoor_agent_apply
+    UPGRADOOR_RELEASES_URL: "{{ upgradoor_agent_releases_url }}"
+    UPGRADOOR_NETWORK: "{{ upgradoor_agent_network }}"
+    UPGRADOOR_HOSTNAME: "{{ upgradoor_agent_hostname }}"
+    UPGRADOOR_SIGNER_PUBLIC_KEY: "{{ upgradoor_agent_signer_public_key }}"
+    UPGRADOOR_USER: "{{ upgradoor_agent_user }}"
+    UPGRADOOR_GROUP: "{{ upgradoor_agent_group }}"
+    UPGRADOOR_DOCKER_GROUP: "{{ upgradoor_agent_docker_group }}"
+    UPGRADOOR_ENTRY_USER: "{{ upgradoor_agent_entry_user }}"
+    UPGRADOOR_CONFIG_DIR: "{{ upgradoor_agent_config_dir }}"
+    UPGRADOOR_KEY_FILE: "{{ upgradoor_agent_key_file }}"
+    UPGRADOOR_CERT_FILE: "{{ upgradoor_agent_cert_file }}"
+    UPGRADOOR_STATE_DIR: "{{ upgradoor_agent_state_dir }}"
+    UPGRADOOR_OVERRIDES_DIR: "{{ upgradoor_agent_overrides_dir if upgradoor_agent_overrides | bool else '' }}"
+    UPGRADOOR_OVERRIDES_FILE: "{{ upgradoor_agent_overrides_file if upgradoor_agent_overrides | bool else '' }}"
+    UPGRADOOR_OVERRIDES_LINK: "{{ upgradoor_agent_overrides_link if upgradoor_agent_overrides | bool else '' }}"
+    UPGRADOOR_BINARY: "{{ upgradoor_agent_binary_path }}"
+    UPGRADOOR_SEQ_FILE: "{{ upgradoor_agent_release_seq_file }}"
+  register: upgradoor_agent_install
   check_mode: false
-  changed_when: upgradoor_agent_apply.rc == 0 and (upgradoor_agent_apply.stdout | from_json).changed
-  failed_when: false
-  no_log: true
+  changed_when: upgradoor_agent_install.rc == 0 and (upgradoor_agent_install.stdout | from_json).changed
+  notify: Restart upgradoor-agent
 
-- name: Report a failed upgradoor agent apply
-  ansible.builtin.fail:
-    msg: "{{ upgradoor_agent_apply.stderr | default('', true) or 'upgradoor apply failed' }}"
-  when: upgradoor_agent_apply.rc != 0
+- name: Write the upgradoor agent config
+  ansible.builtin.template:
+    src: agent.yaml.j2
+    dest: "{{ upgradoor_agent_config_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart upgradoor-agent
+
+- name: Write the upgradoor agent unit
+  ansible.builtin.template:
+    src: upgradoor-agent.service.j2
+    dest: /etc/systemd/system/{{ upgradoor_agent_service_name }}.service
+    owner: root
+    group: root
+    mode: "0644"
+  register: upgradoor_agent_unit
+  notify:
+    - Reload systemd for upgradoor-agent
+    - Restart upgradoor-agent
+
+- name: Write the upgradoor agent sudoers rules
+  ansible.builtin.template:
+    src: sudoers.j2
+    dest: "{{ upgradoor_agent_sudoers_file }}"
+    owner: root
+    group: root
+    mode: "0440"
+    validate: visudo -cf %s
+
+# Only public input reaches the image; the seed goes through the environment.
+- name: Issue the upgradoor host certificate
+  ansible.builtin.command:
+    argv:
+      - docker
+      - run
+      - --rm
+      - -i
+      - --network=none
+      - --env=UPGRADOOR_SEED
+      - "{{ upgradoor_agent_image_repository }}@{{ upgradoor_agent_release.image_digest }}"
+      - keygen
+      - host-cert
+      - --network={{ upgradoor_agent_network }}
+      - --hostname={{ upgradoor_agent_hostname }}
+      - --public-key={{ upgradoor_agent_release.public_key }}
+  environment:
+    UPGRADOOR_SEED: "{{ upgradoor_agent_seed }}"
+  register: upgradoor_agent_cert
+  changed_when: true
+  when: upgradoor_agent_release.cert_needed or upgradoor_agent_reissue | bool
+  delegate_to: localhost
+  become: false
+  vars:
+    upgradoor_agent_release: "{{ upgradoor_agent_install.stdout | from_json }}"
+
+- name: Install the upgradoor host certificate
+  ansible.builtin.copy:
+    content: "{{ upgradoor_agent_cert.stdout }}\n"
+    dest: "{{ upgradoor_agent_cert_file }}"
+    owner: root
+    group: "{{ upgradoor_agent_group }}"
+    mode: "0640"
+  when: upgradoor_agent_cert is not skipped
+  notify: Restart upgradoor-agent
+
+- name: Start the upgradoor agent
+  ansible.builtin.systemd:
+    name: "{{ upgradoor_agent_service_name }}"
+    enabled: "{{ upgradoor_agent_service_enabled }}"
+    state: "{{ upgradoor_agent_service_state }}"
+    daemon_reload: "{{ upgradoor_agent_unit is changed }}"

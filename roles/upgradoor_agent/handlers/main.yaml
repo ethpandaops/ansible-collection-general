@@ -1,3 +1,9 @@
 - name: Reload systemd for upgradoor-agent
   ansible.builtin.systemd:
     daemon_reload: true
+
+- name: Restart upgradoor-agent
+  ansible.builtin.systemd:
+    name: "{{ upgradoor_agent_service_name }}"
+    state: restarted
+  when: upgradoor_agent_service_state != 'stopped'

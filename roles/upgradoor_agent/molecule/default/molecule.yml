@@ -6,9 +6,6 @@ ansible:
     args:
       ansible_playbook:
         - --inventory=inventory/
-  playbooks:
-    create: ../../../../playbooks/molecule/create.yml
-    destroy: ../../../../playbooks/molecule/destroy.yml
 
 dependency:
   name: galaxy

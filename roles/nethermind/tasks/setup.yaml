@@ -30,7 +30,7 @@
     removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
   register: nethermind_upgradoor_deploy
   changed_when: nethermind_upgradoor_deploy.stdout is match('{') and (nethermind_upgradoor_deploy.stdout | from_json).changed
-  when: secret_upgradoor_seed is defined
+  when: nethermind_upgradoor_enabled | bool
 
 - name: Run nethermind container
   vars:
@@ -43,8 +43,9 @@
       {{ {} if upgradoor_deploy | default('soft') == 'immediate'
          else dict(nethermind_upgradoor.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
     labels: >-
-      {{ {'io.ethpandaops.upgradoor.group': nethermind_upgradoor_group, 'io.ethpandaops.upgradoor.kind': 'el'}
-         if nethermind_upgradoor and nethermind_upgradoor_group else {} }}
+      {{ {'io.ethpandaops.upgradoor.kind': 'el'}
+         | combine({'io.ethpandaops.upgradoor.team': nethermind_upgradoor_team} if nethermind_upgradoor_team else {})
+         if nethermind_upgradoor_enabled | bool else {} }}
     image: "{{ nethermind_container_image }}"
     image_name_mismatch: recreate
     state: started

@@ -1,25 +1,22 @@
 # Runs the geth role in mode upgradoor_agent_case.mode and checks what the
-# agent answered and whether Ansible recreated the container.
+# agent answered, whether Ansible recreated the container and what
+# managed.yaml holds. With override, an override of that image is set through
+# the agent first; with entry, the overrides file must contain that text.
 - name: Look at the container before - {{ upgradoor_agent_case.name }}
   community.docker.docker_container_info:
     name: geth
   register: upgradoor_agent_hook_before
 
-- name: Add an override and a hold below the block - {{ upgradoor_agent_case.name }}
-  when: upgradoor_agent_case.mine | default(false)
-  block:
-    - name: Read the overrides file - {{ upgradoor_agent_case.name }}
-      ansible.builtin.slurp:
-        src: /etc/upgradoor/overrides/overrides.yaml
-      register: upgradoor_agent_hook_file
-
-    - name: Write the override and the hold - {{ upgradoor_agent_case.name }}
-      ansible.builtin.copy:
-        content: "{{ upgradoor_agent_hook_file.content | b64decode }}{{ upgradoor_agent_mine }}"
-        dest: /etc/upgradoor/overrides/overrides.yaml
-        owner: upgradoor
-        group: upgradoor
-        mode: "0664"
+- name: Set an override - {{ upgradoor_agent_case.name }}
+  ansible.builtin.command:
+    argv: [upgradoor, override, set, geth, --image, "{{ upgradoor_agent_case.override }}", --reason, test]
+  register: upgradoor_agent_hook_override
+  # The agent may still be starting.
+  retries: 10
+  delay: 1
+  until: upgradoor_agent_hook_override is succeeded
+  changed_when: true
+  when: upgradoor_agent_case.override is defined
 
 - name: Run the geth role - {{ upgradoor_agent_case.name }}
   ansible.builtin.include_role:
@@ -37,19 +34,41 @@
     name: geth
   register: upgradoor_agent_hook_after
 
+- name: Read managed.yaml - {{ upgradoor_agent_case.name }}
+  ansible.builtin.slurp:
+    src: /etc/upgradoor/managed.yaml
+  register: upgradoor_agent_hook_managed
+
+- name: Read the overrides file - {{ upgradoor_agent_case.name }}
+  ansible.builtin.slurp:
+    src: /etc/upgradoor/overrides/overrides.yaml
+  register: upgradoor_agent_hook_overrides
+  when: upgradoor_agent_case.entry is defined
+
 - name: Assert the deploy - {{ upgradoor_agent_case.name }}
   ansible.builtin.assert:
     that:
       - upgradoor_agent_hook_deploy.container == 'geth'
       - upgradoor_agent_hook_deploy.exists == upgradoor_agent_case.exists | default(true)
       - upgradoor_agent_case.roll is not defined or upgradoor_agent_hook_deploy.roll == upgradoor_agent_case.roll
+      - upgradoor_agent_case.changed is not defined or upgradoor_agent_hook_deploy.changed == upgradoor_agent_case.changed
       - (upgradoor_agent_hook_before.container.Id | default('') != upgradoor_agent_hook_after.container.Id) == upgradoor_agent_case.recreated
       - upgradoor_agent_hook_after.container.Config.Image == upgradoor_agent_case.running
       - upgradoor_agent_hook_after.container.State.Running
-      - upgradoor_agent_hook_labels['io.ethpandaops.upgradoor.group'] == 'execution'
       - upgradoor_agent_hook_labels['io.ethpandaops.upgradoor.kind'] == 'el'
-    fail_msg: "{{ upgradoor_agent_case.name }}: {{ upgradoor_agent_hook_deploy }}, running {{ upgradoor_agent_hook_after.container.Config.Image }}"
+      - upgradoor_agent_hook_labels['io.ethpandaops.upgradoor.team'] == 'geth'
+      - upgradoor_agent_hook_managed_text is match('# written by upgradoor deploy, do not edit\n')
+      - "'      - \"86400\"' in upgradoor_agent_hook_managed_text"
+      - >-
+        upgradoor_agent_hook_managed_text | from_yaml
+        == {'containers': {'geth': {'image': upgradoor_agent_case.image, 'command': ['sleep', '86400']}}}
+      - upgradoor_agent_case.entry is not defined or upgradoor_agent_case.entry in upgradoor_agent_hook_overrides_text
+    fail_msg: >-
+      {{ upgradoor_agent_case.name }}: {{ upgradoor_agent_hook_deploy }}, running {{ upgradoor_agent_hook_after.container.Config.Image }},
+      managed.yaml {{ upgradoor_agent_hook_managed_text }}, overrides file {{ upgradoor_agent_hook_overrides_text }}
     quiet: true
   vars:
     upgradoor_agent_hook_deploy: "{{ geth_upgradoor_deploy.stdout | from_json }}"
     upgradoor_agent_hook_labels: "{{ upgradoor_agent_hook_after.container.Config.Labels }}"
+    upgradoor_agent_hook_managed_text: "{{ upgradoor_agent_hook_managed.content | b64decode }}"
+    upgradoor_agent_hook_overrides_text: "{{ upgradoor_agent_hook_overrides.content | default('') | b64decode }}"

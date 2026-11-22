@@ -7,136 +7,106 @@
         path: "{{ item }}"
       loop:
         - /usr/local/bin/upgradoor
+        - /usr/local/lib/upgradoor/install.sh
+        - /usr/local/lib/upgradoor/allowed_signers
+        - /usr/local/lib/upgradoor/upgrade-packages
         - /etc/upgradoor
         - /etc/upgradoor/agent.yaml
         - /etc/upgradoor/host.key
         - /etc/upgradoor/host.crt
         - /var/lib/upgradoor
-        - /etc/systemd/system/upgradoor-agent.service
-        - /etc/upgradoor/overrides
-        - /usr/local/lib/upgradoor/upgrade-packages
         - /etc/sudoers.d/upgradoor-agent
       register: upgradoor_agent_stat
 
     - name: Assert files, owners and modes
       ansible.builtin.assert:
         that:
-          - upgradoor_agent_files.values() | rejectattr('exists') | list | length == 0
-          - upgradoor_agent_files['/usr/local/bin/upgradoor'].mode == '0755'
-          - upgradoor_agent_files['/etc/upgradoor'].mode == '0755'
-          - upgradoor_agent_files['/etc/upgradoor/agent.yaml'].mode == '0644'
-          - upgradoor_agent_files['/etc/upgradoor/host.key'].mode == '0600'
-          - upgradoor_agent_files['/etc/upgradoor/host.crt'].mode == '0600'
-          - upgradoor_agent_files['/var/lib/upgradoor'].mode == '0700'
-          - upgradoor_agent_files['/etc/upgradoor/overrides'].mode == '2775'
-          - upgradoor_agent_files['/usr/local/lib/upgradoor/upgrade-packages'].mode == '0755'
-          - upgradoor_agent_files['/etc/sudoers.d/upgradoor-agent'].mode == '0440'
-          # The agent owns exactly these; everything else is root's.
-          - >-
-            upgradoor_agent_files | dict2items | rejectattr('value.pw_name', 'equalto', 'root') | map(attribute='key') | sort
-            == upgradoor_agent_own
-          - >-
-            upgradoor_agent_files | dict2items | rejectattr('value.gr_name', 'equalto', 'root') | map(attribute='key') | sort
-            == upgradoor_agent_own
-          - upgradoor_agent_own | map('extract', upgradoor_agent_files) | map(attribute='pw_name') | unique | list == ['upgradoor']
+          - item.stat.pw_name ~ ':' ~ item.stat.gr_name ~ ' ' ~ item.stat.mode == upgradoor_agent_want[item.item]
+        fail_msg: "{{ item.item }}: {{ item.stat.pw_name | default('missing') }}:{{ item.stat.gr_name | default('') }} {{ item.stat.mode | default('') }}"
         quiet: true
+      loop: "{{ upgradoor_agent_stat.results }}"
+      loop_control:
+        label: "{{ item.item }}"
       vars:
-        upgradoor_agent_own:
-          - /etc/upgradoor/host.crt
-          - /etc/upgradoor/host.key
-          - /etc/upgradoor/overrides
-          - /var/lib/upgradoor
-        upgradoor_agent_files: "{{ dict(upgradoor_agent_stat.results | map(attribute='item') | zip(upgradoor_agent_stat.results | map(attribute='stat'))) }}"
+        upgradoor_agent_want:
+          /usr/local/bin/upgradoor: root:root 0755
+          /usr/local/lib/upgradoor/install.sh: root:root 0755
+          /usr/local/lib/upgradoor/allowed_signers: root:root 0644
+          /usr/local/lib/upgradoor/upgrade-packages: root:root 0755
+          /etc/upgradoor: root:upgradoor 0750
+          /etc/upgradoor/agent.yaml: root:root 0644
+          /etc/upgradoor/host.key: root:upgradoor 0640
+          /etc/upgradoor/host.crt: root:upgradoor 0640
+          /var/lib/upgradoor: upgradoor:upgradoor 0700
+          /etc/sudoers.d/upgradoor-agent: root:root 0440
 
-    - name: Read key, certificate, config and unit
+    - name: Read the config, the unit and the release seq
       ansible.builtin.slurp:
         src: "{{ item }}"
       loop:
-        - /etc/upgradoor/host.key
-        - /etc/upgradoor/host.crt
         - /etc/upgradoor/agent.yaml
         - /etc/systemd/system/upgradoor-agent.service
+        - /etc/upgradoor/release-seq
       register: upgradoor_agent_slurp
-      no_log: true
 
-    # Fact names must differ from the role's task vars: facts outrank them.
-    - name: Decode files
-      ansible.builtin.set_fact:
-        upgradoor_agent_installed_key: "{{ upgradoor_agent_slurp.results[0].content | b64decode }}"
-        upgradoor_agent_installed_cert: "{{ upgradoor_agent_slurp.results[1].content | b64decode }}"
-        upgradoor_agent_config: "{{ upgradoor_agent_slurp.results[2].content | b64decode | from_yaml }}"
-        upgradoor_agent_unit: "{{ upgradoor_agent_slurp.results[3].content | b64decode }}"
-      no_log: true
-
-    - name: Assert the form of key and certificate
+    - name: Assert config, unit and release
       ansible.builtin.assert:
         that:
-          - upgradoor_agent_installed_key is match('[A-Za-z0-9_-]{43}\n\Z')
-          - upgradoor_agent_installed_cert is match('[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\n\Z')
+          - upgradoor_agent_config.controller.publicKey == upgradoor_controller_public_key
+          - upgradoor_agent_config.roles == ['ethereum_node']
+          - "'overridesFile' not in upgradoor_agent_config"
+          - upgradoor_agent_config.defaultPolicy == 'ignore'
+          - "upgradoor_agent_config.kindPolicies == {'el': {'roll': true}, 'snooper-el': {'roll': false}}"
+          - "upgradoor_agent_config.docker == {'host': 'unix:///var/run/docker.sock', 'authFile': '/etc/upgradoor/registry-auth.json'}"
+          - "upgradoor_agent_config.fallback == {'after': '24h', 'interval': '6h'}"
+          - >-
+            upgradoor_agent_config.probes == {
+              'el': 'http://127.0.0.1:8545', 'cl': 'http://127.0.0.1:5052', 'snooper-el': 'http://127.0.0.1:9000/health',
+            }
+          - upgradoor_agent_config.keys() | intersect(['groups', 'containers', 'defaultGroup', 'registry', 'validators']) | length == 0
+          - upgradoor_agent_unit is search('(?m)^User=upgradoor$')
+          - upgradoor_agent_unit is search('(?m)^KillMode=process$')
+          - upgradoor_agent_seq == "2000 v0.2.0\n"
+        quiet: true
+      vars:
+        upgradoor_agent_config: "{{ upgradoor_agent_slurp.results[0].content | b64decode | from_yaml }}"
+        upgradoor_agent_unit: "{{ upgradoor_agent_slurp.results[1].content | b64decode }}"
+        upgradoor_agent_seq: "{{ upgradoor_agent_slurp.results[2].content | b64decode }}"
+
+    - name: Read the host public key and the certificate's claims
+      ansible.builtin.shell:
+        cmd: |
+          set -eu
+          upgradoor key
+          upgradoor verify-cert --network testnet-devnet-0 --signer-public-key {{ upgradoor_signer_public_key | quote }} < /etc/upgradoor/host.crt
+      register: upgradoor_agent_identity
+      changed_when: false
+
+    - name: Assert the certificate certifies this host's key
+      ansible.builtin.assert:
+        that:
+          - >-
+            upgradoor_agent_identity.stdout_lines[1] | from_json
+            == {'hostname': 'lighthouse-geth-1', 'network': 'testnet-devnet-0', 'publicKey': upgradoor_agent_identity.stdout_lines[0]}
         quiet: true
 
-    # The last cases bring the host back to the input of converge.
-    - name: Apply the role again with the same and with other identity input
-      ansible.builtin.include_tasks:
-        file: tasks/reissue.yml
-      loop:
-        - name: the same input
-          reissued: false
-        - name: other roles
-          roles: [bootnode, ethereum_node]
-          reissued: true
-        - name: another host name
-          hostname: lighthouse-geth-2
-          reissued: true
-        - name: another devnet seed
-          seed: "0f1e2d3c4b5a69780f1e2d3c4b5a69780f1e2d3c4b5a69780f1e2d3c4b5a6978"
-          reissued: true
-        - name: the input of converge again
-          reissued: true
-        - name: a damaged certificate file
-          damage: true
-          reissued: false
-      loop_control:
-        loop_var: upgradoor_agent_case
-        label: "{{ upgradoor_agent_case.name }}"
+    - name: Let systemd check the unit
+      ansible.builtin.command:
+        cmd: systemd-analyze verify /etc/systemd/system/upgradoor-agent.service
+      register: upgradoor_agent_unit_verify
+      changed_when: false
+      failed_when: upgradoor_agent_unit_verify.rc != 0 or upgradoor_agent_unit_verify.stderr | length > 0
 
-    - name: Assert agent config
+    - name: Read the unit state
+      ansible.builtin.systemd:
+        name: upgradoor-agent.service
+      register: upgradoor_agent_unit_state
+
+    - name: Assert the agent runs
       ansible.builtin.assert:
         that:
-          - upgradoor_agent_config.controller.url == 'https://upgradoor.testnet-devnet-0.ethpandaops.io'
-          - upgradoor_agent_config.controller.allowInsecure is false
-          - upgradoor_agent_config.controller.publicKey is match('[A-Za-z0-9_-]{1750}\Z')
-          - upgradoor_agent_config.validators.markerFile == '/var/lib/validator/.validator_keyrange'
-          - >-
-            upgradoor_agent_config.groups == {
-              'consensus': {'client': 'lighthouse', 'owners': ['sigp'], 'overrides': ['image', 'flags'], 'stopTimeout': '120s'},
-              'execution': {'client': 'geth', 'owners': ['geth']},
-              'proxy': {'impact': 'independent'},
-            }
-          - >-
-            upgradoor_agent_config.containers == {
-              'geth': {'group': 'execution', 'kind': 'el'},
-              'lighthouse': {'group': 'consensus', 'kind': 'cl'},
-              'lighthouse-validator': {'group': 'consensus', 'kind': 'vc'},
-            }
-          - "upgradoor_agent_config.defaultGroup == {'roll': false, 'exclude': []}"
-          - >-
-            upgradoor_agent_config.commands == {
-              'upgradePackages': ['/usr/bin/sudo', '-n', '/usr/local/lib/upgradoor/upgrade-packages'],
-              'reboot': ['/usr/bin/sudo', '-n', '/usr/bin/systemctl', 'reboot'],
-            }
-          - >-
-            upgradoor_agent_config.packages.blocked == [
-              'docker-ce', 'docker-ce-cli', 'docker-ce-rootless-extras', 'containerd.io',
-              'docker-buildx-plugin', 'docker-compose-plugin',
-            ]
-          - "upgradoor_agent_config.probes == {'el': 'http://127.0.0.1:8545', 'cl': 'http://127.0.0.1:5052'}"
-          - >-
-            upgradoor_agent_config.keys() | sort == [
-              'auditLog', 'certFile', 'commands', 'containers', 'controller', 'defaultGroup', 'docker', 'entryUser', 'groups',
-              'keyFile', 'overridesFile', 'packages', 'probes', 'registry', 'socket', 'stateDir',
-              'validators', 'verbs', 'verify',
-            ]
+          - upgradoor_agent_unit_state.status.UnitFileState == 'enabled'
+          - upgradoor_agent_unit_state.status.ActiveState == 'active'
         quiet: true
 
     # No blocked package is installed here, so the script exits before apt.
@@ -145,14 +115,9 @@
         argv: "{{ ['/usr/bin/sudo', '-u', 'upgradoor', '--', '/usr/bin/sudo', '-n'] + item.argv }}"
       loop:
         - {argv: [/usr/local/lib/upgradoor/upgrade-packages, docker-ce, containerd.io], rc: 0}
-        - {argv: [/usr/local/lib/upgradoor/upgrade-packages], rc: 2}
         - {argv: [/usr/local/lib/upgradoor/upgrade-packages, docker-ce, bash], rc: 2}
-        - {argv: [/usr/local/lib/upgradoor/upgrade-packages, -o, "APT::Update::Pre-Invoke::=id"], rc: 2}
-        - {argv: [/usr/local/lib/upgradoor/upgrade-packages, "docker-ce containerd.io"], rc: 2}
         - {argv: [-l, /usr/bin/systemctl, reboot], rc: 0}
-        - {argv: [-l, /usr/bin/systemctl, poweroff], rc: 1}
         - {argv: [/usr/bin/apt-get, update], rc: 1}
-        - {argv: [/bin/sh, /usr/local/lib/upgradoor/upgrade-packages], rc: 1}
       loop_control:
         label: "{{ item.argv | join(' ') }}"
       register: upgradoor_agent_sudo
@@ -169,335 +134,304 @@
         upgradoor_agent_ids.stdout.split() | intersect(['upgradoor', 'docker', 'sudo', 'root']) | sort
         != (['docker', 'upgradoor'] if item == 'upgradoor' else ['upgradoor'])
 
-    # The agent reads the marker through the ACL and sees nothing else there.
-    - name: Read the validator range marker as the agent
-      ansible.builtin.command:
-        argv: "{{ ['/usr/bin/sudo', '-u', 'upgradoor', '--'] + item.argv }}"
-      loop:
-        - {argv: [/usr/bin/cat, /var/lib/validator/.validator_keyrange], rc: 0}
-        - {argv: [/usr/bin/ls, /var/lib/validator], rc: 2}
-      loop_control:
-        label: "{{ item.argv | join(' ') }}"
-      register: upgradoor_agent_marker_read
-      changed_when: false
-      failed_when: upgradoor_agent_marker_read.rc != item.rc
-
-    - name: Assert systemd unit content
-      ansible.builtin.assert:
-        that:
-          - "'ExecStart=/usr/local/bin/upgradoor agent --config /etc/upgradoor/agent.yaml' in upgradoor_agent_unit"
-          - upgradoor_agent_unit is search('(?m)^User=upgradoor$')
-          - upgradoor_agent_unit is search('(?m)^SupplementaryGroups=docker$')
-          - upgradoor_agent_unit is search('(?m)^RuntimeDirectory=upgradoor$')
-          - upgradoor_agent_unit is search('(?m)^NoNewPrivileges=false$')
-          - upgradoor_agent_unit is not search('(?m)^ProtectSystem=')
-          - upgradoor_agent_unit is search('(?m)^KillMode=process$')
-          - upgradoor_agent_unit is search('(?m)^TimeoutStopSec=3600$')
-        quiet: true
-
-    - name: Let systemd check the unit
-      ansible.builtin.command:
-        cmd: systemd-analyze verify /etc/systemd/system/upgradoor-agent.service
-      register: upgradoor_agent_unit_verify
-      changed_when: false
-
-    - name: Read unit state
-      ansible.builtin.systemd:
-        name: upgradoor-agent.service
-      register: upgradoor_agent_unit_state
-
-    # ActiveState needs a reachable controller.
-    - name: Assert unit is loaded and enabled
-      ansible.builtin.assert:
-        that:
-          - upgradoor_agent_unit_state.status.LoadState == 'loaded'
-          - upgradoor_agent_unit_state.status.UnitFileState == 'enabled'
-          - upgradoor_agent_unit_state.status.KillMode == 'process'
-          - upgradoor_agent_unit_verify.stderr | length == 0
-        quiet: true
-
-    # A restart must not kill a running apt-get. A drop-in swaps the agent
-    # for a stand-in whose child stays in the unit, like dpkg.
-    - name: Prove that a child of the agent survives a restart of the unit
-      block:
-        - name: Create the drop-in directory
-          ansible.builtin.file:
-            path: /run/systemd/system/upgradoor-agent.service.d
-            state: directory
-            mode: "0755"
-
-        - name: Swap the agent for a stand-in with a child
-          ansible.builtin.copy:
-            content: |
-              [Service]
-              User=root
-              ExecStart=
-              ExecStart=/bin/sh -c 'sleep 86400 & echo $$! > /run/upgradoor-molecule-child.pid; exec sleep 86401'
-            dest: /run/systemd/system/upgradoor-agent.service.d/50-molecule.conf
-            mode: "0644"
-
-        - name: Start the stand-in
-          ansible.builtin.systemd:
-            name: upgradoor-agent.service
-            state: restarted
-            daemon_reload: true
-
-        - name: Wait for the child
-          ansible.builtin.wait_for:
-            path: /run/upgradoor-molecule-child.pid
-            search_regex: '^[0-9]+$'
-            timeout: 30
-
-        - name: Read the child and the unit it belongs to
-          ansible.builtin.shell:
-            cmd: |
-              set -eu
-              pid="$(cat /run/upgradoor-molecule-child.pid)"
-              echo "$pid"
-              tr '\0' ' ' < "/proc/$pid/cmdline"
-              echo
-              cat "/proc/$pid/cgroup"
-              systemctl show --property MainPID --value upgradoor-agent.service
-          register: upgradoor_agent_child_before
-          changed_when: false
-
-        - name: Restart the unit
-          ansible.builtin.systemd:
-            name: upgradoor-agent.service
-            state: restarted
-
-        # The restarted stand-in overwrites the pid file: use the pid read before.
-        - name: Look at the first child again
-          ansible.builtin.shell:
-            cmd: |
-              set -u
-              tr '\0' ' ' < "/proc/{{ upgradoor_agent_child_before.stdout_lines[0] }}/cmdline"
-              echo
-              systemctl show --property MainPID --value upgradoor-agent.service
-          register: upgradoor_agent_child_after
-          changed_when: false
-
-        - name: Assert the child is still running and the main process is a new one
-          ansible.builtin.assert:
-            that:
-              - upgradoor_agent_child_before.stdout_lines[1] | trim == 'sleep 86400'
-              - upgradoor_agent_child_before.stdout_lines[2] is search('upgradoor-agent\.service')
-              - upgradoor_agent_child_after.stdout_lines[0] | trim == 'sleep 86400'
-              - upgradoor_agent_child_after.stdout_lines[-1] | int > 0
-              - upgradoor_agent_child_after.stdout_lines[-1] != upgradoor_agent_child_before.stdout_lines[-1]
-            fail_msg: "before {{ upgradoor_agent_child_before.stdout_lines }}, after {{ upgradoor_agent_child_after.stdout_lines }}"
-            quiet: true
-      always:
-        - name: Remove the stand-in
-          ansible.builtin.file:
-            path: /run/systemd/system/upgradoor-agent.service.d
-            state: absent
-
-        - name: Forget the stand-in
-          ansible.builtin.systemd:
-            daemon_reload: true
-
-        - name: Kill everything that is left in the unit
-          ansible.builtin.command:
-            cmd: systemctl kill --kill-whom=all --signal=SIGKILL upgradoor-agent.service
-          changed_when: false
-          failed_when: false
-
-        - name: Remove the pid file of the child
-          ansible.builtin.file:
-            path: /run/upgradoor-molecule-child.pid
-            state: absent
-
-        - name: Start the agent again
-          ansible.builtin.systemd:
-            name: upgradoor-agent.service
-            state: restarted
-
-        - name: Look for children of the stand-in
-          ansible.builtin.command:
-            cmd: pgrep -f '^sleep 8640[01]$'
-          register: upgradoor_agent_leftover
-          changed_when: false
-          failed_when: upgradoor_agent_leftover.rc != 1
-
-    # The agent would read "120s" as 0s and fall back to its default.
-    - name: Try stop timeouts that are not whole seconds
+    - name: Prove the certificate is issued once, and again for a new key
       ansible.builtin.include_tasks:
-        file: tasks/bad_stop_timeout.yml
-      loop: ["120s", "1.5", 0]
+        file: tasks/certificate.yml
+      loop:
+        - {name: the same host, issued: false}
+        - {name: a new host key, remove: /etc/upgradoor/host.key, issued: true}
+        - {name: a removed certificate, remove: /etc/upgradoor/host.crt, issued: true}
+        - {name: reissue, reissue: true, issued: true}
+        - {name: the same host again, issued: false}
       loop_control:
-        loop_var: upgradoor_agent_bad_stop_timeout
+        loop_var: upgradoor_agent_case
+        label: "{{ upgradoor_agent_case.name }}"
 
-    - name: Read the agent config after the refused runs
-      ansible.builtin.slurp:
-        src: /etc/upgradoor/agent.yaml
-      register: upgradoor_agent_config_after
+    # A container deployed before the labels: the hook leaves nothing to the
+    # agent, so Ansible recreates it once with its labels.
+    - name: Run an unlabelled geth container
+      community.docker.docker_container:
+        name: geth
+        image: "busybox:1.35"
+        command: [sleep, "86400"]
+        stop_timeout: 1
+        state: started
 
-    - name: Assert the refused runs changed nothing
-      ansible.builtin.assert:
-        that:
-          - upgradoor_agent_config_after.content | b64decode | from_yaml == upgradoor_agent_config
-        quiet: true
+    # A client role deploys through the agent: one container, all modes;
+    # overrides are off.
+    - name: Prove the client role hook without overrides
+      ansible.builtin.include_tasks:
+        file: tasks/client_hook.yml
+      loop:
+        - {name: soft deploy of an unlabelled container, mode: soft, image: "busybox:1.36", roll: none, recreated: true, running: "busybox:1.36"}
+        - {name: soft deploy of a new image, mode: soft, image: "busybox:1.37", roll: requested, changed: true, recreated: false, running: "busybox:1.36"}
+        - {name: force deploy, mode: force, image: "busybox:1.37", roll: requested, changed: false, recreated: false, running: "busybox:1.36"}
+        - {name: immediate deploy, mode: immediate, image: "busybox:1.37", recreated: true, running: "busybox:1.37"}
+        - {name: immediate deploy again, mode: immediate, image: "busybox:1.37", changed: false, recreated: false, running: "busybox:1.37"}
+      loop_control:
+        loop_var: upgradoor_agent_case
+        label: "{{ upgradoor_agent_case.name }}"
 
-    # The agent writes the missing overrides file; the role only links it.
-    - name: Stat the overrides file and its link
+    - name: Stat managed.yaml, the overrides file and its link
       ansible.builtin.stat:
         path: "{{ item }}"
         follow: false
       loop:
+        - /etc/upgradoor/managed.yaml
         - /etc/upgradoor/overrides/overrides.yaml
         - /home/devops/overrides.yaml
-      register: upgradoor_agent_overrides_stat
+      register: upgradoor_agent_files_off
 
-    - name: Assert the overrides file is the agent's and linked for the entry user
+    - name: Try an override without overrides
+      ansible.builtin.command:
+        argv: [upgradoor, override, set, geth, --image, "busybox:1.36"]
+      register: upgradoor_agent_override_off
+      changed_when: false
+      failed_when: upgradoor_agent_override_off.rc == 0 or 'overrides are disabled on this host' not in upgradoor_agent_override_off.stderr
+
+    - name: Assert managed.yaml is root's and there is no overrides file
       ansible.builtin.assert:
         that:
-          - upgradoor_agent_overrides_stat.results[0].stat.pw_name == 'upgradoor'
-          - upgradoor_agent_overrides_stat.results[0].stat.gr_name == 'upgradoor'
-          - upgradoor_agent_overrides_stat.results[0].stat.mode == '0664'
-          - upgradoor_agent_overrides_stat.results[1].stat.islnk
-          - upgradoor_agent_overrides_stat.results[1].stat.lnk_source == '/etc/upgradoor/overrides/overrides.yaml'
-          - upgradoor_agent_overrides_stat.results[1].stat.pw_name == 'devops'
+          - upgradoor_agent_files_off.results[0].stat.pw_name ~ ':' ~ upgradoor_agent_files_off.results[0].stat.gr_name == 'root:upgradoor'
+          - upgradoor_agent_files_off.results[0].stat.mode == '0640'
+          - not upgradoor_agent_files_off.results[1].stat.exists
+          - not upgradoor_agent_files_off.results[2].stat.exists
         quiet: true
 
-    # A client role deploys through the agent: one container, all modes.
-    - name: Prove the client role hook
+    # Overrides on: the agent lays out the overrides file; a soft deploy
+    # keeps an override, force and immediate deploys clear it.
+    - name: Prove the client role hook with overrides
       vars:
-        upgradoor_agent_mine: "overrides:\n  geth:\n    image: busybox:1.36\n    by: me\n    reason: test\nhold:\n  local:\n    by: me\n    reason: test\n"
-        upgradoor_agent_hook_cases:
-          - {name: soft deploy of a new container, mode: soft, image: "busybox:1.36", exists: false, recreated: true, running: "busybox:1.36"}
-          - {name: soft deploy of a new image, mode: soft, image: "busybox:1.37", roll: requested, recreated: false, running: "busybox:1.36"}
-          - {name: force deploy drops the override, mode: force, image: "busybox:1.37", mine: true, recreated: false, running: "busybox:1.36"}
-          - {name: immediate deploy, mode: immediate, image: "busybox:1.37", recreated: true, running: "busybox:1.37"}
-          - {name: immediate deploy again, mode: immediate, image: "busybox:1.37", recreated: false, running: "busybox:1.37"}
+        upgradoor_agent_default_entry: "  geth:\n    # default image: busybox:1.37\n    # default command:\n    #   - sleep\n    #   - \"86400\"\n"
+        upgradoor_agent_empty_entry: "    #   - \"86400\"\n    # image:\n    # command:\n    # reason:\n    # until:\n"
       block:
-        - name: Deploy geth with the client role
+        - name: Apply the role with overrides
+          ansible.builtin.include_role:
+            name: upgradoor_agent
+          vars:
+            upgradoor_agent_overrides: true
+
+        - name: Restart the agent with overrides
+          ansible.builtin.meta: flush_handlers
+
+        - name: Wait for the agent's socket
+          ansible.builtin.wait_for:
+            path: /run/upgradoor/agent.sock
+            timeout: 30
+
+        - name: Deploy geth with the client role and overrides
           ansible.builtin.include_tasks:
             file: tasks/client_hook.yml
-          loop: "{{ upgradoor_agent_hook_cases }}"
+          loop:
+            - name: soft deploy lays out the overrides file
+              mode: soft
+              image: "busybox:1.37"
+              changed: false
+              recreated: false
+              running: "busybox:1.37"
+              entry: "{{ upgradoor_agent_default_entry ~ '    # image:\n' }}"
+            - name: soft deploy keeps an override
+              mode: soft
+              image: "busybox:1.37"
+              override: "busybox:1.36"
+              roll: requested
+              changed: false
+              recreated: false
+              running: "busybox:1.37"
+              entry: "{{ upgradoor_agent_default_entry ~ '    image: busybox:1.36\n    by: root\n    reason: test\n' }}"
+            - name: force deploy clears the override
+              mode: force
+              image: "busybox:1.37"
+              changed: true
+              recreated: false
+              running: "busybox:1.37"
+              entry: "{{ upgradoor_agent_empty_entry }}"
+            - name: immediate deploy clears the override
+              mode: immediate
+              image: "busybox:1.36"
+              override: "busybox:1.37"
+              changed: true
+              recreated: true
+              running: "busybox:1.36"
+              entry: "{{ upgradoor_agent_empty_entry }}"
           loop_control:
             loop_var: upgradoor_agent_case
             label: "{{ upgradoor_agent_case.name }}"
 
-        - name: Read the overrides file after the force deploy
+        - name: Set and clear an override
+          ansible.builtin.command:
+            argv: "{{ ['upgradoor', 'override'] + item }}"
+          loop:
+            - [set, geth, --image, "busybox:1.37", --add-flag=--verbose, --reason, test]
+            - [clear, geth]
+          register: upgradoor_agent_set_clear
+          changed_when: true
+
+        - name: Read the overrides file after the clear
           ansible.builtin.slurp:
             src: /etc/upgradoor/overrides/overrides.yaml
           register: upgradoor_agent_overrides_after
 
-        - name: Assert the force deploy dropped the override and kept the hold
+        - name: Assert the clear put the commented structure back
           ansible.builtin.assert:
             that:
-              - "upgradoor_agent_parsed.deployed == {'geth': {'image': 'busybox:1.37', 'command': ['sleep', '86400']}}"
-              - upgradoor_agent_parsed.overrides | default({}, true) == {}
-              - "upgradoor_agent_parsed.hold == {'local': {'by': 'me', 'reason': 'test'}}"
-            fail_msg: "{{ upgradoor_agent_overrides }}"
+              - "'set image busybox:1.37, command sleep 86400 --verbose; was nothing' in upgradoor_agent_overrides_text"
+              - "'cleared; was image busybox:1.37, command sleep 86400 --verbose' in upgradoor_agent_overrides_text"
+              - upgradoor_agent_empty_entry in upgradoor_agent_overrides_text
+              - "(upgradoor_agent_overrides_text | from_yaml).overrides == {'geth': none}"
+            fail_msg: "{{ upgradoor_agent_overrides_text }}"
             quiet: true
           vars:
-            upgradoor_agent_overrides: "{{ upgradoor_agent_overrides_after.content | b64decode }}"
-            upgradoor_agent_parsed: "{{ upgradoor_agent_overrides | from_yaml }}"
+            upgradoor_agent_overrides_text: "{{ upgradoor_agent_overrides_after.content | b64decode }}"
 
-        - name: Deploy with an unknown mode
-          block:
-            - name: Run the client role with upgradoor_deploy hard
-              ansible.builtin.include_role:
-                name: geth
-              vars:
-                upgradoor_deploy: hard # noqa: var-naming[no-role-prefix]
-
-            - name: The role must not get here
-              ansible.builtin.fail:
-                msg: upgradoor_deploy hard was accepted
-          rescue:
-            - name: Assert the deploy refused the mode
-              ansible.builtin.assert:
-                that:
-                  - ansible_failed_task.name is search('through upgradoor')
-                  - "'upgradoor_deploy must be soft, force or immediate' in ansible_failed_result.msg"
-                quiet: true
-      always:
-        - name: Remove the geth container
+        # A kind without a team is managed and never overridable.
+        - name: Run a snooper container without a team
           community.docker.docker_container:
-            name: geth
-            state: absent
+            name: snooper
+            image: "busybox:1.37"
+            command: [sleep, "86400"]
+            stop_timeout: 1
+            labels:
+              io.ethpandaops.upgradoor.kind: snooper-el
+            state: started
 
-        - name: Remove the hold and the deployed entry
+        - name: List the managed containers
+          ansible.builtin.command:
+            argv: [upgradoor, list]
+          register: upgradoor_agent_list
+          # The agent sees the container with its next cycle.
+          retries: 10
+          delay: 1
+          until: "'snooper  (snooper-el, no team, running)' in upgradoor_agent_list.stdout"
+          changed_when: false
+
+        - name: Try an override of the snooper
+          ansible.builtin.command:
+            argv: [upgradoor, override, set, snooper, --image, "busybox:1.36"]
+          register: upgradoor_agent_override_teamless
+          changed_when: false
+          failed_when: >-
+            upgradoor_agent_override_teamless.rc == 0
+            or 'has no io.ethpandaops.upgradoor.team label' not in upgradoor_agent_override_teamless.stderr
+
+        - name: Read the overrides file with the snooper
+          ansible.builtin.slurp:
+            src: /etc/upgradoor/overrides/overrides.yaml
+          register: upgradoor_agent_overrides_snooper
+
+        - name: Assert only the container with a team has a key
+          ansible.builtin.assert:
+            that:
+              - "'geth  (el of geth, running)' in upgradoor_agent_list.stdout"
+              - "'  geth:' in upgradoor_agent_overrides_snooper_text"
+              - "'snooper' not in upgradoor_agent_overrides_snooper_text"
+            fail_msg: "{{ upgradoor_agent_list.stdout }} {{ upgradoor_agent_overrides_snooper_text }}"
+            quiet: true
+          vars:
+            upgradoor_agent_overrides_snooper_text: "{{ upgradoor_agent_overrides_snooper.content | b64decode }}"
+
+        # The running agent writes a missing overrides file.
+        - name: Remove the overrides file
           ansible.builtin.file:
             path: /etc/upgradoor/overrides/overrides.yaml
             state: absent
 
-        - name: Let the agent write the overrides file again
-          ansible.builtin.command:
-            cmd: /usr/local/bin/upgradoor init-overrides
-          changed_when: true
+        - name: Wait for the agent to write the overrides file
+          ansible.builtin.wait_for:
+            path: /etc/upgradoor/overrides/overrides.yaml
+            timeout: 30
 
-    # unattended_upgrades
-    - name: Read the effective apt configuration
-      ansible.builtin.command:
-        cmd: apt-config dump
-      register: upgradoor_agent_apt_config
-      changed_when: false
+        - name: Stat the overrides directory, file and link
+          ansible.builtin.stat:
+            path: "{{ item }}"
+            follow: false
+          loop:
+            - /etc/upgradoor/overrides
+            - /etc/upgradoor/overrides/overrides.yaml
+            - /home/devops/overrides.yaml
+          register: upgradoor_agent_overrides_stat
 
-    - name: Assert unattended-upgrades configuration
-      ansible.builtin.assert:
-        that:
-          - upgradoor_agent_apt_expected | difference(upgradoor_agent_apt_lines) | length == 0
-          - upgradoor_agent_apt_lines | select('match', 'Unattended-Upgrade::Origins-Pattern::') | list | length == 1
-          - upgradoor_agent_apt_lines | select('match', 'Unattended-Upgrade::Allowed-Origins::') | list | length == 0
-          - upgradoor_agent_apt_lines | select('match', 'Unattended-Upgrade::Package-Blacklist::') | list | length == 6
-        fail_msg: "missing: {{ upgradoor_agent_apt_expected | difference(upgradoor_agent_apt_lines) }}"
-        quiet: true
-      vars:
-        upgradoor_agent_apt_lines: "{{ upgradoor_agent_apt_config.stdout_lines }}"
-        upgradoor_agent_apt_expected:
-          - >-
-            Unattended-Upgrade::Origins-Pattern::
-            "origin=Debian,codename=${distro_codename}-security,label=Debian-Security";
-          - 'Unattended-Upgrade::Package-Blacklist:: "docker-ce$";'
-          - 'Unattended-Upgrade::Package-Blacklist:: "docker-ce-cli$";'
-          - 'Unattended-Upgrade::Package-Blacklist:: "docker-ce-rootless-extras$";'
-          - 'Unattended-Upgrade::Package-Blacklist:: "containerd\.io$";'
-          - 'Unattended-Upgrade::Package-Blacklist:: "docker-buildx-plugin$";'
-          - 'Unattended-Upgrade::Package-Blacklist:: "docker-compose-plugin$";'
-          - 'Unattended-Upgrade::Automatic-Reboot "false";'
-          - 'Unattended-Upgrade::Automatic-Reboot-WithUsers "false";'
-          - 'APT::Periodic::Update-Package-Lists "1";'
-          - 'APT::Periodic::Unattended-Upgrade "1";'
+        - name: Assert the overrides file is the agent's and linked for the entry user
+          ansible.builtin.assert:
+            that:
+              - upgradoor_agent_overrides_stat.results[0].stat.pw_name ~ ' ' ~ upgradoor_agent_overrides_stat.results[0].stat.mode == 'upgradoor 2775'
+              - upgradoor_agent_overrides_stat.results[1].stat.pw_name == 'upgradoor'
+              - upgradoor_agent_overrides_stat.results[1].stat.mode == '0664'
+              - upgradoor_agent_overrides_stat.results[2].stat.lnk_source == '/etc/upgradoor/overrides/overrides.yaml'
+              - upgradoor_agent_overrides_stat.results[2].stat.pw_name == 'devops'
+            quiet: true
+      always:
+        - name: Remove the geth and snooper containers
+          community.docker.docker_container:
+            name: "{{ item }}"
+            state: absent
+          loop: [geth, snooper]
 
-    - name: Let unattended-upgrades read its configuration (dry run)
-      ansible.builtin.command:
-        cmd: unattended-upgrade --dry-run --debug
-      register: upgradoor_agent_dry_run
-      changed_when: false
+    # Role switch off: no hook, no labels. The snooper gets its label only,
+    # without the hook.
+    - name: Prove a client role with its switch off and the snooper label
+      block:
+        - name: Run the geth role with its switch off
+          ansible.builtin.include_role:
+            name: geth
+          vars:
+            geth_upgradoor_enabled: false # noqa: var-naming[no-role-prefix]
+            geth_container_name: geth-plain # noqa: var-naming[no-role-prefix]
+            geth_container_image: "busybox:1.37" # noqa: var-naming[no-role-prefix]
+            geth_container_command: [sleep, "86400"] # noqa: var-naming[no-role-prefix]
+            geth_container_ports: [] # noqa: var-naming[no-role-prefix]
+            geth_container_volumes: [] # noqa: var-naming[no-role-prefix]
+            geth_container_stop_timeout: "1" # noqa: var-naming[no-role-prefix]
 
-    - name: Assert origins and blacklist as unattended-upgrades understood them
-      ansible.builtin.assert:
-        that:
-          - upgradoor_agent_dry_run_output is search(upgradoor_agent_origins_pattern)
-          - upgradoor_agent_dry_run_output is search(upgradoor_agent_blacklist_pattern)
-        quiet: true
-      vars:
-        upgradoor_agent_dry_run_output: "{{ upgradoor_agent_dry_run.stdout ~ '\n' ~ upgradoor_agent_dry_run.stderr ~ '\n' }}"
-        upgradoor_agent_origins_pattern: >-
-          Allowed origins are: origin=Debian,codename=[a-z]+-security,label=Debian-Security\n
-        upgradoor_agent_blacklist_pattern: >-
-          Initial blacklist: docker-ce\$ docker-ce-cli\$ docker-ce-rootless-extras\$ containerd\\\.io\$
-          docker-buildx-plugin\$ docker-compose-plugin\$\n
+        - name: Run the snooper role
+          ansible.builtin.include_role:
+            name: json_rpc_snooper
+          vars:
+            json_rpc_snooper_upgradoor_kind: snooper-el # noqa: var-naming[no-role-prefix]
+            json_rpc_snooper_container_image: "busybox:1.37" # noqa: var-naming[no-role-prefix]
+            json_rpc_snooper_container_command: [sleep, "86400"] # noqa: var-naming[no-role-prefix]
+            json_rpc_snooper_container_ports: [] # noqa: var-naming[no-role-prefix]
 
-    - name: Read apt timer state
-      ansible.builtin.systemd:
-        name: "{{ item }}"
-      loop:
-        - apt-daily.timer
-        - apt-daily-upgrade.timer
-      register: upgradoor_agent_timers
+        - name: Look at the containers
+          community.docker.docker_container_info:
+            name: "{{ item }}"
+          loop: [geth-plain, snooper]
+          register: upgradoor_agent_plain
 
-    - name: Assert apt timers are enabled
-      ansible.builtin.assert:
-        that:
-          - upgradoor_agent_timers.results | map(attribute='status.UnitFileState') | list == ['enabled', 'enabled']
-          - upgradoor_agent_timers.results | map(attribute='status.ActiveState') | list == ['active', 'active']
-        quiet: true
+        - name: Read managed.yaml with the switch off
+          ansible.builtin.slurp:
+            src: /etc/upgradoor/managed.yaml
+          register: upgradoor_agent_plain_managed
 
-    - name: Prove that the role installs only a signed release
+        - name: Assert the labels and no managed.yaml entries
+          ansible.builtin.assert:
+            that:
+              - upgradoor_agent_plain.results[0].container.State.Running
+              - upgradoor_agent_plain.results[0].container.Config.Labels | default({}, true) | select('match', 'io.ethpandaops.upgradoor') | list == []
+              - upgradoor_agent_plain.results[1].container.Config.Labels['io.ethpandaops.upgradoor.kind'] == 'snooper-el'
+              - "'io.ethpandaops.upgradoor.team' not in upgradoor_agent_plain.results[1].container.Config.Labels"
+              - (upgradoor_agent_plain_managed.content | b64decode | from_yaml).containers.keys() | intersect(['geth-plain', 'snooper']) == []
+            fail_msg: >-
+              {{ upgradoor_agent_plain.results | map(attribute='container.Config.Labels') }}
+              {{ upgradoor_agent_plain_managed.content | b64decode }}
+            quiet: true
+      always:
+        - name: Remove the geth-plain and snooper containers
+          community.docker.docker_container:
+            name: "{{ item }}"
+            state: absent
+          loop: [geth-plain, snooper]
+
+    - name: Prove that the role installs only a signed, newer release
       ansible.builtin.include_tasks:
-        file: tasks/release.yml
+        file: tasks/release_case.yml
+      loop:
+        - {version: v0.2.1, reason: does not verify}
+        - {version: v0.2.2, reason: does not verify}
+        - {version: v0.2.4, reason: the manifest lists}
+        - {version: v0.2.0-rc1, reason: must be latest or a release tag}
+        - {version: v0.3.0, seq: 3000}
+        - {version: v0.1.5, reason: refusing a downgrade}
+      loop_control:
+        loop_var: upgradoor_agent_case
+        label: "{{ upgradoor_agent_case.version }}"

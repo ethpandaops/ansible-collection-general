@@ -56,8 +56,6 @@ reth_container_security_opts: []
 # reth_container_cpu_quota:
 # reth_container_cpu_period:
 reth_container_stop_timeout: "300"
-# upgradoor group label of the container; empty: not managed by upgradoor
-reth_upgradoor_group: execution
 reth_container_networks: []
 reth_container_command_default:
   - node
@@ -156,3 +154,7 @@ reth_rbuilder_config: |
   algo = "parallel-builder"
   discard_txs = true
   num_threads = 25
+
+# upgradoor hook and labels for this role
+reth_upgradoor_enabled: "{{ upgradoor_enabled | default(false) }}"
+reth_upgradoor_team: reth

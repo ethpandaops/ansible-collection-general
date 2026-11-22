@@ -33,7 +33,7 @@
         removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
       register: lodestar_upgradoor_deploy
       changed_when: lodestar_upgradoor_deploy.stdout is match('{') and (lodestar_upgradoor_deploy.stdout | from_json).changed
-      when: secret_upgradoor_seed is defined
+      when: lodestar_upgradoor_enabled | bool
 
     - name: Run lodestar container
       vars:
@@ -46,8 +46,9 @@
           {{ {} if upgradoor_deploy | default('soft') == 'immediate'
              else dict(lodestar_upgradoor.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
         labels: >-
-          {{ {'io.ethpandaops.upgradoor.group': lodestar_upgradoor_group, 'io.ethpandaops.upgradoor.kind': 'cl'}
-             if lodestar_upgradoor and lodestar_upgradoor_group else {} }}
+          {{ {'io.ethpandaops.upgradoor.kind': 'cl'}
+             | combine({'io.ethpandaops.upgradoor.team': lodestar_upgradoor_team} if lodestar_upgradoor_team else {})
+             if lodestar_upgradoor_enabled | bool else {} }}
         image: "{{ lodestar_container_image }}"
         image_name_mismatch: recreate
         state: started
@@ -114,7 +115,7 @@
         removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
       register: lodestar_validator_upgradoor_deploy
       changed_when: lodestar_validator_upgradoor_deploy.stdout is match('{') and (lodestar_validator_upgradoor_deploy.stdout | from_json).changed
-      when: secret_upgradoor_seed is defined
+      when: lodestar_upgradoor_enabled | bool
 
     - name: Run lodestar validator container
       vars:
@@ -127,8 +128,9 @@
           {{ {} if upgradoor_deploy | default('soft') == 'immediate'
              else dict(lodestar_validator_upgradoor.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
         labels: >-
-          {{ {'io.ethpandaops.upgradoor.group': lodestar_validator_upgradoor_group, 'io.ethpandaops.upgradoor.kind': 'vc'}
-             if lodestar_validator_upgradoor and lodestar_validator_upgradoor_group else {} }}
+          {{ {'io.ethpandaops.upgradoor.kind': 'vc'}
+             | combine({'io.ethpandaops.upgradoor.team': lodestar_validator_upgradoor_team} if lodestar_validator_upgradoor_team else {})
+             if lodestar_upgradoor_enabled | bool else {} }}
         image: "{{ lodestar_validator_container_image }}"
         image_name_mismatch: recreate
         state: started

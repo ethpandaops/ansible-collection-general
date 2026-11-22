@@ -1,19 +1,7 @@
-- name: Write the seq file - {{ upgradoor_agent_case.version }}
-  ansible.builtin.copy:
-    content: "{{ upgradoor_agent_case.seqfile }}"
-    dest: /etc/upgradoor/release-seq
-    owner: root
-    group: root
-    mode: "0644"
-  when: upgradoor_agent_case.seqfile is defined
-
-- name: Stat the binary and its seq before - {{ upgradoor_agent_case.version }}
+- name: Stat the binary before - {{ upgradoor_agent_case.version }}
   ansible.builtin.stat:
-    path: "{{ item }}"
+    path: /usr/local/bin/upgradoor
     checksum_algorithm: sha256
-  loop:
-    - /usr/local/bin/upgradoor
-    - /etc/upgradoor/release-seq
   register: upgradoor_agent_case_before
 
 - name: Run upgradoor_agent with release {{ upgradoor_agent_case.version }}
@@ -21,58 +9,38 @@
     - name: Apply the role with release {{ upgradoor_agent_case.version }}
       ansible.builtin.include_role:
         name: upgradoor_agent
-        apply:
-          ignore_errors: "{{ upgradoor_agent_case.ignored | default(false) }}"
       vars:
-        upgradoor_agent_binary_local_path: ""
         upgradoor_agent_version: "{{ upgradoor_agent_case.version }}"
-        upgradoor_agent_release_url: "file://{{ upgradoor_agent_test_release_dir }}/{{ upgradoor_agent_case.version }}"
-        upgradoor_agent_binary_url: "file://{{ upgradoor_agent_test_host_dir }}/{{ upgradoor_agent_case.version }}/upgradoor-linux-{{ upgradoor_agent_arch }}"
-        upgradoor_agent_allowed_signers_file: "{{ upgradoor_agent_test_release_dir }}/keys/allowed_signers"
-        upgradoor_agent_allow_downgrade: "{{ upgradoor_agent_case.allow_downgrade | default(false) }}"
 
     - name: Record the acceptance of release {{ upgradoor_agent_case.version }}
       ansible.builtin.set_fact:
-        upgradoor_agent_case_refused_by: ""
+        upgradoor_agent_case_refusal: ""
   rescue:
     - name: Record the refusal of release {{ upgradoor_agent_case.version }}
       ansible.builtin.set_fact:
-        upgradoor_agent_case_refused_by: "{{ ansible_failed_task.name }}"
-        upgradoor_agent_case_refusal: "{{ ansible_failed_result.msg | default('') }}"
+        upgradoor_agent_case_refusal: "{{ ansible_failed_task.name }}: {{ ansible_failed_result.stderr | default(ansible_failed_result.msg) }}"
 
-- name: Stat the binary and its seq after - {{ upgradoor_agent_case.version }}
+- name: Stat the binary after - {{ upgradoor_agent_case.version }}
   ansible.builtin.stat:
-    path: "{{ item }}"
+    path: /usr/local/bin/upgradoor
     checksum_algorithm: sha256
-  loop:
-    - /usr/local/bin/upgradoor
-    - /etc/upgradoor/release-seq
   register: upgradoor_agent_case_after
 
 - name: Read the seq after - {{ upgradoor_agent_case.version }}
   ansible.builtin.slurp:
     src: /etc/upgradoor/release-seq
   register: upgradoor_agent_case_seq
-  when: upgradoor_agent_case.seq is defined
 
 - name: Assert the outcome of release {{ upgradoor_agent_case.version }}
   ansible.builtin.assert:
     that:
-      - (upgradoor_agent_case.refused_by | default('')) is in upgradoor_agent_case_refused_by
-      - (upgradoor_agent_case.refused_by is defined) == (upgradoor_agent_case_refused_by | length > 0)
-      - (upgradoor_agent_case.reason | default('')) is in (upgradoor_agent_case_refusal | default(''))
-      - upgradoor_agent_case.seq is defined
-        or upgradoor_agent_case_before.results | map(attribute='stat.checksum', default='') | list
-           == upgradoor_agent_case_after.results | map(attribute='stat.checksum', default='') | list
-      - upgradoor_agent_case.seq is not defined
-        or upgradoor_agent_case_after.results[0].stat.checksum == upgradoor_agent_test_checksums[upgradoor_agent_case.version]
-      - upgradoor_agent_case.seq is not defined
+      - upgradoor_agent_case.reason is not defined or upgradoor_agent_case.reason in upgradoor_agent_case_refusal
+      - upgradoor_agent_case.reason is defined or upgradoor_agent_case_refusal == ''
+      - >-
+        (upgradoor_agent_case_before.stat.checksum == upgradoor_agent_case_after.stat.checksum)
+        == (upgradoor_agent_case.reason is defined)
+      - >-
+        upgradoor_agent_case.reason is defined
         or (upgradoor_agent_case_seq.content | b64decode).split() == [upgradoor_agent_case.seq | string, upgradoor_agent_case.version]
-      - upgradoor_agent_case.image is not defined
-        or upgradoor_agent_release.image | default('') == upgradoor_agent_case.image
-    fail_msg: >-
-      {{ upgradoor_agent_case.version }}: refused by '{{ upgradoor_agent_case_refused_by }}'
-      {{ upgradoor_agent_case_refusal | default('') }}; binary
-      {{ upgradoor_agent_case_before.results[0].stat.checksum | default('none') }} ->
-      {{ upgradoor_agent_case_after.results[0].stat.checksum | default('none') }}
+    fail_msg: "{{ upgradoor_agent_case.version }}: {{ upgradoor_agent_case_refusal }}"
     quiet: true

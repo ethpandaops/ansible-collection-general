@@ -1,0 +1,4 @@
+---
+# Built binaries, image, keys and fake releases of prepare.yml.
+upgradoor_agent_test_dir: "{{ lookup('ansible.builtin.env', 'MOLECULE_EPHEMERAL_DIRECTORY') | default(playbook_dir ~ '/.molecule', true) }}"
+upgradoor_agent_image_repository: localhost:5588/upgradoor

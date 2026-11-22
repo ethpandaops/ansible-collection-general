@@ -1,85 +1,162 @@
-# Fails early when converge has no upgradoor binary or verify.yml no keygen
-# image.
-- name: Prepare the upgradoor binary
+# Builds the binaries and the image from UPGRADOOR_AGENT_SOURCE (the Go
+# working tree), pushes the image to a local registry and signs fake releases
+# with a throwaway key.
+- name: Prepare the release
   hosts: localhost
-  connection: local
   gather_facts: false
-  become: false
   vars:
-    upgradoor_agent_binary: "{{ lookup('ansible.builtin.env', 'UPGRADOOR_AGENT_BINARY') }}"
     upgradoor_agent_source: "{{ lookup('ansible.builtin.env', 'UPGRADOOR_AGENT_SOURCE') }}"
-    upgradoor_agent_built_binary: "{{ lookup('ansible.builtin.env', 'MOLECULE_EPHEMERAL_DIRECTORY') | default(playbook_dir, true) }}/upgradoor"
-    upgradoor_agent_image: "{{ lookup('ansible.builtin.env', 'UPGRADOOR_KEYGEN_IMAGE') }}"
-    # upgradoor_agent_molecule_built_image of inventory/group_vars/molecule.yml
-    upgradoor_agent_built_image: upgradoor-molecule:keygen
+    upgradoor_agent_test_seed: "{{ hostvars[groups['molecule'][0]].secret_upgradoor_seed }}"
+    upgradoor_agent_test_network: "{{ hostvars[groups['molecule'][0]].ethereum_network_name }}"
   tasks:
-    - name: Assert the given binaries exist
+    - name: Assert the source is given
       ansible.builtin.assert:
-        that:
-          - upgradoor_agent_binary | length == 0 or upgradoor_agent_binary is file
-        fail_msg: "UPGRADOOR_AGENT_BINARY is not a file."
+        that: upgradoor_agent_source | length > 0
+        fail_msg: Set UPGRADOOR_AGENT_SOURCE to an upgradoor checkout.
         quiet: true
 
-    # Static, so the binary runs in the test container whatever libc it has.
-    - name: Build the binary from UPGRADOOR_AGENT_SOURCE
+    - name: Create the build directories
+      ansible.builtin.file:
+        path: "{{ upgradoor_agent_test_dir }}/{{ item }}"
+        state: directory
+        mode: "0700"
+      loop: [bin, image, keys]
+
+    # Static, so the binary runs in the test host whatever libc it has.
+    - name: Build the binaries
       ansible.builtin.command:
-        cmd: go build -o {{ upgradoor_agent_built_binary | quote }} ./cmd/upgradoor
+        cmd: go build -o {{ (upgradoor_agent_test_dir ~ '/bin/' ~ item) | quote }} ./cmd/{{ item }}
         chdir: "{{ upgradoor_agent_source }}"
       environment:
         CGO_ENABLED: "0"
         GOOS: linux
+      loop: [upgradoor, upgradoor-controller]
       changed_when: true
-      when:
-        - upgradoor_agent_binary | length == 0
-        - upgradoor_agent_source | length > 0
 
-    - name: Check the release
-      when:
-        - upgradoor_agent_binary | length == 0
-        - upgradoor_agent_source | length == 0
-      block:
-        - name: Read the role defaults
-          ansible.builtin.include_vars:
-            file: ../../defaults/main.yaml
+    - name: Derive the public keys
+      ansible.builtin.shell:
+        cmd: >-
+          {{ (upgradoor_agent_test_dir ~ '/bin/upgradoor-controller') | quote }} keygen {{ item.cmd }}
+          --network {{ upgradoor_agent_test_network | quote }} > {{ (upgradoor_agent_test_dir ~ '/' ~ item.out) | quote }}
+      environment: "{{ item.env }}"
+      loop:
+        - {cmd: signer-pubkey, out: signer.pub, env: {UPGRADOOR_SEED: "{{ upgradoor_agent_test_seed }}"}}
+        - cmd: controller-pubkey
+          out: controller.pub
+          env: {UPGRADOOR_CONTROLLER_SEED: "{{ hostvars[groups['molecule'][0]].upgradoor_agent_test_controller_seed }}"}
+      changed_when: true
 
-        - name: Look for the release manifest
-          ansible.builtin.uri:
-            url: "{{ upgradoor_agent_manifest_url }}"
-            method: HEAD
-            follow_redirects: all
-            status_code: [200, 401, 403, 404]
-          register: upgradoor_agent_release
+    - name: Write the image's Dockerfile
+      ansible.builtin.copy:
+        content: |
+          FROM scratch
+          COPY upgradoor-controller /upgradoor-controller
+          ENTRYPOINT ["/upgradoor-controller"]
+        dest: "{{ upgradoor_agent_test_dir }}/image/Dockerfile"
+        mode: "0600"
 
-        - name: Assert the release is published
-          ansible.builtin.assert:
-            that:
-              - upgradoor_agent_release.status == 200
-            fail_msg: >-
-              {{ upgradoor_agent_manifest_url }} answered {{ upgradoor_agent_release.status }}: set
-              UPGRADOOR_AGENT_SOURCE or UPGRADOOR_AGENT_BINARY.
-            quiet: true
+    - name: Put the controller binary into the image context
+      ansible.builtin.copy:
+        src: "{{ upgradoor_agent_test_dir }}/bin/upgradoor-controller"
+        dest: "{{ upgradoor_agent_test_dir }}/image/upgradoor-controller"
+        mode: "0755"
 
-    - name: Build the keygen image from UPGRADOOR_AGENT_SOURCE
+    - name: Start the registry
+      community.docker.docker_container:
+        name: upgradoor-molecule-registry
+        image: registry:2
+        published_ports: ["127.0.0.1:5588:5000"]
+        state: started
+
+    - name: Build and push the image
+      community.docker.docker_image:
+        name: "{{ upgradoor_agent_image_repository }}:molecule"
+        source: build
+        build:
+          path: "{{ upgradoor_agent_test_dir }}/image"
+        push: true
+        force_source: true
+
+    - name: Read the image digest
+      community.docker.docker_image_info:
+        name: "{{ upgradoor_agent_image_repository }}:molecule"
+      register: upgradoor_agent_test_image
+
+    - name: Create the release key and another key
       ansible.builtin.command:
-        argv: [docker, build, --tag, "{{ upgradoor_agent_built_image }}", "{{ upgradoor_agent_source }}"]
+        cmd: ssh-keygen -q -t ed25519 -N "" -C {{ item }} -f {{ (upgradoor_agent_test_dir ~ '/keys/' ~ item) | quote }}
+        creates: "{{ upgradoor_agent_test_dir }}/keys/{{ item }}"
+      loop: [release, other]
+
+    - name: Write the allowed signers of the release key
+      ansible.builtin.copy:
+        content: >
+          upgradoor-release namespaces="upgradoor-release"
+          {{ lookup('ansible.builtin.file', upgradoor_agent_test_dir ~ '/keys/release.pub').split()[:2] | join(' ') }}
+        dest: "{{ upgradoor_agent_test_dir }}/keys/allowed_signers"
+        mode: "0600"
+
+    # Each release serves its own host binary (a trailing line keeps it
+    # runnable). key: signing key; tamper: manifest changed after signing;
+    # mismatch: binary differs from the manifest.
+    - name: Build the fake releases
+      ansible.builtin.shell:
+        executable: /bin/bash
+        cmd: |
+          set -euo pipefail
+          v={{ item.v }}
+          seq={{ item.seq }}
+          d={{ (upgradoor_agent_test_dir ~ '/releases/download/' ~ item.v) | quote }}
+          bin={{ (upgradoor_agent_test_dir ~ '/bin') | quote }}
+          rm -rf "$d"
+          mkdir -p "$d"
+          for p in linux-amd64 linux-arm64; do
+            { cat "$bin/upgradoor"; printf '\n# fake release %s\n' "$v"; } > "$d/upgradoor-$p"
+            cp "$bin/upgradoor-controller" "$d/upgradoor-controller-$p"
+          done
+          chmod 0644 "$d"/*
+          {
+            echo "image $seq ghcr.io/ethpandaops/upgradoor {{ upgradoor_agent_test_digest }}"
+            for b in upgradoor upgradoor-controller; do
+              for p in linux-amd64 linux-arm64; do
+                echo "$b $seq $p $(sha256sum < "$d/$b-$p" | cut -c 1-64)"
+              done
+            done
+          } | LC_ALL=C sort > "$d/upgradoor-manifest.txt"
+          ssh-keygen -q -Y sign -f {{ (upgradoor_agent_test_dir ~ '/keys/' ~ item.key | default('release')) | quote }} \
+            -n upgradoor-release "$d/upgradoor-manifest.txt"
+          {% if item.tamper | default(false) %}
+          sed -i 's/^image /image  /' "$d/upgradoor-manifest.txt"
+          {% endif %}
+          {% if item.mismatch | default(false) %}
+          printf 'x\n' >> "$d/upgradoor-linux-amd64"
+          printf 'x\n' >> "$d/upgradoor-linux-arm64"
+          {% endif %}
+          chmod 0644 "$d"/*
+      loop:
+        - {v: v0.1.5, seq: 1005}
+        - {v: v0.2.0, seq: 2000}
+        - {v: v0.2.1, seq: 2001, tamper: true}
+        - {v: v0.2.2, seq: 2002, key: other}
+        - {v: v0.2.4, seq: 2004, mismatch: true}
+        - {v: v0.3.0, seq: 3000}
+      loop_control:
+        label: "{{ item.v }}"
+      vars:
+        upgradoor_agent_test_digest: "{{ upgradoor_agent_test_image.images[0].RepoDigests[0].split('@sha256:')[1] }}"
       changed_when: true
-      when:
-        - upgradoor_agent_image | length == 0
-        - upgradoor_agent_source | length > 0
 
-    # The fake releases of verify.yml name images that do not exist.
-    - name: Assert there is a keygen image for verify.yml
-      ansible.builtin.assert:
-        that:
-          - upgradoor_agent_image | length > 0 or upgradoor_agent_source | length > 0
-        fail_msg: "verify.yml needs a keygen image: set UPGRADOOR_AGENT_SOURCE or UPGRADOOR_KEYGEN_IMAGE."
-        quiet: true
+    - name: Point latest at v0.2.0
+      ansible.builtin.shell:
+        cmd: mkdir -p latest && ln -sfn ../download/v0.2.0 latest/download
+        chdir: "{{ upgradoor_agent_test_dir }}/releases"
+      changed_when: true
 
-# verify.yml deploys a client role through the agent.
-- name: Prepare Docker on the host
+- name: Prepare Docker on the test host
   hosts: molecule
   become: true
   tasks:
+    # verify.yml deploys a client role through the agent.
     - name: Install Docker
       ansible.builtin.apt:
         name: [docker.io, python3-docker]

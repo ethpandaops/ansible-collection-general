@@ -4,17 +4,17 @@ Installs the [upgradoor](https://github.com/ethpandaops/upgradoor) agent on a de
 
 The role:
 
-- verifies the signed release on the Ansible controller and installs the binary to `/usr/local/bin/upgradoor`,
-- derives the host key and certificate (ML-DSA-44) from the devnet seed into `/etc/upgradoor/host.{key,crt}` with `upgradoor-controller keygen` from the verified release image; certificates are deterministic, so reruns change nothing,
-- writes `/etc/upgradoor/agent.yaml` and links the overrides file (the agent writes it) into the entry user's home,
+- copies `files/install.sh` to the host, which downloads the release's manifest, signature and binary from GitHub, verifies them against the pinned `files/allowed_signers`, refuses downgrades and installs the binary to `/usr/local/bin/upgradoor`,
+- lets the host create its own key (ML-DSA-44, `/etc/upgradoor/host.key`, `upgradoor key`); only when the host has no certificate for that key and hostname, issues one on the Ansible controller with `upgradoor-controller keygen host-cert` in the verified release image (by digest, without network) and installs it as `/etc/upgradoor/host.crt`,
+- writes `/etc/upgradoor/agent.yaml` (with the host's roles) and links the overrides file (the agent writes it) into the entry user's home,
 - creates the non-root user `upgradoor` (member of `docker`) with two sudo rules: `/usr/local/lib/upgradoor/upgrade-packages` (accepts only the blocked packages) and `/usr/bin/systemctl reboot`,
 - installs and starts `upgradoor-agent.service` (`KillMode=process`: a running package upgrade survives an agent restart).
 
 ## Requirements
 
-- Debian family host with systemd, Docker and sudo.
-- On the Ansible controller: Docker (keys are derived in the release's controller image, without network) and `ssh-keygen` from OpenSSH 8.2+.
-- `secret_upgradoor_seed` (devnet sops file) and `secret_upgradoor_controller_seed` (devnet group sops file), each at least 32 bytes and different from each other.
+- Debian family host with systemd, Docker and sudo; install.sh installs `curl` and `openssh-client` when missing.
+- On the Ansible controller: Docker, to issue host certificates in the release image.
+- `secret_upgradoor_seed` (devnet sops file), and the public keys `upgradoor_signer_public_key` (`upgradoor-controller keygen signer-pubkey`) and `upgradoor_controller_public_key` (`upgradoor-controller keygen controller-pubkey`) as inventory variables.
 - `ethereum_network_name` and `network_subdomain`.
 
 ## Role Variables
@@ -23,11 +23,11 @@ See [defaults/main.yaml](defaults/main.yaml). The main ones:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `upgradoor_agent_version` | `v0.1.0` | Release tag, exactly `vX.Y.Z`. |
+| `upgradoor_enabled` | `false` | Global switch: installs the agent and enables the `upgradoor deploy` hook and container labels in the client roles. |
+| `upgradoor_agent_version` | `latest` | Release tag `vX.Y.Z`, or `latest` (the latest published release). Only signed releases are installed, never a lower one than a host has. |
 | `upgradoor_agent_allowed_signers_file` | `files/allowed_signers` | Release keys the manifest signature is checked against. |
-| `upgradoor_agent_allow_downgrade` | `false` | Allow a release with a lower seq than the installed one. |
-| `upgradoor_agent_binary_local_path` | `""` | Install this local binary instead, **unverified** (testing). |
-| `upgradoor_agent_keygen_image` | `""` | Derive keys in this image instead of the verified release's, **unverified** (testing). |
+| `upgradoor_agent_reissue` | `false` | Issue the host certificate even when the installed one is current. |
+| `upgradoor_agent_roles` | inventory groups out of `upgradoor_agent_role_groups` | The host's roles, reported by the agent. |
 | `upgradoor_agent_extra_groups` | `{}` | Merged over the default `execution`/`consensus` groups, e.g. `{execution: {overrides: [image, flags]}}`. |
 | `upgradoor_agent_client_owners` | `{}` | Team names per client, e.g. `{lighthouse: [sigp]}`. |
 | `upgradoor_agent_extra_containers` | `{}` | Name map entries, e.g. `{dora: {group: tooling, kind: other}}`. |
@@ -38,7 +38,7 @@ See [defaults/main.yaml](defaults/main.yaml). The main ones:
 | `upgradoor_deploy` | `soft` | How client roles deploy: `soft`, `force` or `immediate`, see below. |
 | `upgradoor_agent_cleanup` | `false` | Remove the agent, its files and state. |
 
-`upgradoor_agent_release` is an output of the role (the verified release, including the controller image by digest); never set it.
+A release older than the installed one (`/etc/upgradoor/release-seq`) is refused; remove that file to downgrade.
 
 ## Managed containers and deploy modes
 
@@ -65,6 +65,6 @@ Disable watchtower (`ethereum_node_docker_watchtower_enabled: false`) on hosts m
 ```sh
 cd roles/upgradoor_agent
 UPGRADOOR_AGENT_SOURCE=/path/to/upgradoor molecule test
-# or with built binaries
-UPGRADOOR_AGENT_BINARY=/path/to/upgradoor UPGRADOOR_KEYGEN_IMAGE=<controller image> molecule test
 ```
+
+The scenario builds the binaries and the image from that checkout, pushes the image to a local registry and serves fake releases signed with a throwaway key.

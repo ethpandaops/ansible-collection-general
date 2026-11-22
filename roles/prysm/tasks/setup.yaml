@@ -33,7 +33,7 @@
         removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
       register: prysm_upgradoor_deploy
       changed_when: prysm_upgradoor_deploy.stdout is match('{') and (prysm_upgradoor_deploy.stdout | from_json).changed
-      when: secret_upgradoor_seed is defined
+      when: prysm_upgradoor_enabled | bool
 
     - name: Run prysm container
       vars:
@@ -46,8 +46,9 @@
           {{ {} if upgradoor_deploy | default('soft') == 'immediate'
              else dict(prysm_upgradoor.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
         labels: >-
-          {{ {'io.ethpandaops.upgradoor.group': prysm_upgradoor_group, 'io.ethpandaops.upgradoor.kind': 'cl'}
-             if prysm_upgradoor and prysm_upgradoor_group else {} }}
+          {{ {'io.ethpandaops.upgradoor.kind': 'cl'}
+             | combine({'io.ethpandaops.upgradoor.team': prysm_upgradoor_team} if prysm_upgradoor_team else {})
+             if prysm_upgradoor_enabled | bool else {} }}
         image: "{{ prysm_container_image }}"
         image_name_mismatch: recreate
         state: started
@@ -111,7 +112,7 @@
         removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
       register: prysm_validator_upgradoor_deploy
       changed_when: prysm_validator_upgradoor_deploy.stdout is match('{') and (prysm_validator_upgradoor_deploy.stdout | from_json).changed
-      when: secret_upgradoor_seed is defined
+      when: prysm_upgradoor_enabled | bool
 
     - name: Run prysm validator container
       vars:
@@ -124,8 +125,9 @@
           {{ {} if upgradoor_deploy | default('soft') == 'immediate'
              else dict(prysm_validator_upgradoor.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
         labels: >-
-          {{ {'io.ethpandaops.upgradoor.group': prysm_validator_upgradoor_group, 'io.ethpandaops.upgradoor.kind': 'vc'}
-             if prysm_validator_upgradoor and prysm_validator_upgradoor_group else {} }}
+          {{ {'io.ethpandaops.upgradoor.kind': 'vc'}
+             | combine({'io.ethpandaops.upgradoor.team': prysm_validator_upgradoor_team} if prysm_validator_upgradoor_team else {})
+             if prysm_upgradoor_enabled | bool else {} }}
         image: "{{ prysm_validator_container_image }}"
         image_name_mismatch: recreate
         state: started

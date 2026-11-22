@@ -41,3 +41,7 @@ json_rpc_snooper_container_command:
   - "{{ json_rpc_snooper_target }}"
 
 json_rpc_snooper_container_command_extra_args: []
+
+# upgradoor kind label (rolled globally on digest bumps); empty kind: no label
+json_rpc_snooper_upgradoor_enabled: "{{ upgradoor_enabled | default(false) }}"
+json_rpc_snooper_upgradoor_kind: ""

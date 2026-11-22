@@ -1,41 +1,23 @@
 ---
 secret_upgradoor_seed: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef" # noqa: var-naming[no-role-prefix]
+upgradoor_agent_test_controller_seed: "fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"
+upgradoor_signer_public_key: "{{ lookup('ansible.builtin.file', upgradoor_agent_test_dir ~ '/signer.pub') }}" # noqa: var-naming[no-role-prefix]
+upgradoor_controller_public_key: "{{ lookup('ansible.builtin.file', upgradoor_agent_test_dir ~ '/controller.pub') }}" # noqa: var-naming[no-role-prefix]
 ethereum_network_name: testnet-devnet-0 # noqa: var-naming[no-role-prefix]
 network_subdomain: testnet-devnet-0.ethpandaops.io # noqa: var-naming[no-role-prefix]
-validator_start: 0 # noqa: var-naming[no-role-prefix]
-validator_end: 100 # noqa: var-naming[no-role-prefix]
-secret_upgradoor_controller_seed: "fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210" # noqa: var-naming[no-role-prefix]
-validator_keys_sync_files: # noqa: var-naming[no-role-prefix]
-  - src: /nonexistent/keys
-    dest: /var/lib/validator/validators
 upgradoor_agent_hostname: lighthouse-geth-1
+
+upgradoor_agent_releases_url: file:///srv/upgradoor-releases
+upgradoor_agent_allowed_signers_file: "{{ upgradoor_agent_test_dir }}/keys/allowed_signers"
+# Short sync intervals: the controller is unreachable and the agent backs off.
+upgradoor_agent_controller_sync_interval: 2s
+upgradoor_agent_controller_max_sync_interval: 3s
 
 ethereum_node_el: geth # noqa: var-naming[no-role-prefix]
 ethereum_node_cl: lighthouse # noqa: var-naming[no-role-prefix]
-ethereum_node_cl_validator_enabled: "{{ validator_start is defined and validator_end is defined }}" # noqa: var-naming[no-role-prefix]
-upgradoor_agent_client_owners:
-  lighthouse: [sigp]
-
-# admin-only has nothing set, so it gets no entry.
-upgradoor_agent_extra_groups:
-  consensus:
-    overrides: [image, flags]
-    stop_timeout: 120
-  proxy:
-    impact: independent
-  admin-only: {}
-
-# UPGRADOOR_AGENT_BINARY, else built from UPGRADOOR_AGENT_SOURCE by
-# prepare.yml, else the published release of upgradoor_agent_version.
-upgradoor_agent_molecule_built_binary: "{{ lookup('ansible.builtin.env', 'MOLECULE_EPHEMERAL_DIRECTORY') | default(playbook_dir, true) }}/upgradoor"
-upgradoor_agent_binary_local_path: >-
-  {{ lookup('ansible.builtin.env', 'UPGRADOOR_AGENT_BINARY')
-     | default(upgradoor_agent_molecule_built_binary
-               if lookup('ansible.builtin.env', 'UPGRADOOR_AGENT_SOURCE') | length > 0 else '', true) }}
-
-# UPGRADOOR_KEYGEN_IMAGE, else built from UPGRADOOR_AGENT_SOURCE by prepare.yml.
-upgradoor_agent_molecule_built_image: upgradoor-molecule:keygen
-upgradoor_agent_keygen_image: >-
-  {{ lookup('ansible.builtin.env', 'UPGRADOOR_KEYGEN_IMAGE')
-     | default(upgradoor_agent_molecule_built_image
-               if lookup('ansible.builtin.env', 'UPGRADOOR_AGENT_SOURCE') | length > 0 else '', true) }}
+upgradoor_agent_kind_policies:
+  el: {roll: true}
+  snooper-el: {roll: false}
+upgradoor_agent_extra_probes:
+  snooper-el: http://127.0.0.1:9000/health
+upgradoor_enabled: true # noqa: var-naming[no-role-prefix]

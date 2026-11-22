@@ -74,8 +74,6 @@ lodestar_container_security_opts: []
 # lodestar_container_cpu_quota:
 # lodestar_container_cpu_period:
 lodestar_container_stop_timeout: "300"
-# upgradoor group label of the container; empty: not managed by upgradoor
-lodestar_upgradoor_group: consensus
 lodestar_container_networks: []
 lodestar_container_command_default:
   - beacon
@@ -145,7 +143,6 @@ lodestar_validator_container_security_opts: []
 # lodestar_validator_container_cpu_quota:
 # lodestar_validator_container_cpu_period:
 lodestar_validator_container_stop_timeout: "300"
-lodestar_validator_upgradoor_group: "{{ lodestar_upgradoor_group }}"
 lodestar_validator_container_networks: []
 lodestar_validator_container_command:
   - validator
@@ -173,3 +170,8 @@ lodestar_mev_boost_beacon_command:
   - --builder.urls={{ lodestar_mev_boost_endpoint }}
 lodestar_mev_boost_validator_command:
   - --builder
+
+# upgradoor hook and labels for this role
+lodestar_upgradoor_enabled: "{{ upgradoor_enabled | default(false) }}"
+lodestar_upgradoor_team: lodestar
+lodestar_validator_upgradoor_team: "{{ lodestar_upgradoor_team }}"

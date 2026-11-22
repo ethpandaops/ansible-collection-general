@@ -6,6 +6,9 @@
 - name: Run json_rpc_snooper container
   community.docker.docker_container:
     name: "{{ json_rpc_snooper_container_name }}"
+    labels: >-
+      {{ {'io.ethpandaops.upgradoor.kind': json_rpc_snooper_upgradoor_kind}
+         if json_rpc_snooper_upgradoor_enabled | bool and json_rpc_snooper_upgradoor_kind | length > 0 else {} }}
     image: "{{ json_rpc_snooper_container_image }}"
     image_name_mismatch: recreate
     state: started

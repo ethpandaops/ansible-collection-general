@@ -16,7 +16,10 @@ keyFile: {{ upgradoor_agent_key_file | to_json }}
 certFile: {{ upgradoor_agent_cert_file | to_json }}
 stateDir: {{ upgradoor_agent_state_dir | to_json }}
 entryUser: {{ upgradoor_agent_entry_user | to_json }}
+{% if upgradoor_agent_overrides | bool %}
 overridesFile: {{ upgradoor_agent_overrides_file | to_json }}
+{% endif %}
+roles: {{ upgradoor_agent_roles | list | to_json }}
 
 socket:
   path: {{ upgradoor_agent_socket_path | to_json }}
@@ -38,74 +41,16 @@ verbs:
 verbs: []
 {% endif %}
 
-{% set groups = {} %}
-{% for name, group in upgradoor_agent_groups.items() %}
-{% set group = group | default({}, true) | dict2items | selectattr('value') | items2dict %}
-{% if group | length > 0 %}
-{% set _ = groups.update({name: group}) %}
-{% endif %}
+defaultPolicy: {{ upgradoor_agent_default_policy | to_json }}
+{% if upgradoor_agent_kind_policies | length > 0 %}
+kindPolicies:
+{% for kind, policy in upgradoor_agent_kind_policies | dictsort %}
+  {{ kind | to_json }}: {roll: {{ policy.roll | default(false) | bool | to_json }}}
 {% endfor %}
-{% if groups | length > 0 %}
-groups:
-{% for name, group in groups | dictsort %}
-{% set stop_timeout = group.stop_timeout | default('', true) | string %}
-  {{ name | to_json }}:
-{% if group.client | default('', true) | length > 0 %}
-    client: {{ group.client | to_json }}
-{% endif %}
-{% if group.owners | default([], true) | length > 0 %}
-    owners: {{ group.owners | list | to_json }}
-{% endif %}
-{% if group.overrides | default([], true) | length > 0 %}
-    overrides: {{ group.overrides | list | to_json }}
-{% endif %}
-{% if group.impact | default('', true) | length > 0 %}
-    impact: {{ group.impact | to_json }}
-{% endif %}
-{% if stop_timeout | length > 0 %}
-    stopTimeout: {{ ((stop_timeout | int) ~ 's') | to_json }}
-{% endif %}
-{% endfor %}
-{% else %}
-groups: {}
-{% endif %}
-
-{% set containers = {} %}
-{% for c in upgradoor_agent_client_containers if c.group | length > 0 %}
-{% set _ = containers.update({c.name: {'group': c.group, 'kind': c.kind}}) %}
-{% endfor %}
-{% set _ = containers.update(upgradoor_agent_extra_containers) %}
-{% if containers | length > 0 %}
-containers:
-{% for name, c in containers | dictsort %}
-  {{ name | to_json }}: {group: {{ c.group | to_json }}, kind: {{ c.kind | default('other', true) | to_json }}}
-{% endfor %}
-{% else %}
-containers: {}
-{% endif %}
-
-{% set excluded = upgradoor_agent_default_group_exclude
-                  + (upgradoor_agent_client_containers | rejectattr('group') | map(attribute='name') | list) %}
-defaultGroup:
-  roll: {{ upgradoor_agent_default_group_roll | bool | to_json }}
-  exclude: {{ excluded | unique | list | to_json }}
-
-{% if upgradoor_agent_validators_marker_file | length > 0 %}
-validators:
-  markerFile: {{ upgradoor_agent_validators_marker_file | to_json }}
-{% elif (upgradoor_agent_validator_end | string | length > 0)
-        and (upgradoor_agent_validator_end | int) > (upgradoor_agent_validator_start | int) %}
-validators:
-  start: {{ upgradoor_agent_validator_start | int }}
-  end: {{ upgradoor_agent_validator_end | int }}
-{% else %}
-validators: {}
 {% endif %}
 
 docker:
   host: {{ upgradoor_agent_docker_host | to_json }}
-
-registry:
   authFile: {{ upgradoor_agent_registry_auth_file | to_json }}
 
 commands:
@@ -122,16 +67,16 @@ packages:
   blocked: []
 {% endif %}
 
-{% if upgradoor_agent_fallback_containers | length > 0 %}
 fallback:
-  containers: {{ upgradoor_agent_fallback_containers | to_json }}
-  after: {{ upgradoor_agent_fallback_after | to_json }}
-  interval: {{ upgradoor_agent_fallback_interval | to_json }}
+  after: {{ upgradoor_agent_fallback_after | string | to_json }}
+  interval: {{ upgradoor_agent_fallback_interval | string | to_json }}
 
-{% endif %}
 probes:
   el: {{ upgradoor_agent_probe_el | to_json }}
   cl: {{ upgradoor_agent_probe_cl | to_json }}
+{% for kind, url in upgradoor_agent_extra_probes | dictsort %}
+  {{ kind | to_json }}: {{ url | to_json }}
+{% endfor %}
 
 verify:
   window: {{ upgradoor_agent_verify_window | string | to_json }}

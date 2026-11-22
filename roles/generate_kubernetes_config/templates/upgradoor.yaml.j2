@@ -37,7 +37,7 @@ upgradoor:
       memory: 512Mi
 
   network: "{{ ethereum_network_name }}"
-  signerPublicKey: "{{ upgradoor_agent_signer_pubkey.stdout }}"
+  signerPublicKey: "{{ upgradoor_signer_public_key }}"
   authProviderUrl: "https://auth.{{ network_subdomain }}"
   controllerSeed: "{{ gen_kubernetes_config_upgradoor_controller_seed_ref }}"
   # Agents sign the URL they call, so every public URL must be listed.
@@ -47,6 +47,7 @@ upgradoor:
 {% endfor %}
   beaconEndpoints:
     - "{{ default_cl_endpoint }}"
+  validatorRangesUrl: "https://config.{{ network_subdomain }}/api/v1/nodes/validator-ranges"
 
 {% if gen_kubernetes_config_upgradoor_settings | length > 0 %}
   settings:
