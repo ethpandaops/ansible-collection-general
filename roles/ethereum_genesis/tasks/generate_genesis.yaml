@@ -50,6 +50,7 @@
         docker run --rm -t {{ ethereum_genesis_docker_user_flag }}
         -v {{ ethereum_genesis_generator_tmp_output_dir_register.path }}:/data
         -v {{ ethereum_genesis_generator_tmp_config_dir_register.path }}:/config
+        {% for volume in ethereum_genesis_generator_container_volumes %}-v {{ volume }} {% endfor %}
         {{ ethereum_genesis_generator_container_image }} all
       register: ethereum_genesis_generator_cmd
       changed_when: false
