@@ -165,3 +165,8 @@ nimbus_mev_boost_enabled: false
 nimbus_mev_boost_beacon_command:
   - --payload-builder=true
   - --payload-builder-url={{ nimbus_mev_boost_endpoint }}
+
+# upgradoor hook and labels for this role
+nimbus_upgradoor_enabled: "{{ upgradoor_enabled | default(false) }}"
+nimbus_upgradoor_team: nimbus
+nimbus_validator_upgradoor_team: "{{ nimbus_upgradoor_team }}"

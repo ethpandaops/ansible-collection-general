@@ -69,3 +69,7 @@ ethrex_container_command_extra_args: []
 
 # Default image pull policy
 ethrex_container_pull: false
+
+# upgradoor hook and labels for this role
+ethrex_upgradoor_enabled: "{{ upgradoor_enabled | default(false) }}"
+ethrex_upgradoor_team: ethrex

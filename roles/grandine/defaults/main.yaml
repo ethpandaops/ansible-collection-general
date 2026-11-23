@@ -145,3 +145,7 @@ grandine_container_pull: false
 grandine_mev_boost_enabled: false
 grandine_mev_boost_beacon_command:
   - --builder-url={{ grandine_mev_boost_endpoint }}
+
+# upgradoor hook and labels for this role
+grandine_upgradoor_enabled: "{{ upgradoor_enabled | default(false) }}"
+grandine_upgradoor_team: grandine

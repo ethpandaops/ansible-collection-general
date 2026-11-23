@@ -16,9 +16,33 @@
   failed_when: false
   changed_when: false
 
+- name: Deploy through upgradoor {{ nimbusel_container_name }}
+  ansible.builtin.command:
+    argv: >-
+      {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', nimbusel_container_name,
+          '--image', nimbusel_container_image, '--command',
+          (nimbusel_container_command + nimbusel_container_command_extra_args) | to_json]
+         + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
+           | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+    removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
+  register: nimbusel_upgradoor_deploy
+  changed_when: nimbusel_upgradoor_deploy.stdout is match('{') and (nimbusel_upgradoor_deploy.stdout | from_json).changed
+  when: nimbusel_upgradoor_enabled | bool
+
 - name: Run nimbusel container
+  vars:
+    nimbusel_upgradoor: >-
+      {{ nimbusel_upgradoor_deploy.stdout | from_json
+         if nimbusel_upgradoor_deploy.stdout | default('') is match('{') else {} }}
   community.docker.docker_container:
     name: "{{ nimbusel_container_name }}"
+    comparisons: >-
+      {{ {} if upgradoor_deploy | default('soft') == 'immediate'
+         else dict(nimbusel_upgradoor.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
+    labels: >-
+      {{ {'io.ethpandaops.upgradoor.kind': 'el'}
+         | combine({'io.ethpandaops.upgradoor.team': nimbusel_upgradoor_team} if nimbusel_upgradoor_team else {})
+         if nimbusel_upgradoor_enabled | bool else {} }}
     image: "{{ nimbusel_container_image }}"
     image_name_mismatch: recreate
     state: started

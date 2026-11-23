@@ -79,3 +79,7 @@ ethereumjs_container_command_extra_args: []
 
 # Default image pull policy
 ethereumjs_container_pull: false
+
+# upgradoor hook and labels for this role
+ethereumjs_upgradoor_enabled: "{{ upgradoor_enabled | default(false) }}"
+ethereumjs_upgradoor_team: ethereumjs

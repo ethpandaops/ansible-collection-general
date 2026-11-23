@@ -35,9 +35,40 @@
   changed_when: false
   when: grandine_validator_enabled
 
+- name: Deploy through upgradoor {{ grandine_container_name }}
+  ansible.builtin.command:
+    argv: >-
+      {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', grandine_container_name,
+          '--image', grandine_container_image, '--command',
+          (grandine_container_command +
+           (grandine_validator_enabled | ternary(grandine_container_validator_args +
+             (grandine_mev_boost_enabled | ternary(grandine_mev_boost_beacon_command,[])),
+           [])) +
+           (grandine_checkpoint_sync_enabled | ternary(
+             grandine_container_command_extra_args + grandine_container_command_checkpoint_args,
+             grandine_container_command_extra_args
+           ))) | to_json]
+         + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
+           | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+    removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
+  register: grandine_upgradoor_deploy
+  changed_when: grandine_upgradoor_deploy.stdout is match('{') and (grandine_upgradoor_deploy.stdout | from_json).changed
+  when: grandine_upgradoor_enabled | bool
+
 - name: Run grandine container
+  vars:
+    grandine_upgradoor: >-
+      {{ grandine_upgradoor_deploy.stdout | from_json
+         if grandine_upgradoor_deploy.stdout | default('') is match('{') else {} }}
   community.docker.docker_container:
     name: "{{ grandine_container_name }}"
+    comparisons: >-
+      {{ {} if upgradoor_deploy | default('soft') == 'immediate'
+         else dict(grandine_upgradoor.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
+    labels: >-
+      {{ {'io.ethpandaops.upgradoor.kind': 'cl'}
+         | combine({'io.ethpandaops.upgradoor.team': grandine_upgradoor_team} if grandine_upgradoor_team else {})
+         if grandine_upgradoor_enabled | bool else {} }}
     image: "{{ grandine_container_image }}"
     image_name_mismatch: recreate
     state: started

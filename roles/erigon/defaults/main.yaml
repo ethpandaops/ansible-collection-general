@@ -112,3 +112,7 @@ erigon_init_custom_network_container_command:
 
 # Default image pull policy
 erigon_container_pull: false
+
+# upgradoor hook and labels for this role
+erigon_upgradoor_enabled: "{{ upgradoor_enabled | default(false) }}"
+erigon_upgradoor_team: erigon

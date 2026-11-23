@@ -55,9 +55,33 @@
         (not (erigon_container_info.exists | default(false)) or
          (erigon_container_info.container.State.Status | default('')) != "running")
 
+- name: Deploy through upgradoor {{ erigon_container_name }}
+  ansible.builtin.command:
+    argv: >-
+      {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', erigon_container_name,
+          '--image', erigon_container_image, '--command',
+          (erigon_container_command + erigon_container_command_extra_args) | to_json]
+         + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
+           | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+    removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
+  register: erigon_upgradoor_deploy
+  changed_when: erigon_upgradoor_deploy.stdout is match('{') and (erigon_upgradoor_deploy.stdout | from_json).changed
+  when: erigon_upgradoor_enabled | bool
+
 - name: Run erigon container
+  vars:
+    erigon_upgradoor: >-
+      {{ erigon_upgradoor_deploy.stdout | from_json
+         if erigon_upgradoor_deploy.stdout | default('') is match('{') else {} }}
   community.docker.docker_container:
     name: "{{ erigon_container_name }}"
+    comparisons: >-
+      {{ {} if upgradoor_deploy | default('soft') == 'immediate'
+         else dict(erigon_upgradoor.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
+    labels: >-
+      {{ {'io.ethpandaops.upgradoor.kind': 'el'}
+         | combine({'io.ethpandaops.upgradoor.team': erigon_upgradoor_team} if erigon_upgradoor_team else {})
+         if erigon_upgradoor_enabled | bool else {} }}
     image: "{{ erigon_container_image }}"
     image_name_mismatch: recreate
     state: started

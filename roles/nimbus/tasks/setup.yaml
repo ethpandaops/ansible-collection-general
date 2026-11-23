@@ -53,10 +53,40 @@
     user: "{{ nimbus_user_meta.uid }}"
     security_opts: "{{ nimbus_container_security_opts }}"
 
+- name: Deploy through upgradoor {{ nimbus_container_name }}
+  ansible.builtin.command:
+    argv: >-
+      {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', nimbus_container_name,
+          '--image', nimbus_container_image, '--command',
+          (nimbus_validator_enabled | ternary(
+             nimbus_container_command + nimbus_validator_container_args + nimbus_container_command_extra_args +
+             (nimbus_mev_boost_enabled | ternary(nimbus_mev_boost_beacon_command, [])),
+             nimbus_container_command + nimbus_container_command_extra_args,
+           )) | to_json]
+         + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
+           | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+    removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
+  register: nimbus_upgradoor_deploy
+  changed_when: nimbus_upgradoor_deploy.stdout is match('{') and (nimbus_upgradoor_deploy.stdout | from_json).changed
+  when:
+    - nimbus_enabled
+    - nimbus_upgradoor_enabled | bool
+
 - name: Run nimbus container
   when: nimbus_enabled
+  vars:
+    nimbus_upgradoor: >-
+      {{ nimbus_upgradoor_deploy.stdout | from_json
+         if nimbus_upgradoor_deploy.stdout | default('') is match('{') else {} }}
   community.docker.docker_container:
     name: "{{ nimbus_container_name }}"
+    comparisons: >-
+      {{ {} if upgradoor_deploy | default('soft') == 'immediate'
+         else dict(nimbus_upgradoor.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
+    labels: >-
+      {{ {'io.ethpandaops.upgradoor.kind': 'cl'}
+         | combine({'io.ethpandaops.upgradoor.team': nimbus_upgradoor_team} if nimbus_upgradoor_team else {})
+         if nimbus_upgradoor_enabled | bool else {} }}
     image: "{{ nimbus_container_image }}"
     image_name_mismatch: recreate
     state: started
@@ -96,10 +126,35 @@
     cpu_quota: "{{ nimbus_container_cpu_quota | default(omit) }}"
     cpu_period: "{{ nimbus_container_cpu_period | default(omit) }}"
 
+- name: Deploy through upgradoor {{ nimbus_validator_container_name }}
+  ansible.builtin.command:
+    argv: >-
+      {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', nimbus_validator_container_name,
+          '--image', nimbus_validator_container_image, '--command', nimbus_validator_container_command | to_json]
+         + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
+           | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+    removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
+  register: nimbus_validator_upgradoor_deploy
+  changed_when: nimbus_validator_upgradoor_deploy.stdout is match('{') and (nimbus_validator_upgradoor_deploy.stdout | from_json).changed
+  when:
+    - nimbus_validator_enabled and (not nimbus_enabled)
+    - nimbus_upgradoor_enabled | bool
+
 - name: Run nimbus validator container
   when: nimbus_validator_enabled and (not nimbus_enabled)
+  vars:
+    nimbus_validator_upgradoor: >-
+      {{ nimbus_validator_upgradoor_deploy.stdout | from_json
+         if nimbus_validator_upgradoor_deploy.stdout | default('') is match('{') else {} }}
   community.docker.docker_container:
     name: "{{ nimbus_validator_container_name }}"
+    comparisons: >-
+      {{ {} if upgradoor_deploy | default('soft') == 'immediate'
+         else dict(nimbus_validator_upgradoor.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
+    labels: >-
+      {{ {'io.ethpandaops.upgradoor.kind': 'vc'}
+         | combine({'io.ethpandaops.upgradoor.team': nimbus_validator_upgradoor_team} if nimbus_validator_upgradoor_team else {})
+         if nimbus_upgradoor_enabled | bool else {} }}
     image: "{{ nimbus_validator_container_image }}"
     image_name_mismatch: recreate
     state: started

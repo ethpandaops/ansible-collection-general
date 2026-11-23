@@ -16,9 +16,33 @@
   failed_when: false
   changed_when: false
 
+- name: Deploy through upgradoor {{ ethrex_container_name }}
+  ansible.builtin.command:
+    argv: >-
+      {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', ethrex_container_name,
+          '--image', ethrex_container_image, '--command',
+          (ethrex_container_command + ethrex_container_command_extra_args) | to_json]
+         + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
+           | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+    removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
+  register: ethrex_upgradoor_deploy
+  changed_when: ethrex_upgradoor_deploy.stdout is match('{') and (ethrex_upgradoor_deploy.stdout | from_json).changed
+  when: ethrex_upgradoor_enabled | bool
+
 - name: Run ethrex container
+  vars:
+    ethrex_upgradoor: >-
+      {{ ethrex_upgradoor_deploy.stdout | from_json
+         if ethrex_upgradoor_deploy.stdout | default('') is match('{') else {} }}
   community.docker.docker_container:
     name: "{{ ethrex_container_name }}"
+    comparisons: >-
+      {{ {} if upgradoor_deploy | default('soft') == 'immediate'
+         else dict(ethrex_upgradoor.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
+    labels: >-
+      {{ {'io.ethpandaops.upgradoor.kind': 'el'}
+         | combine({'io.ethpandaops.upgradoor.team': ethrex_upgradoor_team} if ethrex_upgradoor_team else {})
+         if ethrex_upgradoor_enabled | bool else {} }}
     image: "{{ ethrex_container_image }}"
     image_name_mismatch: recreate
     state: started
