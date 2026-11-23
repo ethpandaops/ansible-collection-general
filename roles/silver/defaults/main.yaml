@@ -108,7 +108,8 @@ silver_container_volumes:
   - "{{ silver_config_path }}:/config:ro"
   - "{{ silver_runtime_path }}:/runtime"
   - "{{ silver_auth_jwt_path }}:/execution-auth.jwt:ro"
-silver_container_security_opts: []
+silver_container_security_opts:
+  - seccomp=unconfined
 silver_container_shm_size: 2G
 # silver_container_memory:
 # silver_container_memory_reservation:

@@ -26,3 +26,5 @@ teku_container_command_extra_args: # noqa: var-naming[no-role-prefix]
 ethlambda_container_command_extra_args: # noqa: var-naming[no-role-prefix]
   - --checkpoint-sync-url=https://beaconstate.ethstaker.cc
 ethereum_node_fact_discovery_cl_retries: 120 # noqa: var-naming[no-role-prefix]
+erigon_container_command_extra_args: # noqa: var-naming[no-role-prefix]
+  - --torrent.download.rate=1mb
