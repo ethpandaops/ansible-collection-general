@@ -144,9 +144,16 @@ gen_kubernetes_config_ingress_class: >- # noqa var-naming[no-role-prefix]
 # named like the class (traefik-devnets-pandamenu@kubernetescrd).
 gen_kubernetes_config_ingress_traefik: "{{ gen_kubernetes_config_ingress_class != 'ingress-nginx-public' }}" # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_ingress_pandamenu_middleware: "{{ gen_kubernetes_config_ingress_class }}-pandamenu@kubernetescrd" # noqa var-naming[no-role-prefix] yaml[line-length]
-# Basic auth for faucets with ingressBasicAuth (faucet-agents): the class's
-# per-repo gate, built from the same node_ingress credentials.
-gen_kubernetes_config_ingress_basic_auth_middleware: "{{ gen_kubernetes_config_ingress_class }}-basic-auth-{{ devnet_name }}@kubernetescrd" # noqa var-naming[no-role-prefix] yaml[line-length]
+# The namespace ArgoCD deploys this devnet into: <ArgoCD prefix>-<devnet dir>
+# (ethPandaOps shared/devnets.yaml, argocd). The same as ethereum_network_name
+# unless the repo's ArgoCD prefix differs from its name (bogota-devnets deploys
+# into frames-devnet-N): set it in that repo's inventory.
+gen_kubernetes_config_namespace: "{{ ethereum_network_name }}" # noqa var-naming[no-role-prefix]
+# Basic auth for faucets with ingressBasicAuth (faucet-agents) on a Traefik
+# class: the faucet's own gate, Middleware basic-auth beside it in its namespace
+# (templates/powfaucet-basic-auth.yaml.j2), built from the repo's node_ingress
+# credentials.
+gen_kubernetes_config_ingress_basic_auth_middleware: "{{ gen_kubernetes_config_namespace }}-basic-auth@kubernetescrd" # noqa var-naming[no-role-prefix] yaml[line-length]
 
 # PandaMenu configuration
 gen_kubernetes_config_pandamenu_enabled: true # noqa var-naming[no-role-prefix]
@@ -185,6 +192,8 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
         version: 1.3.0
   faucet-agents:
     valuesTemplatePath: templates/powfaucet.yaml.j2
+    additionalTemplates:
+      "templates/basic-auth.yaml": templates/powfaucet-basic-auth.yaml.j2
     dependencies:
       - name: powfaucet
         repository: https://ethpandaops.github.io/ethereum-helm-charts

@@ -31,8 +31,8 @@ powfaucet:
 {%   set _middlewares = ([gen_kubernetes_config_ingress_basic_auth_middleware] if _basic_auth else []) + ([gen_kubernetes_config_ingress_pandamenu_middleware] if _pandamenu else []) %}
     annotations:
 {%   if _basic_auth %}
-      # Behind the class's basic-auth gate (node_ingress credentials), which
-      # only the panda proxy holds: auth tier, priority 2000.
+      # Behind its own basic-auth gate (templates/basic-auth.yaml, node_ingress
+      # credentials), which only the panda proxy holds: auth tier, priority 2000.
       traefik.ingress.kubernetes.io/router.priority: "2000"
 {%   else %}
       ethpandaops.io/exposure: "public"
