@@ -1,0 +1,30 @@
+{# Written to forkmon/templates/: Forkmon serves Go's /debug handlers on its UI
+   port, so the class's Traefik sends /debug to its deny backend (503) at the
+   deny tier, from an Ingress in the deny Service's namespace. Empty on
+   ingress-nginx. #}
+{% if gen_kubernetes_config_ingress_traefik | bool %}
+# {{ ansible_managed }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ ethereum_network_name }}-forkmon-debug-deny
+  namespace: {{ gen_kubernetes_config_ingress_class }}
+  annotations:
+    traefik.ingress.kubernetes.io/router.priority: "3000"
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  ingressClassName: {{ gen_kubernetes_config_ingress_class }}
+  rules:
+  {{ '{{' }}- range .Values.forkmon.ingress.hosts {{ '}}' }}
+  - host: {{ '{{' }} .host | quote {{ '}}' }}
+    http:
+      paths:
+      - path: /debug
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ gen_kubernetes_config_ingress_class }}-deny
+            port:
+              number: 80
+  {{ '{{' }}- end {{ '}}' }}
+{% endif %}

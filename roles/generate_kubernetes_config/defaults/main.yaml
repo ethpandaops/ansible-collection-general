@@ -209,6 +209,8 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
       ingressBasicAuth: true
   forkmon:
     valuesTemplatePath: templates/forkmon.yaml.j2
+    additionalTemplates:
+      "templates/debug-deny.yaml": templates/forkmon-debug-deny.yaml.j2
     dependencies:
       - name: forkmon
         repository: https://ethpandaops.github.io/ethereum-helm-charts
