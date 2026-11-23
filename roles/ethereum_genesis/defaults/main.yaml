@@ -16,6 +16,7 @@ ethereum_genesis_timestamp_relative_cmd:
 ethereum_genesis_mnemonic: "sleep moment list remain like wall lake industry canvas wonder ecology elite duck salad naive syrup frame brass utility club odor country obey pudding" # noqa yaml[line-length]
 
 ethereum_genesis_generator_container_image: ethpandaops/ethereum-genesis-generator:latest
+ethereum_genesis_generator_container_volumes: []
 ethereum_genesis_generator_output_dir: "{{ ansible_inventory_sources[0] | dirname }}/files/ethereum-network-config"
 ethereum_genesis_generator_config_files:
   cl/config.yaml: "{{ lookup('ansible.builtin.url', 'https://raw.githubusercontent.com/ethpandaops/ethereum-genesis-generator/master/config-example/cl/config.yaml', split_lines=false) }}" # noqa yaml[line-length]
