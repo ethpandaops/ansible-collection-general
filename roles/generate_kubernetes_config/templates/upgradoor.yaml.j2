@@ -37,7 +37,7 @@ upgradoor:
       memory: 512Mi
 
   network: "{{ ethereum_network_name }}"
-  signerPublicKey: "{{ gen_kubernetes_config_upgradoor_signer_public_key }}"
+  signerPublicKey: "{{ upgradoor_signer_public_key }}"
   authProviderUrl: "https://auth.{{ network_subdomain }}"
   controllerSeed: "{{ gen_kubernetes_config_upgradoor_controller_seed_ref }}"
   registry:
