@@ -27,5 +27,24 @@ for lock in /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock; do
     fi
 done
 
-apt-get update
+lock=DPkg::Lock::Timeout=300
+
+# apt-get update does not wait for the lock of the package lists (apt-daily).
+tries=0
+until out="$(apt-get update -o "$lock" 2>&1)"; do
+    printf '%s\n' "$out" >&2
+
+    case "$out" in
+        *"E: Could not get lock "* | *"E: Unable to lock directory "*) ;;
+        *) exit 1 ;;
+    esac
+
+    tries=$((tries + 1))
+    if [ "$tries" -ge 60 ]; then
+        exit 1
+    fi
+
+    sleep 5
+done
+
 exec unattended-upgrade -v
