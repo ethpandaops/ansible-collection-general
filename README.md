@@ -45,11 +45,13 @@ A collection of reusable ansible components used by the EthPandaOps team.
 - [reth](roles/reth)
 
 ### Ethereum consensus clients
+- [ethlambda](roles/ethlambda)
 - [grandine](roles/grandine)
 - [lighthouse](roles/lighthouse)
 - [lodestar](roles/lodestar)
 - [nimbus](roles/nimbus)
 - [prysm](roles/prysm)
+- [silver](roles/silver)
 - [teku](roles/teku)
 
 ### Ethereum L2 clients

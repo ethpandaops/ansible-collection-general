@@ -1,0 +1,7 @@
+- name: Setup silver
+  ansible.builtin.import_tasks: setup.yaml
+  when: not silver_cleanup
+
+- name: Cleanup silver
+  ansible.builtin.import_tasks: cleanup.yaml
+  when: silver_cleanup

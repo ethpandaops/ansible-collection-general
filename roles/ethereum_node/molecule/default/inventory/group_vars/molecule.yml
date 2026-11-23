@@ -23,3 +23,5 @@ teku_container_command_extra_args: # noqa: var-naming[no-role-prefix]
   # Fixes: Cannot sync outside of weak subjectivity period.
   # Consider re-syncing your node using --checkpoint-sync-url or use --ignore-weak-subjectivity-period-enabled to ignore this check
   - --ignore-weak-subjectivity-period-enabled
+ethlambda_container_command_extra_args: # noqa: var-naming[no-role-prefix]
+  - --checkpoint-sync-url=https://beaconstate.ethstaker.cc

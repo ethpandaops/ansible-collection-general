@@ -1,0 +1,61 @@
+- name: Add silver user
+  ansible.builtin.user:
+    name: "{{ silver_user }}"
+  register: silver_user_meta
+
+- name: Create data, config and runtime dirs
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0750"
+    owner: "{{ silver_user }}"
+    group: "{{ silver_user }}"
+  loop:
+    - "{{ silver_datadir }}"
+    - "{{ silver_config_path }}"
+    - "{{ silver_runtime_path }}"
+
+- name: Set permissions
+  ansible.builtin.command: "chown -R {{ silver_user }}:{{ silver_user }} {{ silver_datadir }}" # noqa no-free-form
+  failed_when: false
+  changed_when: false
+
+- name: Create silver config file
+  ansible.builtin.copy:
+    content: "{{ silver_config }}"
+    dest: "{{ silver_config_path }}/silver.toml"
+    owner: "{{ silver_user }}"
+    group: "{{ silver_user }}"
+    mode: "0640"
+  register: silver_config_meta
+
+- name: Run silver container
+  community.docker.docker_container:
+    name: "{{ silver_container_name }}"
+    image: "{{ silver_container_image }}"
+    image_name_mismatch: recreate
+    state: started
+    restart: "{{ silver_config_meta.changed }}"
+    restart_policy: always
+    stop_timeout: "{{ silver_container_stop_timeout }}"
+    ports: "{{ silver_container_ports }}"
+    volumes: "{{ silver_container_volumes }}"
+    env: "{{ silver_container_env }}"
+    networks: "{{ silver_container_networks }}"
+    entrypoint: "{{ silver_container_entrypoint | default(omit) }}"
+    command: "{{ silver_container_command + silver_container_command_extra_args }}"
+    user: "{{ silver_user_meta.uid }}"
+    pull: "{{ silver_container_pull | bool }}"
+    security_opts: "{{ silver_container_security_opts }}"
+    shm_size: "{{ silver_container_shm_size }}"
+    memory: "{{ silver_container_memory | default(omit) }}"
+    memory_reservation: "{{ silver_container_memory_reservation | default(omit) }}"
+    memory_swap: "{{ silver_container_memory_swap | default(omit) }}"
+    memory_swappiness: "{{ silver_container_memory_swappiness | default(omit) }}"
+    kernel_memory: "{{ silver_container_kernel_memory | default(omit) }}"
+    cpus: "{{ silver_container_cpus | default(omit) }}"
+    cpuset_cpus: "{{ silver_container_cpuset_cpus | default(omit) }}"
+    cpuset_mems: "{{ silver_container_cpuset_mems | default(omit) }}"
+    cpu_shares: "{{ silver_container_cpu_shares | default(omit) }}"
+    cpu_quota: "{{ silver_container_cpu_quota | default(omit) }}"
+    cpu_period: "{{ silver_container_cpu_period | default(omit) }}"

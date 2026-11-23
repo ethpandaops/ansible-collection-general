@@ -12,11 +12,13 @@ You can choose and switch between client you want to run by changing the followi
 It uses the following underyling roles:
 
 ### Consensus layer clients
+- [ethpandaops.general.ethlambda](../ethlambda)
 - [ethpandaops.general.grandine](../grandine)
 - [ethpandaops.general.lighthouse](../lighthouse)
 - [ethpandaops.general.lodestar](../lodestar)
 - [ethpandaops.general.nimbus](../nimbus)
 - [ethpandaops.general.prysm](../prysm)
+- [ethpandaops.general.silver](../silver)
 - [ethpandaops.general.teku](../teku)
 
 ### Execution layer clients
