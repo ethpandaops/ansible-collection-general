@@ -120,9 +120,20 @@ gen_kubernetes_config_upgradoor_beacon_nodes: 10 # noqa var-naming[no-role-prefi
 gen_kubernetes_config_upgradoor_node_ingress_ref: >- # noqa var-naming[no-role-prefix]
   <path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>
 gen_kubernetes_config_upgradoor_dockerhub_token_ref: "<path:/secrets/services/services.enc.yaml#upgradoor | jsonPath {.dockerhub_token}>" # noqa var-naming[no-role-prefix] yaml[line-length]
-# Controller setting defaults (--default-setting), e.g. {maxUnavailablePercent: 10, policyImage: manual,
-# policyClients: {lighthouse: auto}}. Values changed in the UI win.
-gen_kubernetes_config_upgradoor_settings: {} # noqa var-naming[no-role-prefix]
+# Controller setting defaults (--default-setting); values changed in the UI win.
+gen_kubernetes_config_upgradoor_settings: # noqa var-naming[no-role-prefix]
+  policyImage: manual
+  policyPackages: manual
+  policyReboot: manual
+  actionPolicies:
+    security-upgrades: manual
+  maxUnavailablePercent: 25
+  maxLeasedPercent: 25
+  maxIndependentPercent: 25
+  minParticipationPercent: 80
+  leaseTtl: 1h
+  hostStaleAfter: 10m
+  readinessTimeout: 1h
 gen_kubernetes_config_upgradoor_persistence_size: "1Gi" # noqa var-naming[no-role-prefix]
 
 # powfaucet configuration

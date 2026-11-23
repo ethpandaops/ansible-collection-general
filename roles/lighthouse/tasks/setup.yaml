@@ -21,34 +21,17 @@
 
     - name: Deploy through upgradoor {{ lighthouse_container_name }}
       ansible.builtin.command:
-        argv: >-
-          {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', lighthouse_container_name,
-              '--image', lighthouse_container_image, '--command',
-              (lighthouse_container_command +
-               lighthouse_container_command_extra_args +
-               (lighthouse_checkpoint_sync_enabled | ternary(lighthouse_container_command_checkpoint_args, [])) +
-               (lighthouse_mev_boost_enabled | ternary(lighthouse_mev_boost_beacon_command, []))) | to_json]
-             + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
-               | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+        argv: "{{ lighthouse_upgradoor_deploy_argv }}"
         removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
       register: lighthouse_upgradoor_deploy
-      changed_when: lighthouse_upgradoor_deploy.stdout is match('{') and (lighthouse_upgradoor_deploy.stdout | from_json).changed
+      changed_when: lighthouse_upgradoor_result.changed | default(false)
       when: lighthouse_upgradoor_enabled | bool
 
     - name: Run lighthouse container
-      vars:
-        lighthouse_upgradoor: >-
-          {{ lighthouse_upgradoor_deploy.stdout | from_json
-             if lighthouse_upgradoor_deploy.stdout | default('') is match('{') else {} }}
       community.docker.docker_container:
         name: "{{ lighthouse_container_name }}"
-        comparisons: >-
-          {{ {} if upgradoor_deploy | default('soft') == 'immediate'
-             else dict(lighthouse_upgradoor.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
-        labels: >-
-          {{ {'io.ethpandaops.upgradoor.kind': 'cl'}
-             | combine({'io.ethpandaops.upgradoor.team': lighthouse_upgradoor_team} if lighthouse_upgradoor_team else {})
-             if lighthouse_upgradoor_enabled | bool else {} }}
+        comparisons: "{{ lighthouse_upgradoor_comparisons }}"
+        labels: "{{ lighthouse_upgradoor_labels }}"
         image: "{{ lighthouse_container_image }}"
         image_name_mismatch: recreate
         state: started
@@ -59,15 +42,9 @@
         env: "{{ lighthouse_container_env }}"
         networks: "{{ lighthouse_container_networks }}"
         entrypoint: "{{ lighthouse_container_entrypoint | default(omit) }}"
-        command: >-
-          {{
-            lighthouse_container_command +
-            lighthouse_container_command_extra_args +
-            (lighthouse_checkpoint_sync_enabled | ternary(lighthouse_container_command_checkpoint_args, [])) +
-            (lighthouse_mev_boost_enabled | ternary(lighthouse_mev_boost_beacon_command, []))
-          }}
+        command: "{{ lighthouse_container_command_all }}"
         user: "{{ lighthouse_user_meta.uid }}"
-        pull: "{{ lighthouse_container_pull | bool }}"
+        pull: "{{ lighthouse_upgradoor_pull | bool }}"
         security_opts: "{{ lighthouse_container_security_opts }}"
         memory: "{{ lighthouse_container_memory | default(omit) }}"
         memory_reservation: "{{ lighthouse_container_memory_reservation | default(omit) }}"
@@ -104,33 +81,17 @@
 
     - name: Deploy through upgradoor {{ lighthouse_validator_container_name }}
       ansible.builtin.command:
-        argv: >-
-          {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', lighthouse_validator_container_name,
-              '--image', lighthouse_validator_container_image, '--command',
-              (lighthouse_validator_container_command +
-               lighthouse_validator_container_command_extra_args +
-               (lighthouse_mev_boost_enabled | ternary(lighthouse_mev_boost_validator_command, []))) | to_json]
-             + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
-               | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+        argv: "{{ lighthouse_validator_upgradoor_deploy_argv }}"
         removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
       register: lighthouse_validator_upgradoor_deploy
-      changed_when: lighthouse_validator_upgradoor_deploy.stdout is match('{') and (lighthouse_validator_upgradoor_deploy.stdout | from_json).changed
+      changed_when: lighthouse_validator_upgradoor_result.changed | default(false)
       when: lighthouse_upgradoor_enabled | bool
 
     - name: Run lighthouse validator container
-      vars:
-        lighthouse_validator_upgradoor: >-
-          {{ lighthouse_validator_upgradoor_deploy.stdout | from_json
-             if lighthouse_validator_upgradoor_deploy.stdout | default('') is match('{') else {} }}
       community.docker.docker_container:
         name: "{{ lighthouse_validator_container_name }}"
-        comparisons: >-
-          {{ {} if upgradoor_deploy | default('soft') == 'immediate'
-             else dict(lighthouse_validator_upgradoor.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
-        labels: >-
-          {{ {'io.ethpandaops.upgradoor.kind': 'vc'}
-             | combine({'io.ethpandaops.upgradoor.team': lighthouse_validator_upgradoor_team} if lighthouse_validator_upgradoor_team else {})
-             if lighthouse_upgradoor_enabled | bool else {} }}
+        comparisons: "{{ lighthouse_validator_upgradoor_comparisons }}"
+        labels: "{{ lighthouse_validator_upgradoor_labels }}"
         image: "{{ lighthouse_validator_container_image }}"
         image_name_mismatch: recreate
         state: started
@@ -141,14 +102,9 @@
         env: "{{ lighthouse_validator_container_env }}"
         networks: "{{ lighthouse_validator_container_networks }}"
         entrypoint: "{{ lighthouse_validator_container_entrypoint | default(omit) }}"
-        command: >-
-          {{
-            lighthouse_validator_container_command +
-            lighthouse_validator_container_command_extra_args +
-            (lighthouse_mev_boost_enabled | ternary(lighthouse_mev_boost_validator_command, []))
-          }}
+        command: "{{ lighthouse_validator_container_command_all }}"
         user: "{{ lighthouse_user_meta.uid }}"
-        pull: "{{ lighthouse_container_pull | bool }}"
+        pull: "{{ lighthouse_validator_upgradoor_pull | bool }}"
         security_opts: "{{ lighthouse_validator_container_security_opts }}"
         memory: "{{ lighthouse_validator_container_memory | default(omit) }}"
         memory_reservation: "{{ lighthouse_validator_container_memory_reservation | default(omit) }}"

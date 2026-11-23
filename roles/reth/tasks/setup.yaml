@@ -28,32 +28,17 @@
 
 - name: Deploy through upgradoor {{ reth_container_name }}
   ansible.builtin.command:
-    argv: >-
-      {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', reth_container_name,
-          '--image', reth_container_image, '--command',
-          (reth_container_command + reth_container_command_extra_args +
-           (reth_rbuilder_enabled | ternary(reth_rbuilder_container_args, []))) | to_json]
-         + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
-           | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+    argv: "{{ reth_upgradoor_deploy_argv }}"
     removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
   register: reth_upgradoor_deploy
-  changed_when: reth_upgradoor_deploy.stdout is match('{') and (reth_upgradoor_deploy.stdout | from_json).changed
+  changed_when: reth_upgradoor_result.changed | default(false)
   when: reth_upgradoor_enabled | bool
 
 - name: Run reth container
-  vars:
-    reth_upgradoor: >-
-      {{ reth_upgradoor_deploy.stdout | from_json
-         if reth_upgradoor_deploy.stdout | default('') is match('{') else {} }}
   community.docker.docker_container:
     name: "{{ reth_container_name }}"
-    comparisons: >-
-      {{ {} if upgradoor_deploy | default('soft') == 'immediate'
-         else dict(reth_upgradoor.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
-    labels: >-
-      {{ {'io.ethpandaops.upgradoor.kind': 'el'}
-         | combine({'io.ethpandaops.upgradoor.team': reth_upgradoor_team} if reth_upgradoor_team else {})
-         if reth_upgradoor_enabled | bool else {} }}
+    comparisons: "{{ reth_upgradoor_comparisons }}"
+    labels: "{{ reth_upgradoor_labels }}"
     image: "{{ reth_container_image }}"
     image_name_mismatch: recreate
     state: started
@@ -68,13 +53,9 @@
     env: "{{ reth_container_env }}"
     networks: "{{ reth_container_networks }}"
     entrypoint: "{{ reth_container_entrypoint | default(omit) }}"
-    command: >-
-      {{
-        reth_container_command + reth_container_command_extra_args +
-        (reth_rbuilder_enabled | ternary(reth_rbuilder_container_args, []))
-      }}
+    command: "{{ reth_container_command_all }}"
     user: "{{ reth_user_meta.uid }}"
-    pull: "{{ reth_container_pull | bool }}"
+    pull: "{{ reth_upgradoor_pull | bool }}"
     security_opts: "{{ reth_container_security_opts }}"
     memory: "{{ reth_container_memory | default(omit) }}"
     memory_reservation: "{{ reth_container_memory_reservation | default(omit) }}"

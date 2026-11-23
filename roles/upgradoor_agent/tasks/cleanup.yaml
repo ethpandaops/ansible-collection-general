@@ -18,9 +18,9 @@
   ansible.builtin.assert:
     that:
       - >-
-        (upgradoor_agent_install_dir | regex_replace('/+', '/') | regex_replace('(/\.)+(?=/|$)', '') | regex_replace('(.)/$', '\1'))
+        (upgradoor_agent_install_dir | regex_replace('/+', '/') | regex_replace('(/\.)+(?=/|$)', '') | regex_replace('(?<=.)/$', ''))
         != (upgradoor_agent_binary_path | dirname | regex_replace('/+', '/') | regex_replace('(/\.)+(?=/|$)', '')
-            | regex_replace('(.)/$', '\1'))
+            | regex_replace('(?<=.)/$', ''))
     fail_msg: >-
       upgradoor_agent_install_dir ({{ upgradoor_agent_install_dir }}) must not be the directory of
       upgradoor_agent_binary_path ({{ upgradoor_agent_binary_path }}).

@@ -210,7 +210,11 @@ if [ -n "$overrides_file" ] && [ -n "$overrides_link" ]; then
         apply chown "$user:$group" -- "$overrides_file"
         apply chmod 0664 -- "$overrides_file"
     fi
-    if id "$entry" >/dev/null 2>&1 && { [ "$(readlink -- "$overrides_link" || true)" != "$overrides_file" ] ||
+    if [ -e "$overrides_link" ] && [ ! -L "$overrides_link" ]; then
+        # Both a regular file there and the overrides file: neither is overwritten.
+        printf 'upgradoor install: %s is a regular file next to %s; not linked\n' \
+            "$overrides_link" "$overrides_file" >&2
+    elif id "$entry" >/dev/null 2>&1 && { [ "$(readlink -- "$overrides_link" || true)" != "$overrides_file" ] ||
         [ "$(stat -c %U -- "$overrides_link")" != "$entry" ]; }; then
         apply ln -sfT -- "$overrides_file" "$overrides_link"
         apply chown -h "$entry" -- "$overrides_link"

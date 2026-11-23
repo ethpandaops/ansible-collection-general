@@ -85,6 +85,11 @@ reth_container_command: >-
 reth_container_command_extra_args: []
 #  - --http.api=eth,net,web3
 #  - --http.vhosts=*
+reth_container_command_all: >-
+  {{
+    reth_container_command + reth_container_command_extra_args +
+    (reth_rbuilder_enabled | ternary(reth_rbuilder_container_args, []))
+  }}
 
 # Default image pull policy
 reth_container_pull: false
@@ -155,6 +160,28 @@ reth_rbuilder_config: |
   discard_txs = true
   num_threads = 25
 
-# upgradoor hook and labels for this role
+################################################################################
+##
+## upgradoor
+##
+################################################################################
 reth_upgradoor_enabled: "{{ upgradoor_enabled | default(false) }}"
 reth_upgradoor_team: reth
+reth_upgradoor_result: >-
+  {{ reth_upgradoor_deploy.stdout | from_json
+     if (reth_upgradoor_deploy.stdout | default('')) is match('{') else {} }}
+reth_upgradoor_deploy_argv: >-
+  {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', reth_container_name,
+      '--image', reth_container_image, '--command', reth_container_command_all | to_json]
+     + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
+       | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+reth_upgradoor_labels: >-
+  {{ {'io.ethpandaops.upgradoor.kind': 'el'}
+     | combine({'io.ethpandaops.upgradoor.team': reth_upgradoor_team} if reth_upgradoor_team else {})
+     if reth_upgradoor_enabled | bool else {} }}
+reth_upgradoor_comparisons: >-
+  {{ {} if upgradoor_deploy | default('soft') == 'immediate'
+     else dict(reth_upgradoor_result.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
+reth_upgradoor_pull: >-
+  {{ upgradoor_deploy | default('soft') == 'immediate'
+     or (reth_upgradoor_result.pull | default(reth_container_pull | bool)) }}

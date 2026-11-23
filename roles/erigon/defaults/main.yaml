@@ -93,6 +93,7 @@ erigon_container_command: >-
 
 erigon_container_command_extra_args: []
 #  - --prune=htc
+erigon_container_command_all: "{{ erigon_container_command + erigon_container_command_extra_args }}"
 
 
 # Only required changing when running custom networks
@@ -113,6 +114,28 @@ erigon_init_custom_network_container_command:
 # Default image pull policy
 erigon_container_pull: false
 
-# upgradoor hook and labels for this role
+################################################################################
+##
+## upgradoor
+##
+################################################################################
 erigon_upgradoor_enabled: "{{ upgradoor_enabled | default(false) }}"
 erigon_upgradoor_team: erigon
+erigon_upgradoor_result: >-
+  {{ erigon_upgradoor_deploy.stdout | from_json
+     if (erigon_upgradoor_deploy.stdout | default('')) is match('{') else {} }}
+erigon_upgradoor_deploy_argv: >-
+  {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', erigon_container_name,
+      '--image', erigon_container_image, '--command', erigon_container_command_all | to_json]
+     + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
+       | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+erigon_upgradoor_labels: >-
+  {{ {'io.ethpandaops.upgradoor.kind': 'el'}
+     | combine({'io.ethpandaops.upgradoor.team': erigon_upgradoor_team} if erigon_upgradoor_team else {})
+     if erigon_upgradoor_enabled | bool else {} }}
+erigon_upgradoor_comparisons: >-
+  {{ {} if upgradoor_deploy | default('soft') == 'immediate'
+     else dict(erigon_upgradoor_result.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
+erigon_upgradoor_pull: >-
+  {{ upgradoor_deploy | default('soft') == 'immediate'
+     or (erigon_upgradoor_result.pull | default(erigon_container_pull | bool)) }}

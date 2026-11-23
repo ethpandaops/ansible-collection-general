@@ -80,10 +80,33 @@ geth_container_command: >-
 geth_container_command_extra_args: []
 #  - --http.api=eth,net,web3
 #  - --http.vhosts=*
+geth_container_command_all: "{{ geth_container_command + geth_container_command_extra_args }}"
 
 # Default image pull policy
 geth_container_pull: false
 
-# upgradoor hook and labels for this role
+################################################################################
+##
+## upgradoor
+##
+################################################################################
 geth_upgradoor_enabled: "{{ upgradoor_enabled | default(false) }}"
 geth_upgradoor_team: geth
+geth_upgradoor_result: >-
+  {{ geth_upgradoor_deploy.stdout | from_json
+     if (geth_upgradoor_deploy.stdout | default('')) is match('{') else {} }}
+geth_upgradoor_deploy_argv: >-
+  {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', geth_container_name,
+      '--image', geth_container_image, '--command', geth_container_command_all | to_json]
+     + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
+       | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+geth_upgradoor_labels: >-
+  {{ {'io.ethpandaops.upgradoor.kind': 'el'}
+     | combine({'io.ethpandaops.upgradoor.team': geth_upgradoor_team} if geth_upgradoor_team else {})
+     if geth_upgradoor_enabled | bool else {} }}
+geth_upgradoor_comparisons: >-
+  {{ {} if upgradoor_deploy | default('soft') == 'immediate'
+     else dict(geth_upgradoor_result.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
+geth_upgradoor_pull: >-
+  {{ upgradoor_deploy | default('soft') == 'immediate'
+     or (geth_upgradoor_result.pull | default(geth_container_pull | bool)) }}

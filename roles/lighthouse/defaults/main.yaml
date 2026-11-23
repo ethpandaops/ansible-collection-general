@@ -124,6 +124,13 @@ checkpoint_sync_url: https://beaconstate.ethstaker.cc # noqa var-naming[no-role-
 lighthouse_checkpoint_sync_enabled: true
 lighthouse_container_command_checkpoint_args:
   - --checkpoint-sync-url={{ checkpoint_sync_url }}
+lighthouse_container_command_all: >-
+  {{
+    lighthouse_container_command +
+    lighthouse_container_command_extra_args +
+    (lighthouse_checkpoint_sync_enabled | ternary(lighthouse_container_command_checkpoint_args, [])) +
+    (lighthouse_mev_boost_enabled | ternary(lighthouse_mev_boost_beacon_command, []))
+  }}
 
 ################################################################################
 ##
@@ -167,6 +174,12 @@ lighthouse_validator_container_command_extra_args: []
   # - --http
   # - --http-port=5062
   # - --graffiti=hello-world
+lighthouse_validator_container_command_all: >-
+  {{
+    lighthouse_validator_container_command +
+    lighthouse_validator_container_command_extra_args +
+    (lighthouse_mev_boost_enabled | ternary(lighthouse_mev_boost_validator_command, []))
+  }}
 
 # Default image pull policy
 lighthouse_container_pull: false
@@ -183,7 +196,47 @@ lighthouse_mev_boost_validator_command:
   - --builder-proposals
   - --prefer-builder-proposals
 
-# upgradoor hook and labels for this role
+################################################################################
+##
+## upgradoor
+##
+################################################################################
 lighthouse_upgradoor_enabled: "{{ upgradoor_enabled | default(false) }}"
 lighthouse_upgradoor_team: lighthouse
 lighthouse_validator_upgradoor_team: "{{ lighthouse_upgradoor_team }}"
+lighthouse_upgradoor_result: >-
+  {{ lighthouse_upgradoor_deploy.stdout | from_json
+     if (lighthouse_upgradoor_deploy.stdout | default('')) is match('{') else {} }}
+lighthouse_upgradoor_deploy_argv: >-
+  {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', lighthouse_container_name,
+      '--image', lighthouse_container_image, '--command', lighthouse_container_command_all | to_json]
+     + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
+       | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+lighthouse_upgradoor_labels: >-
+  {{ {'io.ethpandaops.upgradoor.kind': 'cl'}
+     | combine({'io.ethpandaops.upgradoor.team': lighthouse_upgradoor_team} if lighthouse_upgradoor_team else {})
+     if lighthouse_upgradoor_enabled | bool else {} }}
+lighthouse_upgradoor_comparisons: >-
+  {{ {} if upgradoor_deploy | default('soft') == 'immediate'
+     else dict(lighthouse_upgradoor_result.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
+lighthouse_upgradoor_pull: >-
+  {{ upgradoor_deploy | default('soft') == 'immediate'
+     or (lighthouse_upgradoor_result.pull | default(lighthouse_container_pull | bool)) }}
+lighthouse_validator_upgradoor_result: >-
+  {{ lighthouse_validator_upgradoor_deploy.stdout | from_json
+     if (lighthouse_validator_upgradoor_deploy.stdout | default('')) is match('{') else {} }}
+lighthouse_validator_upgradoor_deploy_argv: >-
+  {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', lighthouse_validator_container_name,
+      '--image', lighthouse_validator_container_image, '--command', lighthouse_validator_container_command_all | to_json]
+     + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
+       | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+lighthouse_validator_upgradoor_labels: >-
+  {{ {'io.ethpandaops.upgradoor.kind': 'vc'}
+     | combine({'io.ethpandaops.upgradoor.team': lighthouse_validator_upgradoor_team} if lighthouse_validator_upgradoor_team else {})
+     if lighthouse_upgradoor_enabled | bool else {} }}
+lighthouse_validator_upgradoor_comparisons: >-
+  {{ {} if upgradoor_deploy | default('soft') == 'immediate'
+     else dict(lighthouse_validator_upgradoor_result.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
+lighthouse_validator_upgradoor_pull: >-
+  {{ upgradoor_deploy | default('soft') == 'immediate'
+     or (lighthouse_validator_upgradoor_result.pull | default(lighthouse_container_pull | bool)) }}

@@ -18,31 +18,17 @@
 
 - name: Deploy through upgradoor {{ geth_container_name }}
   ansible.builtin.command:
-    argv: >-
-      {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', geth_container_name,
-          '--image', geth_container_image, '--command',
-          (geth_container_command + geth_container_command_extra_args) | to_json]
-         + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
-           | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+    argv: "{{ geth_upgradoor_deploy_argv }}"
     removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
   register: geth_upgradoor_deploy
-  changed_when: geth_upgradoor_deploy.stdout is match('{') and (geth_upgradoor_deploy.stdout | from_json).changed
+  changed_when: geth_upgradoor_result.changed | default(false)
   when: geth_upgradoor_enabled | bool
 
 - name: Run geth container
-  vars:
-    geth_upgradoor: >-
-      {{ geth_upgradoor_deploy.stdout | from_json
-         if geth_upgradoor_deploy.stdout | default('') is match('{') else {} }}
   community.docker.docker_container:
     name: "{{ geth_container_name }}"
-    comparisons: >-
-      {{ {} if upgradoor_deploy | default('soft') == 'immediate'
-         else dict(geth_upgradoor.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
-    labels: >-
-      {{ {'io.ethpandaops.upgradoor.kind': 'el'}
-         | combine({'io.ethpandaops.upgradoor.team': geth_upgradoor_team} if geth_upgradoor_team else {})
-         if geth_upgradoor_enabled | bool else {} }}
+    comparisons: "{{ geth_upgradoor_comparisons }}"
+    labels: "{{ geth_upgradoor_labels }}"
     image: "{{ geth_container_image }}"
     image_name_mismatch: recreate
     state: started
@@ -53,9 +39,9 @@
     env: "{{ geth_container_env }}"
     networks: "{{ geth_container_networks }}"
     entrypoint: "{{ geth_container_entrypoint | default(omit) }}"
-    command: "{{ geth_container_command + geth_container_command_extra_args }}"
+    command: "{{ geth_container_command_all }}"
     user: "{{ geth_user_meta.uid }}"
-    pull: "{{ geth_container_pull | bool }}"
+    pull: "{{ geth_upgradoor_pull | bool }}"
     security_opts: "{{ geth_container_security_opts }}"
     memory: "{{ geth_container_memory | default(omit) }}"
     memory_reservation: "{{ geth_container_memory_reservation | default(omit) }}"

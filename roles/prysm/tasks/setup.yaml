@@ -21,34 +21,17 @@
 
     - name: Deploy through upgradoor {{ prysm_container_name }}
       ansible.builtin.command:
-        argv: >-
-          {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', prysm_container_name,
-              '--image', prysm_container_image, '--command',
-              (prysm_container_command +
-               prysm_container_command_extra_args +
-               (prysm_checkpoint_sync_enabled | ternary(prysm_container_command_checkpoint_args, [])) +
-               (prysm_mev_boost_enabled | ternary(prysm_mev_boost_beacon_command, []))) | to_json]
-             + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
-               | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+        argv: "{{ prysm_upgradoor_deploy_argv }}"
         removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
       register: prysm_upgradoor_deploy
-      changed_when: prysm_upgradoor_deploy.stdout is match('{') and (prysm_upgradoor_deploy.stdout | from_json).changed
+      changed_when: prysm_upgradoor_result.changed | default(false)
       when: prysm_upgradoor_enabled | bool
 
     - name: Run prysm container
-      vars:
-        prysm_upgradoor: >-
-          {{ prysm_upgradoor_deploy.stdout | from_json
-             if prysm_upgradoor_deploy.stdout | default('') is match('{') else {} }}
       community.docker.docker_container:
         name: "{{ prysm_container_name }}"
-        comparisons: >-
-          {{ {} if upgradoor_deploy | default('soft') == 'immediate'
-             else dict(prysm_upgradoor.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
-        labels: >-
-          {{ {'io.ethpandaops.upgradoor.kind': 'cl'}
-             | combine({'io.ethpandaops.upgradoor.team': prysm_upgradoor_team} if prysm_upgradoor_team else {})
-             if prysm_upgradoor_enabled | bool else {} }}
+        comparisons: "{{ prysm_upgradoor_comparisons }}"
+        labels: "{{ prysm_upgradoor_labels }}"
         image: "{{ prysm_container_image }}"
         image_name_mismatch: recreate
         state: started
@@ -60,15 +43,9 @@
         networks: "{{ prysm_container_networks }}"
         tty: "{{ prysm_container_tty }}"
         entrypoint: "{{ prysm_container_entrypoint | default(omit) }}"
-        command: >-
-          {{
-            prysm_container_command +
-            prysm_container_command_extra_args +
-            (prysm_checkpoint_sync_enabled | ternary(prysm_container_command_checkpoint_args, [])) +
-            (prysm_mev_boost_enabled | ternary(prysm_mev_boost_beacon_command, []))
-          }}
+        command: "{{ prysm_container_command_all }}"
         user: "{{ prysm_user_meta.uid }}"
-        pull: "{{ prysm_container_pull | bool }}"
+        pull: "{{ prysm_upgradoor_pull | bool }}"
         security_opts: "{{ prysm_container_security_opts }}"
         memory: "{{ prysm_container_memory | default(omit) }}"
         memory_reservation: "{{ prysm_container_memory_reservation | default(omit) }}"
@@ -101,33 +78,17 @@
 
     - name: Deploy through upgradoor {{ prysm_validator_container_name }}
       ansible.builtin.command:
-        argv: >-
-          {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', prysm_validator_container_name,
-              '--image', prysm_validator_container_image, '--command',
-              (prysm_validator_container_command +
-               prysm_validator_container_command_extra_args +
-               (prysm_mev_boost_enabled | ternary(prysm_mev_boost_validator_command, []))) | to_json]
-             + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
-               | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+        argv: "{{ prysm_validator_upgradoor_deploy_argv }}"
         removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
       register: prysm_validator_upgradoor_deploy
-      changed_when: prysm_validator_upgradoor_deploy.stdout is match('{') and (prysm_validator_upgradoor_deploy.stdout | from_json).changed
+      changed_when: prysm_validator_upgradoor_result.changed | default(false)
       when: prysm_upgradoor_enabled | bool
 
     - name: Run prysm validator container
-      vars:
-        prysm_validator_upgradoor: >-
-          {{ prysm_validator_upgradoor_deploy.stdout | from_json
-             if prysm_validator_upgradoor_deploy.stdout | default('') is match('{') else {} }}
       community.docker.docker_container:
         name: "{{ prysm_validator_container_name }}"
-        comparisons: >-
-          {{ {} if upgradoor_deploy | default('soft') == 'immediate'
-             else dict(prysm_validator_upgradoor.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
-        labels: >-
-          {{ {'io.ethpandaops.upgradoor.kind': 'vc'}
-             | combine({'io.ethpandaops.upgradoor.team': prysm_validator_upgradoor_team} if prysm_validator_upgradoor_team else {})
-             if prysm_upgradoor_enabled | bool else {} }}
+        comparisons: "{{ prysm_validator_upgradoor_comparisons }}"
+        labels: "{{ prysm_validator_upgradoor_labels }}"
         image: "{{ prysm_validator_container_image }}"
         image_name_mismatch: recreate
         state: started
@@ -139,14 +100,9 @@
         networks: "{{ prysm_validator_container_networks }}"
         tty: "{{ prysm_validator_container_tty }}"
         entrypoint: "{{ prysm_validator_container_entrypoint | default(omit) }}"
-        command: >-
-          {{
-            prysm_validator_container_command +
-            prysm_validator_container_command_extra_args +
-            (prysm_mev_boost_enabled | ternary(prysm_mev_boost_validator_command, []))
-          }}
+        command: "{{ prysm_validator_container_command_all }}"
         user: "{{ prysm_user_meta.uid }}"
-        pull: "{{ prysm_container_pull | bool }}"
+        pull: "{{ prysm_validator_upgradoor_pull | bool }}"
         security_opts: "{{ prysm_validator_container_security_opts }}"
         memory: "{{ prysm_validator_container_memory | default(omit) }}"
         memory_reservation: "{{ prysm_validator_container_memory_reservation | default(omit) }}"

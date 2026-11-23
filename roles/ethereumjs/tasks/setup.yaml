@@ -18,31 +18,17 @@
 
 - name: Deploy through upgradoor {{ ethereumjs_container_name }}
   ansible.builtin.command:
-    argv: >-
-      {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', ethereumjs_container_name,
-          '--image', ethereumjs_container_image, '--command',
-          (ethereumjs_container_command + ethereumjs_container_command_extra_args) | to_json]
-         + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
-           | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+    argv: "{{ ethereumjs_upgradoor_deploy_argv }}"
     removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
   register: ethereumjs_upgradoor_deploy
-  changed_when: ethereumjs_upgradoor_deploy.stdout is match('{') and (ethereumjs_upgradoor_deploy.stdout | from_json).changed
+  changed_when: ethereumjs_upgradoor_result.changed | default(false)
   when: ethereumjs_upgradoor_enabled | bool
 
 - name: Run ethereumjs container
-  vars:
-    ethereumjs_upgradoor: >-
-      {{ ethereumjs_upgradoor_deploy.stdout | from_json
-         if ethereumjs_upgradoor_deploy.stdout | default('') is match('{') else {} }}
   community.docker.docker_container:
     name: "{{ ethereumjs_container_name }}"
-    comparisons: >-
-      {{ {} if upgradoor_deploy | default('soft') == 'immediate'
-         else dict(ethereumjs_upgradoor.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
-    labels: >-
-      {{ {'io.ethpandaops.upgradoor.kind': 'el'}
-         | combine({'io.ethpandaops.upgradoor.team': ethereumjs_upgradoor_team} if ethereumjs_upgradoor_team else {})
-         if ethereumjs_upgradoor_enabled | bool else {} }}
+    comparisons: "{{ ethereumjs_upgradoor_comparisons }}"
+    labels: "{{ ethereumjs_upgradoor_labels }}"
     image: "{{ ethereumjs_container_image }}"
     image_name_mismatch: recreate
     state: started
@@ -53,9 +39,9 @@
     env: "{{ ethereumjs_container_env }}"
     networks: "{{ ethereumjs_container_networks }}"
     entrypoint: "{{ ethereumjs_container_entrypoint | default(omit) }}"
-    command: "{{ ethereumjs_container_command + ethereumjs_container_command_extra_args }}"
+    command: "{{ ethereumjs_container_command_all }}"
     user: "{{ ethereumjs_user_meta.uid }}"
-    pull: "{{ ethereumjs_container_pull | bool }}"
+    pull: "{{ ethereumjs_upgradoor_pull | bool }}"
     security_opts: "{{ ethereumjs_container_security_opts }}"
     memory: "{{ ethereumjs_container_memory | default(omit) }}"
     memory_reservation: "{{ ethereumjs_container_memory_reservation | default(omit) }}"

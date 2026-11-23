@@ -21,34 +21,17 @@
 
     - name: Deploy through upgradoor {{ lodestar_container_name }}
       ansible.builtin.command:
-        argv: >-
-          {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', lodestar_container_name,
-              '--image', lodestar_container_image, '--command',
-              (lodestar_container_command +
-               lodestar_container_command_extra_args +
-               (lodestar_checkpoint_sync_enabled | ternary(lodestar_container_command_checkpoint_args, [])) +
-               (lodestar_mev_boost_enabled | ternary(lodestar_mev_boost_beacon_command, []))) | to_json]
-             + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
-               | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+        argv: "{{ lodestar_upgradoor_deploy_argv }}"
         removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
       register: lodestar_upgradoor_deploy
-      changed_when: lodestar_upgradoor_deploy.stdout is match('{') and (lodestar_upgradoor_deploy.stdout | from_json).changed
+      changed_when: lodestar_upgradoor_result.changed | default(false)
       when: lodestar_upgradoor_enabled | bool
 
     - name: Run lodestar container
-      vars:
-        lodestar_upgradoor: >-
-          {{ lodestar_upgradoor_deploy.stdout | from_json
-             if lodestar_upgradoor_deploy.stdout | default('') is match('{') else {} }}
       community.docker.docker_container:
         name: "{{ lodestar_container_name }}"
-        comparisons: >-
-          {{ {} if upgradoor_deploy | default('soft') == 'immediate'
-             else dict(lodestar_upgradoor.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
-        labels: >-
-          {{ {'io.ethpandaops.upgradoor.kind': 'cl'}
-             | combine({'io.ethpandaops.upgradoor.team': lodestar_upgradoor_team} if lodestar_upgradoor_team else {})
-             if lodestar_upgradoor_enabled | bool else {} }}
+        comparisons: "{{ lodestar_upgradoor_comparisons }}"
+        labels: "{{ lodestar_upgradoor_labels }}"
         image: "{{ lodestar_container_image }}"
         image_name_mismatch: recreate
         state: started
@@ -59,15 +42,9 @@
         env: "{{ lodestar_container_env }}"
         networks: "{{ lodestar_container_networks }}"
         entrypoint: "{{ lodestar_container_entrypoint | default(omit) }}"
-        command: >-
-          {{
-            lodestar_container_command +
-            lodestar_container_command_extra_args +
-            (lodestar_checkpoint_sync_enabled | ternary(lodestar_container_command_checkpoint_args, [])) +
-            (lodestar_mev_boost_enabled | ternary(lodestar_mev_boost_beacon_command, []))
-          }}
+        command: "{{ lodestar_container_command_all }}"
         user: "{{ lodestar_user_meta.uid }}"
-        pull: "{{ lodestar_container_pull | bool }}"
+        pull: "{{ lodestar_upgradoor_pull | bool }}"
         security_opts: "{{ lodestar_container_security_opts }}"
         memory: "{{ lodestar_container_memory | default(omit) }}"
         memory_reservation: "{{ lodestar_container_memory_reservation | default(omit) }}"
@@ -104,33 +81,17 @@
 
     - name: Deploy through upgradoor {{ lodestar_validator_container_name }}
       ansible.builtin.command:
-        argv: >-
-          {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', lodestar_validator_container_name,
-              '--image', lodestar_validator_container_image, '--command',
-              (lodestar_validator_container_command +
-               lodestar_validator_container_command_extra_args +
-               (lodestar_mev_boost_enabled | ternary(lodestar_mev_boost_validator_command, []))) | to_json]
-             + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
-               | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+        argv: "{{ lodestar_validator_upgradoor_deploy_argv }}"
         removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
       register: lodestar_validator_upgradoor_deploy
-      changed_when: lodestar_validator_upgradoor_deploy.stdout is match('{') and (lodestar_validator_upgradoor_deploy.stdout | from_json).changed
+      changed_when: lodestar_validator_upgradoor_result.changed | default(false)
       when: lodestar_upgradoor_enabled | bool
 
     - name: Run lodestar validator container
-      vars:
-        lodestar_validator_upgradoor: >-
-          {{ lodestar_validator_upgradoor_deploy.stdout | from_json
-             if lodestar_validator_upgradoor_deploy.stdout | default('') is match('{') else {} }}
       community.docker.docker_container:
         name: "{{ lodestar_validator_container_name }}"
-        comparisons: >-
-          {{ {} if upgradoor_deploy | default('soft') == 'immediate'
-             else dict(lodestar_validator_upgradoor.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
-        labels: >-
-          {{ {'io.ethpandaops.upgradoor.kind': 'vc'}
-             | combine({'io.ethpandaops.upgradoor.team': lodestar_validator_upgradoor_team} if lodestar_validator_upgradoor_team else {})
-             if lodestar_upgradoor_enabled | bool else {} }}
+        comparisons: "{{ lodestar_validator_upgradoor_comparisons }}"
+        labels: "{{ lodestar_validator_upgradoor_labels }}"
         image: "{{ lodestar_validator_container_image }}"
         image_name_mismatch: recreate
         state: started
@@ -141,14 +102,9 @@
         env: "{{ lodestar_validator_container_env }}"
         networks: "{{ lodestar_validator_container_networks }}"
         entrypoint: "{{ lodestar_validator_container_entrypoint | default(omit) }}"
-        command: >-
-          {{
-            lodestar_validator_container_command +
-            lodestar_validator_container_command_extra_args +
-            (lodestar_mev_boost_enabled | ternary(lodestar_mev_boost_validator_command, []))
-          }}
+        command: "{{ lodestar_validator_container_command_all }}"
         user: "{{ lodestar_user_meta.uid }}"
-        pull: "{{ lodestar_container_pull | bool }}"
+        pull: "{{ lodestar_validator_upgradoor_pull | bool }}"
         security_opts: "{{ lodestar_validator_container_security_opts }}"
         memory: "{{ lodestar_validator_container_memory | default(omit) }}"
         memory_reservation: "{{ lodestar_validator_container_memory_reservation | default(omit) }}"

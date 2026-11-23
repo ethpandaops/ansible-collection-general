@@ -21,31 +21,17 @@
 
 - name: Deploy through upgradoor {{ nethermind_container_name }}
   ansible.builtin.command:
-    argv: >-
-      {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', nethermind_container_name,
-          '--image', nethermind_container_image, '--command',
-          (nethermind_container_command + nethermind_container_command_extra_args) | to_json]
-         + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
-           | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+    argv: "{{ nethermind_upgradoor_deploy_argv }}"
     removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
   register: nethermind_upgradoor_deploy
-  changed_when: nethermind_upgradoor_deploy.stdout is match('{') and (nethermind_upgradoor_deploy.stdout | from_json).changed
+  changed_when: nethermind_upgradoor_result.changed | default(false)
   when: nethermind_upgradoor_enabled | bool
 
 - name: Run nethermind container
-  vars:
-    nethermind_upgradoor: >-
-      {{ nethermind_upgradoor_deploy.stdout | from_json
-         if nethermind_upgradoor_deploy.stdout | default('') is match('{') else {} }}
   community.docker.docker_container:
     name: "{{ nethermind_container_name }}"
-    comparisons: >-
-      {{ {} if upgradoor_deploy | default('soft') == 'immediate'
-         else dict(nethermind_upgradoor.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
-    labels: >-
-      {{ {'io.ethpandaops.upgradoor.kind': 'el'}
-         | combine({'io.ethpandaops.upgradoor.team': nethermind_upgradoor_team} if nethermind_upgradoor_team else {})
-         if nethermind_upgradoor_enabled | bool else {} }}
+    comparisons: "{{ nethermind_upgradoor_comparisons }}"
+    labels: "{{ nethermind_upgradoor_labels }}"
     image: "{{ nethermind_container_image }}"
     image_name_mismatch: recreate
     state: started
@@ -56,9 +42,9 @@
     env: "{{ nethermind_container_env }}"
     networks: "{{ nethermind_container_networks }}"
     entrypoint: "{{ nethermind_container_entrypoint | default(omit) }}"
-    command: "{{ nethermind_container_command + nethermind_container_command_extra_args }}"
+    command: "{{ nethermind_container_command_all }}"
     user: "{{ nethermind_user_meta.uid }}"
-    pull: "{{ nethermind_container_pull | bool }}"
+    pull: "{{ nethermind_upgradoor_pull | bool }}"
     security_opts: "{{ nethermind_container_security_opts }}"
     memory: "{{ nethermind_container_memory | default(omit) }}"
     memory_reservation: "{{ nethermind_container_memory_reservation | default(omit) }}"

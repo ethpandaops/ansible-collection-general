@@ -123,6 +123,13 @@ prysm_checkpoint_sync_enabled: true
 prysm_container_command_checkpoint_args:
   - --checkpoint-sync-url={{ checkpoint_sync_url }}
   - --genesis-beacon-api-url={{ checkpoint_sync_url }}
+prysm_container_command_all: >-
+  {{
+    prysm_container_command +
+    prysm_container_command_extra_args +
+    (prysm_checkpoint_sync_enabled | ternary(prysm_container_command_checkpoint_args, [])) +
+    (prysm_mev_boost_enabled | ternary(prysm_mev_boost_beacon_command, []))
+  }}
 
 ################################################################################
 ##
@@ -164,6 +171,12 @@ prysm_validator_container_command:
 
 prysm_validator_container_command_extra_args: []
   # - --graffiti=hello-world
+prysm_validator_container_command_all: >-
+  {{
+    prysm_validator_container_command +
+    prysm_validator_container_command_extra_args +
+    (prysm_mev_boost_enabled | ternary(prysm_mev_boost_validator_command, []))
+  }}
 
 # Default image pull policy
 prysm_container_pull: false
@@ -180,7 +193,47 @@ prysm_mev_boost_beacon_command:
 prysm_mev_boost_validator_command:
   - --enable-builder
 
-# upgradoor hook and labels for this role
+################################################################################
+##
+## upgradoor
+##
+################################################################################
 prysm_upgradoor_enabled: "{{ upgradoor_enabled | default(false) }}"
 prysm_upgradoor_team: prysm
 prysm_validator_upgradoor_team: "{{ prysm_upgradoor_team }}"
+prysm_upgradoor_result: >-
+  {{ prysm_upgradoor_deploy.stdout | from_json
+     if (prysm_upgradoor_deploy.stdout | default('')) is match('{') else {} }}
+prysm_upgradoor_deploy_argv: >-
+  {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', prysm_container_name,
+      '--image', prysm_container_image, '--command', prysm_container_command_all | to_json]
+     + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
+       | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+prysm_upgradoor_labels: >-
+  {{ {'io.ethpandaops.upgradoor.kind': 'cl'}
+     | combine({'io.ethpandaops.upgradoor.team': prysm_upgradoor_team} if prysm_upgradoor_team else {})
+     if prysm_upgradoor_enabled | bool else {} }}
+prysm_upgradoor_comparisons: >-
+  {{ {} if upgradoor_deploy | default('soft') == 'immediate'
+     else dict(prysm_upgradoor_result.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
+prysm_upgradoor_pull: >-
+  {{ upgradoor_deploy | default('soft') == 'immediate'
+     or (prysm_upgradoor_result.pull | default(prysm_container_pull | bool)) }}
+prysm_validator_upgradoor_result: >-
+  {{ prysm_validator_upgradoor_deploy.stdout | from_json
+     if (prysm_validator_upgradoor_deploy.stdout | default('')) is match('{') else {} }}
+prysm_validator_upgradoor_deploy_argv: >-
+  {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', prysm_validator_container_name,
+      '--image', prysm_validator_container_image, '--command', prysm_validator_container_command_all | to_json]
+     + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
+       | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+prysm_validator_upgradoor_labels: >-
+  {{ {'io.ethpandaops.upgradoor.kind': 'vc'}
+     | combine({'io.ethpandaops.upgradoor.team': prysm_validator_upgradoor_team} if prysm_validator_upgradoor_team else {})
+     if prysm_upgradoor_enabled | bool else {} }}
+prysm_validator_upgradoor_comparisons: >-
+  {{ {} if upgradoor_deploy | default('soft') == 'immediate'
+     else dict(prysm_validator_upgradoor_result.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
+prysm_validator_upgradoor_pull: >-
+  {{ upgradoor_deploy | default('soft') == 'immediate'
+     or (prysm_validator_upgradoor_result.pull | default(prysm_container_pull | bool)) }}

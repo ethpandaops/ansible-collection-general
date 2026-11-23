@@ -57,31 +57,17 @@
 
 - name: Deploy through upgradoor {{ erigon_container_name }}
   ansible.builtin.command:
-    argv: >-
-      {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', erigon_container_name,
-          '--image', erigon_container_image, '--command',
-          (erigon_container_command + erigon_container_command_extra_args) | to_json]
-         + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
-           | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+    argv: "{{ erigon_upgradoor_deploy_argv }}"
     removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
   register: erigon_upgradoor_deploy
-  changed_when: erigon_upgradoor_deploy.stdout is match('{') and (erigon_upgradoor_deploy.stdout | from_json).changed
+  changed_when: erigon_upgradoor_result.changed | default(false)
   when: erigon_upgradoor_enabled | bool
 
 - name: Run erigon container
-  vars:
-    erigon_upgradoor: >-
-      {{ erigon_upgradoor_deploy.stdout | from_json
-         if erigon_upgradoor_deploy.stdout | default('') is match('{') else {} }}
   community.docker.docker_container:
     name: "{{ erigon_container_name }}"
-    comparisons: >-
-      {{ {} if upgradoor_deploy | default('soft') == 'immediate'
-         else dict(erigon_upgradoor.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
-    labels: >-
-      {{ {'io.ethpandaops.upgradoor.kind': 'el'}
-         | combine({'io.ethpandaops.upgradoor.team': erigon_upgradoor_team} if erigon_upgradoor_team else {})
-         if erigon_upgradoor_enabled | bool else {} }}
+    comparisons: "{{ erigon_upgradoor_comparisons }}"
+    labels: "{{ erigon_upgradoor_labels }}"
     image: "{{ erigon_container_image }}"
     image_name_mismatch: recreate
     state: started
@@ -92,9 +78,9 @@
     env: "{{ erigon_container_env }}"
     networks: "{{ erigon_container_networks }}"
     entrypoint: "{{ erigon_container_entrypoint | default(omit) }}"
-    command: "{{ erigon_container_command + erigon_container_command_extra_args }}"
+    command: "{{ erigon_container_command_all }}"
     user: "{{ erigon_user_meta.uid }}:{{ erigon_user_meta.group }}"
-    pull: "{{ erigon_container_pull | bool }}"
+    pull: "{{ erigon_upgradoor_pull | bool }}"
     security_opts: "{{ erigon_container_security_opts }}"
     memory: "{{ erigon_container_memory | default(omit) }}"
     memory_reservation: "{{ erigon_container_memory_reservation | default(omit) }}"

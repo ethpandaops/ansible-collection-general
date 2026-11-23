@@ -66,10 +66,33 @@ ethrex_container_command: >-
   {{ ethrex_container_command_default + (ethrex_container_command_v6 if ethrex_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
 
 ethrex_container_command_extra_args: []
+ethrex_container_command_all: "{{ ethrex_container_command + ethrex_container_command_extra_args }}"
 
 # Default image pull policy
 ethrex_container_pull: false
 
-# upgradoor hook and labels for this role
+################################################################################
+##
+## upgradoor
+##
+################################################################################
 ethrex_upgradoor_enabled: "{{ upgradoor_enabled | default(false) }}"
 ethrex_upgradoor_team: ethrex
+ethrex_upgradoor_result: >-
+  {{ ethrex_upgradoor_deploy.stdout | from_json
+     if (ethrex_upgradoor_deploy.stdout | default('')) is match('{') else {} }}
+ethrex_upgradoor_deploy_argv: >-
+  {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', ethrex_container_name,
+      '--image', ethrex_container_image, '--command', ethrex_container_command_all | to_json]
+     + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
+       | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+ethrex_upgradoor_labels: >-
+  {{ {'io.ethpandaops.upgradoor.kind': 'el'}
+     | combine({'io.ethpandaops.upgradoor.team': ethrex_upgradoor_team} if ethrex_upgradoor_team else {})
+     if ethrex_upgradoor_enabled | bool else {} }}
+ethrex_upgradoor_comparisons: >-
+  {{ {} if upgradoor_deploy | default('soft') == 'immediate'
+     else dict(ethrex_upgradoor_result.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
+ethrex_upgradoor_pull: >-
+  {{ upgradoor_deploy | default('soft') == 'immediate'
+     or (ethrex_upgradoor_result.pull | default(ethrex_container_pull | bool)) }}

@@ -18,31 +18,17 @@
 
 - name: Deploy through upgradoor {{ ethrex_container_name }}
   ansible.builtin.command:
-    argv: >-
-      {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', ethrex_container_name,
-          '--image', ethrex_container_image, '--command',
-          (ethrex_container_command + ethrex_container_command_extra_args) | to_json]
-         + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
-           | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+    argv: "{{ ethrex_upgradoor_deploy_argv }}"
     removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
   register: ethrex_upgradoor_deploy
-  changed_when: ethrex_upgradoor_deploy.stdout is match('{') and (ethrex_upgradoor_deploy.stdout | from_json).changed
+  changed_when: ethrex_upgradoor_result.changed | default(false)
   when: ethrex_upgradoor_enabled | bool
 
 - name: Run ethrex container
-  vars:
-    ethrex_upgradoor: >-
-      {{ ethrex_upgradoor_deploy.stdout | from_json
-         if ethrex_upgradoor_deploy.stdout | default('') is match('{') else {} }}
   community.docker.docker_container:
     name: "{{ ethrex_container_name }}"
-    comparisons: >-
-      {{ {} if upgradoor_deploy | default('soft') == 'immediate'
-         else dict(ethrex_upgradoor.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
-    labels: >-
-      {{ {'io.ethpandaops.upgradoor.kind': 'el'}
-         | combine({'io.ethpandaops.upgradoor.team': ethrex_upgradoor_team} if ethrex_upgradoor_team else {})
-         if ethrex_upgradoor_enabled | bool else {} }}
+    comparisons: "{{ ethrex_upgradoor_comparisons }}"
+    labels: "{{ ethrex_upgradoor_labels }}"
     image: "{{ ethrex_container_image }}"
     image_name_mismatch: recreate
     state: started
@@ -53,7 +39,7 @@
     env: "{{ ethrex_container_env }}"
     networks: "{{ ethrex_container_networks }}"
     entrypoint: "{{ ethrex_container_entrypoint | default(omit) }}"
-    command: "{{ ethrex_container_command + ethrex_container_command_extra_args }}"
+    command: "{{ ethrex_container_command_all }}"
     user: "{{ ethrex_user_meta.uid }}"
-    pull: "{{ ethrex_container_pull | bool }}"
+    pull: "{{ ethrex_upgradoor_pull | bool }}"
     security_opts: "{{ ethrex_container_security_opts }}"
