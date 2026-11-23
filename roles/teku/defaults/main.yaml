@@ -158,3 +158,4 @@ teku_mev_boost_beacon_command:
 # upgradoor hook and labels for this role
 teku_upgradoor_enabled: "{{ upgradoor_enabled | default(false) }}"
 teku_upgradoor_team: teku
+teku_validator_upgradoor_team: "{{ teku_upgradoor_team }}"

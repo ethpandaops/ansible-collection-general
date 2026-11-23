@@ -38,6 +38,9 @@ overrides_file=${UPGRADOOR_OVERRIDES_FILE-$overrides_dir/overrides.yaml}
 overrides_link=${UPGRADOOR_OVERRIDES_LINK-/home/$entry/overrides.yaml}
 binary=${UPGRADOOR_BINARY:-/usr/local/bin/upgradoor}
 seq_file=${UPGRADOOR_SEQ_FILE:-$config_dir/release-seq}
+# Pull credentials the agent may read: a copy of root's docker config. Empty: none.
+auth_source=${UPGRADOOR_REGISTRY_AUTH_SOURCE-/root/.docker/config.json}
+auth_file=${UPGRADOOR_REGISTRY_AUTH_FILE-$config_dir/registry-auth.json}
 image_repo=ghcr.io/ethpandaops/upgradoor
 
 changed=false
@@ -186,6 +189,18 @@ if [ -n "$public_key" ] && [ -f "$cert_file" ] &&
     certified=$("$binary" verify-cert --network "$network" --signer-public-key "$signer" <"$cert_file" 2>/dev/null) &&
     [ "$certified" = "{\"hostname\":\"$hostname\",\"network\":\"$network\",\"publicKey\":\"$public_key\"}" ]; then
     cert_needed=false
+fi
+
+# Registry credentials: kept in step with the source; without one, anonymous pulls.
+if [ -n "$auth_file" ]; then
+    if [ -n "$auth_source" ] && [ -f "$auth_source" ]; then
+        if ! cmp -s -- "$auth_source" "$auth_file" ||
+            [ "$(stat -c '%U:%G:%a' -- "$auth_file")" != "root:$group:640" ]; then
+            apply install -o root -g "$group" -m 0640 -- "$auth_source" "$auth_file"
+        fi
+    elif [ -e "$auth_file" ]; then
+        apply rm -f -- "$auth_file"
+    fi
 fi
 
 # Overrides: the entry user's link; a regular file there becomes the file.

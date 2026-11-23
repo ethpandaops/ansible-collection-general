@@ -111,7 +111,7 @@ upgradoor_agent_kind_policies: {}
 ## Docker and registries
 ################################################################################
 upgradoor_agent_docker_host: unix:///var/run/docker.sock
-# Copied on every run: the agent cannot read root's file. Missing source: anonymous pulls.
+# Kept in step by install.sh (readable by the agent's group); missing source: anonymous pulls.
 upgradoor_agent_registry_auth_source: /root/.docker/config.json
 upgradoor_agent_registry_auth_file: "{{ upgradoor_agent_config_dir }}/registry-auth.json"
 

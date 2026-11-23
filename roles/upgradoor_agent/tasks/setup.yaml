@@ -46,6 +46,8 @@
     UPGRADOOR_OVERRIDES_LINK: "{{ upgradoor_agent_overrides_link if upgradoor_agent_overrides | bool else '' }}"
     UPGRADOOR_BINARY: "{{ upgradoor_agent_binary_path }}"
     UPGRADOOR_SEQ_FILE: "{{ upgradoor_agent_release_seq_file }}"
+    UPGRADOOR_REGISTRY_AUTH_SOURCE: "{{ upgradoor_agent_registry_auth_source }}"
+    UPGRADOOR_REGISTRY_AUTH_FILE: "{{ upgradoor_agent_registry_auth_file }}"
   register: upgradoor_agent_install
   check_mode: false
   changed_when: upgradoor_agent_install.rc == 0 and (upgradoor_agent_install.stdout | from_json).changed
