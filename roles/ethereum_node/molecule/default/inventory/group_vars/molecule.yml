@@ -3,6 +3,10 @@ ethereum_node_announced_ip: 127.0.0.1
 ethereum_network_name: mainnet # noqa: var-naming[no-role-prefix]
 docker_daemon_options: # noqa: var-naming[no-role-prefix]
   storage-driver: "vfs"
+  # Pull Docker Hub images through the ethpandaops pull-through cache,
+  # falling back to Docker Hub.
+  registry-mirrors:
+    - https://docker-cache.ethquokkaops.io
 # Fixes for integration tests to be able to run
 lighthouse_container_command_extra_args: # noqa: var-naming[no-role-prefix]
 # Fixes: Failed to start beacon node reason: Syncing from genesis is insecure and
