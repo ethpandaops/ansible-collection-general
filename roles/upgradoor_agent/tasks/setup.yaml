@@ -2,8 +2,7 @@
   ansible.builtin.assert:
     that:
       - upgradoor_agent_seed is defined
-      - upgradoor_agent_controller_allow_unsigned_answers | bool or upgradoor_agent_controller_public_key is defined
-    fail_msg: upgradoor_agent needs secret_upgradoor_seed and upgradoor_controller_public_key.
+    fail_msg: upgradoor_agent needs secret_upgradoor_seed.
     quiet: true
 
 - name: Copy the upgradoor install files

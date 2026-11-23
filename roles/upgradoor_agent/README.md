@@ -14,7 +14,7 @@ The role:
 
 - Debian family host with systemd, Docker and sudo; install.sh installs `curl` and `openssh-client` when missing.
 - On the Ansible controller: Docker, to issue host certificates in the release image.
-- `secret_upgradoor_seed` (devnet sops file), and the public keys `upgradoor_signer_public_key` (`upgradoor-controller keygen signer-pubkey`) and `upgradoor_controller_public_key` (`upgradoor-controller keygen controller-pubkey`) as inventory variables.
+- `secret_upgradoor_seed` (devnet sops file). The signer and controller public keys are the same for all devnets and default in the role; `upgradoor_signer_public_key` / `upgradoor_controller_public_key` override them.
 - `ethereum_network_name` and `network_subdomain`.
 
 ## Role Variables

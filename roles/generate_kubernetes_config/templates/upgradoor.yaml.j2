@@ -37,9 +37,13 @@ upgradoor:
       memory: 512Mi
 
   network: "{{ ethereum_network_name }}"
-  signerPublicKey: "{{ upgradoor_signer_public_key }}"
+  signerPublicKey: "{{ gen_kubernetes_config_upgradoor_signer_public_key }}"
   authProviderUrl: "https://auth.{{ network_subdomain }}"
   controllerSeed: "{{ gen_kubernetes_config_upgradoor_controller_seed_ref }}"
+  registry:
+    auth: >-
+      {"auths": {"https://index.docker.io/v1/": {"username": "{{ gen_kubernetes_config_upgradoor_dockerhub_user_ref }}",
+      "password": "{{ gen_kubernetes_config_upgradoor_dockerhub_token_ref }}"}}}
   # Agents sign the URL they call, so every public URL must be listed.
   publicUrls:
 {% for _sub in gen_kubernetes_config_network_subdomains %}
