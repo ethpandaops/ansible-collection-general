@@ -49,8 +49,12 @@ upgradoor:
 {% for _sub in gen_kubernetes_config_network_subdomains %}
     - "https://upgradoor.{{ _sub }}"
 {% endfor %}
+  # Queried in parallel; the chain most of them follow is used.
   beaconEndpoints:
     - "{{ default_cl_endpoint }}"
+{% for host in (groups['ethereum_node'] | default([]) | sort | shuffle(seed=ethereum_network_name))[:gen_kubernetes_config_upgradoor_beacon_nodes | int] %}
+    - "https://{{ gen_kubernetes_config_upgradoor_node_ingress_ref }}@{{ ethereum_node_beacon_prefix }}{{ host }}.{{ network_server_subdomain }}"
+{% endfor %}
   validatorRangesUrl: "https://config.{{ network_subdomain }}/api/v1/nodes/validator-ranges"
 
 {% if gen_kubernetes_config_upgradoor_settings | length > 0 %}
