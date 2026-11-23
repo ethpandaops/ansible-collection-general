@@ -43,7 +43,9 @@ silver_config: |
   {% endif %}
   discovery_port = {{ silver_ports_p2p_udp }}
   quic_port = {{ silver_ports_quic }}
-  data_column_custody_group_count = {{ silver_supernode_enabled | ternary(128, 8) }}
+  {% if silver_supernode_enabled %}
+  data_column_custody_group_count = 128
+  {% endif %}
   data_storage_dir = "/data"
   beacon_api_bind = ["0.0.0.0:{{ silver_ports_http_beacon }}"]
   beacon_api_allowed_hosts = {{ silver_beacon_api_allowed_hosts | to_json }}
