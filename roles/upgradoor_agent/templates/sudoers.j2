@@ -2,3 +2,9 @@
 # The upgrade script checks its own arguments.
 {{ upgradoor_agent_user }} ALL=(root) NOPASSWD: {{ upgradoor_agent_upgrade_script }}
 {{ upgradoor_agent_user }} ALL=(root) NOPASSWD: {{ upgradoor_agent_reboot_command | join(' ') }}
+{% for name, action in upgradoor_agent_actions | dictsort %}
+{% if action.command | length == 3 and action.command[:2] == [upgradoor_agent_sudo_path, '-n'] %}
+# Action {{ name }}: the script without arguments.
+{{ upgradoor_agent_user }} ALL=(root) NOPASSWD: {{ action.command[2] }} ""
+{% endif %}
+{% endfor %}

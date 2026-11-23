@@ -27,7 +27,7 @@ upgradoor_agent_config_dir: /etc/upgradoor
 upgradoor_agent_config_file: "{{ upgradoor_agent_config_dir }}/agent.yaml"
 upgradoor_agent_key_file: "{{ upgradoor_agent_config_dir }}/host.key"
 upgradoor_agent_cert_file: "{{ upgradoor_agent_config_dir }}/host.crt"
-upgradoor_agent_state_dir: /var/lib/upgradoor
+upgradoor_agent_state_dir: /data/upgradoor
 # Login user; joins upgradoor_agent_group (overrides file and socket).
 upgradoor_agent_entry_user: devops
 # Lets people on the host and the controller override images and flags; off: no overrides file.
@@ -140,6 +140,22 @@ upgradoor_agent_upgrade_script: "{{ upgradoor_agent_lib_dir }}/upgrade-packages"
 upgradoor_agent_reboot_command: [/usr/bin/systemctl, reboot]
 upgradoor_agent_sudo_path: /usr/bin/sudo
 upgradoor_agent_sudoers_file: /etc/sudoers.d/upgradoor-agent
+
+################################################################################
+## Host actions
+################################################################################
+# Name -> {description, command, impact, timeout, feature, teams, when}. A command
+# [sudo, -n, <script>] gets a sudo rule for exactly that script without arguments.
+upgradoor_agent_actions: "{{ upgradoor_agent_default_actions if upgradoor_agent_security_upgrades_action | bool else {} }}"
+# Needs unattended-upgrades on the host (the action fails with a clear message without it).
+upgradoor_agent_security_upgrades_action: true
+upgradoor_agent_default_actions:
+  security-upgrades:
+    description: Install pending security updates (unattended-upgrades)
+    command: ["{{ upgradoor_agent_sudo_path }}", -n, "{{ upgradoor_agent_lib_dir }}/security-upgrades"]
+    impact: independent
+    timeout: 30m
+    when: securityUpdates
 
 ################################################################################
 ## Probes by kind (empty disables)

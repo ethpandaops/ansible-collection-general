@@ -56,6 +56,26 @@ docker:
 commands:
   upgradePackages: {{ [upgradoor_agent_sudo_path, '-n', upgradoor_agent_upgrade_script] | to_json }}
   reboot: {{ ([upgradoor_agent_sudo_path, '-n'] + upgradoor_agent_reboot_command) | to_json }}
+{% if upgradoor_agent_actions | length > 0 %}
+
+actions:
+{% for name, action in upgradoor_agent_actions | dictsort %}
+  {{ name | to_json }}:
+    description: {{ action.description | to_json }}
+    command: {{ action.command | list | to_json }}
+    impact: {{ action.impact | to_json }}
+    timeout: {{ action.timeout | string | to_json }}
+{% if action.feature is defined %}
+    feature: {{ action.feature | to_json }}
+{% endif %}
+{% if action.teams is defined %}
+    teams: {{ action.teams | list | to_json }}
+{% endif %}
+{% if action.when is defined %}
+    when: {{ action.when | to_json }}
+{% endif %}
+{% endfor %}
+{% endif %}
 
 packages:
 {% if upgradoor_agent_blocked_packages | length > 0 %}

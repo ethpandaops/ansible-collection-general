@@ -31,7 +31,7 @@ entry=${UPGRADOOR_ENTRY_USER:-devops}
 config_dir=${UPGRADOOR_CONFIG_DIR:-/etc/upgradoor}
 key_file=${UPGRADOOR_KEY_FILE:-$config_dir/host.key}
 cert_file=${UPGRADOOR_CERT_FILE:-$config_dir/host.crt}
-state_dir=${UPGRADOOR_STATE_DIR:-/var/lib/upgradoor}
+state_dir=${UPGRADOOR_STATE_DIR:-/data/upgradoor}
 # An empty overrides file: overrides are off, no directory and no link.
 overrides_dir=${UPGRADOOR_OVERRIDES_DIR:-$config_dir/overrides}
 overrides_file=${UPGRADOOR_OVERRIDES_FILE-$overrides_dir/overrides.yaml}

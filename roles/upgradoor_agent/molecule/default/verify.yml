@@ -10,11 +10,12 @@
         - /usr/local/lib/upgradoor/install.sh
         - /usr/local/lib/upgradoor/allowed_signers
         - /usr/local/lib/upgradoor/upgrade-packages
+        - /usr/local/lib/upgradoor/security-upgrades
         - /etc/upgradoor
         - /etc/upgradoor/agent.yaml
         - /etc/upgradoor/host.key
         - /etc/upgradoor/host.crt
-        - /var/lib/upgradoor
+        - /data/upgradoor
         - /etc/sudoers.d/upgradoor-agent
       register: upgradoor_agent_stat
 
@@ -33,23 +34,25 @@
           /usr/local/lib/upgradoor/install.sh: root:root 0755
           /usr/local/lib/upgradoor/allowed_signers: root:root 0644
           /usr/local/lib/upgradoor/upgrade-packages: root:root 0755
+          /usr/local/lib/upgradoor/security-upgrades: root:root 0755
           /etc/upgradoor: root:upgradoor 0750
           /etc/upgradoor/agent.yaml: root:root 0644
           /etc/upgradoor/host.key: root:upgradoor 0640
           /etc/upgradoor/host.crt: root:upgradoor 0640
-          /var/lib/upgradoor: upgradoor:upgradoor 0700
+          /data/upgradoor: upgradoor:upgradoor 0700
           /etc/sudoers.d/upgradoor-agent: root:root 0440
 
-    - name: Read the config, the unit and the release seq
+    - name: Read the config, the unit, the release seq and the sudoers rules
       ansible.builtin.slurp:
         src: "{{ item }}"
       loop:
         - /etc/upgradoor/agent.yaml
         - /etc/systemd/system/upgradoor-agent.service
         - /etc/upgradoor/release-seq
+        - /etc/sudoers.d/upgradoor-agent
       register: upgradoor_agent_slurp
 
-    - name: Assert config, unit and release
+    - name: Assert config, unit, release and sudoers rules
       ansible.builtin.assert:
         that:
           - upgradoor_agent_config.controller.publicKey == upgradoor_controller_public_key
@@ -64,14 +67,28 @@
               'el': 'http://127.0.0.1:8545', 'cl': 'http://127.0.0.1:5052', 'snooper-el': 'http://127.0.0.1:9000/health',
             }
           - upgradoor_agent_config.keys() | intersect(['groups', 'containers', 'defaultGroup', 'registry', 'validators']) | length == 0
+          - >-
+            upgradoor_agent_config.actions == {'security-upgrades': {
+              'description': 'Install pending security updates (unattended-upgrades)',
+              'command': ['/usr/bin/sudo', '-n', '/usr/local/lib/upgradoor/security-upgrades'],
+              'impact': 'independent', 'timeout': '30m', 'when': 'securityUpdates',
+            }}
           - upgradoor_agent_unit is search('(?m)^User=upgradoor$')
           - upgradoor_agent_unit is search('(?m)^KillMode=process$')
           - upgradoor_agent_seq == "2000 v0.2.0\n"
+          - >-
+            upgradoor_agent_sudoers is search('(?m)^upgradoor ALL=\\(root\\) NOPASSWD: /usr/local/lib/upgradoor/security-upgrades ""$')
         quiet: true
       vars:
         upgradoor_agent_config: "{{ upgradoor_agent_slurp.results[0].content | b64decode | from_yaml }}"
         upgradoor_agent_unit: "{{ upgradoor_agent_slurp.results[1].content | b64decode }}"
         upgradoor_agent_seq: "{{ upgradoor_agent_slurp.results[2].content | b64decode }}"
+        upgradoor_agent_sudoers: "{{ upgradoor_agent_slurp.results[3].content | b64decode }}"
+
+    - name: Let visudo check the sudoers rules
+      ansible.builtin.command:
+        cmd: visudo -cf /etc/sudoers.d/upgradoor-agent
+      changed_when: false
 
     - name: Read the host public key and the certificate's claims
       ansible.builtin.shell:
@@ -117,6 +134,8 @@
         - {argv: [/usr/local/lib/upgradoor/upgrade-packages, docker-ce, containerd.io], rc: 0}
         - {argv: [/usr/local/lib/upgradoor/upgrade-packages, docker-ce, bash], rc: 2}
         - {argv: [-l, /usr/bin/systemctl, reboot], rc: 0}
+        - {argv: [-l, /usr/local/lib/upgradoor/security-upgrades], rc: 0}
+        - {argv: [/usr/local/lib/upgradoor/security-upgrades, --help], rc: 1}
         - {argv: [/usr/bin/apt-get, update], rc: 1}
       loop_control:
         label: "{{ item.argv | join(' ') }}"

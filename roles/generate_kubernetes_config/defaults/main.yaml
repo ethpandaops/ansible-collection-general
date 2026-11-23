@@ -104,7 +104,10 @@ gen_kubernetes_config_authenticatoor_grants: # noqa var-naming[no-role-prefix]
   - name: core-devs
     members:
       - "authentik/groups:panda-access"
-    services: ["faucet:drop_100eth"]
+    services:
+      - "faucet:drop_100eth"
+      - "upgradoor:details"
+      # - "upgradoor:team_manage"
 
 # upgradoor configuration; the chart is skipped without secret_upgradoor_seed.
 # "<repository>:<tag>" or "<repository>@sha256:<64 hex>" (the release manifest's image).
@@ -112,7 +115,8 @@ gen_kubernetes_config_upgradoor_image: "{{ (default_tooling_images | default({})
 # Must hold the same seed as secret_upgradoor_controller_seed of the devnet repository.
 gen_kubernetes_config_upgradoor_controller_seed_ref: >- # noqa var-naming[no-role-prefix]
   <path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.upgradoor_controller_seed}>
-# Controller settings overrides, e.g. {maxUnavailablePercent: 10, readyEpochs: 2}.
+# Controller setting defaults (--default-setting), e.g. {maxUnavailablePercent: 10, policyImage: manual,
+# policyClients: {lighthouse: auto}}. Values changed in the UI win.
 gen_kubernetes_config_upgradoor_settings: {} # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_upgradoor_persistence_size: "1Gi" # noqa var-naming[no-role-prefix]
 

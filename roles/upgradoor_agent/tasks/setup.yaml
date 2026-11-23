@@ -19,8 +19,10 @@
     - {src: install.sh, dest: "{{ upgradoor_agent_lib_dir }}/", mode: "0755"}
     - {src: "{{ upgradoor_agent_allowed_signers_file }}", dest: "{{ upgradoor_agent_lib_dir }}/allowed_signers", mode: "0644"}
     - {content: "{{ lookup('ansible.builtin.template', 'upgrade-packages.sh.j2') }}", dest: "{{ upgradoor_agent_upgrade_script }}", mode: "0755"}
+    - {src: security-upgrades, dest: "{{ upgradoor_agent_lib_dir }}/", mode: "0755", enabled: "{{ 'security-upgrades' in upgradoor_agent_actions }}"}
   loop_control:
     label: "{{ item.dest }}"
+  when: item.enabled | default(true) | bool
 
 # Downloads and verifies the release on the host; prints one JSON line.
 - name: Install the upgradoor release

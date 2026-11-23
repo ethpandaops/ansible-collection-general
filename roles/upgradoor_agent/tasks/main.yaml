@@ -2,7 +2,6 @@
   ansible.builtin.import_tasks: setup.yaml
   when: not upgradoor_agent_cleanup and upgradoor_enabled | default(false) | bool
 
-# Dynamic: one skipped task per host instead of every cleanup task.
 - name: Cleanup upgradoor agent
   ansible.builtin.include_tasks: cleanup.yaml
   when: upgradoor_agent_cleanup
