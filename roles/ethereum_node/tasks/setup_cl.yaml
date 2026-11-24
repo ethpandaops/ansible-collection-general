@@ -139,3 +139,46 @@
     grandine_ipv6_enabled: "{{ ethereum_node_ipv6_enabled }}"
     grandine_supernode_enabled: "{{ ethereum_node_cl_supernode_enabled }}"
     grandine_public_ipv6: "{{ ethereum_node_cl_public_ipv6 }}"
+
+- name: "Consensus client: silver"
+  when: ethereum_node_cl == "silver"
+  ansible.builtin.include_role:
+    name: ethpandaops.general.silver
+  vars:
+    silver_announced_ip: "{{ ethereum_node_announced_ip }}"
+    silver_ports_p2p_udp: "{{ ethereum_node_cl_ports_p2p_udp }}"
+    silver_ports_quic: "{{ ethereum_node_cl_ports_quic }}"
+    silver_ports_http_beacon: "{{ ethereum_node_cl_ports_http_beacon }}"
+    silver_ports_metrics: "{{ ethereum_node_cl_ports_metrics }}"
+    silver_container_networks: "{{ ethereum_node_cl_docker_networks }}"
+    silver_container_pull: "{{ ethereum_node_images_always_pull }}"
+    silver_execution_engine_endpoint: "{{ ethereum_node_execution_engine_endpoint }}"
+    silver_fee_recipient: "{{ ethereum_node_cl_validator_fee_recipient }}"
+    silver_mev_boost_enabled: "{{ ethereum_node_external_builder_enabled }}"
+    silver_mev_boost_endpoint: "{{ ethereum_node_external_builder_endpoint }}"
+    silver_checkpoint_sync_enabled: "{{ ethereum_node_cl_checkpoint_sync_enabled }}"
+    silver_ipv6_enabled: "{{ ethereum_node_ipv6_enabled }}"
+    silver_supernode_enabled: "{{ ethereum_node_cl_supernode_enabled }}"
+    silver_public_ipv6: "{{ ethereum_node_cl_public_ipv6 }}"
+
+- name: "Consensus client: ethlambda"
+  when: ethereum_node_cl == "ethlambda"
+  ansible.builtin.include_role:
+    name: ethpandaops.general.ethlambda
+  vars:
+    ethlambda_announced_ip: "{{ ethereum_node_announced_ip }}"
+    ethlambda_ports_p2p_udp: "{{ ethereum_node_cl_ports_p2p_udp }}"
+    ethlambda_ports_quic: "{{ ethereum_node_cl_ports_quic }}"
+    ethlambda_ports_http_beacon: "{{ ethereum_node_cl_ports_http_beacon }}"
+    ethlambda_ports_metrics: "{{ ethereum_node_cl_ports_metrics }}"
+    ethlambda_container_networks: "{{ ethereum_node_cl_docker_networks }}"
+    ethlambda_container_pull: "{{ ethereum_node_images_always_pull }}"
+    ethlambda_execution_engine_endpoint: "{{ ethereum_node_execution_engine_endpoint }}"
+    ethlambda_beacon_endpoint: "{{ ethereum_node_beacon_endpoint }}"
+    ethlambda_validator_enabled: "{{ ethereum_node_cl_validator_enabled }}"
+    ethlambda_validator_container_networks: "{{ ethereum_node_validator_docker_networks }}"
+    ethlambda_validator_fee_recipient: "{{ ethereum_node_cl_validator_fee_recipient }}"
+    ethlambda_mev_boost_enabled: "{{ ethereum_node_external_builder_enabled }}"
+    ethlambda_mev_boost_endpoint: "{{ ethereum_node_external_builder_endpoint }}"
+    ethlambda_checkpoint_sync_enabled: "{{ ethereum_node_cl_checkpoint_sync_enabled }}"
+    ethlambda_supernode_enabled: "{{ ethereum_node_cl_supernode_enabled }}"

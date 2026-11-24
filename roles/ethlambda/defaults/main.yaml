@@ -1,0 +1,139 @@
+ethlambda_enabled: true
+ethlambda_user: ethlambda
+ethlambda_datadir: /data/ethlambda
+ethlambda_auth_jwt_path: /data/execution-auth.secret
+ethlambda_execution_engine_endpoint: http://geth:8551
+ethlambda_beacon_endpoint: "http://{{ ethlambda_container_name }}:{{ ethlambda_ports_http_beacon }}"
+ethlambda_mev_boost_endpoint: "http://mev-boost:18550"
+
+ethlambda_announced_ip: "{{ ansible_host }}"
+
+ethlambda_cleanup: false # when set to "true" it will remove the container(s)
+
+ethlambda_ports_p2p_udp: 9000
+ethlambda_ports_quic: 9001
+ethlambda_ports_http_beacon: 5052
+ethlambda_ports_metrics: 5054
+
+ethlambda_supernode_enabled: false
+
+ethlambda_validator_enabled: false
+ethlambda_validator_fee_recipient: "0x25941dC771bB64514Fc8abBce970307Fb9d477e9" # theprotocolguild.eth
+ethlambda_validator_datadir: /data/ethlambda-validator
+
+################################################################################
+##
+## Beacon node container configuration
+##
+################################################################################
+ethlambda_container_name: ethlambda
+ethlambda_container_image: ghcr.io/lambdaclass/ethlambda:unstable
+ethlambda_container_env: {}
+# ethlambda_container_entrypoint:
+ethlambda_container_ports:
+  - "127.0.0.1:{{ ethlambda_ports_http_beacon }}:{{ ethlambda_ports_http_beacon }}"
+  - "127.0.0.1:{{ ethlambda_ports_metrics }}:{{ ethlambda_ports_metrics }}"
+  - "0.0.0.0:{{ ethlambda_ports_p2p_udp }}:{{ ethlambda_ports_p2p_udp }}/udp"
+  - "0.0.0.0:{{ ethlambda_ports_quic }}:{{ ethlambda_ports_quic }}"
+  - "0.0.0.0:{{ ethlambda_ports_quic }}:{{ ethlambda_ports_quic }}/udp"
+
+ethlambda_container_volumes:
+  - "{{ ethlambda_datadir }}:/data"
+  - "{{ ethlambda_auth_jwt_path }}:/execution-auth.jwt:ro"
+ethlambda_container_security_opts: []
+# ethlambda_container_memory:
+# ethlambda_container_memory_reservation:
+# ethlambda_container_memory_swap:
+# ethlambda_container_memory_swappiness:
+# ethlambda_container_kernel_memory:
+# ethlambda_container_cpus:
+# ethlambda_container_cpuset_cpus:
+# ethlambda_container_cpuset_mems:
+# ethlambda_container_cpu_shares:
+# ethlambda_container_cpu_quota:
+# ethlambda_container_cpu_period:
+ethlambda_container_stop_timeout: "300"
+ethlambda_container_networks: []
+ethlambda_container_command_default:
+  - beacon
+  - --data-dir=/data
+  - --http-address=0.0.0.0
+  - --api-port={{ ethlambda_ports_http_beacon }}
+  - --metrics-port={{ ethlambda_ports_metrics }}
+  - --gossipsub-port={{ ethlambda_ports_quic }}
+  - --discovery.port={{ ethlambda_ports_p2p_udp }}
+  - --discovery.advertise-ip={{ ethlambda_announced_ip }}
+  - --execution-endpoint={{ ethlambda_execution_engine_endpoint }}
+  - --execution-jwt-secret=/execution-auth.jwt
+
+ethlambda_container_supernode_command:
+  - --custody-group-count=128
+
+ethlambda_container_command: >-
+  {{
+    ethlambda_container_command_default +
+    (ethlambda_container_supernode_command if ethlambda_supernode_enabled else [])
+  }}
+
+ethlambda_container_command_extra_args: []
+# - --network=hoodi
+
+checkpoint_sync_url: https://beaconstate.ethstaker.cc # noqa var-naming[no-role-prefix]
+ethlambda_checkpoint_sync_enabled: true
+ethlambda_container_command_checkpoint_args:
+  - --checkpoint-sync-url={{ checkpoint_sync_url }}
+
+################################################################################
+##
+## Validator container configuration
+##
+################################################################################
+ethlambda_validator_container_name: "{{ ethlambda_container_name }}-validator"
+ethlambda_validator_container_image: "{{ ethlambda_container_image }}"
+ethlambda_validator_container_env: {}
+# ethlambda_validator_container_entrypoint:
+ethlambda_validator_container_ports: []
+ethlambda_validator_container_volumes:
+  - "{{ ethlambda_validator_datadir }}:/validator-data"
+ethlambda_validator_container_security_opts: []
+# ethlambda_validator_container_memory:
+# ethlambda_validator_container_memory_reservation:
+# ethlambda_validator_container_memory_swap:
+# ethlambda_validator_container_memory_swappiness:
+# ethlambda_validator_container_kernel_memory:
+# ethlambda_validator_container_cpus:
+# ethlambda_validator_container_cpuset_cpus:
+# ethlambda_validator_container_cpuset_mems:
+# ethlambda_validator_container_cpu_shares:
+# ethlambda_validator_container_cpu_quota:
+# ethlambda_validator_container_cpu_period:
+ethlambda_validator_container_stop_timeout: "300"
+ethlambda_validator_container_networks: []
+ethlambda_validator_container_command:
+  - validator
+  - --validators-dir=/validator-data/keys
+  - --secrets-dir=/validator-data/secrets
+  - --beacon-nodes={{ ethlambda_beacon_endpoint }}
+  - --init-slashing-protection
+  - --suggested-fee-recipient={{ ethlambda_validator_fee_recipient }}
+  - --http-address=0.0.0.0
+  - --metrics-port={{ ethlambda_ports_metrics }}
+ethlambda_validator_container_command_extra_args: []
+  # - --enable-keymanager
+  # - --keymanager-port=5062
+  # - --graffiti=hello-world
+
+# Default image pull policy
+ethlambda_container_pull: false
+
+################################################################################
+##
+## MEV Boost configuration
+##
+################################################################################
+ethlambda_mev_boost_enabled: false
+ethlambda_mev_boost_beacon_command:
+  - --builder={{ ethlambda_mev_boost_endpoint }}
+ethlambda_mev_boost_validator_command:
+  - --builder-proposals
+  - --prefer-builder-proposals

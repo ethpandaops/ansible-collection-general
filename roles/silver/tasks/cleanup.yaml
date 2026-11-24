@@ -1,0 +1,5 @@
+- name: Remove silver container
+  community.docker.docker_container:
+    name: "{{ silver_container_name }}"
+    state: absent
+  when: silver_cleanup

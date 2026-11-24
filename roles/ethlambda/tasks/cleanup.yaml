@@ -1,0 +1,11 @@
+- name: Remove ethlambda container
+  community.docker.docker_container:
+    name: "{{ ethlambda_container_name }}"
+    state: absent
+  when: ethlambda_cleanup or (not ethlambda_enabled)
+
+- name: Remove ethlambda validator container
+  community.docker.docker_container:
+    name: "{{ ethlambda_validator_container_name }}"
+    state: absent
+  when: ethlambda_cleanup or (not ethlambda_validator_enabled)

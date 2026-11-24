@@ -95,3 +95,17 @@
     name: ethpandaops.general.grandine
   vars:
     grandine_cleanup: true
+
+- name: "Cleanup consensus client: silver"
+  when: (ethereum_node_cl != "silver") or (not ethereum_node_cl_enabled)
+  ansible.builtin.include_role:
+    name: ethpandaops.general.silver
+  vars:
+    silver_cleanup: true
+
+- name: "Cleanup consensus client: ethlambda"
+  when: (ethereum_node_cl != "ethlambda") or (not ethereum_node_cl_enabled)
+  ansible.builtin.include_role:
+    name: ethpandaops.general.ethlambda
+  vars:
+    ethlambda_cleanup: true

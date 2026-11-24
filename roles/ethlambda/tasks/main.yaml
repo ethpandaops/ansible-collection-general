@@ -1,0 +1,7 @@
+- name: Setup ethlambda
+  ansible.builtin.import_tasks: setup.yaml
+  when: not ethlambda_cleanup
+
+- name: Cleanup ethlambda
+  ansible.builtin.import_tasks: cleanup.yaml
+  when: ethlambda_cleanup
