@@ -12,6 +12,16 @@
       buildoor_builder_mnemonic), a wallet key, CL/EL endpoints and a JWT secret
       path to be configured.
 
+- name: Refuse to deploy buildoor without authentication
+  ansible.builtin.assert:
+    that:
+      - (buildoor_auth_provider_url | length > 0) or (buildoor_allow_unauthenticated | bool)
+    fail_msg: >-
+      buildoor_auth_provider_url is empty, which serves the whole buildoor API
+      (settings, key lifecycle, pprof) without authentication. Set
+      buildoor_auth_provider_url, or set buildoor_allow_unauthenticated=true if
+      the API is not reachable from untrusted networks.
+
 - name: Add buildoor user
   ansible.builtin.user:
     name: "{{ buildoor_user }}"
@@ -30,6 +40,16 @@
     owner: "{{ buildoor_user }}"
     group: "{{ buildoor_user }}"
     mode: '0750'
+
+- name: Write buildoor secrets file
+  ansible.builtin.copy:
+    content: "{{ buildoor_secrets | to_nice_yaml }}"
+    dest: "{{ buildoor_secrets_file }}"
+    owner: "{{ buildoor_user }}"
+    group: "{{ buildoor_user }}"
+    mode: '0600'
+  no_log: true
+  notify: Restart buildoor container
 
 - name: Run buildoor container
   community.docker.docker_container:
