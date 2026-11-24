@@ -186,12 +186,11 @@ gen_kubernetes_config_ingress_basic_auth_middleware: "{{ gen_kubernetes_config_i
 
 # PandaMenu configuration
 gen_kubernetes_config_pandamenu_enabled: true # noqa var-naming[no-role-prefix]
-gen_kubernetes_config_pandamenu_script: '<script src="https://pandamenu.ethpandaops.io/panda-menu-1.0.1.js" integrity="sha384-icGX6g6CzB0tqlhDc6Su4c6IPVbcbUvfM3xjbbFYsYBwuZR79WkmOxDhGEPfmyn2" crossorigin="anonymous"></script>' # noqa var-naming[no-role-prefix] yaml[line-length]
-# Origins the menu loads its script and network list from (for a service's
-# Content-Security-Policy).
-gen_kubernetes_config_pandamenu_origins: # noqa var-naming[no-role-prefix]
-  - "https://pandamenu.ethpandaops.io"
-  - "https://ethpandaops-platform-production-cartographoor.ams3.digitaloceanspaces.com"
+gen_kubernetes_config_pandamenu_script_url: "https://pandamenu.ethpandaops.io/panda-menu-1.0.1.js" # noqa var-naming[no-role-prefix]
+gen_kubernetes_config_pandamenu_script_integrity: "sha384-icGX6g6CzB0tqlhDc6Su4c6IPVbcbUvfM3xjbbFYsYBwuZR79WkmOxDhGEPfmyn2" # noqa var-naming[no-role-prefix] yaml[line-length]
+gen_kubernetes_config_pandamenu_script: '<script src="{{ gen_kubernetes_config_pandamenu_script_url }}" integrity="{{ gen_kubernetes_config_pandamenu_script_integrity }}" crossorigin="anonymous"></script>' # noqa var-naming[no-role-prefix] yaml[line-length]
+# Origin the menu fetches its network list from.
+gen_kubernetes_config_pandamenu_data_origin: "https://ethpandaops-platform-production-cartographoor.ams3.digitaloceanspaces.com" # noqa var-naming[no-role-prefix] yaml[line-length]
 
 gen_kubernetes_config_chat_image: "" # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_chat_llm_model: "claude-sonnet-4-6" # noqa var-naming[no-role-prefix]

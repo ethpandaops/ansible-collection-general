@@ -57,11 +57,11 @@ upgradoor:
 {% endfor %}
   validatorRangesUrl: "https://config.{{ network_subdomain }}/api/v1/nodes/validator-ranges"
 {% if gen_kubernetes_config_pandamenu_enabled %}
-  # The UI's Content-Security-Policy admits the injected menu.
+  # The UI includes the menu itself; its Content-Security-Policy admits the menu's data.
   extraArgs:
-{% for _origin in gen_kubernetes_config_pandamenu_origins %}
-    - "--ui-origin={{ _origin }}"
-{% endfor %}
+    - "--ui-script={{ gen_kubernetes_config_pandamenu_script_url }}"
+    - "--ui-script-integrity={{ gen_kubernetes_config_pandamenu_script_integrity }}"
+    - "--ui-origin={{ gen_kubernetes_config_pandamenu_data_origin }}"
 {% endif %}
 
 {% if gen_kubernetes_config_upgradoor_settings | length > 0 %}
@@ -81,18 +81,9 @@ upgradoor:
     annotations:
 {% if gen_kubernetes_config_ingress_traefik | bool %}
       ethpandaops.io/exposure: "public"
-{% if gen_kubernetes_config_pandamenu_enabled %}
-      traefik.ingress.kubernetes.io/router.middlewares: {{ gen_kubernetes_config_ingress_pandamenu_middleware }}
-{% endif %}
 {% else %}
       # A full package inventory of a host is posted in one request.
       nginx.ingress.kubernetes.io/proxy-body-size: "8m"
-{% if gen_kubernetes_config_pandamenu_enabled %}
-      nginx.ingress.kubernetes.io/configuration-snippet: |
-        sub_filter '</head>' '{{ gen_kubernetes_config_pandamenu_script }}</head>';
-        sub_filter_types text/html;
-        sub_filter_once off;
-{% endif %}
 {% endif %}
     hosts:
 {% for _sub in gen_kubernetes_config_network_subdomains %}
