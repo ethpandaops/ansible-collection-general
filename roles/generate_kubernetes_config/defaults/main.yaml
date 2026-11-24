@@ -77,6 +77,7 @@ gen_kubernetes_config_dora_mev_relays: [] # noqa var-naming[no-role-prefix]
 # Xatu block-arrival views in dora, read from the xatu raw + cbt ClickHouse via the shared pandaops-dora chproxy user.
 gen_kubernetes_config_dora_xatu_enabled: false # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_assertoor_tests: [] # noqa var-naming[no-role-prefix]
+gen_kubernetes_config_dugtrio_extra_env: [] # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_dora_buildoor_overview_url: "https://buildoor.{{ network_subdomain }}" # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_dora_ens_remote_networks: # noqa var-naming[no-role-prefix]
   - name: mainnet
