@@ -287,24 +287,6 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
       - name: spamoor
         repository: https://ethpandaops.github.io/ethereum-helm-charts
         version: 1.0.1
-  xatu-cannon:
-    valuesTemplatePath: templates/xatu-cannon.yaml.j2
-    dependencies:
-      - name: xatu-cannon
-        repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 0.2.2
-  xatu-mimicry:
-    valuesTemplatePath: templates/xatu-mimicry.yaml.j2
-    dependencies:
-      - name: xatu-mimicry
-        repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 0.0.7
-  xatu-cl-mimicry:
-    valuesTemplatePath: templates/xatu-cl-mimicry.yaml.j2
-    dependencies:
-      - name: xatu-cl-mimicry
-        repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 0.0.2
   syncoor-server:
     valuesTemplatePath: templates/syncoor-server.yaml.j2
     dependencies:
@@ -315,12 +297,6 @@ gen_kubernetes_config_helm_charts: # noqa var-naming[no-role-prefix]
     valuesTemplatePath: templates/syncoor-web.yaml.j2
     dependencies:
       - name: syncoor-web
-        repository: https://ethpandaops.github.io/ethereum-helm-charts
-        version: 0.0.1
-  xatu-relay-monitor:
-    valuesTemplatePath: templates/xatu-relay-monitor.yaml.j2
-    dependencies:
-      - name: xatu-relay-monitor
         repository: https://ethpandaops.github.io/ethereum-helm-charts
         version: 0.0.1
   slashoor:
