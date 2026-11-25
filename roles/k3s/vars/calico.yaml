@@ -7,6 +7,11 @@ k3s_calico_backup_dir: "{{ k3s_server_location }}/server/calico/backup"
 
 # Calico operator URL
 k3s_calico_operator_url: "https://raw.githubusercontent.com/projectcalico/calico/{{ k3s_calico_version }}/manifests/tigera-operator.yaml"
+k3s_calico_crds_url: "https://raw.githubusercontent.com/projectcalico/calico/{{ k3s_calico_version }}/manifests/operator-crds.yaml"
+k3s_calico_crds_file: "{{ k3s_server_location }}/server/calico/operator-crds.{{ k3s_calico_version }}.yaml"
+k3s_calico_ships_crds_separately: "{{ k3s_calico_version | regex_replace('^v', '') is version('3.30.0', '>=') }}"
+# How long the operator may take to roll calico-node across every node after a version change
+k3s_calico_rollout_timeout: 3600s
 
 # Resource comparison script for detecting changes
 k3s_resource_compare_script: |
