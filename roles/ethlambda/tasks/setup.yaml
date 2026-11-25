@@ -19,9 +19,19 @@
       failed_when: false
       changed_when: false
 
+    - name: Deploy through upgradoor {{ ethlambda_container_name }}
+      ansible.builtin.command:
+        argv: "{{ ethlambda_upgradoor_deploy_argv }}"
+        removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
+      register: ethlambda_upgradoor_deploy
+      changed_when: ethlambda_upgradoor_result.changed | default(false)
+      when: ethlambda_upgradoor_enabled | bool
+
     - name: Run ethlambda container
       community.docker.docker_container:
         name: "{{ ethlambda_container_name }}"
+        comparisons: "{{ ethlambda_upgradoor_comparisons }}"
+        labels: "{{ ethlambda_upgradoor_labels }}"
         image: "{{ ethlambda_container_image }}"
         image_name_mismatch: recreate
         state: started
@@ -32,15 +42,9 @@
         env: "{{ ethlambda_container_env }}"
         networks: "{{ ethlambda_container_networks }}"
         entrypoint: "{{ ethlambda_container_entrypoint | default(omit) }}"
-        command: >-
-          {{
-            ethlambda_container_command +
-            ethlambda_container_command_extra_args +
-            (ethlambda_checkpoint_sync_enabled | ternary(ethlambda_container_command_checkpoint_args, [])) +
-            (ethlambda_mev_boost_enabled | ternary(ethlambda_mev_boost_beacon_command, []))
-          }}
+        command: "{{ ethlambda_container_command_all }}"
         user: "{{ ethlambda_user_meta.uid }}"
-        pull: "{{ ethlambda_container_pull | bool }}"
+        pull: "{{ ethlambda_upgradoor_pull | bool }}"
         security_opts: "{{ ethlambda_container_security_opts }}"
         memory: "{{ ethlambda_container_memory | default(omit) }}"
         memory_reservation: "{{ ethlambda_container_memory_reservation | default(omit) }}"
@@ -75,9 +79,19 @@
       failed_when: false
       changed_when: false
 
+    - name: Deploy through upgradoor {{ ethlambda_validator_container_name }}
+      ansible.builtin.command:
+        argv: "{{ ethlambda_validator_upgradoor_deploy_argv }}"
+        removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
+      register: ethlambda_validator_upgradoor_deploy
+      changed_when: ethlambda_validator_upgradoor_result.changed | default(false)
+      when: ethlambda_upgradoor_enabled | bool
+
     - name: Run ethlambda validator container
       community.docker.docker_container:
         name: "{{ ethlambda_validator_container_name }}"
+        comparisons: "{{ ethlambda_validator_upgradoor_comparisons }}"
+        labels: "{{ ethlambda_validator_upgradoor_labels }}"
         image: "{{ ethlambda_validator_container_image }}"
         image_name_mismatch: recreate
         state: started
@@ -88,14 +102,9 @@
         env: "{{ ethlambda_validator_container_env }}"
         networks: "{{ ethlambda_validator_container_networks }}"
         entrypoint: "{{ ethlambda_validator_container_entrypoint | default(omit) }}"
-        command: >-
-          {{
-            ethlambda_validator_container_command +
-            ethlambda_validator_container_command_extra_args +
-            (ethlambda_mev_boost_enabled | ternary(ethlambda_mev_boost_validator_command, []))
-          }}
+        command: "{{ ethlambda_validator_container_command_all }}"
         user: "{{ ethlambda_user_meta.uid }}"
-        pull: "{{ ethlambda_container_pull | bool }}"
+        pull: "{{ ethlambda_validator_upgradoor_pull | bool }}"
         security_opts: "{{ ethlambda_validator_container_security_opts }}"
         memory: "{{ ethlambda_validator_container_memory | default(omit) }}"
         memory_reservation: "{{ ethlambda_validator_container_memory_reservation | default(omit) }}"

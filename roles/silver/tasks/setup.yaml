@@ -29,9 +29,19 @@
     mode: "0640"
   register: silver_config_meta
 
+- name: Deploy through upgradoor {{ silver_container_name }}
+  ansible.builtin.command:
+    argv: "{{ silver_upgradoor_deploy_argv }}"
+    removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
+  register: silver_upgradoor_deploy
+  changed_when: silver_upgradoor_result.changed | default(false)
+  when: silver_upgradoor_enabled | bool
+
 - name: Run silver container
   community.docker.docker_container:
     name: "{{ silver_container_name }}"
+    comparisons: "{{ silver_upgradoor_comparisons }}"
+    labels: "{{ silver_upgradoor_labels }}"
     image: "{{ silver_container_image }}"
     image_name_mismatch: recreate
     state: started
@@ -43,9 +53,9 @@
     env: "{{ silver_container_env }}"
     networks: "{{ silver_container_networks }}"
     entrypoint: "{{ silver_container_entrypoint | default(omit) }}"
-    command: "{{ silver_container_command + silver_container_command_extra_args }}"
+    command: "{{ silver_container_command_all }}"
     user: "{{ silver_user_meta.uid }}"
-    pull: "{{ silver_container_pull | bool }}"
+    pull: "{{ silver_upgradoor_pull | bool }}"
     security_opts: "{{ silver_container_security_opts }}"
     shm_size: "{{ silver_container_shm_size }}"
     memory: "{{ silver_container_memory | default(omit) }}"

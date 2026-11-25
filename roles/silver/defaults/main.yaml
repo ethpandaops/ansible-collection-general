@@ -126,9 +126,38 @@ silver_container_stop_timeout: "300"
 silver_container_networks: []
 silver_container_command:
   - --config=/config/silver.toml
+  # the image sets SILVER_BEACON_API_BIND, which overrides the config file
+  - --beacon-api-bind=0.0.0.0:{{ silver_ports_http_beacon }}
 
 silver_container_command_extra_args: []
 # - --network=hoodi
+silver_container_command_all: "{{ silver_container_command + silver_container_command_extra_args }}"
 
 # Default image pull policy
 silver_container_pull: false
+
+################################################################################
+##
+## upgradoor
+##
+################################################################################
+silver_upgradoor_enabled: "{{ upgradoor_enabled | default(false) }}"
+silver_upgradoor_team: silver
+silver_upgradoor_result: >-
+  {{ silver_upgradoor_deploy.stdout | from_json
+     if (silver_upgradoor_deploy.stdout | default('')) is match('{') else {} }}
+silver_upgradoor_deploy_argv: >-
+  {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', silver_container_name,
+      '--image', silver_container_image, '--command', silver_container_command_all | to_json]
+     + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
+       | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+silver_upgradoor_labels: >-
+  {{ {'io.ethpandaops.upgradoor.kind': 'cl'}
+     | combine({'io.ethpandaops.upgradoor.team': silver_upgradoor_team} if silver_upgradoor_team else {})
+     if silver_upgradoor_enabled | bool else {} }}
+silver_upgradoor_comparisons: >-
+  {{ {} if upgradoor_deploy | default('soft') == 'immediate'
+     else dict(silver_upgradoor_result.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
+silver_upgradoor_pull: >-
+  {{ upgradoor_deploy | default('soft') == 'immediate'
+     or (silver_upgradoor_result.pull | default(silver_container_pull | bool)) }}
