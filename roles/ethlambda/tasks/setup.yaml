@@ -1,0 +1,110 @@
+- name: Add ethlambda user
+  ansible.builtin.user:
+    name: "{{ ethlambda_user }}"
+  register: ethlambda_user_meta
+
+- name: Configure ethlambda beacon client
+  when: ethlambda_enabled
+  block:
+    - name: Create data dir
+      ansible.builtin.file:
+        path: "{{ ethlambda_datadir }}"
+        state: directory
+        mode: "0750"
+        owner: "{{ ethlambda_user }}"
+        group: "{{ ethlambda_user }}"
+
+    - name: Set permissions
+      ansible.builtin.command: "chown -R {{ ethlambda_user }}:{{ ethlambda_user }} {{ ethlambda_datadir }}" # noqa no-free-form
+      failed_when: false
+      changed_when: false
+
+    - name: Run ethlambda container
+      community.docker.docker_container:
+        name: "{{ ethlambda_container_name }}"
+        image: "{{ ethlambda_container_image }}"
+        image_name_mismatch: recreate
+        state: started
+        restart_policy: always
+        stop_timeout: "{{ ethlambda_container_stop_timeout }}"
+        ports: "{{ ethlambda_container_ports }}"
+        volumes: "{{ ethlambda_container_volumes }}"
+        env: "{{ ethlambda_container_env }}"
+        networks: "{{ ethlambda_container_networks }}"
+        entrypoint: "{{ ethlambda_container_entrypoint | default(omit) }}"
+        command: >-
+          {{
+            ethlambda_container_command +
+            ethlambda_container_command_extra_args +
+            (ethlambda_checkpoint_sync_enabled | ternary(ethlambda_container_command_checkpoint_args, [])) +
+            (ethlambda_mev_boost_enabled | ternary(ethlambda_mev_boost_beacon_command, []))
+          }}
+        user: "{{ ethlambda_user_meta.uid }}"
+        pull: "{{ ethlambda_container_pull | bool }}"
+        security_opts: "{{ ethlambda_container_security_opts }}"
+        memory: "{{ ethlambda_container_memory | default(omit) }}"
+        memory_reservation: "{{ ethlambda_container_memory_reservation | default(omit) }}"
+        memory_swap: "{{ ethlambda_container_memory_swap | default(omit) }}"
+        memory_swappiness: "{{ ethlambda_container_memory_swappiness | default(omit) }}"
+        kernel_memory: "{{ ethlambda_container_kernel_memory | default(omit) }}"
+        cpus: "{{ ethlambda_container_cpus | default(omit) }}"
+        cpuset_cpus: "{{ ethlambda_container_cpuset_cpus | default(omit) }}"
+        cpuset_mems: "{{ ethlambda_container_cpuset_mems | default(omit) }}"
+        cpu_shares: "{{ ethlambda_container_cpu_shares | default(omit) }}"
+        cpu_quota: "{{ ethlambda_container_cpu_quota | default(omit) }}"
+        cpu_period: "{{ ethlambda_container_cpu_period | default(omit) }}"
+
+
+- name: Configure ethlambda validator client
+  when: ethlambda_validator_enabled
+  block:
+    - name: Create validator data dir
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: "0750"
+        owner: "{{ ethlambda_user }}"
+        group: "{{ ethlambda_user }}"
+      loop:
+        - "{{ ethlambda_validator_datadir }}"
+        - "{{ ethlambda_validator_datadir }}/keys"
+        - "{{ ethlambda_validator_datadir }}/secrets"
+
+    - name: Set permissions for validator data dir
+      ansible.builtin.command: "chown -R {{ ethlambda_user }}:{{ ethlambda_user }} {{ ethlambda_validator_datadir }}" # noqa no-free-form
+      failed_when: false
+      changed_when: false
+
+    - name: Run ethlambda validator container
+      community.docker.docker_container:
+        name: "{{ ethlambda_validator_container_name }}"
+        image: "{{ ethlambda_validator_container_image }}"
+        image_name_mismatch: recreate
+        state: started
+        restart_policy: always
+        stop_timeout: "{{ ethlambda_validator_container_stop_timeout }}"
+        ports: "{{ ethlambda_validator_container_ports }}"
+        volumes: "{{ ethlambda_validator_container_volumes }}"
+        env: "{{ ethlambda_validator_container_env }}"
+        networks: "{{ ethlambda_validator_container_networks }}"
+        entrypoint: "{{ ethlambda_validator_container_entrypoint | default(omit) }}"
+        command: >-
+          {{
+            ethlambda_validator_container_command +
+            ethlambda_validator_container_command_extra_args +
+            (ethlambda_mev_boost_enabled | ternary(ethlambda_mev_boost_validator_command, []))
+          }}
+        user: "{{ ethlambda_user_meta.uid }}"
+        pull: "{{ ethlambda_container_pull | bool }}"
+        security_opts: "{{ ethlambda_validator_container_security_opts }}"
+        memory: "{{ ethlambda_validator_container_memory | default(omit) }}"
+        memory_reservation: "{{ ethlambda_validator_container_memory_reservation | default(omit) }}"
+        memory_swap: "{{ ethlambda_validator_container_memory_swap | default(omit) }}"
+        memory_swappiness: "{{ ethlambda_validator_container_memory_swappiness | default(omit) }}"
+        kernel_memory: "{{ ethlambda_validator_container_kernel_memory | default(omit) }}"
+        cpus: "{{ ethlambda_validator_container_cpus | default(omit) }}"
+        cpuset_cpus: "{{ ethlambda_validator_container_cpuset_cpus | default(omit) }}"
+        cpuset_mems: "{{ ethlambda_validator_container_cpuset_mems | default(omit) }}"
+        cpu_shares: "{{ ethlambda_validator_container_cpu_shares | default(omit) }}"
+        cpu_quota: "{{ ethlambda_validator_container_cpu_quota | default(omit) }}"
+        cpu_period: "{{ ethlambda_validator_container_cpu_period | default(omit) }}"

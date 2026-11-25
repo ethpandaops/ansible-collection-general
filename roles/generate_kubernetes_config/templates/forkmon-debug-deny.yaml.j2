@@ -1,0 +1,30 @@
+{# Written to forkmon/templates/: Forkmon serves Go's /debug handlers on its UI
+   port, so /debug on the forkmon hosts gets its own Ingress in forkmon's
+   namespace, behind the class's allow-none Middleware (403 to everyone) at the
+   auth tier. Empty on ingress-nginx. #}
+{% if gen_kubernetes_config_ingress_traefik | bool %}
+# {{ ansible_managed }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ ethereum_network_name }}-forkmon-debug-deny
+  annotations:
+    traefik.ingress.kubernetes.io/router.priority: "2000"
+    traefik.ingress.kubernetes.io/router.middlewares: {{ gen_kubernetes_config_ingress_class }}-allow-none@kubernetescrd
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  ingressClassName: {{ gen_kubernetes_config_ingress_class }}
+  rules:
+  {{ '{{' }}- range .Values.forkmon.ingress.hosts {{ '}}' }}
+  - host: {{ '{{' }} .host | quote {{ '}}' }}
+    http:
+      paths:
+      - path: /debug
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ '{{' }} $.Values.forkmon.fullnameOverride {{ '}}' }}
+            port:
+              name: http
+  {{ '{{' }}- end {{ '}}' }}
+{% endif %}

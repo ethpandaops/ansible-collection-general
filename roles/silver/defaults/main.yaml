@@ -1,0 +1,134 @@
+silver_user: silver
+silver_datadir: /data/silver
+silver_config_path: /data/silver-config
+silver_runtime_path: /data/silver-runtime
+silver_auth_jwt_path: /data/execution-auth.secret
+silver_execution_engine_endpoint: http://geth:8551
+silver_announced_ip: "{{ ansible_host }}"
+silver_public_ipv6: ""
+silver_announced_ipv6: >-
+  {{ silver_public_ipv6 if (silver_public_ipv6 | length > 0)
+  else (ansible_default_ipv6.address
+  if silver_ipv6_enabled and ansible_default_ipv6.address is defined else '') }}
+silver_mev_boost_endpoint: "http://mev-boost:18550"
+
+silver_cleanup: false # when set to "true" it will remove the container
+
+silver_ports_p2p_udp: 9000
+silver_ports_quic: 9001
+silver_ports_http_beacon: 5051
+silver_ports_metrics: 5054
+
+silver_ipv6_enabled: false
+silver_supernode_enabled: false
+
+silver_fee_recipient: "0x25941dC771bB64514Fc8abBce970307Fb9d477e9" # theprotocolguild.eth
+silver_beacon_api_allowed_hosts:
+  - "*"
+
+checkpoint_sync_url: https://beaconstate.ethstaker.cc # noqa var-naming[no-role-prefix]
+silver_checkpoint_sync_enabled: true
+
+silver_mev_boost_enabled: false
+
+################################################################################
+##
+## Config file
+##
+################################################################################
+silver_config: |
+  external_ip_v4 = "{{ silver_announced_ip }}"
+  {% if silver_ipv6_enabled and (silver_announced_ipv6 | length > 0) %}
+  external_ip_v6 = "{{ silver_announced_ipv6 }}"
+  {% endif %}
+  discovery_port = {{ silver_ports_p2p_udp }}
+  quic_port = {{ silver_ports_quic }}
+  {% if silver_supernode_enabled %}
+  data_column_custody_group_count = 128
+  {% endif %}
+  data_storage_dir = "/data"
+  beacon_api_bind = ["0.0.0.0:{{ silver_ports_http_beacon }}"]
+  beacon_api_allowed_hosts = {{ silver_beacon_api_allowed_hosts | to_json }}
+  suggested_fee_recipient = "{{ silver_fee_recipient }}"
+  disable_weak_subjectivity_check = {{ (not (silver_checkpoint_sync_enabled | bool)) | lower }}
+  {{ silver_config_extra }}
+
+  [metrics]
+  enabled = true
+  bind = "0.0.0.0:{{ silver_ports_metrics }}"
+
+  [engine_config]
+  execution_endpoint = "{{ silver_execution_engine_endpoint }}"
+  jwt_secret = "/execution-auth.jwt"
+
+  {% if silver_checkpoint_sync_enabled %}
+  [chain_config]
+  checkpoint_sync_urls = ["{{ checkpoint_sync_url }}"]
+
+  {% endif %}
+  {% if silver_mev_boost_enabled %}
+  [pbs]
+  endpoint = "{{ silver_mev_boost_endpoint }}"
+  {% endif %}
+
+silver_config_extra: ""
+# silver_config_extra: |
+#   attestation_subnet_count = 64
+
+################################################################################
+##
+## Beacon node container configuration
+##
+################################################################################
+silver_container_name: silver
+silver_container_image: ethpandaops/silver:main
+silver_container_env:
+  LOG_STDOUT: "1"
+  RUST_LOG: info
+  XDG_DATA_HOME: /runtime
+# silver_container_entrypoint:
+silver_container_ports_ipv4:
+  - "127.0.0.1:{{ silver_ports_http_beacon }}:{{ silver_ports_http_beacon }}"
+  - "127.0.0.1:{{ silver_ports_metrics }}:{{ silver_ports_metrics }}"
+  - "0.0.0.0:{{ silver_ports_p2p_udp }}:{{ silver_ports_p2p_udp }}/udp"
+  - "0.0.0.0:{{ silver_ports_quic }}:{{ silver_ports_quic }}/udp"
+
+silver_container_ports_ipv6:
+  - "[::]:{{ silver_ports_p2p_udp }}:{{ silver_ports_p2p_udp }}/udp"
+  - "[::]:{{ silver_ports_quic }}:{{ silver_ports_quic }}/udp"
+
+silver_container_ports: >-
+  {{ silver_container_ports_ipv4 +
+  (silver_container_ports_ipv6
+  if silver_ipv6_enabled and ansible_default_ipv6.address is defined
+  and (silver_public_ipv6 | length == 0) else []) }}
+
+silver_container_volumes:
+  - "{{ silver_datadir }}:/data"
+  - "{{ silver_config_path }}:/config:ro"
+  - "{{ silver_runtime_path }}:/runtime"
+  - "{{ silver_auth_jwt_path }}:/execution-auth.jwt:ro"
+silver_container_security_opts:
+  - seccomp=unconfined
+silver_container_shm_size: 2G
+# silver_container_memory:
+# silver_container_memory_reservation:
+# silver_container_memory_swap:
+# silver_container_memory_swappiness:
+# silver_container_kernel_memory:
+# silver_container_cpus:
+# silver_container_cpuset_cpus:
+# silver_container_cpuset_mems:
+# silver_container_cpu_shares:
+# silver_container_cpu_quota:
+# silver_container_cpu_period:
+silver_container_stop_timeout: "300"
+silver_container_networks: []
+silver_container_command:
+  - --config=/config/silver.toml
+
+silver_container_command_extra_args: []
+# - --network=hoodi
+
+# Default image pull policy
+silver_container_pull: false

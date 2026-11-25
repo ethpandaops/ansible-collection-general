@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        consensus: [teku, prysm, lighthouse, nimbus, lodestar, grandine]
+        consensus: [teku, prysm, lighthouse, nimbus, lodestar, grandine, silver, ethlambda]
     runs-on: self-hosted-ghr-size-m-x64
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -25,9 +25,6 @@ jobs:
           path: ansible_collections/ethpandaops/general
 
       - uses: ./ansible_collections/ethpandaops/general/.github/actions/setup
-        with:
-          dockerhub_username: ethpandaops
-          dockerhub_password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Test ${{ matrix.consensus }} with all execution clients
         working-directory: ansible_collections/ethpandaops/general/roles/ethereum_node
@@ -35,8 +32,6 @@ jobs:
           PY_COLORS: '1'
           ANSIBLE_REMOTE_TMP: '/tmp/.ansible/tmp'
           CONSENSUS_CLIENT: ${{ matrix.consensus }}
-          DOCKERHUB_USERNAME: ethpandaops
-          DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
         run: |
           execution_clients=(geth nethermind erigon besu reth nimbusel)
 

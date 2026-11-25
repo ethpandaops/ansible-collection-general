@@ -3,6 +3,10 @@ ethereum_node_announced_ip: 127.0.0.1
 ethereum_network_name: mainnet # noqa: var-naming[no-role-prefix]
 docker_daemon_options: # noqa: var-naming[no-role-prefix]
   storage-driver: "vfs"
+  # Pull Docker Hub images through the ethpandaops pull-through cache,
+  # falling back to Docker Hub.
+  registry-mirrors:
+    - https://docker-cache.ethquokkaops.io
 # Fixes for integration tests to be able to run
 lighthouse_container_command_extra_args: # noqa: var-naming[no-role-prefix]
 # Fixes: Failed to start beacon node reason: Syncing from genesis is insecure and
@@ -19,3 +23,8 @@ teku_container_command_extra_args: # noqa: var-naming[no-role-prefix]
   # Fixes: Cannot sync outside of weak subjectivity period.
   # Consider re-syncing your node using --checkpoint-sync-url or use --ignore-weak-subjectivity-period-enabled to ignore this check
   - --ignore-weak-subjectivity-period-enabled
+ethlambda_container_command_extra_args: # noqa: var-naming[no-role-prefix]
+  - --checkpoint-sync-url=https://beaconstate.ethstaker.cc
+ethereum_node_fact_discovery_cl_retries: 120 # noqa: var-naming[no-role-prefix]
+erigon_container_command_extra_args: # noqa: var-naming[no-role-prefix]
+  - --torrent.download.rate=1mb

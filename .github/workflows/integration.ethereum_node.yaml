@@ -31,11 +31,13 @@ jobs:
         id: consensus_clients
         with:
           filters: |
+            ethlambda: roles/ethlambda/**
             grandine: roles/grandine/**
             lighthouse: roles/lighthouse/**
             lodestar: roles/lodestar/**
             nimbus: roles/nimbus/**
             prysm: roles/prysm/**
+            silver: roles/silver/**
             teku: roles/teku/**
       - uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
         id: execution_clients
@@ -58,7 +60,7 @@ jobs:
         id: vars
         run: |
           echo "Verifying which client roles have changed...";
-          ALL_CONSENSUS_CLIENTS='["teku", "prysm", "lighthouse", "nimbus", "lodestar", "grandine"]';
+          ALL_CONSENSUS_CLIENTS='["teku", "prysm", "lighthouse", "nimbus", "lodestar", "grandine", "silver", "ethlambda"]';
           ALL_EXECUTION_CLIENTS='["geth", "nethermind", "erigon", "besu", "reth", "nimbusel", "ethrex"]';
 
           CONSENSUS_CLIENTS="[]";
@@ -116,9 +118,6 @@ jobs:
           path: ansible_collections/ethpandaops/general
 
       - uses: ./ansible_collections/ethpandaops/general/.github/actions/setup
-        with:
-          dockerhub_username: ethpandaops
-          dockerhub_password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Test ${{ matrix.consensus }} with all execution clients
         working-directory: ansible_collections/ethpandaops/general/roles/ethereum_node
@@ -127,8 +126,6 @@ jobs:
           ANSIBLE_DOCKER_TIMEOUT: '120'
           ANSIBLE_REMOTE_TMP: '/tmp/.ansible/tmp'
           CONSENSUS_CLIENT: ${{ matrix.consensus }}
-          DOCKERHUB_USERNAME: ethpandaops
-          DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
         run: |
           execution_clients_json='${{ needs.vars.outputs.EXECUTION_CLIENTS }}'
           execution_clients=($(echo $execution_clients_json | jq -r '.[]'))
