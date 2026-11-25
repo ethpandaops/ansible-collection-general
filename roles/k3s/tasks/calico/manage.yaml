@@ -36,9 +36,10 @@
       changed_when: true
       when: k3s_legacy_operator_check.rc == 0
 
-# Uninstall tasks
+# Uninstall tasks: only a Calico install the role does not track yet is torn down and
+# reinstalled. A tracked install changes version in place through the operator.
 - name: Remove existing Calico deployment
-  when: k3s_calico_version_changed
+  when: k3s_legacy_calico_detected
   block:
     # Remove webhook configurations that might block uninstallation
     - name: Check for Rancher mutating webhook configurations
@@ -175,6 +176,31 @@
       - "Will apply operator: {{ k3s_calico_version_changed or (k3s_operator_diff.rc | default(0) == 1) }}"
   when: k3s_operator_diff is not skipped or k3s_calico_version_changed
 
+# From v3.30 the CRDs ship in operator-crds.yaml instead of tigera-operator.yaml, and
+# Calico's upgrade procedure applies them before the operator.
+- name: Download operator-crds.yaml
+  ansible.builtin.get_url:
+    url: "{{ k3s_calico_crds_url }}"
+    dest: "{{ k3s_calico_crds_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+    force: "{{ k3s_calico_version_changed }}"
+  when: k3s_calico_ships_crds_separately
+
+- name: Apply operator-crds.yaml
+  ansible.builtin.command:
+    cmd: >
+      k3s kubectl apply --server-side --force-conflicts -f {{ k3s_calico_crds_file }}
+  register: k3s_apply_calico_crds
+  retries: 5
+  delay: 10
+  until: k3s_apply_calico_crds is succeeded
+  changed_when: k3s_apply_calico_crds.stdout is defined and k3s_apply_calico_crds.stdout != ""
+  when:
+    - k3s_calico_ships_crds_separately
+    - k3s_calico_version_changed or (k3s_operator_diff.rc | default(0) == 1)
+
 - name: Apply tigera-operator.yaml
   ansible.builtin.command:
     cmd: >
@@ -249,5 +275,31 @@
   until: k3s_apply_custom_resources is succeeded
   changed_when: k3s_apply_custom_resources.stdout is defined and k3s_apply_custom_resources.stdout != ""
   when: k3s_calico_version_changed or (k3s_resources_diff.rc | default(0) == 1)
+
+# The operator rolls calico-node one node at a time after a version change; verify.yaml
+# restarts pods that are not Ready, so it must only run once that rollout has finished.
+- name: Wait for the Calico rollout to finish
+  when:
+    - k3s_calico_version_changed
+    - not k3s_calico_install_required
+  block:
+    - name: Wait for the operator to move calico-node to the new version
+      ansible.builtin.command:
+        cmd: "k3s kubectl -n calico-system get daemonset calico-node -o jsonpath={.spec.template.spec.containers[0].image}"
+      register: k3s_calico_node_image
+      retries: 60
+      delay: 10
+      until: k3s_calico_node_image.stdout is search(':' ~ k3s_calico_version ~ '$')
+      changed_when: false
+
+    - name: Wait for calico-node to roll out on every node
+      ansible.builtin.command:
+        cmd: "k3s kubectl -n calico-system rollout status daemonset/calico-node --timeout={{ k3s_calico_rollout_timeout }}"
+      changed_when: false
+
+    - name: Wait for the operator to report Calico available
+      ansible.builtin.command:
+        cmd: "k3s kubectl wait tigerastatus/calico --for=condition=Available --timeout=600s"
+      changed_when: false
 
 # Version will be saved after successful verification in main.yaml
