@@ -55,9 +55,23 @@
         (not (erigon_container_info.exists | default(false)) or
          (erigon_container_info.container.State.Status | default('')) != "running")
 
+- name: Deploy through upgradoor {{ erigon_container_name }}
+  ansible.builtin.command:
+    argv: "{{ erigon_upgradoor_deploy_argv }}"
+    removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
+  register: erigon_upgradoor_deploy
+  changed_when: erigon_upgradoor_result.changed | default(false)
+  when: erigon_upgradoor_enabled | bool
+
 - name: Run erigon container
+  # docker_container keeps comparison modes in module globals; mitogen reuses the interpreter
+  vars:
+    mitogen_task_isolation: fork
   community.docker.docker_container:
     name: "{{ erigon_container_name }}"
+    comparisons: "{{ erigon_upgradoor_comparisons }}"
+    image_comparison: current-image
+    labels: "{{ erigon_upgradoor_labels }}"
     image: "{{ erigon_container_image }}"
     image_name_mismatch: recreate
     state: started
@@ -68,9 +82,9 @@
     env: "{{ erigon_container_env }}"
     networks: "{{ erigon_container_networks }}"
     entrypoint: "{{ erigon_container_entrypoint | default(omit) }}"
-    command: "{{ erigon_container_command + erigon_container_command_extra_args }}"
+    command: "{{ erigon_container_command_all }}"
     user: "{{ erigon_user_meta.uid }}:{{ erigon_user_meta.group }}"
-    pull: "{{ erigon_container_pull | bool }}"
+    pull: "{{ erigon_upgradoor_pull | bool }}"
     security_opts: "{{ erigon_container_security_opts }}"
     memory: "{{ erigon_container_memory | default(omit) }}"
     memory_reservation: "{{ erigon_container_memory_reservation | default(omit) }}"

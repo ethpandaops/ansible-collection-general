@@ -1,0 +1,94 @@
+# {{ ansible_managed }}
+
+{# The tag follows the last colon of the last path component, not a registry port. #}
+{% set upgradoor_image = gen_kubernetes_config_upgradoor_image | string | trim %}
+{% set upgradoor_image_parts = upgradoor_image.split('@') %}
+{% set upgradoor_image_name = upgradoor_image_parts[0].rsplit('/', 1) | last %}
+{% if upgradoor_image_parts | length == 2 %}
+{% if upgradoor_image_parts[1] is not match('^sha256:[0-9a-f]{64}$') or ':' in upgradoor_image_name or upgradoor_image_name | length == 0 %}
+{{ undef(hint="gen_kubernetes_config_upgradoor_image (default_tooling_images.upgradoor) must be '<repository>:<tag>' or '<repository>@sha256:<64 hex>', got '" ~ upgradoor_image ~ "'") }}
+{% endif %}
+{% elif upgradoor_image_parts | length != 1 or upgradoor_image_name is not match('^[^:]+:[^:]+$') %}
+{{ undef(hint="gen_kubernetes_config_upgradoor_image (default_tooling_images.upgradoor) must be '<repository>:<tag>' or '<repository>@sha256:<64 hex>', got '" ~ upgradoor_image ~ "'") }}
+{% endif %}
+upgradoor:
+  fullnameOverride: upgradoor
+
+  image:
+{% if upgradoor_image_parts | length == 2 %}
+    repository: {{ upgradoor_image_parts[0] }}
+    {# The chart renders <repository>:<tag>; a tag in front of the digest keeps the reference valid. #}
+    tag: "latest@{{ upgradoor_image_parts[1] }}"
+    pullPolicy: IfNotPresent
+{% else %}
+{% set upgradoor_image_tag = upgradoor_image_name.split(':', 1) | last %}
+    repository: {{ upgradoor_image[:-(upgradoor_image_tag | length + 1)] }}
+    tag: {{ upgradoor_image_tag }}
+    pullPolicy: {% if "latest" in upgradoor_image_tag %}Always{% else %}IfNotPresent{% endif %}
+
+{% endif %}
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  network: "{{ ethereum_network_name }}"
+  signerPublicKey: "{{ upgradoor_signer_public_key }}"
+  authProviderUrl: "https://auth.{{ network_subdomain }}"
+  controllerSeed: "{{ gen_kubernetes_config_upgradoor_controller_seed_ref }}"
+  registry:
+    auth: >-
+      {"auths": {"https://index.docker.io/v1/": {"username": "{{ gen_kubernetes_config_upgradoor_dockerhub_user_ref }}",
+      "password": "{{ gen_kubernetes_config_upgradoor_dockerhub_token_ref }}"}}}
+  # Agents sign the URL they call, so every public URL must be listed.
+  publicUrls:
+{% for _sub in gen_kubernetes_config_network_subdomains %}
+    - "https://upgradoor.{{ _sub }}"
+{% endfor %}
+  # Queried in parallel; the chain most of them follow is used.
+  beaconEndpoints:
+    - "{{ default_cl_endpoint }}"
+{% for host in (groups['ethereum_node'] | default([]) | sort | shuffle(seed=ethereum_network_name))[:gen_kubernetes_config_upgradoor_beacon_nodes | int] %}
+    - "https://{{ gen_kubernetes_config_upgradoor_node_ingress_ref }}@{{ ethereum_node_beacon_prefix }}{{ host }}.{{ network_server_subdomain }}"
+{% endfor %}
+  validatorRangesUrl: "https://config.{{ network_subdomain }}/api/v1/nodes/validator-ranges"
+{% if gen_kubernetes_config_pandamenu_enabled %}
+  # The UI includes the menu itself; its Content-Security-Policy admits the menu's data.
+  extraArgs:
+    - "--ui-script={{ gen_kubernetes_config_pandamenu_script_url }}"
+    - "--ui-script-integrity={{ gen_kubernetes_config_pandamenu_script_integrity }}"
+    - "--ui-origin={{ gen_kubernetes_config_pandamenu_data_origin }}"
+{% endif %}
+
+{% if gen_kubernetes_config_upgradoor_settings | length > 0 %}
+  settings:
+    {{ gen_kubernetes_config_upgradoor_settings | to_nice_yaml(indent=2) | trim | indent(width=4) }}
+{% else %}
+  settings: {}
+{% endif %}
+
+  persistence:
+    enabled: true
+    size: "{{ gen_kubernetes_config_upgradoor_persistence_size }}"
+
+  ingress:
+    enabled: true
+    className: {{ gen_kubernetes_config_ingress_class }}
+    annotations:
+{% if gen_kubernetes_config_ingress_traefik | bool %}
+      ethpandaops.io/exposure: "public"
+{% else %}
+      # A full package inventory of a host is posted in one request.
+      nginx.ingress.kubernetes.io/proxy-body-size: "8m"
+{% endif %}
+    hosts:
+{% for _sub in gen_kubernetes_config_network_subdomains %}
+      - host: upgradoor.{{ _sub }}
+        paths:
+          - path: /
+            pathType: Prefix
+{% endfor %}

@@ -1,0 +1,44 @@
+unattended_upgrades_install_apt_listchanges: true
+unattended_upgrades_packages: "{{ ['unattended-upgrades'] + (['apt-listchanges'] if unattended_upgrades_install_apt_listchanges | bool else []) }}"
+unattended_upgrades_apt_cache_valid_time: 3600
+
+# Origins-Pattern entries: security updates only.
+unattended_upgrades_default_origins:
+  Debian:
+    - "origin=Debian,codename=${distro_codename}-security,label=Debian-Security"
+  Ubuntu:
+    - "origin=Ubuntu,archive=${distro_codename}-security,label=Ubuntu"
+    - "origin=UbuntuESMApps,archive=${distro_codename}-apps-security"
+    - "origin=UbuntuESM,archive=${distro_codename}-infra-security"
+unattended_upgrades_origins: "{{ unattended_upgrades_default_origins[ansible_facts.distribution] | default(unattended_upgrades_default_origins['Debian']) }}"
+unattended_upgrades_extra_origins: []
+
+# Upgraded by the upgradoor agent instead; shared through upgradoor_blocked_packages.
+unattended_upgrades_default_blocked_packages:
+  - docker-ce
+  - docker-ce-cli
+  - docker-ce-rootless-extras
+  - containerd.io
+  - docker-buildx-plugin
+  - docker-compose-plugin
+unattended_upgrades_blocked_packages: "{{ upgradoor_blocked_packages | default(unattended_upgrades_default_blocked_packages) }}"
+# Raw Package-Blacklist entries (Python regular expressions).
+unattended_upgrades_blocked_package_patterns: []
+
+# Keep installed conffiles; applies to every apt run on the host.
+unattended_upgrades_keep_conffiles: false
+unattended_upgrades_minimal_steps: true
+unattended_upgrades_remove_unused_kernel_packages: true
+unattended_upgrades_remove_new_unused_dependencies: true
+unattended_upgrades_remove_unused_dependencies: false
+unattended_upgrades_syslog_enable: false
+
+# Intervals in days, 0 disables.
+unattended_upgrades_periodic_update_package_lists: 1
+unattended_upgrades_periodic_unattended_upgrade: 1
+unattended_upgrades_periodic_autoclean_interval: 7
+
+unattended_upgrades_manage_timers: true
+unattended_upgrades_timers:
+  - apt-daily.timer
+  - apt-daily-upgrade.timer

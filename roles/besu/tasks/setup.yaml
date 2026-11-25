@@ -16,9 +16,23 @@
   failed_when: false
   changed_when: false
 
+- name: Deploy through upgradoor {{ besu_container_name }}
+  ansible.builtin.command:
+    argv: "{{ besu_upgradoor_deploy_argv }}"
+    removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
+  register: besu_upgradoor_deploy
+  changed_when: besu_upgradoor_result.changed | default(false)
+  when: besu_upgradoor_enabled | bool
+
 - name: Run besu container
+  # docker_container keeps comparison modes in module globals; mitogen reuses the interpreter
+  vars:
+    mitogen_task_isolation: fork
   community.docker.docker_container:
     name: "{{ besu_container_name }}"
+    comparisons: "{{ besu_upgradoor_comparisons }}"
+    image_comparison: current-image
+    labels: "{{ besu_upgradoor_labels }}"
     image: "{{ besu_container_image }}"
     image_name_mismatch: recreate
     state: started
@@ -29,9 +43,9 @@
     env: "{{ besu_container_env }}"
     networks: "{{ besu_container_networks }}"
     entrypoint: "{{ besu_container_entrypoint | default(omit) }}"
-    command: "{{ besu_container_command + besu_container_command_extra_args }}"
+    command: "{{ besu_container_command_all }}"
     user: "{{ besu_user_meta.uid }}"
-    pull: "{{ besu_container_pull | bool }}"
+    pull: "{{ besu_upgradoor_pull | bool }}"
     security_opts: "{{ besu_container_security_opts }}"
     memory: "{{ besu_container_memory | default(omit) }}"
     memory_reservation: "{{ besu_container_memory_reservation | default(omit) }}"

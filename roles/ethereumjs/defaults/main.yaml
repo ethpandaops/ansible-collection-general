@@ -76,6 +76,33 @@ ethereumjs_container_command: >-
   {{ ethereumjs_container_command_default + (ethereumjs_container_command_v6 if ethereumjs_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
 
 ethereumjs_container_command_extra_args: []
+ethereumjs_container_command_all: "{{ ethereumjs_container_command + ethereumjs_container_command_extra_args }}"
 
 # Default image pull policy
 ethereumjs_container_pull: false
+
+################################################################################
+##
+## upgradoor
+##
+################################################################################
+ethereumjs_upgradoor_enabled: "{{ upgradoor_enabled | default(false) }}"
+ethereumjs_upgradoor_team: ethereumjs
+ethereumjs_upgradoor_result: >-
+  {{ ethereumjs_upgradoor_deploy.stdout | from_json
+     if (ethereumjs_upgradoor_deploy.stdout | default('')) is match('{') else {} }}
+ethereumjs_upgradoor_deploy_argv: >-
+  {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', ethereumjs_container_name,
+      '--image', ethereumjs_container_image, '--command', ethereumjs_container_command_all | to_json]
+     + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
+       | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+ethereumjs_upgradoor_labels: >-
+  {{ {'io.ethpandaops.upgradoor.kind': 'el'}
+     | combine({'io.ethpandaops.upgradoor.team': ethereumjs_upgradoor_team} if ethereumjs_upgradoor_team else {})
+     if ethereumjs_upgradoor_enabled | bool else {} }}
+ethereumjs_upgradoor_comparisons: >-
+  {{ {} if upgradoor_deploy | default('soft') == 'immediate'
+     else dict(ethereumjs_upgradoor_result.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
+ethereumjs_upgradoor_pull: >-
+  {{ upgradoor_deploy | default('soft') == 'immediate'
+     or (ethereumjs_upgradoor_result.pull | default(ethereumjs_container_pull | bool)) }}

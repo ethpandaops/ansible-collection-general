@@ -1,0 +1,14 @@
+- name: Destroy the test host
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Remove the test host and the registry
+      community.docker.docker_container:
+        name: "{{ item }}"
+        state: absent
+      loop: "{{ groups['molecule'] + ['upgradoor-molecule-registry'] }}"
+
+    - name: Remove the test image
+      community.docker.docker_image:
+        name: "{{ upgradoor_agent_image_repository }}:molecule"
+        state: absent

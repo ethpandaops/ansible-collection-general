@@ -19,9 +19,23 @@
       failed_when: false
       changed_when: false
 
+    - name: Deploy through upgradoor {{ lighthouse_container_name }}
+      ansible.builtin.command:
+        argv: "{{ lighthouse_upgradoor_deploy_argv }}"
+        removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
+      register: lighthouse_upgradoor_deploy
+      changed_when: lighthouse_upgradoor_result.changed | default(false)
+      when: lighthouse_upgradoor_enabled | bool
+
     - name: Run lighthouse container
+      # docker_container keeps comparison modes in module globals; mitogen reuses the interpreter
+      vars:
+        mitogen_task_isolation: fork
       community.docker.docker_container:
         name: "{{ lighthouse_container_name }}"
+        comparisons: "{{ lighthouse_upgradoor_comparisons }}"
+        image_comparison: current-image
+        labels: "{{ lighthouse_upgradoor_labels }}"
         image: "{{ lighthouse_container_image }}"
         image_name_mismatch: recreate
         state: started
@@ -32,15 +46,9 @@
         env: "{{ lighthouse_container_env }}"
         networks: "{{ lighthouse_container_networks }}"
         entrypoint: "{{ lighthouse_container_entrypoint | default(omit) }}"
-        command: >-
-          {{
-            lighthouse_container_command +
-            lighthouse_container_command_extra_args +
-            (lighthouse_checkpoint_sync_enabled | ternary(lighthouse_container_command_checkpoint_args, [])) +
-            (lighthouse_mev_boost_enabled | ternary(lighthouse_mev_boost_beacon_command, []))
-          }}
+        command: "{{ lighthouse_container_command_all }}"
         user: "{{ lighthouse_user_meta.uid }}"
-        pull: "{{ lighthouse_container_pull | bool }}"
+        pull: "{{ lighthouse_upgradoor_pull | bool }}"
         security_opts: "{{ lighthouse_container_security_opts }}"
         memory: "{{ lighthouse_container_memory | default(omit) }}"
         memory_reservation: "{{ lighthouse_container_memory_reservation | default(omit) }}"
@@ -75,9 +83,23 @@
       failed_when: false
       changed_when: false
 
+    - name: Deploy through upgradoor {{ lighthouse_validator_container_name }}
+      ansible.builtin.command:
+        argv: "{{ lighthouse_validator_upgradoor_deploy_argv }}"
+        removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
+      register: lighthouse_validator_upgradoor_deploy
+      changed_when: lighthouse_validator_upgradoor_result.changed | default(false)
+      when: lighthouse_upgradoor_enabled | bool
+
     - name: Run lighthouse validator container
+      # docker_container keeps comparison modes in module globals; mitogen reuses the interpreter
+      vars:
+        mitogen_task_isolation: fork
       community.docker.docker_container:
         name: "{{ lighthouse_validator_container_name }}"
+        comparisons: "{{ lighthouse_validator_upgradoor_comparisons }}"
+        image_comparison: current-image
+        labels: "{{ lighthouse_validator_upgradoor_labels }}"
         image: "{{ lighthouse_validator_container_image }}"
         image_name_mismatch: recreate
         state: started
@@ -88,14 +110,9 @@
         env: "{{ lighthouse_validator_container_env }}"
         networks: "{{ lighthouse_validator_container_networks }}"
         entrypoint: "{{ lighthouse_validator_container_entrypoint | default(omit) }}"
-        command: >-
-          {{
-            lighthouse_validator_container_command +
-            lighthouse_validator_container_command_extra_args +
-            (lighthouse_mev_boost_enabled | ternary(lighthouse_mev_boost_validator_command, []))
-          }}
+        command: "{{ lighthouse_validator_container_command_all }}"
         user: "{{ lighthouse_user_meta.uid }}"
-        pull: "{{ lighthouse_container_pull | bool }}"
+        pull: "{{ lighthouse_validator_upgradoor_pull | bool }}"
         security_opts: "{{ lighthouse_validator_container_security_opts }}"
         memory: "{{ lighthouse_validator_container_memory | default(omit) }}"
         memory_reservation: "{{ lighthouse_validator_container_memory_reservation | default(omit) }}"

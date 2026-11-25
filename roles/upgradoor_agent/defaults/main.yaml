@@ -1,0 +1,184 @@
+upgradoor_agent_cleanup: false
+
+################################################################################
+## Binary
+################################################################################
+# Release tag (vX.Y.Z), or latest: the latest published release. Either is installed only when signed;
+# never a lower release than the host has.
+upgradoor_agent_version: latest
+upgradoor_agent_releases_url: https://github.com/ethpandaops/upgradoor/releases
+# Pinned release keys (principal and namespace upgradoor-release).
+upgradoor_agent_allowed_signers_file: "{{ role_path }}/files/allowed_signers"
+# The release image issues the host certificates, pulled by the digest the signed manifest names.
+upgradoor_agent_image_repository: ghcr.io/ethpandaops/upgradoor
+# "<seq> <version>" of the installed release.
+upgradoor_agent_release_seq_file: "{{ upgradoor_agent_config_dir }}/release-seq"
+upgradoor_agent_binary_path: /usr/local/bin/upgradoor
+# Download directory of earlier versions, removed by the cleanup.
+upgradoor_agent_install_dir: /opt/upgradoor
+
+################################################################################
+## Files
+################################################################################
+upgradoor_agent_user: upgradoor
+upgradoor_agent_group: upgradoor
+upgradoor_agent_docker_group: docker
+upgradoor_agent_config_dir: /etc/upgradoor
+upgradoor_agent_config_file: "{{ upgradoor_agent_config_dir }}/agent.yaml"
+upgradoor_agent_key_file: "{{ upgradoor_agent_config_dir }}/host.key"
+upgradoor_agent_cert_file: "{{ upgradoor_agent_config_dir }}/host.crt"
+upgradoor_agent_state_dir: /data/upgradoor
+# Login user; joins upgradoor_agent_group (overrides file and socket).
+upgradoor_agent_entry_user: devops
+# Lets people on the host and the controller override images and flags; off: no overrides file.
+upgradoor_agent_overrides: false
+# Own directory: the agent and the entry user both replace the file. The agent
+# creates the file and owns its default lines.
+upgradoor_agent_overrides_dir: "{{ upgradoor_agent_config_dir }}/overrides"
+upgradoor_agent_overrides_file: "{{ upgradoor_agent_overrides_dir }}/overrides.yaml"
+# Symlink to the overrides file; a regular file found here is moved there. Empty for none.
+upgradoor_agent_overrides_link: "/home/{{ upgradoor_agent_entry_user }}/overrides.yaml"
+upgradoor_agent_socket_path: /run/upgradoor/agent.sock
+# Must be a group the agent is a member of.
+upgradoor_agent_socket_group: "{{ upgradoor_agent_group }}"
+upgradoor_agent_audit_log_file: "{{ upgradoor_agent_state_dir }}/audit.log"
+upgradoor_agent_audit_log_max_size_bytes: 1048576
+upgradoor_agent_audit_log_max_files: 5
+
+################################################################################
+## Service
+################################################################################
+upgradoor_agent_service_name: upgradoor-agent
+upgradoor_agent_service_enabled: true
+upgradoor_agent_service_state: started
+upgradoor_agent_service_restart_sec: 5
+# A stopping agent finishes its current step (recreate, package upgrade).
+upgradoor_agent_service_stop_timeout_sec: 3600
+upgradoor_agent_log_level: info
+upgradoor_agent_log_format: text
+
+################################################################################
+## Identity
+################################################################################
+# Signs the host certificates on the Ansible controller.
+upgradoor_agent_seed: "{{ secret_upgradoor_seed }}"
+# Certificate signer public key (keygen signer-pubkey).
+upgradoor_agent_signer_public_key: "{{ upgradoor_signer_public_key }}"
+# Issue the host certificate even when the installed one is current.
+upgradoor_agent_reissue: false
+upgradoor_agent_network: "{{ ethereum_network_name }}"
+upgradoor_agent_hostname: "{{ inventory_hostname }}"
+# Inventory groups that become the host's roles (agent.yaml).
+upgradoor_agent_role_groups:
+  - bootnode
+  - ethereum_node
+  - buildoor
+  - mev_relay
+upgradoor_agent_roles: "{{ group_names | intersect(upgradoor_agent_role_groups) }}"
+
+################################################################################
+## Controller
+################################################################################
+upgradoor_agent_controller_url: "https://upgradoor.{{ network_subdomain }}"
+upgradoor_agent_controller_sync_interval: 30s
+upgradoor_agent_controller_lease_sync_interval: 5s
+# Plain http controller URL (development only).
+upgradoor_agent_controller_allow_insecure: false
+upgradoor_agent_controller_min_sync_interval: 1s
+upgradoor_agent_controller_max_sync_interval: 10m
+# Controller public key (keygen controller-pubkey).
+upgradoor_agent_controller_public_key: "{{ upgradoor_controller_public_key | default(upgradoor_agent_default_controller_public_key) }}"
+upgradoor_agent_default_controller_public_key: >- # noqa yaml[line-length]
+  JOvsftdUTxKc7xmkvB4Z8kQkIBhxaRGvupEE5tzgqerb_Wr2N4-LLmdr6yAdVI9AcQ_zzUT0kSGKv_Ivvb5ew48q6hs15hp1TKs4QYOW23fSMpQEwMnEdN-va7JFD-9Ty8jRXpXA-if1zN7yH58q5mWuqFSUlgubmWvaxC7vsw_o5gLcLWkWD2Qp3M1pa7c9xYtnC38IWg8p2FXyNIBJSWl-QSX_OqQ523ZPmhkC7M3MxAUDTzmxGunCPRfeAk6T4dmGueq5aXhDAI4eCT-OlSr9pDHwOwB9YMCGeODVkD5i3tAYupMQ-tOIGenRv8M0SfM177HHN_G1QmwpwQqod4nbab44weASKjInjIM9l_p0nhMvE2SowDAegiYY1bSOu_n6EsU67GyCELnhVj23lxrAPe3jiI3sNUifVfVsFoweiyiZ1xmw351z1JROtMSc2MBfgC2yU1dmVwk1fM4RkYwOIrnqC6n8OZcSjmWKJEsMy11Q-W7MQmErfkuu3DigpJXv3lOijTxNjQOcOmEdZWTL2hiqaxcFmOERT_K-WpmTp0tu8oyxXHKwFukV7QRUdIbEb2WfZIWlniaXD0rw7vkJVv4hucUGhoF1auoftAroNus2DcufZRoGWQBLNrb9HceXMtgb5daA4VT0EgB9BU4xMTcxqUltq6pZsCB75LYZZo_7a4owhLmF9iKk583szZHfO-CAJ1FI5G3kJ2ev2HtGDEZkp00lLHnsYRvP-CgEmVgzY_3vDO7hMt6qf0Lc9XQTUszLpEK36LhZYRmK4uECHEkLGEVIn8tZKO8JWyz4xzpE9aj9NEdV105mw8MvXFF2aB3zpx9Tloh0Zr5FTaMGZ6VUszRV2gKTNW66vzGQ6_OPen13MvGY2FweHqRAo-ES-MXwYZJowE_U9Nk39WezeRc-pRq9WFqWdXzTCILTk-X49iVGFWRxElh50IR8tAsxnAGDYzc91ODoJuyBLNFGTfGGuwQ9UusME9nP44kM88MkgE3AIL6dkrzpBT3c3q_vEgnoAgktqPyehxT01ybhAW4_PvcPEzBy91dOUiZodu5Tv1P91siH7N2CIAJo5lyWfv65nPJabKflVBqgHzjGNNP6G9EdNCM4sdVc-7m_qbMzvI-kJWkeI3e0yFfvQyanRV-JqWqybGSQLw5PbvIrCBWo2EpGcW6qtmyLW7VCePdk2yCphRadhoGJ4OH3eFXi1Xdv31a6P2wnU0hPAYlkcXWSjwubIWirwTioqOpFr73Qy3mFlBAgaG5MGPgyaxm3Tkty-adI0Rbbg7owV2_f5tj7nIgsfto87W05AK2PJQDU937KBYz2yjVlAUwj8E6ogC7Iq4KC3y5cg57PmcCJb1s683l0QJ4JiJ8P03wdxzG9BANucHrgKosmbsKc30y1azvHfd1_v8NeY37xw1udmxXm3711h4LmaeQ5X_obV5Zn0mOmFgmm9MX2gBhxcH09hJYvEqNSNIOooylS3oHO9m-_GowdVsDH5Ro4sg24JG_P_oIcoJzXscRo7aM4hHHhXduWg1vrGwJkd-huEouIUPSMtxMXC3_7dWPQxU4mKw6ieSZPIg_2J4fNedkorYDPYAtIucYvF8A7LbC9ig5DTS3BSrvDB6T-FhDGl256W2DPd_Te1bOuBEhGNHnh5co2lb7NHUs3VAUe_Mu6O71ZPWQNeLkVnKn8f5W-rmvtKC3LDI1Dyu-6L95vKoo_I97Gi5fNUOdR52DsBMqOng
+# Act on unsigned controller answers (development only); no controller public key needed.
+upgradoor_agent_controller_allow_unsigned_answers: false
+
+# What the controller may ask for.
+upgradoor_agent_verbs:
+  - roll
+  - packages
+  - reboot
+
+################################################################################
+## Containers
+################################################################################
+# Containers are configured by their labels io.ethpandaops.upgradoor.kind (any kind but none is
+# managed) and io.ethpandaops.upgradoor.team; the client roles set them.
+# Unlabelled containers: ignore, or roll (they follow their tag, impact independent).
+upgradoor_agent_default_policy: ignore
+# Which kinds roll while the controller is silent (fallback below), e.g. {el: {roll: true}}.
+upgradoor_agent_kind_policies: {}
+
+################################################################################
+## Docker and registries
+################################################################################
+upgradoor_agent_docker_host: unix:///var/run/docker.sock
+# Kept in step by install.sh (readable by the agent's group); missing source: anonymous pulls.
+upgradoor_agent_registry_auth_source: /root/.docker/config.json
+upgradoor_agent_registry_auth_file: "{{ upgradoor_agent_config_dir }}/registry-auth.json"
+
+################################################################################
+## Fallback without the controller
+################################################################################
+# Silence after which the kinds of upgradoor_agent_kind_policies (and unlabelled containers with
+# defaultPolicy roll) follow their tags, unstaggered.
+upgradoor_agent_fallback_after: 24h
+upgradoor_agent_fallback_interval: 6h
+
+################################################################################
+## Packages
+################################################################################
+# Shared with unattended_upgrades through upgradoor_blocked_packages.
+upgradoor_agent_default_blocked_packages:
+  - docker-ce
+  - docker-ce-cli
+  - docker-ce-rootless-extras
+  - containerd.io
+  - docker-buildx-plugin
+  - docker-compose-plugin
+upgradoor_agent_blocked_packages: "{{ upgradoor_blocked_packages | default(upgradoor_agent_default_blocked_packages) }}"
+upgradoor_agent_lib_dir: /usr/local/lib/upgradoor
+upgradoor_agent_upgrade_script: "{{ upgradoor_agent_lib_dir }}/upgrade-packages"
+upgradoor_agent_reboot_command: [/usr/bin/systemctl, reboot]
+upgradoor_agent_sudo_path: /usr/bin/sudo
+upgradoor_agent_sudoers_file: /etc/sudoers.d/upgradoor-agent
+
+################################################################################
+## Host actions
+################################################################################
+# Name -> {description, command, impact, timeout, feature, teams, when}. A command
+# [sudo, -n, <script>] gets a sudo rule for exactly that script without arguments.
+upgradoor_agent_actions: "{{ upgradoor_agent_default_actions if upgradoor_agent_security_upgrades_action | bool else {} }}"
+# Needs unattended-upgrades on the host (the action fails with a clear message without it).
+upgradoor_agent_security_upgrades_action: true
+upgradoor_agent_default_actions:
+  security-upgrades:
+    description: Install pending security updates (unattended-upgrades)
+    command: ["{{ upgradoor_agent_sudo_path }}", -n, "{{ upgradoor_agent_lib_dir }}/security-upgrades"]
+    impact: independent
+    timeout: 30m
+    when: securityUpdates
+
+################################################################################
+## Probes by kind (empty disables)
+################################################################################
+# Only inventory variables are visible here, not the client roles' defaults.
+upgradoor_agent_el: "{{ ethereum_node_el | default('') }}"
+upgradoor_agent_cl: "{{ ethereum_node_cl | default('') }}"
+upgradoor_agent_el_managed: "{{ (upgradoor_agent_el | length > 0) and (ethereum_node_el_enabled | default(true) | bool) }}"
+# Beacon node runs ("<client>_enabled" is false on a validator-only teku or nimbus host).
+upgradoor_agent_cl_managed: >-
+  {{ (upgradoor_agent_cl | length > 0) and (ethereum_node_cl_enabled | default(true) | bool)
+     and (lookup('ansible.builtin.vars', upgradoor_agent_cl ~ '_enabled', default=true) | bool) }}
+upgradoor_agent_probe_el: >-
+  {{ ('http://127.0.0.1:' ~ (ethereum_node_el_ports_http_rpc | default(8545))) if upgradoor_agent_el_managed | bool else '' }}
+upgradoor_agent_probe_cl: >-
+  {{ ('http://127.0.0.1:' ~ (ethereum_node_cl_ports_http_beacon | default(5052))) if upgradoor_agent_cl_managed | bool else '' }}
+# Probes of other kinds by kind, e.g. {snooper-el: "http://127.0.0.1:9000/health"}: a GET that answers 2xx.
+upgradoor_agent_extra_probes: {}
+
+################################################################################
+## Verification after an operation
+################################################################################
+upgradoor_agent_verify_window: 45s
+upgradoor_agent_verify_timeout: 10m

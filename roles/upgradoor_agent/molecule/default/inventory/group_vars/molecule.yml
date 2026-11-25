@@ -1,0 +1,23 @@
+---
+secret_upgradoor_seed: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef" # noqa: var-naming[no-role-prefix]
+upgradoor_agent_test_controller_seed: "fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"
+upgradoor_signer_public_key: "{{ lookup('ansible.builtin.file', upgradoor_agent_test_dir ~ '/signer.pub') }}" # noqa: var-naming[no-role-prefix]
+upgradoor_controller_public_key: "{{ lookup('ansible.builtin.file', upgradoor_agent_test_dir ~ '/controller.pub') }}" # noqa: var-naming[no-role-prefix]
+ethereum_network_name: testnet-devnet-0 # noqa: var-naming[no-role-prefix]
+network_subdomain: testnet-devnet-0.ethpandaops.io # noqa: var-naming[no-role-prefix]
+upgradoor_agent_hostname: lighthouse-geth-1
+
+upgradoor_agent_releases_url: file:///srv/upgradoor-releases
+upgradoor_agent_allowed_signers_file: "{{ upgradoor_agent_test_dir }}/keys/allowed_signers"
+# Short sync intervals: the controller is unreachable and the agent backs off.
+upgradoor_agent_controller_sync_interval: 2s
+upgradoor_agent_controller_max_sync_interval: 3s
+
+ethereum_node_el: geth # noqa: var-naming[no-role-prefix]
+ethereum_node_cl: lighthouse # noqa: var-naming[no-role-prefix]
+upgradoor_agent_kind_policies:
+  el: {roll: true}
+  snooper-el: {roll: false}
+upgradoor_agent_extra_probes:
+  snooper-el: http://127.0.0.1:9000/health
+upgradoor_enabled: true # noqa: var-naming[no-role-prefix]

@@ -19,9 +19,23 @@
       failed_when: false
       changed_when: false
 
+    - name: Deploy through upgradoor {{ lodestar_container_name }}
+      ansible.builtin.command:
+        argv: "{{ lodestar_upgradoor_deploy_argv }}"
+        removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
+      register: lodestar_upgradoor_deploy
+      changed_when: lodestar_upgradoor_result.changed | default(false)
+      when: lodestar_upgradoor_enabled | bool
+
     - name: Run lodestar container
+      # docker_container keeps comparison modes in module globals; mitogen reuses the interpreter
+      vars:
+        mitogen_task_isolation: fork
       community.docker.docker_container:
         name: "{{ lodestar_container_name }}"
+        comparisons: "{{ lodestar_upgradoor_comparisons }}"
+        image_comparison: current-image
+        labels: "{{ lodestar_upgradoor_labels }}"
         image: "{{ lodestar_container_image }}"
         image_name_mismatch: recreate
         state: started
@@ -32,15 +46,9 @@
         env: "{{ lodestar_container_env }}"
         networks: "{{ lodestar_container_networks }}"
         entrypoint: "{{ lodestar_container_entrypoint | default(omit) }}"
-        command: >-
-          {{
-            lodestar_container_command +
-            lodestar_container_command_extra_args +
-            (lodestar_checkpoint_sync_enabled | ternary(lodestar_container_command_checkpoint_args, [])) +
-            (lodestar_mev_boost_enabled | ternary(lodestar_mev_boost_beacon_command, []))
-          }}
+        command: "{{ lodestar_container_command_all }}"
         user: "{{ lodestar_user_meta.uid }}"
-        pull: "{{ lodestar_container_pull | bool }}"
+        pull: "{{ lodestar_upgradoor_pull | bool }}"
         security_opts: "{{ lodestar_container_security_opts }}"
         memory: "{{ lodestar_container_memory | default(omit) }}"
         memory_reservation: "{{ lodestar_container_memory_reservation | default(omit) }}"
@@ -75,9 +83,23 @@
       failed_when: false
       changed_when: false
 
+    - name: Deploy through upgradoor {{ lodestar_validator_container_name }}
+      ansible.builtin.command:
+        argv: "{{ lodestar_validator_upgradoor_deploy_argv }}"
+        removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
+      register: lodestar_validator_upgradoor_deploy
+      changed_when: lodestar_validator_upgradoor_result.changed | default(false)
+      when: lodestar_upgradoor_enabled | bool
+
     - name: Run lodestar validator container
+      # docker_container keeps comparison modes in module globals; mitogen reuses the interpreter
+      vars:
+        mitogen_task_isolation: fork
       community.docker.docker_container:
         name: "{{ lodestar_validator_container_name }}"
+        comparisons: "{{ lodestar_validator_upgradoor_comparisons }}"
+        image_comparison: current-image
+        labels: "{{ lodestar_validator_upgradoor_labels }}"
         image: "{{ lodestar_validator_container_image }}"
         image_name_mismatch: recreate
         state: started
@@ -88,14 +110,9 @@
         env: "{{ lodestar_validator_container_env }}"
         networks: "{{ lodestar_validator_container_networks }}"
         entrypoint: "{{ lodestar_validator_container_entrypoint | default(omit) }}"
-        command: >-
-          {{
-            lodestar_validator_container_command +
-            lodestar_validator_container_command_extra_args +
-            (lodestar_mev_boost_enabled | ternary(lodestar_mev_boost_validator_command, []))
-          }}
+        command: "{{ lodestar_validator_container_command_all }}"
         user: "{{ lodestar_user_meta.uid }}"
-        pull: "{{ lodestar_container_pull | bool }}"
+        pull: "{{ lodestar_validator_upgradoor_pull | bool }}"
         security_opts: "{{ lodestar_validator_container_security_opts }}"
         memory: "{{ lodestar_validator_container_memory | default(omit) }}"
         memory_reservation: "{{ lodestar_validator_container_memory_reservation | default(omit) }}"

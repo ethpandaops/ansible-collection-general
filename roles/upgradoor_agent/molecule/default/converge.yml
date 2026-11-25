@@ -1,0 +1,11 @@
+- name: Converge
+  hosts: molecule
+  become: true
+  pre_tasks:
+    # The login user of a devnet host.
+    - name: Create the entry user
+      ansible.builtin.user:
+        name: devops
+  roles:
+    - role: unattended_upgrades
+    - role: upgradoor_agent

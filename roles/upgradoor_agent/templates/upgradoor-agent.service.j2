@@ -1,0 +1,38 @@
+# {{ ansible_managed }}
+[Unit]
+Description=upgradoor agent
+Documentation=https://github.com/ethpandaops/upgradoor
+Wants=network-online.target
+After=network-online.target docker.service
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User={{ upgradoor_agent_user }}
+Group={{ upgradoor_agent_group }}
+SupplementaryGroups={{ upgradoor_agent_docker_group }}
+{% if upgradoor_agent_socket_path is match('/run/[^/]+/[^/]+$') %}
+RuntimeDirectory={{ upgradoor_agent_socket_path | dirname | basename }}
+RuntimeDirectoryMode=0755
+{% endif %}
+ExecStart={{ upgradoor_agent_binary_path }} agent --config {{ upgradoor_agent_config_file }} --log-level {{ upgradoor_agent_log_level }} --log-format {{ upgradoor_agent_log_format }}
+Restart=always
+RestartSec={{ upgradoor_agent_service_restart_sec }}
+# A running apt-get/dpkg must survive an agent restart.
+KillMode=process
+TimeoutStopSec={{ upgradoor_agent_service_stop_timeout_sec }}
+StandardOutput=journal
+StandardError=journal
+
+# Package upgrades run via sudo inside this unit: no file system protection
+# and never NoNewPrivileges.
+NoNewPrivileges=false
+PrivateTmp=true
+ProtectClock=true
+ProtectHostname=true
+ProtectControlGroups=true
+RestrictRealtime=true
+LockPersonality=true
+
+[Install]
+WantedBy=multi-user.target

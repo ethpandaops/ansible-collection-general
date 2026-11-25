@@ -1,0 +1,50 @@
+#!/bin/sh
+# Run as root via sudo: installs the pending security updates with
+# unattended-upgrades. Refuses while another package manager holds the dpkg lock.
+set -eu
+
+if [ "$#" -ne 0 ]; then
+    echo "usage: security-upgrades" >&2
+    exit 2
+fi
+
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+export LC_ALL=C LANG=C
+export DEBIAN_FRONTEND=noninteractive APT_LISTCHANGES_FRONTEND=none
+
+if ! command -v unattended-upgrade >/dev/null; then
+    echo "security-upgrades: unattended-upgrades is not installed" >&2
+    exit 1
+fi
+
+# dpkg takes fcntl locks, which flock cannot see; /proc/locks lists them by inode.
+for lock in /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock; do
+    [ -e "$lock" ] || continue
+    inode=$(stat -c %i -- "$lock")
+    if grep -q ":$inode " /proc/locks; then
+        echo "security-upgrades: $lock is held by another package manager, try again later" >&2
+        exit 1
+    fi
+done
+
+lock=DPkg::Lock::Timeout=300
+
+# apt-get update does not wait for the lock of the package lists (apt-daily).
+tries=0
+until out="$(apt-get update -o "$lock" 2>&1)"; do
+    printf '%s\n' "$out" >&2
+
+    case "$out" in
+        *"E: Could not get lock "* | *"E: Unable to lock directory "*) ;;
+        *) exit 1 ;;
+    esac
+
+    tries=$((tries + 1))
+    if [ "$tries" -ge 60 ]; then
+        exit 1
+    fi
+
+    sleep 5
+done
+
+exec unattended-upgrade -v

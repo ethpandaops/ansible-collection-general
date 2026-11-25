@@ -1,0 +1,127 @@
+- name: Check the upgradoor input
+  ansible.builtin.assert:
+    that:
+      - upgradoor_agent_seed is defined
+      - upgradoor_agent_signer_public_key is defined
+    fail_msg: upgradoor_agent needs secret_upgradoor_seed and upgradoor_signer_public_key.
+    quiet: true
+
+- name: Copy the upgradoor install files
+  ansible.builtin.copy:
+    src: "{{ item.src | default(omit) }}"
+    content: "{{ item.content | default(omit) }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    # The trailing slash creates the directory.
+    - {src: install.sh, dest: "{{ upgradoor_agent_lib_dir }}/", mode: "0755"}
+    - {src: "{{ upgradoor_agent_allowed_signers_file }}", dest: "{{ upgradoor_agent_lib_dir }}/allowed_signers", mode: "0644"}
+    - {content: "{{ lookup('ansible.builtin.template', 'upgrade-packages.sh.j2') }}", dest: "{{ upgradoor_agent_upgrade_script }}", mode: "0755"}
+    - {src: security-upgrades, dest: "{{ upgradoor_agent_lib_dir }}/", mode: "0755", enabled: "{{ 'security-upgrades' in upgradoor_agent_actions }}"}
+  loop_control:
+    label: "{{ item.dest }}"
+  when: item.enabled | default(true) | bool
+
+# Downloads and verifies the release on the host; prints one JSON line.
+- name: Install the upgradoor release
+  ansible.builtin.command:
+    argv: "{{ [upgradoor_agent_lib_dir ~ '/install.sh'] + (['--check'] if ansible_check_mode else []) + [upgradoor_agent_version] }}"
+  environment:
+    UPGRADOOR_RELEASES_URL: "{{ upgradoor_agent_releases_url }}"
+    UPGRADOOR_NETWORK: "{{ upgradoor_agent_network }}"
+    UPGRADOOR_HOSTNAME: "{{ upgradoor_agent_hostname }}"
+    UPGRADOOR_SIGNER_PUBLIC_KEY: "{{ upgradoor_agent_signer_public_key }}"
+    UPGRADOOR_USER: "{{ upgradoor_agent_user }}"
+    UPGRADOOR_GROUP: "{{ upgradoor_agent_group }}"
+    UPGRADOOR_DOCKER_GROUP: "{{ upgradoor_agent_docker_group }}"
+    UPGRADOOR_ENTRY_USER: "{{ upgradoor_agent_entry_user }}"
+    UPGRADOOR_CONFIG_DIR: "{{ upgradoor_agent_config_dir }}"
+    UPGRADOOR_KEY_FILE: "{{ upgradoor_agent_key_file }}"
+    UPGRADOOR_CERT_FILE: "{{ upgradoor_agent_cert_file }}"
+    UPGRADOOR_STATE_DIR: "{{ upgradoor_agent_state_dir }}"
+    UPGRADOOR_OVERRIDES_DIR: "{{ upgradoor_agent_overrides_dir if upgradoor_agent_overrides | bool else '' }}"
+    UPGRADOOR_OVERRIDES_FILE: "{{ upgradoor_agent_overrides_file if upgradoor_agent_overrides | bool else '' }}"
+    UPGRADOOR_OVERRIDES_LINK: "{{ upgradoor_agent_overrides_link if upgradoor_agent_overrides | bool else '' }}"
+    UPGRADOOR_BINARY: "{{ upgradoor_agent_binary_path }}"
+    UPGRADOOR_SEQ_FILE: "{{ upgradoor_agent_release_seq_file }}"
+    UPGRADOOR_REGISTRY_AUTH_SOURCE: "{{ upgradoor_agent_registry_auth_source }}"
+    UPGRADOOR_REGISTRY_AUTH_FILE: "{{ upgradoor_agent_registry_auth_file }}"
+  register: upgradoor_agent_install
+  check_mode: false
+  changed_when: upgradoor_agent_install.rc == 0 and (upgradoor_agent_install.stdout | from_json).changed
+  notify: Restart upgradoor-agent
+
+- name: Write the upgradoor agent config
+  ansible.builtin.template:
+    src: agent.yaml.j2
+    dest: "{{ upgradoor_agent_config_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart upgradoor-agent
+
+- name: Write the upgradoor agent unit
+  ansible.builtin.template:
+    src: upgradoor-agent.service.j2
+    dest: /etc/systemd/system/{{ upgradoor_agent_service_name }}.service
+    owner: root
+    group: root
+    mode: "0644"
+  register: upgradoor_agent_unit
+  notify:
+    - Reload systemd for upgradoor-agent
+    - Restart upgradoor-agent
+
+- name: Write the upgradoor agent sudoers rules
+  ansible.builtin.template:
+    src: sudoers.j2
+    dest: "{{ upgradoor_agent_sudoers_file }}"
+    owner: root
+    group: root
+    mode: "0440"
+    validate: visudo -cf %s
+
+# Only public input reaches the image; the seed goes through the environment.
+- name: Issue the upgradoor host certificate
+  ansible.builtin.command:
+    argv:
+      - docker
+      - run
+      - --rm
+      - -i
+      - --network=none
+      - --env=UPGRADOOR_SEED
+      - "{{ upgradoor_agent_image_repository }}@{{ upgradoor_agent_release.image_digest }}"
+      - keygen
+      - host-cert
+      - --network={{ upgradoor_agent_network }}
+      - --hostname={{ upgradoor_agent_hostname }}
+      - --public-key={{ upgradoor_agent_release.public_key }}
+  environment:
+    UPGRADOOR_SEED: "{{ upgradoor_agent_seed }}"
+  register: upgradoor_agent_cert
+  changed_when: true
+  when: upgradoor_agent_release.cert_needed or upgradoor_agent_reissue | bool
+  delegate_to: localhost
+  become: false
+  vars:
+    upgradoor_agent_release: "{{ upgradoor_agent_install.stdout | from_json }}"
+
+- name: Install the upgradoor host certificate
+  ansible.builtin.copy:
+    content: "{{ upgradoor_agent_cert.stdout }}\n"
+    dest: "{{ upgradoor_agent_cert_file }}"
+    owner: root
+    group: "{{ upgradoor_agent_group }}"
+    mode: "0640"
+  when: upgradoor_agent_cert is not skipped
+  notify: Restart upgradoor-agent
+
+- name: Start the upgradoor agent
+  ansible.builtin.systemd:
+    name: "{{ upgradoor_agent_service_name }}"
+    enabled: "{{ upgradoor_agent_service_enabled }}"
+    state: "{{ upgradoor_agent_service_state }}"
+    daemon_reload: "{{ upgradoor_agent_unit is changed }}"

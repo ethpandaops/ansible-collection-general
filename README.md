@@ -72,6 +72,8 @@ A collection of reusable ansible components used by the EthPandaOps team.
 - [prometheus](roles/prometheus)
 - [s3_cron_backup](roles/s3_cron_backup)
 - [traffic_control](roles/traffic_control)
+- [unattended_upgrades](roles/unattended_upgrades)
+- [upgradoor_agent](roles/upgradoor_agent)
 - [vector](roles/vector)
 
 ### Prometheus exporters

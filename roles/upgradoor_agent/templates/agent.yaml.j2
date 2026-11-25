@@ -1,0 +1,103 @@
+# {{ ansible_managed }}
+controller:
+  url: {{ upgradoor_agent_controller_url | to_json }}
+  syncInterval: {{ upgradoor_agent_controller_sync_interval | string | to_json }}
+  leaseSyncInterval: {{ upgradoor_agent_controller_lease_sync_interval | string | to_json }}
+  minSyncInterval: {{ upgradoor_agent_controller_min_sync_interval | string | to_json }}
+  maxSyncInterval: {{ upgradoor_agent_controller_max_sync_interval | string | to_json }}
+  allowInsecure: {{ upgradoor_agent_controller_allow_insecure | bool | to_json }}
+{% if upgradoor_agent_controller_allow_unsigned_answers | bool %}
+  allowUnsignedAnswers: true
+{% else %}
+  publicKey: {{ upgradoor_agent_controller_public_key | to_json }}
+{% endif %}
+
+keyFile: {{ upgradoor_agent_key_file | to_json }}
+certFile: {{ upgradoor_agent_cert_file | to_json }}
+stateDir: {{ upgradoor_agent_state_dir | to_json }}
+entryUser: {{ upgradoor_agent_entry_user | to_json }}
+{% if upgradoor_agent_overrides | bool %}
+overridesFile: {{ upgradoor_agent_overrides_file | to_json }}
+{% endif %}
+roles: {{ upgradoor_agent_roles | list | to_json }}
+
+socket:
+  path: {{ upgradoor_agent_socket_path | to_json }}
+{% if upgradoor_agent_socket_group | length > 0 %}
+  group: {{ upgradoor_agent_socket_group | to_json }}
+{% endif %}
+
+auditLog:
+  file: {{ upgradoor_agent_audit_log_file | to_json }}
+  maxSizeBytes: {{ upgradoor_agent_audit_log_max_size_bytes | int }}
+  maxFiles: {{ upgradoor_agent_audit_log_max_files | int }}
+
+{% if upgradoor_agent_verbs | length > 0 %}
+verbs:
+{% for verb in upgradoor_agent_verbs %}
+  - {{ verb | to_json }}
+{% endfor %}
+{% else %}
+verbs: []
+{% endif %}
+
+defaultPolicy: {{ upgradoor_agent_default_policy | to_json }}
+{% if upgradoor_agent_kind_policies | length > 0 %}
+kindPolicies:
+{% for kind, policy in upgradoor_agent_kind_policies | dictsort %}
+  {{ kind | to_json }}: {roll: {{ policy.roll | default(false) | bool | to_json }}}
+{% endfor %}
+{% endif %}
+
+docker:
+  host: {{ upgradoor_agent_docker_host | to_json }}
+  authFile: {{ upgradoor_agent_registry_auth_file | to_json }}
+
+commands:
+  upgradePackages: {{ [upgradoor_agent_sudo_path, '-n', upgradoor_agent_upgrade_script] | to_json }}
+  reboot: {{ ([upgradoor_agent_sudo_path, '-n'] + upgradoor_agent_reboot_command) | to_json }}
+{% if upgradoor_agent_actions | length > 0 %}
+
+actions:
+{% for name, action in upgradoor_agent_actions | dictsort %}
+  {{ name | to_json }}:
+    description: {{ action.description | to_json }}
+    command: {{ action.command | list | to_json }}
+    impact: {{ action.impact | to_json }}
+    timeout: {{ action.timeout | string | to_json }}
+{% if action.feature is defined %}
+    feature: {{ action.feature | to_json }}
+{% endif %}
+{% if action.teams is defined %}
+    teams: {{ action.teams | list | to_json }}
+{% endif %}
+{% if action.when is defined %}
+    when: {{ action.when | to_json }}
+{% endif %}
+{% endfor %}
+{% endif %}
+
+packages:
+{% if upgradoor_agent_blocked_packages | length > 0 %}
+  blocked:
+{% for package in upgradoor_agent_blocked_packages %}
+    - {{ package | to_json }}
+{% endfor %}
+{% else %}
+  blocked: []
+{% endif %}
+
+fallback:
+  after: {{ upgradoor_agent_fallback_after | string | to_json }}
+  interval: {{ upgradoor_agent_fallback_interval | string | to_json }}
+
+probes:
+  el: {{ upgradoor_agent_probe_el | to_json }}
+  cl: {{ upgradoor_agent_probe_cl | to_json }}
+{% for kind, url in upgradoor_agent_extra_probes | dictsort %}
+  {{ kind | to_json }}: {{ url | to_json }}
+{% endfor %}
+
+verify:
+  window: {{ upgradoor_agent_verify_window | string | to_json }}
+  timeout: {{ upgradoor_agent_verify_timeout | string | to_json }}

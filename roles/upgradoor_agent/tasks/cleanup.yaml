@@ -1,0 +1,90 @@
+- name: Stop and disable upgradoor agent
+  ansible.builtin.systemd:
+    name: "{{ upgradoor_agent_service_name }}"
+    enabled: false
+    state: stopped
+  register: upgradoor_agent_service_stop
+  failed_when:
+    - upgradoor_agent_service_stop is failed
+    - "'Could not find the requested service' not in (upgradoor_agent_service_stop.msg | default(''))"
+
+- name: Remove upgradoor agent systemd unit
+  ansible.builtin.file:
+    path: "/etc/systemd/system/{{ upgradoor_agent_service_name }}.service"
+    state: absent
+  notify: Reload systemd for upgradoor-agent
+
+- name: Check the upgradoor install directory
+  ansible.builtin.assert:
+    that:
+      - >-
+        (upgradoor_agent_install_dir | regex_replace('/+', '/') | regex_replace('(/\.)+(?=/|$)', '') | regex_replace('(?<=.)/$', ''))
+        != (upgradoor_agent_binary_path | dirname | regex_replace('/+', '/') | regex_replace('(/\.)+(?=/|$)', '')
+            | regex_replace('(?<=.)/$', ''))
+    fail_msg: >-
+      upgradoor_agent_install_dir ({{ upgradoor_agent_install_dir }}) must not be the directory of
+      upgradoor_agent_binary_path ({{ upgradoor_agent_binary_path }}).
+    quiet: true
+
+- name: Find the upgradoor downloads
+  ansible.builtin.find:
+    paths: "{{ upgradoor_agent_install_dir }}"
+    patterns: ["upgradoor-v*-linux-*"]
+    file_type: file
+  register: upgradoor_agent_cleanup_downloads
+
+- name: Remove the upgradoor downloads
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ upgradoor_agent_cleanup_downloads.files }}"
+  loop_control:
+    label: "{{ item.path }}"
+
+- name: Find what else is in the upgradoor install directory
+  ansible.builtin.find:
+    paths: "{{ upgradoor_agent_install_dir }}"
+    file_type: any
+    hidden: true
+  register: upgradoor_agent_cleanup_rest
+
+- name: Remove the empty upgradoor install directory
+  ansible.builtin.file:
+    path: "{{ upgradoor_agent_install_dir }}"
+    state: absent
+  when: upgradoor_agent_cleanup_rest.matched | default(0) == 0
+
+- name: Stat the overrides link
+  ansible.builtin.stat:
+    path: "{{ upgradoor_agent_overrides_link }}"
+    follow: false
+    get_checksum: false
+  register: upgradoor_agent_cleanup_link
+  when: upgradoor_agent_overrides_link | length > 0
+
+- name: Remove the overrides link
+  ansible.builtin.file:
+    path: "{{ upgradoor_agent_overrides_link }}"
+    state: absent
+  when: (upgradoor_agent_cleanup_link.stat | default({})).islnk | default(false)
+
+- name: Remove the upgradoor user
+  ansible.builtin.user:
+    name: "{{ upgradoor_agent_user }}"
+    state: absent
+
+- name: Remove the upgradoor group
+  ansible.builtin.group:
+    name: "{{ upgradoor_agent_group }}"
+    state: absent
+
+- name: Remove upgradoor binary, config, keys and state
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ upgradoor_agent_binary_path }}"
+    - "{{ upgradoor_agent_sudoers_file }}"
+    - "{{ upgradoor_agent_lib_dir }}"
+    - "{{ upgradoor_agent_config_dir }}"
+    - "{{ upgradoor_agent_state_dir }}"

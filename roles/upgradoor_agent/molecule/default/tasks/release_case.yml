@@ -1,0 +1,46 @@
+- name: Stat the binary before - {{ upgradoor_agent_case.version }}
+  ansible.builtin.stat:
+    path: /usr/local/bin/upgradoor
+    checksum_algorithm: sha256
+  register: upgradoor_agent_case_before
+
+- name: Run upgradoor_agent with release {{ upgradoor_agent_case.version }}
+  block:
+    - name: Apply the role with release {{ upgradoor_agent_case.version }}
+      ansible.builtin.include_role:
+        name: upgradoor_agent
+      vars:
+        upgradoor_agent_version: "{{ upgradoor_agent_case.version }}"
+
+    - name: Record the acceptance of release {{ upgradoor_agent_case.version }}
+      ansible.builtin.set_fact:
+        upgradoor_agent_case_refusal: ""
+  rescue:
+    - name: Record the refusal of release {{ upgradoor_agent_case.version }}
+      ansible.builtin.set_fact:
+        upgradoor_agent_case_refusal: "{{ ansible_failed_task.name }}: {{ ansible_failed_result.stderr | default(ansible_failed_result.msg) }}"
+
+- name: Stat the binary after - {{ upgradoor_agent_case.version }}
+  ansible.builtin.stat:
+    path: /usr/local/bin/upgradoor
+    checksum_algorithm: sha256
+  register: upgradoor_agent_case_after
+
+- name: Read the seq after - {{ upgradoor_agent_case.version }}
+  ansible.builtin.slurp:
+    src: /etc/upgradoor/release-seq
+  register: upgradoor_agent_case_seq
+
+- name: Assert the outcome of release {{ upgradoor_agent_case.version }}
+  ansible.builtin.assert:
+    that:
+      - upgradoor_agent_case.reason is not defined or upgradoor_agent_case.reason in upgradoor_agent_case_refusal
+      - upgradoor_agent_case.reason is defined or upgradoor_agent_case_refusal == ''
+      - >-
+        (upgradoor_agent_case_before.stat.checksum == upgradoor_agent_case_after.stat.checksum)
+        == (upgradoor_agent_case.reason is defined)
+      - >-
+        upgradoor_agent_case.reason is defined
+        or (upgradoor_agent_case_seq.content | b64decode).split() == [upgradoor_agent_case.seq | string, upgradoor_agent_case.version]
+    fail_msg: "{{ upgradoor_agent_case.version }}: {{ upgradoor_agent_case_refusal }}"
+    quiet: true

@@ -78,6 +78,34 @@ besu_container_command: >-
   {{ besu_container_command_default + (besu_container_command_v6 if besu_ipv6_enabled and ansible_default_ipv6.address is defined else []) }}
 
 besu_container_command_extra_args: []
+besu_container_command_all: "{{ besu_container_command + besu_container_command_extra_args }}"
 
 # Default image pull policy
 besu_container_pull: false
+
+################################################################################
+##
+## upgradoor
+##
+################################################################################
+besu_upgradoor_enabled: "{{ upgradoor_enabled | default(false) }}"
+# upgradoor team label: owner of the container (permissions, client policy, rollouts)
+besu_upgradoor_team: besu
+besu_upgradoor_result: >-
+  {{ besu_upgradoor_deploy.stdout | from_json
+     if (besu_upgradoor_deploy.stdout | default('')) is match('{') else {} }}
+besu_upgradoor_deploy_argv: >-
+  {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', besu_container_name,
+      '--image', besu_container_image, '--command', besu_container_command_all | to_json]
+     + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
+       | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+besu_upgradoor_labels: >-
+  {{ {'io.ethpandaops.upgradoor.kind': 'el'}
+     | combine({'io.ethpandaops.upgradoor.team': besu_upgradoor_team} if besu_upgradoor_team else {})
+     if besu_upgradoor_enabled | bool else {} }}
+besu_upgradoor_comparisons: >-
+  {{ {} if upgradoor_deploy | default('soft') == 'immediate'
+     else dict(besu_upgradoor_result.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
+besu_upgradoor_pull: >-
+  {{ upgradoor_deploy | default('soft') == 'immediate'
+     or (besu_upgradoor_result.pull | default(besu_container_pull | bool)) }}

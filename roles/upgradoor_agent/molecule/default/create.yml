@@ -1,0 +1,30 @@
+# A systemd Debian container; the fake releases of prepare.yml are mounted
+# where the role's install.sh reads them (file:// URLs).
+- name: Create the test host
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Create the release directory
+      ansible.builtin.file:
+        path: "{{ upgradoor_agent_test_dir }}/releases"
+        state: directory
+        mode: "0755"
+
+    - name: Start the test host
+      community.docker.docker_container:
+        name: "{{ item }}"
+        hostname: "{{ item }}"
+        image: geerlingguy/docker-debian13-ansible:latest
+        privileged: true
+        cgroupns_mode: host
+        volumes:
+          - /sys/fs/cgroup:/sys/fs/cgroup:rw
+          - "{{ upgradoor_agent_test_dir }}/releases:/srv/upgradoor-releases:ro"
+        state: started
+      loop: "{{ groups['molecule'] }}"
+
+    - name: Wait for the test host
+      ansible.builtin.wait_for_connection:
+        timeout: 60
+      delegate_to: "{{ item }}"
+      loop: "{{ groups['molecule'] }}"

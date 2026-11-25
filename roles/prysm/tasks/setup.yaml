@@ -19,9 +19,23 @@
       failed_when: false
       changed_when: false
 
+    - name: Deploy through upgradoor {{ prysm_container_name }}
+      ansible.builtin.command:
+        argv: "{{ prysm_upgradoor_deploy_argv }}"
+        removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
+      register: prysm_upgradoor_deploy
+      changed_when: prysm_upgradoor_result.changed | default(false)
+      when: prysm_upgradoor_enabled | bool
+
     - name: Run prysm container
+      # docker_container keeps comparison modes in module globals; mitogen reuses the interpreter
+      vars:
+        mitogen_task_isolation: fork
       community.docker.docker_container:
         name: "{{ prysm_container_name }}"
+        comparisons: "{{ prysm_upgradoor_comparisons }}"
+        image_comparison: current-image
+        labels: "{{ prysm_upgradoor_labels }}"
         image: "{{ prysm_container_image }}"
         image_name_mismatch: recreate
         state: started
@@ -33,15 +47,9 @@
         networks: "{{ prysm_container_networks }}"
         tty: "{{ prysm_container_tty }}"
         entrypoint: "{{ prysm_container_entrypoint | default(omit) }}"
-        command: >-
-          {{
-            prysm_container_command +
-            prysm_container_command_extra_args +
-            (prysm_checkpoint_sync_enabled | ternary(prysm_container_command_checkpoint_args, [])) +
-            (prysm_mev_boost_enabled | ternary(prysm_mev_boost_beacon_command, []))
-          }}
+        command: "{{ prysm_container_command_all }}"
         user: "{{ prysm_user_meta.uid }}"
-        pull: "{{ prysm_container_pull | bool }}"
+        pull: "{{ prysm_upgradoor_pull | bool }}"
         security_opts: "{{ prysm_container_security_opts }}"
         memory: "{{ prysm_container_memory | default(omit) }}"
         memory_reservation: "{{ prysm_container_memory_reservation | default(omit) }}"
@@ -72,9 +80,23 @@
       failed_when: false
       changed_when: false
 
+    - name: Deploy through upgradoor {{ prysm_validator_container_name }}
+      ansible.builtin.command:
+        argv: "{{ prysm_validator_upgradoor_deploy_argv }}"
+        removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
+      register: prysm_validator_upgradoor_deploy
+      changed_when: prysm_validator_upgradoor_result.changed | default(false)
+      when: prysm_upgradoor_enabled | bool
+
     - name: Run prysm validator container
+      # docker_container keeps comparison modes in module globals; mitogen reuses the interpreter
+      vars:
+        mitogen_task_isolation: fork
       community.docker.docker_container:
         name: "{{ prysm_validator_container_name }}"
+        comparisons: "{{ prysm_validator_upgradoor_comparisons }}"
+        image_comparison: current-image
+        labels: "{{ prysm_validator_upgradoor_labels }}"
         image: "{{ prysm_validator_container_image }}"
         image_name_mismatch: recreate
         state: started
@@ -86,14 +108,9 @@
         networks: "{{ prysm_validator_container_networks }}"
         tty: "{{ prysm_validator_container_tty }}"
         entrypoint: "{{ prysm_validator_container_entrypoint | default(omit) }}"
-        command: >-
-          {{
-            prysm_validator_container_command +
-            prysm_validator_container_command_extra_args +
-            (prysm_mev_boost_enabled | ternary(prysm_mev_boost_validator_command, []))
-          }}
+        command: "{{ prysm_validator_container_command_all }}"
         user: "{{ prysm_user_meta.uid }}"
-        pull: "{{ prysm_container_pull | bool }}"
+        pull: "{{ prysm_validator_upgradoor_pull | bool }}"
         security_opts: "{{ prysm_validator_container_security_opts }}"
         memory: "{{ prysm_validator_container_memory | default(omit) }}"
         memory_reservation: "{{ prysm_validator_container_memory_reservation | default(omit) }}"

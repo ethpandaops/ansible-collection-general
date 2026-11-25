@@ -16,9 +16,23 @@
   failed_when: false
   changed_when: false
 
+- name: Deploy through upgradoor {{ ethereumjs_container_name }}
+  ansible.builtin.command:
+    argv: "{{ ethereumjs_upgradoor_deploy_argv }}"
+    removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
+  register: ethereumjs_upgradoor_deploy
+  changed_when: ethereumjs_upgradoor_result.changed | default(false)
+  when: ethereumjs_upgradoor_enabled | bool
+
 - name: Run ethereumjs container
+  # docker_container keeps comparison modes in module globals; mitogen reuses the interpreter
+  vars:
+    mitogen_task_isolation: fork
   community.docker.docker_container:
     name: "{{ ethereumjs_container_name }}"
+    comparisons: "{{ ethereumjs_upgradoor_comparisons }}"
+    image_comparison: current-image
+    labels: "{{ ethereumjs_upgradoor_labels }}"
     image: "{{ ethereumjs_container_image }}"
     image_name_mismatch: recreate
     state: started
@@ -29,9 +43,9 @@
     env: "{{ ethereumjs_container_env }}"
     networks: "{{ ethereumjs_container_networks }}"
     entrypoint: "{{ ethereumjs_container_entrypoint | default(omit) }}"
-    command: "{{ ethereumjs_container_command + ethereumjs_container_command_extra_args }}"
+    command: "{{ ethereumjs_container_command_all }}"
     user: "{{ ethereumjs_user_meta.uid }}"
-    pull: "{{ ethereumjs_container_pull | bool }}"
+    pull: "{{ ethereumjs_upgradoor_pull | bool }}"
     security_opts: "{{ ethereumjs_container_security_opts }}"
     memory: "{{ ethereumjs_container_memory | default(omit) }}"
     memory_reservation: "{{ ethereumjs_container_memory_reservation | default(omit) }}"

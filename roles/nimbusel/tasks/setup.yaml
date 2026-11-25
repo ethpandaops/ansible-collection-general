@@ -16,9 +16,23 @@
   failed_when: false
   changed_when: false
 
+- name: Deploy through upgradoor {{ nimbusel_container_name }}
+  ansible.builtin.command:
+    argv: "{{ nimbusel_upgradoor_deploy_argv }}"
+    removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
+  register: nimbusel_upgradoor_deploy
+  changed_when: nimbusel_upgradoor_result.changed | default(false)
+  when: nimbusel_upgradoor_enabled | bool
+
 - name: Run nimbusel container
+  # docker_container keeps comparison modes in module globals; mitogen reuses the interpreter
+  vars:
+    mitogen_task_isolation: fork
   community.docker.docker_container:
     name: "{{ nimbusel_container_name }}"
+    comparisons: "{{ nimbusel_upgradoor_comparisons }}"
+    image_comparison: current-image
+    labels: "{{ nimbusel_upgradoor_labels }}"
     image: "{{ nimbusel_container_image }}"
     image_name_mismatch: recreate
     state: started
@@ -29,9 +43,9 @@
     env: "{{ nimbusel_container_env }}"
     networks: "{{ nimbusel_container_networks }}"
     entrypoint: "{{ nimbusel_container_entrypoint | default(omit) }}"
-    command: "{{ nimbusel_container_command + nimbusel_container_command_extra_args }}"
+    command: "{{ nimbusel_container_command_all }}"
     user: "{{ nimbusel_user_meta.uid }}"
-    pull: "{{ nimbusel_container_pull | bool }}"
+    pull: "{{ nimbusel_upgradoor_pull | bool }}"
     security_opts: "{{ nimbusel_container_security_opts }}"
     memory: "{{ nimbusel_container_memory | default(omit) }}"
     memory_reservation: "{{ nimbusel_container_memory_reservation | default(omit) }}"

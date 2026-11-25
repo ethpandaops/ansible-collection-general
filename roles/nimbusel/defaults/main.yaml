@@ -87,6 +87,33 @@ nimbusel_container_command: >-
 nimbusel_container_command_extra_args: []
 #  - --rpc-api=eth,debug
 #  - --http.vhosts=*
+nimbusel_container_command_all: "{{ nimbusel_container_command + nimbusel_container_command_extra_args }}"
 
 # Default image pull policy
 nimbusel_container_pull: false
+
+################################################################################
+##
+## upgradoor
+##
+################################################################################
+nimbusel_upgradoor_enabled: "{{ upgradoor_enabled | default(false) }}"
+nimbusel_upgradoor_team: nimbus
+nimbusel_upgradoor_result: >-
+  {{ nimbusel_upgradoor_deploy.stdout | from_json
+     if (nimbusel_upgradoor_deploy.stdout | default('')) is match('{') else {} }}
+nimbusel_upgradoor_deploy_argv: >-
+  {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', nimbusel_container_name,
+      '--image', nimbusel_container_image, '--command', nimbusel_container_command_all | to_json]
+     + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
+       | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+nimbusel_upgradoor_labels: >-
+  {{ {'io.ethpandaops.upgradoor.kind': 'el'}
+     | combine({'io.ethpandaops.upgradoor.team': nimbusel_upgradoor_team} if nimbusel_upgradoor_team else {})
+     if nimbusel_upgradoor_enabled | bool else {} }}
+nimbusel_upgradoor_comparisons: >-
+  {{ {} if upgradoor_deploy | default('soft') == 'immediate'
+     else dict(nimbusel_upgradoor_result.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
+nimbusel_upgradoor_pull: >-
+  {{ upgradoor_deploy | default('soft') == 'immediate'
+     or (nimbusel_upgradoor_result.pull | default(nimbusel_container_pull | bool)) }}

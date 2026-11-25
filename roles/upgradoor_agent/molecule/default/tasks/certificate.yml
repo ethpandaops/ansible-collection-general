@@ -1,0 +1,28 @@
+- name: Remove a file - {{ upgradoor_agent_case.name }}
+  ansible.builtin.file:
+    path: "{{ upgradoor_agent_case.remove }}"
+    state: absent
+  when: upgradoor_agent_case.remove is defined
+
+- name: Apply the role - {{ upgradoor_agent_case.name }}
+  ansible.builtin.include_role:
+    name: upgradoor_agent
+  vars:
+    upgradoor_agent_reissue: "{{ upgradoor_agent_case.reissue | default(false) }}"
+
+- name: Read the host public key and the certificate's claims - {{ upgradoor_agent_case.name }}
+  ansible.builtin.shell:
+    cmd: |
+      set -eu
+      upgradoor key
+      upgradoor verify-cert --network testnet-devnet-0 --signer-public-key {{ upgradoor_signer_public_key | quote }} < /etc/upgradoor/host.crt
+  register: upgradoor_agent_identity
+  changed_when: false
+
+- name: Assert the certificate - {{ upgradoor_agent_case.name }}
+  ansible.builtin.assert:
+    that:
+      - (upgradoor_agent_cert is not skipped) == upgradoor_agent_case.issued
+      - (upgradoor_agent_identity.stdout_lines[1] | from_json).publicKey == upgradoor_agent_identity.stdout_lines[0]
+    fail_msg: "{{ upgradoor_agent_case.name }}: issued {{ upgradoor_agent_cert is not skipped }}"
+    quiet: true

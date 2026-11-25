@@ -35,9 +35,23 @@
   changed_when: false
   when: grandine_validator_enabled
 
+- name: Deploy through upgradoor {{ grandine_container_name }}
+  ansible.builtin.command:
+    argv: "{{ grandine_upgradoor_deploy_argv }}"
+    removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
+  register: grandine_upgradoor_deploy
+  changed_when: grandine_upgradoor_result.changed | default(false)
+  when: grandine_upgradoor_enabled | bool
+
 - name: Run grandine container
+  # docker_container keeps comparison modes in module globals; mitogen reuses the interpreter
+  vars:
+    mitogen_task_isolation: fork
   community.docker.docker_container:
     name: "{{ grandine_container_name }}"
+    comparisons: "{{ grandine_upgradoor_comparisons }}"
+    image_comparison: current-image
+    labels: "{{ grandine_upgradoor_labels }}"
     image: "{{ grandine_container_image }}"
     image_name_mismatch: recreate
     state: started
@@ -48,19 +62,9 @@
     env: "{{ grandine_container_env }}"
     networks: "{{ grandine_container_networks }}"
     entrypoint: "{{ grandine_container_entrypoint | default(omit) }}"
-    command: >-
-      {{
-        grandine_container_command +
-        (grandine_validator_enabled | ternary(grandine_container_validator_args +
-          (grandine_mev_boost_enabled | ternary(grandine_mev_boost_beacon_command,[])),
-        [])) +
-        (grandine_checkpoint_sync_enabled | ternary(
-          grandine_container_command_extra_args + grandine_container_command_checkpoint_args,
-          grandine_container_command_extra_args
-        ))
-      }}
+    command: "{{ grandine_container_command_all }}"
     user: "{{ grandine_user_meta.uid }}"
-    pull: "{{ grandine_container_pull | bool }}"
+    pull: "{{ grandine_upgradoor_pull | bool }}"
     security_opts: "{{ grandine_container_security_opts }}"
     memory: "{{ grandine_container_memory | default(omit) }}"
     memory_reservation: "{{ grandine_container_memory_reservation | default(omit) }}"

@@ -120,6 +120,17 @@ checkpoint_sync_url: https://beaconstate.ethstaker.cc # noqa var-naming[no-role-
 grandine_checkpoint_sync_enabled: true
 grandine_container_command_checkpoint_args:
   - --checkpoint-sync-url={{ checkpoint_sync_url }}
+grandine_container_command_all: >-
+  {{
+    grandine_container_command +
+    (grandine_validator_enabled | ternary(grandine_container_validator_args +
+      (grandine_mev_boost_enabled | ternary(grandine_mev_boost_beacon_command,[])),
+    [])) +
+    (grandine_checkpoint_sync_enabled | ternary(
+      grandine_container_command_extra_args + grandine_container_command_checkpoint_args,
+      grandine_container_command_extra_args
+    ))
+  }}
 
 ################################################################################
 ##
@@ -145,3 +156,29 @@ grandine_container_pull: false
 grandine_mev_boost_enabled: false
 grandine_mev_boost_beacon_command:
   - --builder-url={{ grandine_mev_boost_endpoint }}
+
+################################################################################
+##
+## upgradoor
+##
+################################################################################
+grandine_upgradoor_enabled: "{{ upgradoor_enabled | default(false) }}"
+grandine_upgradoor_team: grandine
+grandine_upgradoor_result: >-
+  {{ grandine_upgradoor_deploy.stdout | from_json
+     if (grandine_upgradoor_deploy.stdout | default('')) is match('{') else {} }}
+grandine_upgradoor_deploy_argv: >-
+  {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', grandine_container_name,
+      '--image', grandine_container_image, '--command', grandine_container_command_all | to_json]
+     + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
+       | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+grandine_upgradoor_labels: >-
+  {{ {'io.ethpandaops.upgradoor.kind': 'cl'}
+     | combine({'io.ethpandaops.upgradoor.team': grandine_upgradoor_team} if grandine_upgradoor_team else {})
+     if grandine_upgradoor_enabled | bool else {} }}
+grandine_upgradoor_comparisons: >-
+  {{ {} if upgradoor_deploy | default('soft') == 'immediate'
+     else dict(grandine_upgradoor_result.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
+grandine_upgradoor_pull: >-
+  {{ upgradoor_deploy | default('soft') == 'immediate'
+     or (grandine_upgradoor_result.pull | default(grandine_container_pull | bool)) }}

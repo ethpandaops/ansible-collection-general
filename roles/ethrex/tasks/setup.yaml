@@ -16,9 +16,23 @@
   failed_when: false
   changed_when: false
 
+- name: Deploy through upgradoor {{ ethrex_container_name }}
+  ansible.builtin.command:
+    argv: "{{ ethrex_upgradoor_deploy_argv }}"
+    removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
+  register: ethrex_upgradoor_deploy
+  changed_when: ethrex_upgradoor_result.changed | default(false)
+  when: ethrex_upgradoor_enabled | bool
+
 - name: Run ethrex container
+  # docker_container keeps comparison modes in module globals; mitogen reuses the interpreter
+  vars:
+    mitogen_task_isolation: fork
   community.docker.docker_container:
     name: "{{ ethrex_container_name }}"
+    comparisons: "{{ ethrex_upgradoor_comparisons }}"
+    image_comparison: current-image
+    labels: "{{ ethrex_upgradoor_labels }}"
     image: "{{ ethrex_container_image }}"
     image_name_mismatch: recreate
     state: started
@@ -29,7 +43,7 @@
     env: "{{ ethrex_container_env }}"
     networks: "{{ ethrex_container_networks }}"
     entrypoint: "{{ ethrex_container_entrypoint | default(omit) }}"
-    command: "{{ ethrex_container_command + ethrex_container_command_extra_args }}"
+    command: "{{ ethrex_container_command_all }}"
     user: "{{ ethrex_user_meta.uid }}"
-    pull: "{{ ethrex_container_pull | bool }}"
+    pull: "{{ ethrex_upgradoor_pull | bool }}"
     security_opts: "{{ ethrex_container_security_opts }}"

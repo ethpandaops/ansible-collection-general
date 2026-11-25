@@ -1,0 +1,4 @@
+// {{ ansible_managed }}
+APT::Periodic::Update-Package-Lists "{{ unattended_upgrades_periodic_update_package_lists | int }}";
+APT::Periodic::Unattended-Upgrade "{{ unattended_upgrades_periodic_unattended_upgrade | int }}";
+APT::Periodic::AutocleanInterval "{{ unattended_upgrades_periodic_autoclean_interval | int }}";

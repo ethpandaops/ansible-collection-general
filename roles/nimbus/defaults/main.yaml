@@ -129,6 +129,14 @@ nimbus_container_command: >-
 
 nimbus_container_command_extra_args: []
   # - --graffiti=hello-world
+nimbus_container_command_all: >-
+  {{
+    nimbus_validator_enabled | ternary(
+      nimbus_container_command + nimbus_validator_container_args + nimbus_container_command_extra_args +
+      (nimbus_mev_boost_enabled | ternary(nimbus_mev_boost_beacon_command, [])),
+      nimbus_container_command + nimbus_container_command_extra_args,
+    )
+  }}
 
 ################################################################################
 ##
@@ -165,3 +173,48 @@ nimbus_mev_boost_enabled: false
 nimbus_mev_boost_beacon_command:
   - --payload-builder=true
   - --payload-builder-url={{ nimbus_mev_boost_endpoint }}
+
+################################################################################
+##
+## upgradoor
+##
+################################################################################
+nimbus_upgradoor_enabled: "{{ upgradoor_enabled | default(false) }}"
+nimbus_upgradoor_team: nimbus
+nimbus_validator_upgradoor_team: "{{ nimbus_upgradoor_team }}"
+nimbus_upgradoor_result: >-
+  {{ nimbus_upgradoor_deploy.stdout | from_json
+     if (nimbus_upgradoor_deploy.stdout | default('')) is match('{') else {} }}
+nimbus_upgradoor_deploy_argv: >-
+  {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', nimbus_container_name,
+      '--image', nimbus_container_image, '--command', nimbus_container_command_all | to_json]
+     + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
+       | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+nimbus_upgradoor_labels: >-
+  {{ {'io.ethpandaops.upgradoor.kind': 'cl'}
+     | combine({'io.ethpandaops.upgradoor.team': nimbus_upgradoor_team} if nimbus_upgradoor_team else {})
+     if nimbus_upgradoor_enabled | bool else {} }}
+nimbus_upgradoor_comparisons: >-
+  {{ {} if upgradoor_deploy | default('soft') == 'immediate'
+     else dict(nimbus_upgradoor_result.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
+nimbus_upgradoor_pull: >-
+  {{ upgradoor_deploy | default('soft') == 'immediate'
+     or (nimbus_upgradoor_result.pull | default(nimbus_container_pull | bool)) }}
+nimbus_validator_upgradoor_result: >-
+  {{ nimbus_validator_upgradoor_deploy.stdout | from_json
+     if (nimbus_validator_upgradoor_deploy.stdout | default('')) is match('{') else {} }}
+nimbus_validator_upgradoor_deploy_argv: >-
+  {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', nimbus_validator_container_name,
+      '--image', nimbus_validator_container_image, '--command', nimbus_validator_container_command | to_json]
+     + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
+       | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+nimbus_validator_upgradoor_labels: >-
+  {{ {'io.ethpandaops.upgradoor.kind': 'vc'}
+     | combine({'io.ethpandaops.upgradoor.team': nimbus_validator_upgradoor_team} if nimbus_validator_upgradoor_team else {})
+     if nimbus_upgradoor_enabled | bool else {} }}
+nimbus_validator_upgradoor_comparisons: >-
+  {{ {} if upgradoor_deploy | default('soft') == 'immediate'
+     else dict(nimbus_validator_upgradoor_result.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
+nimbus_validator_upgradoor_pull: >-
+  {{ upgradoor_deploy | default('soft') == 'immediate'
+     or (nimbus_validator_upgradoor_result.pull | default(nimbus_container_pull | bool)) }}

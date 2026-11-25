@@ -82,6 +82,13 @@ checkpoint_sync_url: https://beaconstate.ethstaker.cc # noqa var-naming[no-role-
 ethlambda_checkpoint_sync_enabled: true
 ethlambda_container_command_checkpoint_args:
   - --checkpoint-sync-url={{ checkpoint_sync_url }}
+ethlambda_container_command_all: >-
+  {{
+    ethlambda_container_command +
+    ethlambda_container_command_extra_args +
+    (ethlambda_checkpoint_sync_enabled | ternary(ethlambda_container_command_checkpoint_args, [])) +
+    (ethlambda_mev_boost_enabled | ternary(ethlambda_mev_boost_beacon_command, []))
+  }}
 
 ################################################################################
 ##
@@ -122,6 +129,12 @@ ethlambda_validator_container_command_extra_args: []
   # - --enable-keymanager
   # - --keymanager-port=5062
   # - --graffiti=hello-world
+ethlambda_validator_container_command_all: >-
+  {{
+    ethlambda_validator_container_command +
+    ethlambda_validator_container_command_extra_args +
+    (ethlambda_mev_boost_enabled | ternary(ethlambda_mev_boost_validator_command, []))
+  }}
 
 # Default image pull policy
 ethlambda_container_pull: false
@@ -137,3 +150,48 @@ ethlambda_mev_boost_beacon_command:
 ethlambda_mev_boost_validator_command:
   - --builder-proposals
   - --prefer-builder-proposals
+
+################################################################################
+##
+## upgradoor
+##
+################################################################################
+ethlambda_upgradoor_enabled: "{{ upgradoor_enabled | default(false) }}"
+ethlambda_upgradoor_team: ethlambda
+ethlambda_validator_upgradoor_team: "{{ ethlambda_upgradoor_team }}"
+ethlambda_upgradoor_result: >-
+  {{ ethlambda_upgradoor_deploy.stdout | from_json
+     if (ethlambda_upgradoor_deploy.stdout | default('')) is match('{') else {} }}
+ethlambda_upgradoor_deploy_argv: >-
+  {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', ethlambda_container_name,
+      '--image', ethlambda_container_image, '--command', ethlambda_container_command_all | to_json]
+     + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
+       | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+ethlambda_upgradoor_labels: >-
+  {{ {'io.ethpandaops.upgradoor.kind': 'cl'}
+     | combine({'io.ethpandaops.upgradoor.team': ethlambda_upgradoor_team} if ethlambda_upgradoor_team else {})
+     if ethlambda_upgradoor_enabled | bool else {} }}
+ethlambda_upgradoor_comparisons: >-
+  {{ {} if upgradoor_deploy | default('soft') == 'immediate'
+     else dict(ethlambda_upgradoor_result.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
+ethlambda_upgradoor_pull: >-
+  {{ upgradoor_deploy | default('soft') == 'immediate'
+     or (ethlambda_upgradoor_result.pull | default(ethlambda_container_pull | bool)) }}
+ethlambda_validator_upgradoor_result: >-
+  {{ ethlambda_validator_upgradoor_deploy.stdout | from_json
+     if (ethlambda_validator_upgradoor_deploy.stdout | default('')) is match('{') else {} }}
+ethlambda_validator_upgradoor_deploy_argv: >-
+  {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', ethlambda_validator_container_name,
+      '--image', ethlambda_validator_container_image, '--command', ethlambda_validator_container_command_all | to_json]
+     + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
+       | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+ethlambda_validator_upgradoor_labels: >-
+  {{ {'io.ethpandaops.upgradoor.kind': 'vc'}
+     | combine({'io.ethpandaops.upgradoor.team': ethlambda_validator_upgradoor_team} if ethlambda_validator_upgradoor_team else {})
+     if ethlambda_upgradoor_enabled | bool else {} }}
+ethlambda_validator_upgradoor_comparisons: >-
+  {{ {} if upgradoor_deploy | default('soft') == 'immediate'
+     else dict(ethlambda_validator_upgradoor_result.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
+ethlambda_validator_upgradoor_pull: >-
+  {{ upgradoor_deploy | default('soft') == 'immediate'
+     or (ethlambda_validator_upgradoor_result.pull | default(ethlambda_container_pull | bool)) }}

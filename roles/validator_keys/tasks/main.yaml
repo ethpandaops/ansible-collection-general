@@ -129,6 +129,9 @@
     # therefore gives a play-wide stop -> wait -> start barrier.
     - name: Stop validator container
       when: validator_keys_drifted and validator_keys_container_info.exists
+      # docker_container keeps comparison modes in module globals; mitogen reuses the interpreter
+      vars:
+        mitogen_task_isolation: fork
       community.docker.docker_container:
         name: "{{ validator_keys_container_name }}"
         state: stopped
@@ -204,6 +207,9 @@
 
     - name: Start validator container
       when: validator_keys_drifted and validator_keys_container_info.exists
+      # docker_container keeps comparison modes in module globals; mitogen reuses the interpreter
+      vars:
+        mitogen_task_isolation: fork
       community.docker.docker_container:
         name: "{{ validator_keys_container_name }}"
         state: started
