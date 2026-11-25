@@ -65,9 +65,13 @@
 
 - name: Run nimbus container
   when: nimbus_enabled
+  # docker_container keeps comparison modes in module globals; mitogen reuses the interpreter
+  vars:
+    mitogen_task_isolation: fork
   community.docker.docker_container:
     name: "{{ nimbus_container_name }}"
     comparisons: "{{ nimbus_upgradoor_comparisons }}"
+    image_comparison: current-image
     labels: "{{ nimbus_upgradoor_labels }}"
     image: "{{ nimbus_container_image }}"
     image_name_mismatch: recreate
@@ -113,9 +117,13 @@
 
 - name: Run nimbus validator container
   when: nimbus_validator_enabled and (not nimbus_enabled)
+  # docker_container keeps comparison modes in module globals; mitogen reuses the interpreter
+  vars:
+    mitogen_task_isolation: fork
   community.docker.docker_container:
     name: "{{ nimbus_validator_container_name }}"
     comparisons: "{{ nimbus_validator_upgradoor_comparisons }}"
+    image_comparison: current-image
     labels: "{{ nimbus_validator_upgradoor_labels }}"
     image: "{{ nimbus_validator_container_image }}"
     image_name_mismatch: recreate

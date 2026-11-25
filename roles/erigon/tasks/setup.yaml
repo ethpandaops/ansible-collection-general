@@ -64,9 +64,13 @@
   when: erigon_upgradoor_enabled | bool
 
 - name: Run erigon container
+  # docker_container keeps comparison modes in module globals; mitogen reuses the interpreter
+  vars:
+    mitogen_task_isolation: fork
   community.docker.docker_container:
     name: "{{ erigon_container_name }}"
     comparisons: "{{ erigon_upgradoor_comparisons }}"
+    image_comparison: current-image
     labels: "{{ erigon_upgradoor_labels }}"
     image: "{{ erigon_container_image }}"
     image_name_mismatch: recreate

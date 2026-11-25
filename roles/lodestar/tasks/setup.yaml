@@ -28,9 +28,13 @@
       when: lodestar_upgradoor_enabled | bool
 
     - name: Run lodestar container
+      # docker_container keeps comparison modes in module globals; mitogen reuses the interpreter
+      vars:
+        mitogen_task_isolation: fork
       community.docker.docker_container:
         name: "{{ lodestar_container_name }}"
         comparisons: "{{ lodestar_upgradoor_comparisons }}"
+        image_comparison: current-image
         labels: "{{ lodestar_upgradoor_labels }}"
         image: "{{ lodestar_container_image }}"
         image_name_mismatch: recreate
@@ -88,9 +92,13 @@
       when: lodestar_upgradoor_enabled | bool
 
     - name: Run lodestar validator container
+      # docker_container keeps comparison modes in module globals; mitogen reuses the interpreter
+      vars:
+        mitogen_task_isolation: fork
       community.docker.docker_container:
         name: "{{ lodestar_validator_container_name }}"
         comparisons: "{{ lodestar_validator_upgradoor_comparisons }}"
+        image_comparison: current-image
         labels: "{{ lodestar_validator_upgradoor_labels }}"
         image: "{{ lodestar_validator_container_image }}"
         image_name_mismatch: recreate

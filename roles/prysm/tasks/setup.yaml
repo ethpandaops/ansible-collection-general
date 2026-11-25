@@ -28,9 +28,13 @@
       when: prysm_upgradoor_enabled | bool
 
     - name: Run prysm container
+      # docker_container keeps comparison modes in module globals; mitogen reuses the interpreter
+      vars:
+        mitogen_task_isolation: fork
       community.docker.docker_container:
         name: "{{ prysm_container_name }}"
         comparisons: "{{ prysm_upgradoor_comparisons }}"
+        image_comparison: current-image
         labels: "{{ prysm_upgradoor_labels }}"
         image: "{{ prysm_container_image }}"
         image_name_mismatch: recreate
@@ -85,9 +89,13 @@
       when: prysm_upgradoor_enabled | bool
 
     - name: Run prysm validator container
+      # docker_container keeps comparison modes in module globals; mitogen reuses the interpreter
+      vars:
+        mitogen_task_isolation: fork
       community.docker.docker_container:
         name: "{{ prysm_validator_container_name }}"
         comparisons: "{{ prysm_validator_upgradoor_comparisons }}"
+        image_comparison: current-image
         labels: "{{ prysm_validator_upgradoor_labels }}"
         image: "{{ prysm_validator_container_image }}"
         image_name_mismatch: recreate

@@ -28,9 +28,13 @@
       when: ethlambda_upgradoor_enabled | bool
 
     - name: Run ethlambda container
+      # docker_container keeps comparison modes in module globals; mitogen reuses the interpreter
+      vars:
+        mitogen_task_isolation: fork
       community.docker.docker_container:
         name: "{{ ethlambda_container_name }}"
         comparisons: "{{ ethlambda_upgradoor_comparisons }}"
+        image_comparison: current-image
         labels: "{{ ethlambda_upgradoor_labels }}"
         image: "{{ ethlambda_container_image }}"
         image_name_mismatch: recreate
@@ -88,9 +92,13 @@
       when: ethlambda_upgradoor_enabled | bool
 
     - name: Run ethlambda validator container
+      # docker_container keeps comparison modes in module globals; mitogen reuses the interpreter
+      vars:
+        mitogen_task_isolation: fork
       community.docker.docker_container:
         name: "{{ ethlambda_validator_container_name }}"
         comparisons: "{{ ethlambda_validator_upgradoor_comparisons }}"
+        image_comparison: current-image
         labels: "{{ ethlambda_validator_upgradoor_labels }}"
         image: "{{ ethlambda_validator_container_image }}"
         image_name_mismatch: recreate

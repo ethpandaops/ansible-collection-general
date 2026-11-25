@@ -28,9 +28,13 @@
       when: lighthouse_upgradoor_enabled | bool
 
     - name: Run lighthouse container
+      # docker_container keeps comparison modes in module globals; mitogen reuses the interpreter
+      vars:
+        mitogen_task_isolation: fork
       community.docker.docker_container:
         name: "{{ lighthouse_container_name }}"
         comparisons: "{{ lighthouse_upgradoor_comparisons }}"
+        image_comparison: current-image
         labels: "{{ lighthouse_upgradoor_labels }}"
         image: "{{ lighthouse_container_image }}"
         image_name_mismatch: recreate
@@ -88,9 +92,13 @@
       when: lighthouse_upgradoor_enabled | bool
 
     - name: Run lighthouse validator container
+      # docker_container keeps comparison modes in module globals; mitogen reuses the interpreter
+      vars:
+        mitogen_task_isolation: fork
       community.docker.docker_container:
         name: "{{ lighthouse_validator_container_name }}"
         comparisons: "{{ lighthouse_validator_upgradoor_comparisons }}"
+        image_comparison: current-image
         labels: "{{ lighthouse_validator_upgradoor_labels }}"
         image: "{{ lighthouse_validator_container_image }}"
         image_name_mismatch: recreate

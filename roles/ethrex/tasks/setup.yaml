@@ -25,9 +25,13 @@
   when: ethrex_upgradoor_enabled | bool
 
 - name: Run ethrex container
+  # docker_container keeps comparison modes in module globals; mitogen reuses the interpreter
+  vars:
+    mitogen_task_isolation: fork
   community.docker.docker_container:
     name: "{{ ethrex_container_name }}"
     comparisons: "{{ ethrex_upgradoor_comparisons }}"
+    image_comparison: current-image
     labels: "{{ ethrex_upgradoor_labels }}"
     image: "{{ ethrex_container_image }}"
     image_name_mismatch: recreate

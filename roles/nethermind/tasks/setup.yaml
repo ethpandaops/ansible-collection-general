@@ -28,9 +28,13 @@
   when: nethermind_upgradoor_enabled | bool
 
 - name: Run nethermind container
+  # docker_container keeps comparison modes in module globals; mitogen reuses the interpreter
+  vars:
+    mitogen_task_isolation: fork
   community.docker.docker_container:
     name: "{{ nethermind_container_name }}"
     comparisons: "{{ nethermind_upgradoor_comparisons }}"
+    image_comparison: current-image
     labels: "{{ nethermind_upgradoor_labels }}"
     image: "{{ nethermind_container_image }}"
     image_name_mismatch: recreate

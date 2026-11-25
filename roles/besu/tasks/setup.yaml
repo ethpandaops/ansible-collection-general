@@ -25,9 +25,13 @@
   when: besu_upgradoor_enabled | bool
 
 - name: Run besu container
+  # docker_container keeps comparison modes in module globals; mitogen reuses the interpreter
+  vars:
+    mitogen_task_isolation: fork
   community.docker.docker_container:
     name: "{{ besu_container_name }}"
     comparisons: "{{ besu_upgradoor_comparisons }}"
+    image_comparison: current-image
     labels: "{{ besu_upgradoor_labels }}"
     image: "{{ besu_container_image }}"
     image_name_mismatch: recreate

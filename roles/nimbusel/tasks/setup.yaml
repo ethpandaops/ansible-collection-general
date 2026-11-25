@@ -25,9 +25,13 @@
   when: nimbusel_upgradoor_enabled | bool
 
 - name: Run nimbusel container
+  # docker_container keeps comparison modes in module globals; mitogen reuses the interpreter
+  vars:
+    mitogen_task_isolation: fork
   community.docker.docker_container:
     name: "{{ nimbusel_container_name }}"
     comparisons: "{{ nimbusel_upgradoor_comparisons }}"
+    image_comparison: current-image
     labels: "{{ nimbusel_upgradoor_labels }}"
     image: "{{ nimbusel_container_image }}"
     image_name_mismatch: recreate
