@@ -3,6 +3,11 @@ devnet_name: "template" # noqa var-naming[no-role-prefix]
 primary_bootnode: "bootnode-1" # noqa var-naming[no-role-prefix]
 
 gen_kubernetes_config_default_output_dir: ../kubernetes/{{ ethereum_network_name | replace(devnet_name + "-", '') }} # noqa var-naming[no-role-prefix]
+# The SOPS file the charts read the class's ethereum.testnets.<devnet_name>-devnets
+# values from, as an argocd-vault-plugin path. Relative paths resolve from each
+# chart's directory (kubernetes/<devnet>/<app>), so a devnet repo that keeps
+# them in kubernetes/secrets.sops.yaml sets ../../secrets.sops.yaml.
+gen_kubernetes_config_class_secrets_file: /secrets/services/services.enc.yaml # noqa var-naming[no-role-prefix]
 # Name shown to humans: faucet titles, the homepage title and chain name, the
 # dora/forkmon/forky network labels. Used verbatim, so write it exactly as it
 # should be displayed. Host names and identifiers keep using
@@ -118,7 +123,7 @@ gen_kubernetes_config_upgradoor_dockerhub_user_ref: "<path:/secrets/services/ser
 # Beacon nodes of the client pool the controller watches, next to the rpc node; user:password of their ingress.
 gen_kubernetes_config_upgradoor_beacon_nodes: 10 # noqa var-naming[no-role-prefix]
 gen_kubernetes_config_upgradoor_node_ingress_ref: >- # noqa var-naming[no-role-prefix]
-  <path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>
+  <path:{{ gen_kubernetes_config_class_secrets_file }}#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>
 gen_kubernetes_config_upgradoor_dockerhub_token_ref: "<path:/secrets/services/services.enc.yaml#upgradoor | jsonPath {.dockerhub_token}>" # noqa var-naming[no-role-prefix] yaml[line-length]
 # Controller setting defaults (--default-setting); values changed in the UI win.
 gen_kubernetes_config_upgradoor_settings: # noqa var-naming[no-role-prefix]

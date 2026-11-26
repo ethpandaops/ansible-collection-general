@@ -46,7 +46,7 @@ physicalMachines:
 {% for host in groups['ethereum_node'] | sort %}
 {% if 'chaosd_state' in hostvars[host] and hostvars[host]['chaosd_state'] == 'present' %}
   - name: {{ hostvars[host]['inventory_hostname'] }}
-    address: "https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@rpc.{{ hostvars[host]['inventory_hostname'] }}.{{ network_subdomain }}/chaosd/"
+    address: "https://<path:{{ gen_kubernetes_config_class_secrets_file }}#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@rpc.{{ hostvars[host]['inventory_hostname'] }}.{{ network_subdomain }}/chaosd/"
     labels:
 {% if 'ethereum_node_cl' in hostvars[host] %}
       consensus: {{ hostvars[host]['ethereum_node_cl'] }}

@@ -55,7 +55,7 @@ spamoor:
   persistence:
     enabled: true
 
-  privateKey: "<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.spamoor_private_key}>"
+  privateKey: "<path:{{ gen_kubernetes_config_class_secrets_file }}#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.spamoor_private_key}>"
   authProviderUrl: "https://auth.{{ network_subdomain }}"
   rpcEndpoints:
 {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
@@ -72,5 +72,5 @@ spamoor:
 {% set _ = groups_list.append('mev-relay') %}
 {% endif %}
 {% set _ = groups_list.append(host_name) %}
-  - "group({{ groups_list | join(',') }})name({{ host_name }})https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_rpc_prefix }}{{ host_name }}.{{ network_server_subdomain }}"
+  - "group({{ groups_list | join(',') }})name({{ host_name }})https://<path:{{ gen_kubernetes_config_class_secrets_file }}#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_rpc_prefix }}{{ host_name }}.{{ network_server_subdomain }}"
 {% endfor %}
