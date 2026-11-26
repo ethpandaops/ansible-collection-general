@@ -99,7 +99,7 @@ forky:
         - name: {{ hostvars[host]['inventory_hostname'] }}
           type: "beacon_node"
           config:
-            address: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_beacon_prefix }}{{ hostvars[host]['inventory_hostname'] }}.{{ network_server_subdomain }}
+            address: https://<path:{{ gen_kubernetes_config_class_secrets_file }}#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_beacon_prefix }}{{ hostvars[host]['inventory_hostname'] }}.{{ network_server_subdomain }}
             polling_interval: "12s"
 {% endif %}
 {% endfor %}

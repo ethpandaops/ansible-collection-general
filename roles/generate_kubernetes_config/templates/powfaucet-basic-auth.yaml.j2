@@ -14,8 +14,8 @@ metadata:
     argocd.argoproj.io/sync-wave: "-1"
 type: kubernetes.io/basic-auth
 stringData:
-  username: "<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.username}>"
-  password: "<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.password}>"
+  username: "<path:{{ gen_kubernetes_config_class_secrets_file }}#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.username}>"
+  password: "<path:{{ gen_kubernetes_config_class_secrets_file }}#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.password}>"
 ---
 apiVersion: traefik.io/v1alpha1
 kind: Middleware

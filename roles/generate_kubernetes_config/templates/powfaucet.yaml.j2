@@ -51,7 +51,7 @@ powfaucet:
 {% if (item.value.faucetOverride.ingressBasicAuth | default(false)) and not (gen_kubernetes_config_ingress_traefik | bool) %}
     # Lock the faucet behind basic auth that only the panda proxy holds, so it is
     # reachable solely via the proxy (which authenticates the caller first).
-    basicAuth: "<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.username}>:{PLAIN}<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.password}>"
+    basicAuth: "<path:{{ gen_kubernetes_config_class_secrets_file }}#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.username}>:{PLAIN}<path:{{ gen_kubernetes_config_class_secrets_file }}#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.password}>"
 {% endif %}
 
     hosts:
@@ -64,8 +64,8 @@ powfaucet:
   httpProxyCount: 2
 
   faucetTitle: "{{ gen_kubernetes_config_network_display_name }} {{ item.value.faucetOverride.titleSuffix | default('PoW Faucet') }}"
-  faucetPrivkey: "{{ item.value.faucetOverride.privkeySopsRef | default('<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.' + devnet_name + '-devnets.' + (item.value.faucetOverride.privkeySopsKey | default('faucet_private_key')) + '}>') }}"
-  faucetRpcUrl: "https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_rpc_prefix }}{{ primary_bootnode }}.{{ network_server_subdomain }}"
+  faucetPrivkey: "{{ item.value.faucetOverride.privkeySopsRef | default('<path:' + gen_kubernetes_config_class_secrets_file + '#ethereum | jsonPath {.testnets.' + devnet_name + '-devnets.' + (item.value.faucetOverride.privkeySopsKey | default('faucet_private_key')) + '}>') }}"
+  faucetRpcUrl: "https://<path:{{ gen_kubernetes_config_class_secrets_file }}#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_rpc_prefix }}{{ primary_bootnode }}.{{ network_server_subdomain }}"
 {# Multi-RPC endpoint list. If the operator set gen_kubernetes_config_powfaucet_rpc_endpoints, that wins.
    Otherwise auto-generate from inventory: tooling/bootnode first, then ethereum_node clients sorted
    by reverse hostname so consecutive entries cover different client pair types. Total capped at 20. #}
@@ -85,11 +85,11 @@ powfaucet:
 {%   endfor %}
 {%   set _clients_sorted = (_client_pairs | sort) %}
   faucetRpcEndpoints:
-    - url: "https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_rpc_prefix }}{{ primary_bootnode }}.{{ network_server_subdomain }}"
+    - url: "https://<path:{{ gen_kubernetes_config_class_secrets_file }}#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_rpc_prefix }}{{ primary_bootnode }}.{{ network_server_subdomain }}"
       name: "{{ primary_bootnode }}"
       priority: 10
 {%   for pair in _clients_sorted[:19] %}
-    - url: "https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_rpc_prefix }}{{ pair[1] }}.{{ network_server_subdomain }}"
+    - url: "https://<path:{{ gen_kubernetes_config_class_secrets_file }}#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_rpc_prefix }}{{ pair[1] }}.{{ network_server_subdomain }}"
       name: "{{ pair[1] }}"
       priority: 5
 {%   endfor %}
@@ -132,5 +132,5 @@ powfaucet:
 
   extraEnv:
     - name: FAUCET_ETH_REST_WALLET_KEY
-      value: "{{ '<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.' + devnet_name + '-devnets.' + item.value.faucetOverride.restWalletSopsKey + '}>' }}"
+      value: "{{ '<path:' + gen_kubernetes_config_class_secrets_file + '#ethereum | jsonPath {.testnets.' + devnet_name + '-devnets.' + item.value.faucetOverride.restWalletSopsKey + '}>' }}"
 {% endif %}

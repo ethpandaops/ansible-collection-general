@@ -111,7 +111,7 @@ dora:
     pandaops:
       credentials:
         username: ""
-        password: "<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>"
+        password: "<path:{{ gen_kubernetes_config_class_secrets_file }}#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>"
 
   blockDbEngine: "s3"
   blockDbConfig:

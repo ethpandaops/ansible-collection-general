@@ -51,13 +51,13 @@ assertoor:
   endpoints:
 {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
     - name:  {{ hostvars[host]['inventory_hostname'] }}
-      executionUrl: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_rpc_prefix }}{{ hostvars[host]['inventory_hostname'] }}.{{ network_server_subdomain }}
-      consensusUrl: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_beacon_prefix }}{{ hostvars[host]['inventory_hostname'] }}.{{ network_server_subdomain }}
+      executionUrl: https://<path:{{ gen_kubernetes_config_class_secrets_file }}#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_rpc_prefix }}{{ hostvars[host]['inventory_hostname'] }}.{{ network_server_subdomain }}
+      consensusUrl: https://<path:{{ gen_kubernetes_config_class_secrets_file }}#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.node_ingress.combined}>@{{ ethereum_node_beacon_prefix }}{{ hostvars[host]['inventory_hostname'] }}.{{ network_server_subdomain }}
 {% endfor %}
 
   validatorNamesInventory: https://config.{{ network_subdomain }}/api/v1/nodes/validator-ranges
   globalVariables:
-    walletPrivkey: "<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.assertoor_private_key}>"
+    walletPrivkey: "<path:{{ gen_kubernetes_config_class_secrets_file }}#ethereum | jsonPath {.testnets.{{ devnet_name }}-devnets.assertoor_private_key}>"
     clientPairNames:
 {% for host in (groups['ethereum_node'] + groups['bootnode']) | sort %}
       - {{ hostvars[host]['inventory_hostname'] }}
