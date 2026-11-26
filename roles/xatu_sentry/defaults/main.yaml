@@ -33,6 +33,8 @@ xatu_sentry_config: |
   ethereum:
     beaconNodeAddress: {{ xatu_sentry_config_beacon_uri }}
     overrideNetworkName: {{ xatu_sentry_config_network_name_override }}
+  beaconCommittees:
+    enabled: true
   outputs:
   - name: grpc
     type: xatu
