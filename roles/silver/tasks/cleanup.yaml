@@ -3,3 +3,9 @@
     name: "{{ silver_container_name }}"
     state: absent
   when: silver_cleanup
+
+- name: Remove silver validator container
+  community.docker.docker_container:
+    name: "{{ silver_validator_container_name }}"
+    state: absent
+  when: silver_cleanup or (not silver_validator_enabled | bool)

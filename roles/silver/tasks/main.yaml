@@ -4,4 +4,3 @@
 
 - name: Cleanup silver
   ansible.builtin.import_tasks: cleanup.yaml
-  when: silver_cleanup

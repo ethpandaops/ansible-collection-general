@@ -31,6 +31,12 @@ silver_checkpoint_sync_enabled: true
 
 silver_mev_boost_enabled: false
 
+silver_validator_enabled: false
+silver_validator_fee_recipient: "{{ silver_fee_recipient }}"
+silver_validator_datadir: /data/silver-validator
+silver_validator_beacon_endpoint: "http://{{ silver_container_name }}:{{ silver_ports_http_beacon }}"
+silver_validator_init_leaf_records: true
+
 ################################################################################
 ##
 ## Config file
@@ -138,6 +144,50 @@ silver_container_pull: false
 
 ################################################################################
 ##
+## Validator client container configuration
+##
+################################################################################
+silver_validator_container_name: "{{ silver_container_name }}-validator"
+silver_validator_container_image: "{{ silver_container_image }}"
+silver_validator_container_entrypoint:
+  - /usr/local/bin/silver-vc
+silver_validator_container_env:
+  LOG_STDOUT: "1"
+  RUST_LOG: info
+silver_validator_container_ports: []
+silver_validator_container_volumes:
+  - "{{ silver_validator_datadir }}:/validator-data"
+silver_validator_container_security_opts: []
+# silver_validator_container_memory:
+# silver_validator_container_memory_reservation:
+# silver_validator_container_memory_swap:
+# silver_validator_container_memory_swappiness:
+# silver_validator_container_kernel_memory:
+# silver_validator_container_cpus:
+# silver_validator_container_cpuset_cpus:
+# silver_validator_container_cpuset_mems:
+# silver_validator_container_cpu_shares:
+# silver_validator_container_cpu_quota:
+# silver_validator_container_cpu_period:
+silver_validator_container_stop_timeout: "300"
+silver_validator_container_networks: []
+silver_validator_container_command:
+  - --beacon-node={{ silver_validator_beacon_endpoint }}
+  - --keystores-dir=/validator-data/keys
+  - --secrets-dir=/validator-data/secrets
+  - --data-dir=/validator-data/data
+  - --suggested-fee-recipient={{ silver_validator_fee_recipient }}
+silver_validator_container_command_extra_args: []
+# - --network=/network-config
+silver_validator_container_command_all: >-
+  {{
+    silver_validator_container_command +
+    (['--init-leaf-records'] if silver_validator_init_leaf_records | bool else []) +
+    silver_validator_container_command_extra_args
+  }}
+
+################################################################################
+##
 ## upgradoor
 ##
 ################################################################################
@@ -161,3 +211,22 @@ silver_upgradoor_comparisons: >-
 silver_upgradoor_pull: >-
   {{ upgradoor_deploy | default('soft') == 'immediate'
      or (silver_upgradoor_result.pull | default(silver_container_pull | bool)) }}
+silver_validator_upgradoor_team: "{{ silver_upgradoor_team }}"
+silver_validator_upgradoor_result: >-
+  {{ silver_validator_upgradoor_deploy.stdout | from_json
+     if (silver_validator_upgradoor_deploy.stdout | default('')) is match('{') else {} }}
+silver_validator_upgradoor_deploy_argv: >-
+  {{ [upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor'), 'deploy', silver_validator_container_name,
+      '--image', silver_validator_container_image, '--command', silver_validator_container_command_all | to_json]
+     + {'soft': [], 'force': ['--reset'], 'immediate': ['--reset']}[upgradoor_deploy | default('soft')]
+       | mandatory('upgradoor_deploy must be soft, force or immediate') }}
+silver_validator_upgradoor_labels: >-
+  {{ {'io.ethpandaops.upgradoor.kind': 'vc'}
+     | combine({'io.ethpandaops.upgradoor.team': silver_validator_upgradoor_team} if silver_validator_upgradoor_team else {})
+     if silver_upgradoor_enabled | bool else {} }}
+silver_validator_upgradoor_comparisons: >-
+  {{ {} if upgradoor_deploy | default('soft') == 'immediate'
+     else dict(silver_validator_upgradoor_result.ignore | default([]) | zip_longest([], fillvalue='ignore')) }}
+silver_validator_upgradoor_pull: >-
+  {{ upgradoor_deploy | default('soft') == 'immediate'
+     or (silver_validator_upgradoor_result.pull | default(silver_container_pull | bool)) }}

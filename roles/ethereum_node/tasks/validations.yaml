@@ -18,8 +18,3 @@
   ansible.builtin.fail:
     msg: "Error: The blobber tool currently doesn't support nimbus, teku, grandine or silver"
   when: ethereum_node_blobber_enabled and ethereum_node_cl in ['nimbus', 'teku', 'grandine', 'silver']
-
-- name: Check if consensus client has a validator client
-  ansible.builtin.fail:
-    msg: "Error: silver has no validator client"
-  when: ethereum_node_cl_validator_enabled and ethereum_node_cl == 'silver'
