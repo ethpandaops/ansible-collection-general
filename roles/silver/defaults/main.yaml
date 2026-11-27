@@ -154,6 +154,7 @@ silver_validator_container_entrypoint:
 silver_validator_container_env:
   LOG_STDOUT: "1"
   RUST_LOG: info
+  XDG_DATA_HOME: /validator-data/runtime
 silver_validator_container_ports: []
 silver_validator_container_volumes:
   - "{{ silver_validator_datadir }}:/validator-data"
