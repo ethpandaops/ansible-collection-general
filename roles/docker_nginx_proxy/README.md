@@ -48,6 +48,8 @@ Your playbook could look like this:
   - role: ethpandaops.general.docker_nginx_proxy
 ```
 
+When a wildcard certificate is configured, the cert linker creates a per-host symlink and then signals `nginx-proxy-gen`. docker-gen regenerates the vhost and reloads nginx. Signaling nginx directly left the vhost on `ssl_reject_handshake` when the config was rendered before the symlink existed.
+
 Once you have the setup deployed, you can start any arbitrary webapp container with the `VIRTUAL_HOST`, `VIRTUAL_PORT`, `LETSENCRYPT_HOST` and `LETSENCRYPT_EMAIL` env vars.
 
 See the example below:
