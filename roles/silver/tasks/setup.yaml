@@ -89,6 +89,7 @@
         - "{{ silver_validator_datadir }}/keys"
         - "{{ silver_validator_datadir }}/secrets"
         - "{{ silver_validator_datadir }}/data"
+        - "{{ silver_validator_datadir }}/runtime"
 
     - name: Set permissions for validator data dir
       ansible.builtin.command: "chown -R {{ silver_user }}:{{ silver_user }} {{ silver_validator_datadir }}" # noqa no-free-form
