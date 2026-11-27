@@ -201,13 +201,16 @@ docker_nginx_proxy_cert_linker_container_env: >-
     (docker_nginx_proxy_cert_linker_container_base_env  | default({}))
     | combine(docker_nginx_proxy_cert_linker_container_extra_env | default({}), recursive=True)
   }}
+# SIGHUP nginx-proxy-gen after the symlink script, not nginx itself.
+# docker-gen regenerates on SIGHUP. A reload of nginx keeps a vhost that
+# was rendered before the certificate symlink existed (ssl_reject_handshake).
 docker_nginx_proxy_cert_linker_container_base_command:
   - /usr/local/bin/docker-gen
   - -watch
   - -notify
   - /bin/sh /etc/nginx/certs/wildcard-symlinks.sh
   - -notify-sighup
-  - "{{ docker_nginx_proxy_container_name }}"
+  - "{{ docker_nginx_proxy_docker_gen_container_name }}"
   - /etc/docker-gen/templates/wildcard-symlinks.tmpl
   - /etc/nginx/certs/wildcard-symlinks.sh
 docker_nginx_proxy_cert_linker_container_extra_command: []

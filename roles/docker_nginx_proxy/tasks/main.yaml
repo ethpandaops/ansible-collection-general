@@ -158,7 +158,7 @@
     command: "{{ docker_nginx_proxy_cert_loader_container_command }}"
   when: docker_nginx_proxy_wildcard_enabled | bool
 
-# --- wildcard: docker-gen watcher to create per-vhost symlinks & HUP nginx-proxy
+# --- wildcard: docker-gen watcher to create per-vhost symlinks, then signal nginx-proxy-gen
 - name: Run docker-gen symlinker for wildcard cert
   community.general.docker_container:
     name: "{{ docker_nginx_proxy_cert_linker_container_name }}"
@@ -171,4 +171,13 @@
     volumes: "{{ docker_nginx_proxy_cert_linker_container_volumes }}"
     env: "{{ docker_nginx_proxy_cert_linker_container_env }}"
     command: "{{ docker_nginx_proxy_cert_linker_container_command }}"
+  register: docker_nginx_proxy_cert_linker
   when: docker_nginx_proxy_wildcard_enabled | bool
+
+- name: Regenerate proxy config after the cert linker starts
+  ansible.builtin.command:
+    cmd: docker kill --signal=HUP {{ docker_nginx_proxy_docker_gen_container_name }}
+  changed_when: false
+  when:
+    - docker_nginx_proxy_wildcard_enabled | bool
+    - docker_nginx_proxy_cert_linker is changed
