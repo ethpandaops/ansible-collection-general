@@ -73,3 +73,66 @@
     cpu_shares: "{{ silver_container_cpu_shares | default(omit) }}"
     cpu_quota: "{{ silver_container_cpu_quota | default(omit) }}"
     cpu_period: "{{ silver_container_cpu_period | default(omit) }}"
+
+- name: Configure silver validator client
+  when: silver_validator_enabled | bool
+  block:
+    - name: Create validator data dirs
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: "0700"
+        owner: "{{ silver_user }}"
+        group: "{{ silver_user }}"
+      loop:
+        - "{{ silver_validator_datadir }}"
+        - "{{ silver_validator_datadir }}/keys"
+        - "{{ silver_validator_datadir }}/secrets"
+        - "{{ silver_validator_datadir }}/data"
+
+    - name: Set permissions for validator data dir
+      ansible.builtin.command: "chown -R {{ silver_user }}:{{ silver_user }} {{ silver_validator_datadir }}" # noqa no-free-form
+      failed_when: false
+      changed_when: false
+
+    - name: Deploy through upgradoor {{ silver_validator_container_name }}
+      ansible.builtin.command:
+        argv: "{{ silver_validator_upgradoor_deploy_argv }}"
+        removes: "{{ upgradoor_agent_binary_path | default('/usr/local/bin/upgradoor') }}"
+      register: silver_validator_upgradoor_deploy
+      changed_when: silver_validator_upgradoor_result.changed | default(false)
+      when: silver_upgradoor_enabled | bool
+
+    - name: Run silver validator container
+      vars:
+        mitogen_task_isolation: fork
+      community.docker.docker_container:
+        name: "{{ silver_validator_container_name }}"
+        comparisons: "{{ silver_validator_upgradoor_comparisons }}"
+        image_comparison: current-image
+        labels: "{{ silver_validator_upgradoor_labels }}"
+        image: "{{ silver_validator_container_image }}"
+        image_name_mismatch: recreate
+        state: started
+        restart_policy: always
+        stop_timeout: "{{ silver_validator_container_stop_timeout }}"
+        ports: "{{ silver_validator_container_ports }}"
+        volumes: "{{ silver_validator_container_volumes }}"
+        env: "{{ silver_validator_container_env }}"
+        networks: "{{ silver_validator_container_networks }}"
+        entrypoint: "{{ silver_validator_container_entrypoint }}"
+        command: "{{ silver_validator_container_command_all }}"
+        user: "{{ silver_user_meta.uid }}"
+        pull: "{{ silver_validator_upgradoor_pull | bool }}"
+        security_opts: "{{ silver_validator_container_security_opts }}"
+        memory: "{{ silver_validator_container_memory | default(omit) }}"
+        memory_reservation: "{{ silver_validator_container_memory_reservation | default(omit) }}"
+        memory_swap: "{{ silver_validator_container_memory_swap | default(omit) }}"
+        memory_swappiness: "{{ silver_validator_container_memory_swappiness | default(omit) }}"
+        kernel_memory: "{{ silver_validator_container_kernel_memory | default(omit) }}"
+        cpus: "{{ silver_validator_container_cpus | default(omit) }}"
+        cpuset_cpus: "{{ silver_validator_container_cpuset_cpus | default(omit) }}"
+        cpuset_mems: "{{ silver_validator_container_cpuset_mems | default(omit) }}"
+        cpu_shares: "{{ silver_validator_container_cpu_shares | default(omit) }}"
+        cpu_quota: "{{ silver_validator_container_cpu_quota | default(omit) }}"
+        cpu_period: "{{ silver_validator_container_cpu_period | default(omit) }}"
