@@ -81,6 +81,7 @@ upgradoor:
       dataDir: /data
       auditRetention: "{{ gen_kubernetes_config_upgradoor_audit_retention }}"
       sshLoginRetention: "{{ gen_kubernetes_config_upgradoor_ssh_login_retention }}"
+    deployWindow: "{{ gen_kubernetes_config_upgradoor_deploy_window }}"
 {% if gen_kubernetes_config_upgradoor_settings | length > 0 %}
     settingDefaults:
       {{ gen_kubernetes_config_upgradoor_settings | to_nice_yaml(indent=2) | trim | indent(width=6) }}

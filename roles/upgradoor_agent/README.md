@@ -29,7 +29,7 @@ See [defaults/main.yaml](defaults/main.yaml). The main ones:
 | `upgradoor_agent_reissue` | `false` | Issue the host certificate even when the installed one is current. |
 | `upgradoor_agent_roles` | inventory groups out of `upgradoor_agent_role_groups` | The host's roles, reported by the agent. |
 | `upgradoor_agent_overrides` | `false` | Opt-in overrides file (`/etc/upgradoor/overrides/overrides.yaml`, linked as `~devops/overrides.yaml`). |
-| `upgradoor_agent_ssh_logins` | `false` | Opt-in SSH login history: the agent joins `systemd-journal`, reads the SSH logins from the journal and names their keys by `/etc/upgradoor/ssh-keys.json`. |
+| `upgradoor_agent_ssh_logins` | `true` | SSH login history: the agent joins `systemd-journal`, reads the SSH logins from the journal and names their keys by `/etc/upgradoor/ssh-keys.json`. |
 | `upgradoor_agent_ssh_login_users` | `[devops]` (the entry user) | Login users whose `authorized_keys` go into the key map (`upgradoor ssh-keymap`, every run). |
 | `upgradoor_agent_ssh_login_backlog` | `168h` | How far back the journal is read when the history starts. |
 | `upgradoor_agent_default_policy` | `ignore` | Unlabelled containers: `ignore`, or `roll` them when their tag moves. |
