@@ -7,6 +7,10 @@ dugtrio:
     tag: {{ default_tooling_images.dugtrio.split(':') | last }}
     pullPolicy: {% if "latest" in (default_tooling_images.dugtrio.split(':') | last) %}Always{% else %}IfNotPresent{% endif %}
 
+{% if gen_kubernetes_config_dugtrio_extra_env %}
+  extraEnv:
+    {{ gen_kubernetes_config_dugtrio_extra_env | to_nice_yaml(indent=2) | indent(4) | trim }}
+{% endif %}
   resources:
     requests:
       cpu: 100m
