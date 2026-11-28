@@ -20,6 +20,13 @@ entryUser: {{ upgradoor_agent_entry_user | to_json }}
 overridesFile: {{ upgradoor_agent_overrides_file | to_json }}
 {% endif %}
 roles: {{ upgradoor_agent_roles | list | to_json }}
+{% if upgradoor_agent_ssh_logins | bool %}
+
+sshLogins:
+  enabled: true
+  backlog: {{ upgradoor_agent_ssh_login_backlog | string | to_json }}
+  keyMap: {{ upgradoor_agent_ssh_key_map_file | to_json }}
+{% endif %}
 
 socket:
   path: {{ upgradoor_agent_socket_path | to_json }}

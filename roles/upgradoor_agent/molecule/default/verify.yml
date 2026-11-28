@@ -386,6 +386,109 @@
             state: absent
           loop: [geth, snooper]
 
+    # SSH login history on, then off again.
+    - name: Prove the SSH login history switch
+      block:
+        - name: Create the entry user's .ssh directory
+          ansible.builtin.file:
+            path: /home/devops/.ssh
+            state: directory
+            owner: devops
+            group: devops
+            mode: "0700"
+
+        - name: Write the entry user's authorized_keys
+          ansible.builtin.copy:
+            content: |
+              # github:alice
+              ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIAQsEZuvHOLblm0OCbiBqRYSOi0bPBRKsxsQk0iHxIn test
+            dest: /home/devops/.ssh/authorized_keys
+            owner: devops
+            group: devops
+            mode: "0600"
+
+        - name: Apply the role with SSH logins
+          ansible.builtin.include_role:
+            name: upgradoor_agent
+          vars:
+            upgradoor_agent_ssh_logins: true
+
+        - name: Restart the agent with SSH logins
+          ansible.builtin.meta: flush_handlers
+
+        - name: Stat the key map
+          ansible.builtin.stat:
+            path: /etc/upgradoor/ssh-keys.json
+          register: upgradoor_agent_key_map_stat
+
+        - name: Read the config, the unit and the key map with SSH logins
+          ansible.builtin.slurp:
+            src: "{{ item }}"
+          loop:
+            - /etc/upgradoor/agent.yaml
+            - /etc/systemd/system/upgradoor-agent.service
+            - /etc/upgradoor/ssh-keys.json
+          register: upgradoor_agent_logins_on
+
+        - name: Read the agent's groups with SSH logins
+          ansible.builtin.command:
+            cmd: id -nG upgradoor
+          register: upgradoor_agent_logins_on_ids
+          changed_when: false
+
+        - name: Assert the SSH login config, unit, group and key map
+          ansible.builtin.assert:
+            that:
+              - "(upgradoor_agent_logins_on.results[0].content | b64decode | from_yaml).sshLogins
+                == {'enabled': true, 'backlog': '168h', 'keyMap': '/etc/upgradoor/ssh-keys.json'}"
+              - upgradoor_agent_logins_on.results[1].content | b64decode is search('(?m)^SupplementaryGroups=docker systemd-journal$')
+              - "'systemd-journal' in upgradoor_agent_logins_on_ids.stdout.split()"
+              - upgradoor_agent_key_map_stat.stat.pw_name ~ ':' ~ upgradoor_agent_key_map_stat.stat.gr_name == 'root:upgradoor'
+              - upgradoor_agent_key_map_stat.stat.mode == '0640'
+              - "(upgradoor_agent_logins_on.results[2].content | b64decode | from_json).values() | list
+                == [{'identity': 'github:alice', 'source': 'github', 'user': 'devops'}]"
+            quiet: true
+
+        - name: Apply the role without SSH logins
+          ansible.builtin.include_role:
+            name: upgradoor_agent
+
+        - name: Restart the agent without SSH logins
+          ansible.builtin.meta: flush_handlers
+
+        - name: Stat the key map without SSH logins
+          ansible.builtin.stat:
+            path: /etc/upgradoor/ssh-keys.json
+          register: upgradoor_agent_key_map_off
+
+        - name: Read the config and the unit without SSH logins
+          ansible.builtin.slurp:
+            src: "{{ item }}"
+          loop:
+            - /etc/upgradoor/agent.yaml
+            - /etc/systemd/system/upgradoor-agent.service
+          register: upgradoor_agent_logins_off
+
+        - name: Read the agent's groups without SSH logins
+          ansible.builtin.command:
+            cmd: id -nG upgradoor
+          register: upgradoor_agent_logins_off_ids
+          changed_when: false
+
+        - name: Assert SSH logins are off
+          ansible.builtin.assert:
+            that:
+              - not upgradoor_agent_key_map_off.stat.exists
+              - "'sshLogins' not in (upgradoor_agent_logins_off.results[0].content | b64decode | from_yaml)"
+              - upgradoor_agent_logins_off.results[1].content | b64decode is search('(?m)^SupplementaryGroups=docker$')
+              - "'systemd-journal' not in upgradoor_agent_logins_off_ids.stdout.split()"
+            quiet: true
+      always:
+        - name: Remove the entry user's authorized_keys
+          ansible.builtin.file:
+            path: /home/devops/.ssh/authorized_keys
+            state: absent
+
     # Role switch off: no hook, no labels. The snooper gets its label only,
     # without the hook.
     - name: Prove a client role with its switch off and the snooper label

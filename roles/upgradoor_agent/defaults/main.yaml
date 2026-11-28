@@ -46,6 +46,19 @@ upgradoor_agent_audit_log_max_size_bytes: 1048576
 upgradoor_agent_audit_log_max_files: 5
 
 ################################################################################
+## SSH login history
+################################################################################
+# Reports the SSH logins from the journal; the agent joins upgradoor_agent_journal_group.
+upgradoor_agent_ssh_logins: false
+# Login users whose authorized_keys name the logins' keys.
+upgradoor_agent_ssh_login_users:
+  - "{{ upgradoor_agent_entry_user }}"
+# How far back the journal is read when the history starts.
+upgradoor_agent_ssh_login_backlog: 168h
+upgradoor_agent_ssh_key_map_file: "{{ upgradoor_agent_config_dir }}/ssh-keys.json"
+upgradoor_agent_journal_group: systemd-journal
+
+################################################################################
 ## Service
 ################################################################################
 upgradoor_agent_service_name: upgradoor-agent

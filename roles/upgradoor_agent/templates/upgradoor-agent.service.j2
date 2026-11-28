@@ -10,7 +10,7 @@ StartLimitIntervalSec=0
 Type=simple
 User={{ upgradoor_agent_user }}
 Group={{ upgradoor_agent_group }}
-SupplementaryGroups={{ upgradoor_agent_docker_group }}
+SupplementaryGroups={{ upgradoor_agent_docker_group }}{{ (' ' ~ upgradoor_agent_journal_group) if upgradoor_agent_ssh_logins | bool else '' }}
 {% if upgradoor_agent_socket_path is match('/run/[^/]+/[^/]+$') %}
 RuntimeDirectory={{ upgradoor_agent_socket_path | dirname | basename }}
 RuntimeDirectoryMode=0755

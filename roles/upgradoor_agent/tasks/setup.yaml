@@ -53,6 +53,55 @@
   changed_when: upgradoor_agent_install.rc == 0 and (upgradoor_agent_install.stdout | from_json).changed
   notify: Restart upgradoor-agent
 
+- name: Add the upgradoor user to the journal group
+  ansible.builtin.user:
+    name: "{{ upgradoor_agent_user }}"
+    groups: ["{{ upgradoor_agent_journal_group }}"]
+    append: true
+  when: upgradoor_agent_ssh_logins | bool
+  notify: Restart upgradoor-agent
+
+- name: Read the journal group members
+  ansible.builtin.getent:
+    database: group
+    key: "{{ upgradoor_agent_journal_group }}"
+    fail_key: false
+  when: not upgradoor_agent_ssh_logins | bool
+
+- name: Remove the upgradoor user from the journal group
+  ansible.builtin.command:
+    argv: [gpasswd, -d, "{{ upgradoor_agent_user }}", "{{ upgradoor_agent_journal_group }}"]
+  changed_when: true
+  when:
+    - not upgradoor_agent_ssh_logins | bool
+    - >-
+      upgradoor_agent_user in
+      ((ansible_facts.getent_group | default({}))[upgradoor_agent_journal_group] | default([None, None, ''], true))[2] | default('', true) | split(',')
+  notify: Restart upgradoor-agent
+
+# Reads the authorized_keys the bootstrap role writes, so it runs after it.
+- name: Write the SSH key map
+  ansible.builtin.shell:
+    cmd: |
+      set -eu
+      before=$(sha256sum {{ upgradoor_agent_ssh_key_map_file | quote }} 2>/dev/null || true)
+      {{ upgradoor_agent_binary_path | quote }} ssh-keymap \
+      {% for user in upgradoor_agent_ssh_login_users %}
+        --user {{ user | quote }} \
+      {% endfor %}
+        --out {{ upgradoor_agent_ssh_key_map_file | quote }} --group {{ upgradoor_agent_group | quote }} >&2
+      after=$(sha256sum {{ upgradoor_agent_ssh_key_map_file | quote }})
+      [ "$before" = "$after" ] || echo changed
+  register: upgradoor_agent_key_map
+  changed_when: upgradoor_agent_key_map.stdout == 'changed'
+  when: upgradoor_agent_ssh_logins | bool
+
+- name: Remove the SSH key map
+  ansible.builtin.file:
+    path: "{{ upgradoor_agent_ssh_key_map_file }}"
+    state: absent
+  when: not upgradoor_agent_ssh_logins | bool
+
 - name: Write the upgradoor agent config
   ansible.builtin.template:
     src: agent.yaml.j2

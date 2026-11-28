@@ -36,39 +36,56 @@ upgradoor:
       cpu: 500m
       memory: 512Mi
 
-  network: "{{ ethereum_network_name }}"
-  signerPublicKey: "{{ upgradoor_signer_public_key }}"
-  authProviderUrl: "https://auth.{{ network_subdomain }}"
   controllerSeed: "{{ gen_kubernetes_config_upgradoor_controller_seed_ref }}"
   registry:
     auth: >-
       {"auths": {"https://index.docker.io/v1/": {"username": "{{ gen_kubernetes_config_upgradoor_dockerhub_user_ref }}",
       "password": "{{ gen_kubernetes_config_upgradoor_dockerhub_token_ref }}"}}}
-  # Agents sign the URL they call, so every public URL must be listed.
-  publicUrls:
-{% for _sub in gen_kubernetes_config_network_subdomains %}
-    - "https://upgradoor.{{ _sub }}"
-{% endfor %}
-  # Queried in parallel; the chain most of them follow is used.
-  beaconEndpoints:
-    - "{{ default_cl_endpoint }}"
-{% for host in (groups['ethereum_node'] | default([]) | sort | shuffle(seed=ethereum_network_name))[:gen_kubernetes_config_upgradoor_beacon_nodes | int] %}
-    - "https://{{ gen_kubernetes_config_upgradoor_node_ingress_ref }}@{{ ethereum_node_beacon_prefix }}{{ host }}.{{ network_server_subdomain }}"
-{% endfor %}
-  validatorRangesUrl: "https://config.{{ network_subdomain }}/api/v1/nodes/validator-ranges"
-{% if gen_kubernetes_config_pandamenu_enabled %}
-  # The UI includes the menu itself; its Content-Security-Policy admits the menu's data.
-  extraArgs:
-    - "--ui-script={{ gen_kubernetes_config_pandamenu_script_url }}"
-    - "--ui-script-integrity={{ gen_kubernetes_config_pandamenu_script_integrity }}"
-    - "--ui-origin={{ gen_kubernetes_config_pandamenu_data_origin }}"
-{% endif %}
 
+  # File paths are the chart's mounts.
+  config: |
+    server:
+      listen: ":8080"
+      # Agents sign the URL they call, so every public URL must be listed.
+      publicUrls:
+{% for _sub in gen_kubernetes_config_network_subdomains %}
+        - "https://upgradoor.{{ _sub }}"
+{% endfor %}
+      trustForwardedHeaders: true
+    network:
+      name: "{{ ethereum_network_name }}"
+      # Queried in parallel; the chain most of them follow is used.
+      beaconEndpoints:
+        - "{{ default_cl_endpoint }}"
+{% for host in (groups['ethereum_node'] | default([]) | sort | shuffle(seed=ethereum_network_name))[:gen_kubernetes_config_upgradoor_beacon_nodes | int] %}
+        - "https://{{ gen_kubernetes_config_upgradoor_node_ingress_ref }}@{{ ethereum_node_beacon_prefix }}{{ host }}.{{ network_server_subdomain }}"
+{% endfor %}
+      validatorRangesUrl: "https://config.{{ network_subdomain }}/api/v1/nodes/validator-ranges"
+    agents:
+      signerPublicKey: "{{ upgradoor_signer_public_key }}"
+      controllerSeedFile: /etc/upgradoor/controller-seed/seed
+    auth:
+      providerUrl: "https://auth.{{ network_subdomain }}"
+    ui:
+{% if gen_kubernetes_config_pandamenu_enabled %}
+      # The UI includes the menu itself; its Content-Security-Policy admits the menu's data.
+      script: "{{ gen_kubernetes_config_pandamenu_script_url }}"
+      scriptIntegrity: "{{ gen_kubernetes_config_pandamenu_script_integrity }}"
+      origins:
+        - "{{ gen_kubernetes_config_pandamenu_data_origin }}"
+{% endif %}
+      pprof: {{ gen_kubernetes_config_upgradoor_pprof | bool | lower }}
+    images:
+      registryAuthFile: /etc/upgradoor/registry-auth/config.json
+    store:
+      dataDir: /data
+      auditRetention: "{{ gen_kubernetes_config_upgradoor_audit_retention }}"
+      sshLoginRetention: "{{ gen_kubernetes_config_upgradoor_ssh_login_retention }}"
 {% if gen_kubernetes_config_upgradoor_settings | length > 0 %}
-  settings:
-    {{ gen_kubernetes_config_upgradoor_settings | to_nice_yaml(indent=2) | trim | indent(width=4) }}
+    settingDefaults:
+      {{ gen_kubernetes_config_upgradoor_settings | to_nice_yaml(indent=2) | trim | indent(width=6) }}
 {% else %}
-  settings: {}
+    settingDefaults: {}
 {% endif %}
 
   persistence:

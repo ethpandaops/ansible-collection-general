@@ -85,6 +85,7 @@
   loop:
     - "{{ upgradoor_agent_binary_path }}"
     - "{{ upgradoor_agent_sudoers_file }}"
+    - "{{ upgradoor_agent_ssh_key_map_file }}"
     - "{{ upgradoor_agent_lib_dir }}"
     - "{{ upgradoor_agent_config_dir }}"
     - "{{ upgradoor_agent_state_dir }}"
